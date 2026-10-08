@@ -4,7 +4,7 @@ description: Operación del proyecto en local y producción con Supabase, Cloudf
 ---
 
 La aplicación se opera con tres servicios principales: frontend en Cloudflare
-Pages, API como Cloudflare Worker en `workers/api/` y base de datos Supabase. El
+Pages, API como Cloudflare Worker en `apps/api/` y base de datos Supabase. El
 pipeline de datos TEC genera seeds versionados para mantener catálogo y oferta.
 
 ## Variables de entorno
@@ -29,7 +29,7 @@ El Worker necesita secretos de servidor:
 | `BETTER_AUTH_URL`      | URL base pública de auth.                 |
 
 El repositorio incluye `.env.example`, `.env.production.local.example` y
-`workers/api/.dev.vars.example` como plantillas.
+`apps/api/.dev.vars.example` como plantillas.
 
 ## Flujo local mínimo
 

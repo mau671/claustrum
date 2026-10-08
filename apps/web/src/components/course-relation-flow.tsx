@@ -35,21 +35,27 @@ type CourseNodeData = {
   showTopHandle?: boolean;
   showBottomHandle?: boolean;
   showTopSourceHandle?: boolean;
+  showRightTargetHandle?: boolean;
   sourceBottomHandles?: string[];
   targetTopHandles?: string[];
+};
+
+type RelationBusHandle = {
+  id: string;
+  side: "left" | "right" | "top" | "bottom";
+  position: number;
+  hidden?: boolean;
 };
 
 type RelationBusNodeData = {
   height: number;
   width?: number;
   orientation?: "vertical" | "horizontal";
+  colorClass?: string;
+  targetHandles?: RelationBusHandle[];
+  sourceHandles?: RelationBusHandle[];
   sourceSide?: "bottom" | "right";
   sourcePosition?: number;
-  targetHandles: Array<{
-    id: string;
-    side: "left" | "right" | "top" | "bottom";
-    position: number;
-  }>;
 };
 
 type FlowNodeData = CourseNodeData | RelationBusNodeData;
@@ -65,6 +71,7 @@ const NODE_HEIGHT = 101;
 const MOBILE_STEP_Y = NODE_HEIGHT + 92;
 const MOBILE_MIN_HEIGHT = 340;
 const MOBILE_PREREQUISITE_BUS_THRESHOLD = 6;
+const MOBILE_OUTGOING_BUS_THRESHOLD = 4;
 const DESKTOP_PREREQUISITE_BUS_THRESHOLD = 6;
 const BUS_WIDTH = 10;
 const VERTICAL_GAP = 28;
@@ -117,6 +124,7 @@ function CourseFlowNode({ data }: { data: CourseNodeData }) {
     showTopHandle,
     showBottomHandle,
     showTopSourceHandle,
+    showRightTargetHandle,
     sourceBottomHandles,
     targetTopHandles,
   } = data;
@@ -159,6 +167,14 @@ function CourseFlowNode({ data }: { data: CourseNodeData }) {
           position={Position.Right}
           className="!bg-border !size-2.5 !border-none"
           id="right"
+        />
+      ) : null}
+      {showRightTargetHandle ? (
+        <Handle
+          type="target"
+          position={Position.Right}
+          className="!bg-border !size-2.5 !border-none"
+          id="right-target"
         />
       ) : null}
       {showLeftSourceHandle ? (
@@ -209,41 +225,110 @@ function CourseFlowNode({ data }: { data: CourseNodeData }) {
 
 function RelationBusNode({ data }: { data: RelationBusNodeData }) {
   const orientation = data.orientation ?? "vertical";
+  const color = data.colorClass ?? "bg-amber-500";
   const sourceSide = data.sourceSide ?? "bottom";
-  const sourcePosition = data.sourcePosition ?? 96;
-  const handlePositions = data.targetHandles.map((handle) => handle.position);
-  const lineStart = handlePositions.length > 0 ? Math.min(...handlePositions, sourcePosition) : 0;
-  const lineEnd =
-    handlePositions.length > 0 ? Math.max(...handlePositions, sourcePosition) : sourcePosition;
+
+  const getRelevantPositions = () => {
+    const positions: number[] = [];
+    const checkHandle = (h: RelationBusHandle) => {
+      if (orientation === "vertical") {
+        if (h.side === "left" || h.side === "right") positions.push(h.position);
+        else if (h.side === "top") positions.push(0);
+        else if (h.side === "bottom") positions.push(100);
+      } else {
+        if (h.side === "top" || h.side === "bottom") positions.push(h.position);
+        else if (h.side === "left") positions.push(0);
+        else if (h.side === "right") positions.push(100);
+      }
+    };
+    data.targetHandles?.forEach(checkHandle);
+    data.sourceHandles?.forEach(checkHandle);
+
+    // Prereq bus legacy support
+    if (!data.sourceHandles || data.sourceHandles.length === 0 || data.sourceSide) {
+      if (orientation === "vertical") {
+        if (sourceSide === "right") positions.push(data.sourcePosition ?? 96);
+        else if (sourceSide === "bottom") positions.push(100);
+      } else {
+        if (sourceSide === "bottom") positions.push(data.sourcePosition ?? 96);
+        else if (sourceSide === "right") positions.push(100);
+      }
+    }
+    return positions;
+  };
+
+  const allPositions = getRelevantPositions();
+  const lineStart = allPositions.length > 0 ? Math.min(...allPositions) : 0;
+  const lineEnd = allPositions.length > 0 ? Math.max(...allPositions) : 100;
+
+  const getPositionEnum = (side: string) => {
+    switch (side) {
+      case "left":
+        return Position.Left;
+      case "right":
+        return Position.Right;
+      case "top":
+        return Position.Top;
+      default:
+        return Position.Bottom;
+    }
+  };
+
+  const getInlineStyle = (side: string, position: number) => {
+    if (orientation === "horizontal") {
+      return side === "left" || side === "right"
+        ? { top: `${position}%`, left: "50%" }
+        : { left: `${position}%`, top: "50%" };
+    }
+    return side === "top" || side === "bottom"
+      ? { left: `${position}%`, top: "50%" }
+      : { top: `${position}%`, left: "50%" };
+  };
 
   if (orientation === "horizontal") {
     return (
       <div className="relative" style={{ width: data.width ?? BUS_WIDTH, height: data.height }}>
         <div
-          className="absolute top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-amber-500"
-          style={{ left: `${lineStart}%`, width: `${lineEnd - lineStart}%` }}
+          className={cn("absolute top-1/2 -translate-y-1/2 rounded-full", color)}
+          style={{ left: `${lineStart}%`, width: `${lineEnd - lineStart}%`, height: "2.5px" }}
         />
-        {data.targetHandles.map((handle) => (
+        {data.targetHandles?.map((handle) => (
           <Handle
             key={handle.id}
             type="target"
-            position={handle.side === "top" ? Position.Top : Position.Bottom}
+            position={getPositionEnum(handle.side)}
             id={handle.id}
-            className="!size-2 !border-none !bg-amber-500"
-            style={{ left: `${handle.position}%` }}
+            className={cn(
+              handle.hidden ? "!size-0 !border-none opacity-0" : cn("!size-2 !border-none", color),
+            )}
+            style={getInlineStyle(handle.side, handle.position)}
           />
         ))}
-        <Handle
-          type="source"
-          position={sourceSide === "bottom" ? Position.Bottom : Position.Right}
-          id={sourceSide}
-          className="!size-2.5 !border-none !bg-amber-500"
-          style={
-            sourceSide === "bottom"
-              ? { left: `${sourcePosition}%` }
-              : { top: "50%", left: `${sourcePosition}%` }
-          }
-        />
+        {data.sourceHandles?.map((handle) => (
+          <Handle
+            key={handle.id}
+            type="source"
+            position={getPositionEnum(handle.side)}
+            id={handle.id}
+            className={cn(
+              handle.hidden ? "!size-0 !border-none opacity-0" : cn("!size-2 !border-none", color),
+            )}
+            style={getInlineStyle(handle.side, handle.position)}
+          />
+        ))}
+        {(!data.sourceHandles || data.sourceHandles.length === 0 || data.sourceSide) && (
+          <Handle
+            type="source"
+            position={sourceSide === "bottom" ? Position.Bottom : Position.Right}
+            id={sourceSide}
+            className={cn("!size-2.5 !border-none", color)}
+            style={
+              sourceSide === "bottom"
+                ? { left: `${data.sourcePosition ?? 96}%` }
+                : { top: "50%", left: `${data.sourcePosition ?? 96}%` }
+            }
+          />
+        )}
       </div>
     );
   }
@@ -251,30 +336,46 @@ function RelationBusNode({ data }: { data: RelationBusNodeData }) {
   return (
     <div className="relative" style={{ width: BUS_WIDTH, height: data.height }}>
       <div
-        className="absolute left-1/2 w-0.5 -translate-x-1/2 rounded-full bg-amber-500"
-        style={{ top: `${lineStart}%`, height: `${lineEnd - lineStart}%` }}
+        className={cn("absolute left-1/2 -translate-x-1/2 rounded-full", color)}
+        style={{ top: `${lineStart}%`, height: `${lineEnd - lineStart}%`, width: "2.5px" }}
       />
-      {data.targetHandles.map((handle) => (
+      {data.targetHandles?.map((handle) => (
         <Handle
           key={handle.id}
           type="target"
-          position={handle.side === "left" ? Position.Left : Position.Right}
+          position={getPositionEnum(handle.side)}
           id={handle.id}
-          className="!size-2 !border-none !bg-amber-500"
-          style={{ top: `${handle.position}%` }}
+          className={cn(
+            handle.hidden ? "!size-0 !border-none opacity-0" : cn("!size-2 !border-none", color),
+          )}
+          style={getInlineStyle(handle.side, handle.position)}
         />
       ))}
-      <Handle
-        type="source"
-        position={sourceSide === "right" ? Position.Right : Position.Bottom}
-        id={sourceSide}
-        className="!size-2.5 !border-none !bg-amber-500"
-        style={
-          sourceSide === "right"
-            ? { top: `${sourcePosition}%` }
-            : { left: "50%", top: `${sourcePosition}%` }
-        }
-      />
+      {data.sourceHandles?.map((handle) => (
+        <Handle
+          key={handle.id}
+          type="source"
+          position={getPositionEnum(handle.side)}
+          id={handle.id}
+          className={cn(
+            handle.hidden ? "!size-0 !border-none opacity-0" : cn("!size-2 !border-none", color),
+          )}
+          style={getInlineStyle(handle.side, handle.position)}
+        />
+      ))}
+      {(!data.sourceHandles || data.sourceHandles.length === 0 || data.sourceSide) && (
+        <Handle
+          type="source"
+          position={sourceSide === "right" ? Position.Right : Position.Bottom}
+          id={sourceSide}
+          className={cn("!size-2.5 !border-none", color)}
+          style={
+            sourceSide === "right"
+              ? { top: `${data.sourcePosition ?? 96}%` }
+              : { left: "50%", top: `${data.sourcePosition ?? 96}%` }
+          }
+        />
+      )}
     </div>
   );
 }
@@ -465,13 +566,11 @@ export function CourseRelationFlow({
         const minGap = 16;
         const availableWidth = Math.max(container.clientWidth - minGap * 2, 1);
         const zoom = Math.min(1, availableWidth / contentWidth);
-        const scaledWidth = contentWidth * zoom;
         const scaledHeight = contentHeight * zoom;
-
-        const sideGap = Math.max((container.clientWidth - scaledWidth) / 2, minGap);
+        const verticalPadding = 32;
         const targetHeight = Math.max(
           MOBILE_MIN_HEIGHT,
-          Math.round((scaledHeight + sideGap * 2) / 2) * 2,
+          Math.round((scaledHeight + verticalPadding) / 2) * 2,
         );
 
         const shouldResize = Math.abs(mobileCardHeight - targetHeight) > 2;
@@ -564,31 +663,36 @@ export function CourseRelationFlow({
       const centralY = prereqRows * compactStepY;
       const lowerStartY = centralY + compactStepY;
       const usePrerequisiteBus = prerequisites.length >= MOBILE_PREREQUISITE_BUS_THRESHOLD;
-      const dependentColumns = Math.min(2, Math.max(dependents.length, 1));
-      const dependentOffsetX = dependents.length > 1 ? 124 : 0;
-      const branchOffset = corequisites.length > 0 && dependents.length > 0 ? 124 : 0;
-      const corequisiteX = dependents.length > 0 ? -branchOffset : centerX;
-      const dependentX =
-        dependents.length > 1 ? centerX : corequisites.length > 0 ? branchOffset : centerX;
+      const outgoingNodes = [
+        ...corequisites.map((c) => ({
+          id: `coreq-${c.id}`,
+          course: c,
+          relation: "corequisite" as const,
+        })),
+        ...dependents.map((d) => ({
+          id: `dep-${d.id}`,
+          course: d,
+          relation: "postrequisite" as const,
+        })),
+      ];
+      const useOutgoingBus = outgoingNodes.length >= MOBILE_OUTGOING_BUS_THRESHOLD;
+      const outColumns = useOutgoingBus ? 2 : Math.min(2, Math.max(outgoingNodes.length, 1));
+      const outOffsetX = outgoingNodes.length > 1 ? 124 : 0;
+
       const laneForX = (x: number): "bottom-left" | "bottom-center" | "bottom-right" => {
         if (x < centerX) return "bottom-left";
         if (x > centerX) return "bottom-right";
         return "bottom-center";
       };
 
-      const targetLanes = [
-        ...corequisites.map(() => laneForX(corequisiteX)),
-        ...dependents.map((_, index) => {
-          const col = index % dependentColumns;
-          const x =
-            dependentColumns === 1
-              ? dependentX
-              : col === 0
-                ? centerX - dependentOffsetX
-                : centerX + dependentOffsetX;
-          return laneForX(x);
-        }),
-      ];
+      const getX = (index: number) => {
+        const row = Math.floor(index / outColumns);
+        const itemsInRow = Math.min(outColumns, outgoingNodes.length - row * outColumns);
+        const col = index % outColumns;
+        return itemsInRow === 1 ? centerX : col === 0 ? centerX - outOffsetX : centerX + outOffsetX;
+      };
+
+      const targetLanes = outgoingNodes.map((_, index) => laneForX(getX(index)));
 
       const incomingPrereqLanes = prerequisites.map((_, index) => {
         const col = index % prereqColumns;
@@ -611,8 +715,9 @@ export function CourseRelationFlow({
               ),
             );
 
-      const outgoingHandles: string[] =
-        targetLanes.length <= 1
+      const outgoingHandles: string[] = useOutgoingBus
+        ? ["bottom"]
+        : targetLanes.length <= 1
           ? ["bottom"]
           : ["bottom-left", "bottom-center", "bottom-right"].filter((lane) =>
               targetLanes.includes(lane as "bottom-left" | "bottom-center" | "bottom-right"),
@@ -658,6 +763,7 @@ export function CourseRelationFlow({
             id: busHandleId,
             side: x < centerX ? "left" : "right",
             position: Math.min(96, Math.max(4, ((y + NODE_HEIGHT / 2) / centralY) * 100)),
+            hidden: true,
           });
         }
 
@@ -713,59 +819,94 @@ export function CourseRelationFlow({
         },
       });
 
-      corequisites.forEach((coreq, index) => {
-        const id = `coreq-${coreq.id}`;
-        const y = lowerStartY + index * compactStepY;
+      const busSourceHandles: RelationBusHandle[] = [];
+      const outRows = Math.ceil(outgoingNodes.length / outColumns);
+      const busY = centralY + NODE_HEIGHT + 5; // Exactly 5px to touch the border of the 10px gray origin dot
+      const lastNodeY = lowerStartY + (outRows > 0 ? outRows - 1 : 0) * compactStepY;
+      const busBottom = lastNodeY + NODE_HEIGHT / 2 + 12; // Extend slightly below the last node's center
+      const busHeight = Math.max(20, busBottom - busY);
 
-        nodeList.push({
-          id,
-          type: "course",
-          position: { x: corequisiteX, y },
-          data: { course: coreq, showTopHandle: true },
-        });
-
-        edgeList.push({
-          id: `e-central-${id}`,
-          source: "central",
-          target: id,
-          sourceHandle: resolveSourceHandle(laneForX(corequisiteX)),
-          targetHandle: "top",
-          type: "relation",
-          data: { relation: "corequisite", layout: "vertical" },
-          markerEnd: getArrow("corequisite"),
-        });
-      });
-
-      dependents.forEach((dep, index) => {
-        const id = `dep-${dep.id}`;
-        const row = Math.floor(index / dependentColumns);
-        const col = index % dependentColumns;
+      outgoingNodes.forEach((item, index) => {
+        const row = Math.floor(index / outColumns);
         const y = lowerStartY + row * compactStepY;
-        const x =
-          dependentColumns === 1
-            ? dependentX
-            : col === 0
-              ? centerX - dependentOffsetX
-              : centerX + dependentOffsetX;
+        const x = getX(index);
 
         nodeList.push({
-          id,
+          id: item.id,
           type: "course",
           position: { x, y },
-          data: { course: dep, showTopHandle: true },
+          data: {
+            course: item.course,
+            showTopHandle: !useOutgoingBus,
+            showLeftHandle: useOutgoingBus && x > centerX,
+            showRightTargetHandle: useOutgoingBus && x < centerX,
+          },
+        });
+
+        if (useOutgoingBus) {
+          const busHandleId = `out-${index}`;
+          busSourceHandles.push({
+            id: busHandleId,
+            side: x < centerX ? "left" : "right",
+            position: ((y + NODE_HEIGHT / 2 - busY) / busHeight) * 100, // Exact vertical match
+            hidden: true,
+          });
+
+          edgeList.push({
+            id: `e-bus-${item.id}`,
+            source: "outgoing-bus",
+            target: item.id,
+            sourceHandle: busHandleId,
+            targetHandle: x < centerX ? "right-target" : "left",
+            type: "relation",
+            data: { relation: item.relation, layout: "horizontal" },
+            markerEnd: undefined, // "dejalos como lineas simplemente"
+          });
+        } else {
+          edgeList.push({
+            id: `e-central-${item.id}`,
+            source: "central",
+            target: item.id,
+            sourceHandle: resolveSourceHandle(laneForX(x)),
+            targetHandle: "top",
+            type: "relation",
+            data: { relation: item.relation, layout: "vertical" },
+            markerEnd: getArrow(item.relation),
+          });
+        }
+      });
+
+      if (useOutgoingBus) {
+        const hasPost = outgoingNodes.some((n) => n.relation === "postrequisite");
+        const hasCoreq = outgoingNodes.some((n) => n.relation === "corequisite");
+        const busColor =
+          hasPost && hasCoreq ? "bg-slate-400" : hasPost ? "bg-emerald-500" : "bg-blue-500";
+        const busRelation =
+          hasPost && hasCoreq ? "postrequisite" : hasPost ? "postrequisite" : "corequisite";
+
+        nodeList.push({
+          id: "outgoing-bus",
+          type: "bus",
+          position: { x: centerX + NODE_WIDTH / 2 - BUS_WIDTH / 2, y: busY },
+          data: {
+            height: busHeight,
+            sourceHandles: busSourceHandles,
+            targetHandles: [{ id: "top", side: "top", position: 50, hidden: true }],
+            colorClass: busColor,
+          },
         });
 
         edgeList.push({
-          id: `e-central-${id}`,
+          id: "e-central-outgoing-bus",
           source: "central",
-          target: id,
-          sourceHandle: resolveSourceHandle(laneForX(x)),
+          target: "outgoing-bus",
+          sourceHandle: "bottom",
           targetHandle: "top",
           type: "relation",
-          data: { relation: "postrequisite", layout: "vertical" },
-          markerEnd: getArrow("postrequisite"),
+          data: { relation: busRelation, layout: "vertical" },
+          markerEnd: undefined, // No arrow on the connection stub
         });
-      });
+      }
 
       const minX = Math.min(...nodeList.map((node) => node.position.x));
       const maxX = Math.max(...nodeList.map((node) => node.position.x + NODE_WIDTH));

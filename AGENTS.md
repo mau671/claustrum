@@ -48,10 +48,10 @@ This document provides guidelines for AI agents operating in this repository.
 
 ### Imports
 
-- **Always use the `@/` alias** for imports from `src/`
+- **Always use the `@/` alias** for imports from `apps/web/src/`
   - Correct: `import { Button } from "@/components/ui/button"`
   - Incorrect: `import { Button } from "../../components/ui/button"`
-- The `@/` alias is configured in `tsconfig.json` and maps to `./src/*`
+- The `@/` alias is configured in `apps/web/tsconfig.json` and maps to `./src/*`
 - Group imports: React/external imports first, then local imports
 
 ### TypeScript
@@ -65,14 +65,14 @@ This document provides guidelines for AI agents operating in this repository.
 
 - **Components**: PascalCase (e.g., `LoginForm`, `AppSidebar`)
 - **Files**: kebab-case for non-component files (e.g., `utils.ts`, `api.ts`)
-- **Routes**: Use directory-based structure in `src/routes/`
+- **Routes**: Use directory-based structure in `apps/web/src/routes/`
 - **Variables/functions**: camelCase (e.g., `isLoading`, `handleSubmit`)
 - **Constants**: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
 - **Booleans**: Prefix with `is`, `has`, `can` (e.g., `isValid`, `hasAccess`)
 
 ### File Structure (TanStack Router)
 
-Routes use **file-based routing** in `src/routes/`:
+Routes use **file-based routing** in `apps/web/src/routes/`:
 
 ```
 src/routes/

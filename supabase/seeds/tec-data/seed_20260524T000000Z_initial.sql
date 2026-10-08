@@ -141413,16 +141413,6 @@ INSERT INTO "public"."course_relation" ("id", "study_plan_id", "from_course_id",
 	(86834, 307, 4274, 4292, 'EQUIVALENT', '2026-01-24 00:39:45.129373+00', true, '2026-05-24 17:54:42.680427+00', NULL);
 
 
---
--- Data for Name: schedule_equivalence_placeholder_course; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "public"."schedule_equivalence_placeholder_course" ("id", "course_code", "is_active", "created_at", "updated_at", "study_plan_id", "course_name_ilike_pattern") VALUES
-	(1, 'SE1100', true, '2026-05-19 07:12:01.421941+00', '2026-05-19 07:12:01.421941+00', NULL, NULL),
-	(2, 'SE1200', true, '2026-05-19 07:12:01.421941+00', '2026-05-19 07:12:01.421941+00', NULL, NULL),
-	(3, 'SE1400', true, '2026-05-19 07:12:01.421941+00', '2026-05-19 07:12:01.421941+00', NULL, NULL),
-	(4, 'FH1000', true, '2026-05-19 07:12:01.421941+00', '2026-05-19 07:12:01.421941+00', NULL, NULL),
-	(5, NULL, true, '2026-05-20 16:55:34.917806+00', '2026-05-20 16:55:34.917806+00', NULL, '%electiva%');
 
 
 --
@@ -156318,11 +156308,6 @@ SELECT pg_catalog.setval('"public"."saved_schedule_id_seq"', 43, true);
 SELECT pg_catalog.setval('"public"."saved_schedule_item_id_seq"', 31, true);
 
 
---
--- Name: schedule_equivalence_placeholder_course_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"public"."schedule_equivalence_placeholder_course_id_seq"', 5, true);
 
 
 --

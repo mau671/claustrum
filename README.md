@@ -45,14 +45,14 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ### Comandos frecuentes
 
-| Comando | Descripción |
-|---------|-------------|
-| `pnpm install` | Instala dependencias según `pnpm-lock.yaml` |
-| `pnpm run dev` | Inicia el servidor de desarrollo Vite |
-| `pnpm run build` | Ejecuta TypeScript y genera el build de producción |
-| `pnpm run supabase:start` | Levanta los contenedores de Supabase local |
-| `pnpm run supabase:stop` | Detiene la instancia local de Supabase |
-| `pnpm run supabase:migrate` | Aplica las migraciones SQL pendientes |
+| Comando                     | Descripción                                        |
+| --------------------------- | -------------------------------------------------- |
+| `pnpm install`              | Instala dependencias según `pnpm-lock.yaml`        |
+| `pnpm run dev`              | Inicia el servidor de desarrollo Vite              |
+| `pnpm run build`            | Ejecuta TypeScript y genera el build de producción |
+| `pnpm run supabase:start`   | Levanta los contenedores de Supabase local         |
+| `pnpm run supabase:stop`    | Detiene la instancia local de Supabase             |
+| `pnpm run supabase:migrate` | Aplica las migraciones SQL pendientes              |
 
 ## Documentación
 

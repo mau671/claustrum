@@ -20,7 +20,7 @@
   "ignorePatterns": [
     "dist/**",
     "node_modules/**",
-    "src/routeTree.gen.ts",
+    "**/routeTree.gen.ts",
     "coverage/**",
     ".wrangler/**",
     ".tanstack/**",
@@ -28,7 +28,6 @@
     ".opencode/**",
     ".agents/**",
     "docs/**",
-    "supabase/**",
-    "workers/**"
+    "supabase/**"
   ]
 }

@@ -1,25 +1,21 @@
 packages:
-  - "workers/*"
+  - "apps/*"
+
+engineStrict: true
+minimumReleaseAge: 72
+publicHoistPattern:
+  - "pdfjs-dist"
 
 allowBuilds:
   "@parcel/watcher": true
   "@prisma/client": true
   better-sqlite3: true
   esbuild: true
-  sharp: true
+  sharp: false
   simple-git-hooks: true
   supabase: true
   workerd: true
+
 auditConfig:
   ignoreGhsas:
     - GHSA-rmmr-r34h-pfm5
-minimumReleaseAgeExclude:
-  - "@supabase/cli-darwin-arm64@2.101.0"
-  - "@supabase/cli-darwin-x64@2.101.0"
-  - "@supabase/cli-linux-arm64-musl@2.101.0"
-  - "@supabase/cli-linux-arm64@2.101.0"
-  - "@supabase/cli-linux-x64-musl@2.101.0"
-  - "@supabase/cli-linux-x64@2.101.0"
-  - "@supabase/cli-windows-arm64@2.101.0"
-  - "@supabase/cli-windows-x64@2.101.0"
-  - supabase@2.101.0

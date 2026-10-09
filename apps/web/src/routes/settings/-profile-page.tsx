@@ -1,9 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
-import { UserIcon, Loader2Icon, UploadIcon } from "lucide-react";
+import { UserIcon, Loader2Icon, UploadIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRef } from "react";
-import { toast } from "sonner";
 
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/combobox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth/client";
 import {
   useAuthUser,
@@ -29,6 +29,7 @@ import {
   useProfileContext,
 } from "@/lib/hooks/use-queries";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { cn } from "@/lib/utils";
 
 export function ProfilePageRoute() {
   return (
@@ -288,8 +289,8 @@ function ProfilePage() {
         <p className="text-muted-foreground mx-auto mb-6 max-w-md">
           Necesitas estar autenticado para ver y editar tu información académica.
         </p>
-        <Button asChild>
-          <a href="/auth/signin">Iniciar sesión</a>
+        <Button render={<a href="/auth/signin" aria-label="Iniciar sesión" />}>
+          Iniciar sesión
         </Button>
       </div>
     );
@@ -380,7 +381,10 @@ function ProfilePage() {
                 }
               >
                 <span
-                  className={`block min-w-0 flex-1 truncate text-left ${!campusIdDraft ? "text-muted-foreground" : ""}`}
+                  className={cn(
+                    "block min-w-0 flex-1 truncate text-left",
+                    !campusIdDraft && "text-muted-foreground",
+                  )}
                 >
                   {campuses.isLoading
                     ? "Cargando..."
@@ -392,12 +396,21 @@ function ProfilePage() {
                             .name
                       : "Selecciona tu sede"}
                 </span>
+                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
               </ComboboxTrigger>
               <ComboboxContent
                 anchor={campusTriggerRef}
+                aria-label="Sede"
                 className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
               >
-                <ComboboxInput showTrigger={false} placeholder="Buscar sede" />
+                <div className="border-b p-2">
+                  <ComboboxInput
+                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                    placeholder="Buscar sede..."
+                    showTrigger={false}
+                    startAddon={<SearchIcon />}
+                  />
+                </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                 <ComboboxList className="max-h-56 scrollbar-none">
                   {(item) => (
@@ -435,7 +448,10 @@ function ProfilePage() {
                 }
               >
                 <span
-                  className={`block min-w-0 flex-1 truncate text-left ${!academicUnitIdDraft ? "text-muted-foreground" : ""}`}
+                  className={cn(
+                    "block min-w-0 flex-1 truncate text-left",
+                    !academicUnitIdDraft && "text-muted-foreground",
+                  )}
                 >
                   {academicUnits.isLoading
                     ? "Cargando..."
@@ -451,12 +467,21 @@ function ProfilePage() {
                           )!.name
                       : "Selecciona tu escuela"}
                 </span>
+                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
               </ComboboxTrigger>
               <ComboboxContent
                 anchor={academicUnitTriggerRef}
+                aria-label="Escuela"
                 className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
               >
-                <ComboboxInput showTrigger={false} placeholder="Buscar escuela" />
+                <div className="border-b p-2">
+                  <ComboboxInput
+                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                    placeholder="Buscar escuela..."
+                    showTrigger={false}
+                    startAddon={<SearchIcon />}
+                  />
+                </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                 <ComboboxList className="max-h-56 scrollbar-none">
                   {(item) => (
@@ -492,7 +517,10 @@ function ProfilePage() {
                 }
               >
                 <span
-                  className={`block min-w-0 flex-1 truncate text-left ${!studyPlanIdDraft ? "text-muted-foreground" : ""}`}
+                  className={cn(
+                    "block min-w-0 flex-1 truncate text-left",
+                    !studyPlanIdDraft && "text-muted-foreground",
+                  )}
                 >
                   {studyPlans.isLoading
                     ? "Cargando..."
@@ -502,12 +530,21 @@ function ProfilePage() {
                           .name.replace(" - ", ": ")
                       : "Selecciona tu plan"}
                 </span>
+                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
               </ComboboxTrigger>
               <ComboboxContent
                 anchor={studyPlanTriggerRef}
+                aria-label="Plan de estudios"
                 className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
               >
-                <ComboboxInput showTrigger={false} placeholder="Buscar plan" />
+                <div className="border-b p-2">
+                  <ComboboxInput
+                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                    placeholder="Buscar plan..."
+                    showTrigger={false}
+                    startAddon={<SearchIcon />}
+                  />
+                </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                 <ComboboxList className="max-h-56 scrollbar-none">
                   {(item) => (

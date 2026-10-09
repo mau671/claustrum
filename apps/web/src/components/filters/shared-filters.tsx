@@ -1,13 +1,14 @@
+import { ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
-  ComboboxContent,
   ComboboxEmpty,
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxPopup,
   ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
@@ -91,26 +92,35 @@ export function FilterCombobox({
             <Button
               variant="outline"
               className={cn(
-                "h-8 w-full min-w-0 justify-between text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
+                "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
                 triggerClassName,
               )}
             />
           }
         >
           <span
-            className={`block min-w-0 flex-1 truncate text-left ${!selectedText ? "text-muted-foreground" : ""}`}
+            className={cn(
+              "block min-w-0 flex-1 truncate text-left",
+              !selectedText && "text-muted-foreground",
+            )}
           >
             {selectedText ?? placeholder}
           </span>
+          <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
         </ComboboxTrigger>
-        <ComboboxContent
+        <ComboboxPopup
           anchor={triggerRef}
+          aria-label={label ?? placeholder}
           className="w-[var(--anchor-width)] max-w-[calc(var(--available-width)-1rem)] min-w-[var(--anchor-width)]"
         >
-          <ComboboxInput
-            showTrigger={false}
-            placeholder={label ? `Buscar ${label.toLowerCase()}` : "Buscar"}
-          />
+          <div className="border-b p-2">
+            <ComboboxInput
+              className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+              placeholder={label ? `Buscar ${label.toLowerCase()}...` : "Buscar..."}
+              showTrigger={false}
+              startAddon={<SearchIcon />}
+            />
+          </div>
           <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
           <ComboboxList className="max-h-56 scrollbar-none">
             {(item) => (
@@ -123,11 +133,11 @@ export function FilterCombobox({
                   }
                 }}
               >
-                <span className="block w-full min-w-0 truncate">{getItemLabel(item)}</span>
+                <span className="block w-full min-w-0 truncate text-xs">{getItemLabel(item)}</span>
               </ComboboxItem>
             )}
           </ComboboxList>
-        </ComboboxContent>
+        </ComboboxPopup>
       </Combobox>
     </div>
   );

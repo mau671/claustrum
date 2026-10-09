@@ -26,26 +26,22 @@ export function NavUser({
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
-            asChild
+            render={<Link to="/auth/signin" />}
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <Link to="/auth/signin">
-              <LogIn className="size-4" />
-              <span className="flex-1 text-left">Iniciar sesión</span>
-            </Link>
+            <LogIn className="size-4" />
+            <span className="flex-1 text-left">Iniciar sesión</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            asChild
+            render={<Link to="/settings/appearance" />}
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <Link to="/settings/appearance">
-              <Settings className="size-4" />
-              <span className="flex-1 text-left">Configuración</span>
-            </Link>
+            <Settings className="size-4" />
+            <span className="flex-1 text-left">Configuración</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

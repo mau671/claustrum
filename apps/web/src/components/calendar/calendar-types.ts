@@ -28,6 +28,7 @@ export type CalendarProps = {
   dayWidth?: number;
   setDayWidth?: (width: number) => void;
   exportTheme?: CalendarExportTheme;
+  cornerAction?: React.ReactNode;
 };
 
 export type CalendarContextType = CalendarProps & {

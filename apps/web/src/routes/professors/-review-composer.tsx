@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { X } from "lucide-react";
+import { X, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types";
@@ -235,9 +235,7 @@ export function ReviewComposer({
             <ComboboxChips ref={courseAnchorRef} className="w-full content-start items-start">
               {selectedCourses.map((course) => (
                 <Tooltip key={course.id}>
-                  <TooltipTrigger asChild>
-                    <ComboboxChip>{course.code}</ComboboxChip>
-                  </TooltipTrigger>
+                  <TooltipTrigger render={<ComboboxChip />}>{course.code}</TooltipTrigger>
                   <TooltipContent side="top" sideOffset={4}>
                     {course.code}: {course.name}
                   </TooltipContent>
@@ -297,7 +295,7 @@ export function ReviewComposer({
                     ? "Cargando periodos..."
                     : "Seleccionar periodo"}
               </span>
-              {selectedTerm && (
+              {selectedTerm ? (
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground hover:bg-muted z-10 -mr-1.5 flex h-full items-center justify-center rounded-sm p-0.5 transition-colors"
@@ -317,14 +315,24 @@ export function ReviewComposer({
                   <X className="size-4" />
                   <span className="sr-only">Limpiar periodo seleccionado</span>
                 </button>
+              ) : (
+                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
               )}
             </ComboboxTrigger>
             <ComboboxContent
               anchor={termTriggerRef}
               container={comboboxPortalContainerRef}
+              aria-label="Período"
               className="w-72"
             >
-              <ComboboxInput showTrigger={false} placeholder="Buscar periodo..." />
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar periodo..."
+                  showTrigger={false}
+                  startAddon={<SearchIcon />}
+                />
+              </div>
               <ComboboxEmpty>No se encontraron periodos.</ComboboxEmpty>
               <ComboboxList className="max-h-56 scrollbar-none">
                 {(group, index) => (
@@ -453,7 +461,10 @@ export function ReviewComposer({
             max={5}
             step={1}
             value={[clampedEngagementLevel]}
-            onValueChange={(value) => setEngagementLevel(String(value[0] ?? 4))}
+            onValueChange={(value) => {
+              const numericValue = typeof value === "number" ? value : (value?.[0] ?? 0);
+              setEngagementLevel(String(numericValue));
+            }}
           />
         </div>
       </div>
@@ -546,7 +557,7 @@ export function ReviewComposer({
         <SheetContent
           side="bottom"
           className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          initialFocus={false}
         >
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
           <SheetHeader className="px-4 pt-4 pb-2">
@@ -555,16 +566,20 @@ export function ReviewComposer({
               <span className="block">
                 Tu reseña es anónima y requiere aprobación antes de publicarse.
               </span>
-              <Button asChild className="h-auto p-0" variant="link">
-                <Link
-                  to="/policies"
-                  hash="politica-de-resenas-y-opiniones-sobre-docentes"
-                  preload="intent"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Ver reglamento de reseñas
-                </Link>
+              <Button
+                className="h-auto p-0"
+                variant="link"
+                render={
+                  <Link
+                    to="/policies"
+                    hash="politica-de-resenas-y-opiniones-sobre-docentes"
+                    preload="intent"
+                    target="_blank"
+                    rel="noreferrer"
+                  />
+                }
+              >
+                Ver reglamento de reseñas
               </Button>
             </SheetDescription>
           </SheetHeader>
@@ -584,7 +599,7 @@ export function ReviewComposer({
     >
       <DialogContent
         className="max-h-[90vh] max-w-3xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        initialFocus={false}
       >
         <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
         <DialogHeader>
@@ -593,16 +608,20 @@ export function ReviewComposer({
             <span className="block">
               Tu reseña es anónima y requiere aprobación antes de publicarse.
             </span>
-            <Button asChild className="h-auto p-0" variant="link">
-              <Link
-                to="/policies"
-                hash="politica-de-resenas-y-opiniones-sobre-docentes"
-                preload="intent"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Ver reglamento de reseñas
-              </Link>
+            <Button
+              className="h-auto p-0"
+              variant="link"
+              render={
+                <Link
+                  to="/policies"
+                  hash="politica-de-resenas-y-opiniones-sobre-docentes"
+                  preload="intent"
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              }
+            >
+              Ver reglamento de reseñas
             </Button>
           </DialogDescription>
         </DialogHeader>

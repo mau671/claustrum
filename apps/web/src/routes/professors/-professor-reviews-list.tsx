@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-table";
 import { Flag, ThumbsDown, ThumbsUp } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
-import { toast } from "sonner";
 
 import type {
   ProfessorReviewPublicRow,
@@ -48,6 +47,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSession } from "@/lib/auth/client";
 import { getTurnstileSiteKey } from "@/lib/env/public";
@@ -68,6 +68,12 @@ const REPORT_REASONS: Array<{ value: ProfessorReviewReportReason; label: string 
   { value: "falso_enganoso", label: "Contenido falso o engañoso" },
   { value: "otro", label: "Otro" },
 ];
+
+const PAGE_SIZE_OPTIONS = [
+  { value: "10", label: "10 filas" },
+  { value: "25", label: "25 filas" },
+  { value: "50", label: "50 filas" },
+] as const;
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -566,6 +572,7 @@ export function ProfessorReviewsList({
             </Pagination>
             <div className="w-28">
               <Select
+                items={PAGE_SIZE_OPTIONS}
                 value={String(pageSize)}
                 onValueChange={(value) => {
                   onPageChange(0);
@@ -576,9 +583,11 @@ export function ProfessorReviewsList({
                   <SelectValue placeholder="Filas" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="10">10 filas</SelectItem>
-                  <SelectItem value="25">25 filas</SelectItem>
-                  <SelectItem value="50">50 filas</SelectItem>
+                  {PAGE_SIZE_OPTIONS.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -599,7 +608,7 @@ export function ProfessorReviewsList({
           <SheetContent
             side="bottom"
             className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 p-0"
-            onOpenAutoFocus={(e) => e.preventDefault()}
+            initialFocus={false}
           >
             <SheetHeader className="px-4 pt-4 pb-2 text-left">
               <SheetTitle>Reportar reseña</SheetTitle>
@@ -610,6 +619,7 @@ export function ProfessorReviewsList({
               <div className="space-y-2">
                 <p className="text-sm font-medium">Motivo</p>
                 <Select
+                  items={REPORT_REASONS}
                   value={reportReason}
                   onValueChange={(value) => setReportReason(value as ProfessorReviewReportReason)}
                 >
@@ -684,7 +694,7 @@ export function ProfessorReviewsList({
             }
           }}
         >
-          <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogContent initialFocus={false}>
             <DialogHeader>
               <DialogTitle>Reportar reseña</DialogTitle>
               <DialogDescription>Reporte anónimo para revisión de moderación.</DialogDescription>
@@ -694,6 +704,7 @@ export function ProfessorReviewsList({
               <div className="space-y-1">
                 <p className="text-sm font-medium">Motivo</p>
                 <Select
+                  items={REPORT_REASONS}
                   value={reportReason}
                   onValueChange={(value) => setReportReason(value as ProfessorReviewReportReason)}
                 >

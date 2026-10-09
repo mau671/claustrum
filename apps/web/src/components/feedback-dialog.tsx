@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { Loader2 } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getTurnstileSiteKey } from "@/lib/env/public";
 import { useSubmitFeedback } from "@/lib/feedback/hooks";
@@ -32,6 +32,12 @@ import { useAuthUser } from "@/lib/hooks/use-queries";
 const Turnstile = lazy(() =>
   import("@marsidev/react-turnstile").then((module) => ({ default: module.Turnstile })),
 );
+
+const FEEDBACK_TYPES = [
+  { value: "bug", label: "Reportar un error" },
+  { value: "feature", label: "Sugerir una nueva funcionalidad" },
+  { value: "other", label: "Otro comentario o duda general" },
+] as const;
 
 export function FeedbackDialog({
   open,
@@ -109,16 +115,19 @@ export function FeedbackDialog({
           <div className="space-y-2">
             <Label htmlFor={field.name}>¿Qué tipo de comentario deseas enviar?</Label>
             <Select
+              items={FEEDBACK_TYPES}
               value={field.state.value}
               onValueChange={(val) => field.handleChange(val as any)}
             >
               <SelectTrigger id={field.name} onBlur={field.handleBlur}>
                 <SelectValue placeholder="Selecciona una opción..." />
               </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="bug">Reportar un error</SelectItem>
-                <SelectItem value="feature">Sugerir una nueva funcionalidad</SelectItem>
-                <SelectItem value="other">Otro comentario o duda general</SelectItem>
+              <SelectContent>
+                {FEEDBACK_TYPES.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {field.state.meta.errors.length > 0 ? (
@@ -251,7 +260,7 @@ export function FeedbackDialog({
         <SheetContent
           side="bottom"
           className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          initialFocus={false}
         >
           <SheetHeader className="px-6 pt-6 pb-2 text-left">
             <TitleAndDescription />
@@ -272,7 +281,7 @@ export function FeedbackDialog({
     >
       <DialogContent
         className="max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden p-0"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        initialFocus={false}
       >
         <DialogHeader className="px-6 pt-6 pb-2 text-left">
           <TitleAndDescription />

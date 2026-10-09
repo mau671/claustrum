@@ -19,18 +19,21 @@ const EmailContact = () => {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="text-primary decoration-primary/50 hover:text-primary/80 font-medium underline decoration-dashed underline-offset-4 focus:outline-none"
-        >
-          {email}
-        </button>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            aria-label={`Ver opciones de correo para ${email}`}
+            className="text-primary decoration-primary/50 hover:text-primary/80 font-medium underline decoration-dashed underline-offset-4 focus:outline-none"
+          />
+        }
+      >
+        {email}
       </PopoverTrigger>
       <PopoverContent
         className="w-[90vw] space-y-4 p-4 sm:w-[420px]"
         align="start"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        initialFocus={false}
       >
         <Input readOnly value={email} className="bg-muted/50 cursor-text" />
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -47,12 +50,10 @@ const EmailContact = () => {
             variant="outline"
             size="sm"
             className="w-full justify-center gap-2 sm:flex-1"
-            asChild
+            render={<a href={`mailto:${email}`} aria-label="Abrir aplicación de correo" />}
           >
-            <a href={`mailto:${email}`}>
-              <Mail className="h-4 w-4" />
-              Abrir aplicación de correo
-            </a>
+            <Mail className="h-4 w-4" />
+            Abrir aplicación de correo
           </Button>
         </div>
       </PopoverContent>
@@ -64,8 +65,9 @@ const ITCR = () => (
   <>
     <span className="md:hidden">ITCR</span>
     <span className="hidden md:inline">
-      <Tooltip delayDuration={300}>
+      <Tooltip>
         <TooltipTrigger
+          delay={300}
           type="button"
           className="decoration-primary/50 cursor-help underline decoration-dashed underline-offset-4"
         >

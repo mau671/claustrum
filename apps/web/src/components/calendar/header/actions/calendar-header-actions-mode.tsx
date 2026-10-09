@@ -27,11 +27,11 @@ export default function CalendarHeaderActionsMode() {
       <LayoutGroup>
         <ToggleGroup
           className="flex gap-0 -space-x-px overflow-hidden rounded-sm border shadow-sm shadow-black/5 rtl:space-x-reverse"
-          type="single"
           variant="outline"
-          value={mode}
-          onValueChange={(value) => {
-            if (value) setMode(value as Mode);
+          value={[mode]}
+          onValueChange={(val) => {
+            const next = (val as string[])[0];
+            if (next) setMode(next as Mode);
           }}
         >
           {calendarModes.map((modeValue) => {

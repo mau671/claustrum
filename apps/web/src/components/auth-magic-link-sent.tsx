@@ -170,11 +170,21 @@ export function AuthMagicLinkSentPage() {
         ) : null}
 
         <div className="mt-7 flex w-full flex-col gap-2">
-          <Button variant="outline" size="lg" className="w-full" asChild>
-            <a href={getEmailProviderUrl(lastSentEmail)} target="_blank" rel="noreferrer">
-              Abrir correo
-              <ExternalLinkIcon />
-            </a>
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full"
+            render={
+              <a
+                href={getEmailProviderUrl(lastSentEmail)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Abrir correo"
+              />
+            }
+          >
+            Abrir correo
+            <ExternalLinkIcon />
           </Button>
           <Button
             variant="ghost"

@@ -213,15 +213,20 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
               <Plus className="size-4" />
             </Button>
             <div className="bg-border mx-1 h-4 w-px" />
-            <Button asChild variant="ghost" size="icon" className="size-8 cursor-pointer">
-              <a
-                href={blobUrl}
-                download={fileName}
-                aria-label="Descargar PDF"
-                title="Descargar PDF"
-              >
-                <Download className="size-4" />
-              </a>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 cursor-pointer"
+              render={
+                <a
+                  href={blobUrl}
+                  download={fileName}
+                  aria-label="Descargar PDF"
+                  title="Descargar PDF"
+                />
+              }
+            >
+              <Download className="size-4" />
             </Button>
           </div>
         </div>

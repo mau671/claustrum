@@ -51,6 +51,7 @@ export default function CalendarProvider({
   dayWidth: externalDayWidth,
   setDayWidth: externalSetDayWidth,
   exportTheme,
+  cornerAction,
   children,
 }: {
   events: CalendarEvent[];
@@ -66,6 +67,7 @@ export default function CalendarProvider({
   dayWidth?: number;
   setDayWidth?: (width: number) => void;
   exportTheme?: CalendarExportTheme;
+  cornerAction?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [newEventDialogOpen, setNewEventDialogOpen] = useState(false);
@@ -123,6 +125,7 @@ export default function CalendarProvider({
         dayWidth,
         setDayWidth,
         exportTheme,
+        cornerAction,
       }}
     >
       {children}

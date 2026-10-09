@@ -18,13 +18,13 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactQrCode from "react-qr-code";
-import { toast } from "sonner";
 
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { StatefulButton } from "@/components/ui/stateful-button";
+import { toast } from "@/components/ui/toast";
 import { authClient, signOut } from "@/lib/auth/client";
 import { useAuthAccounts, useAuthUser } from "@/lib/hooks/use-queries";
 import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
@@ -422,8 +422,8 @@ export function SecurityPage() {
         <p className="text-muted-foreground mx-auto mb-6 max-w-md">
           Necesitas estar autenticado para cambiar tu contraseña y configurar opciones de seguridad.
         </p>
-        <Button asChild>
-          <a href="/auth/signin">Iniciar sesión</a>
+        <Button render={<a href="/auth/signin" aria-label="Iniciar sesión" />}>
+          Iniciar sesión
         </Button>
       </div>
     );

@@ -50,6 +50,12 @@ import { getProfessorNameTransitionName } from "@/lib/utils/view-transition";
 
 const DEFAULT_PAGE_SIZE = 25;
 
+const PAGE_SIZE_OPTIONS = [
+  { value: "25", label: "25 filas" },
+  { value: "50", label: "50 filas" },
+  { value: "100", label: "100 filas" },
+] as const;
+
 function formatScore(score: number | null): string {
   if (score === null) return "-";
   return score.toFixed(2);
@@ -372,19 +378,22 @@ export function ProfessorsReviewsPage() {
                 }}
               />
             </div>
-            <CollapsibleTrigger asChild className="lg:hidden">
-              <Button
-                type="button"
-                variant="outline"
-                className="size-9"
-                aria-label={filtersExpanded ? "Ocultar filtros" : "Mostrar filtros"}
-              >
-                {filtersExpanded ? (
-                  <ChevronDown className="size-4" />
-                ) : (
-                  <ChevronRight className="size-4" />
-                )}
-              </Button>
+            <CollapsibleTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="size-9"
+                  aria-label={filtersExpanded ? "Ocultar filtros" : "Mostrar filtros"}
+                />
+              }
+              className="lg:hidden"
+            >
+              {filtersExpanded ? (
+                <ChevronDown className="size-4" />
+              ) : (
+                <ChevronRight className="size-4" />
+              )}
             </CollapsibleTrigger>
           </div>
 
@@ -521,6 +530,7 @@ export function ProfessorsReviewsPage() {
           </Pagination>
           <div className="w-28">
             <Select
+              items={PAGE_SIZE_OPTIONS}
               value={String(pageSize)}
               onValueChange={(value) => {
                 setPage(0);
@@ -530,10 +540,12 @@ export function ProfessorsReviewsPage() {
               <SelectTrigger className="h-8">
                 <SelectValue placeholder="Filas" />
               </SelectTrigger>
-              <SelectContent position="popper" align="end" sideOffset={4}>
-                <SelectItem value="25">25 filas</SelectItem>
-                <SelectItem value="50">50 filas</SelectItem>
-                <SelectItem value="100">100 filas</SelectItem>
+              <SelectContent align="end" sideOffset={4}>
+                {PAGE_SIZE_OPTIONS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

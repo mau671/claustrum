@@ -8,6 +8,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuLinkItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -47,7 +48,7 @@ export function UserMenuDropdown({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={trigger as React.ReactElement} />
       <DropdownMenuContent
         className={contentClass}
         side={side as any}
@@ -70,12 +71,10 @@ export function UserMenuDropdown({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to="/settings/profile">
-              <Settings className="size-4" />
-              Configuración
-            </Link>
-          </DropdownMenuItem>
+          <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>
+            <Settings className="size-4" />
+            Configuración
+          </DropdownMenuLinkItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem

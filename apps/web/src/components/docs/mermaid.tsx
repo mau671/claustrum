@@ -390,15 +390,17 @@ function OpenDiagramDialogButton({ svg }: { svg: string }) {
 
   return (
     <Dialog modal={false} open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          aria-label="Abrir diagrama ampliado"
-          title="Abrir diagrama ampliado"
-          className={iconButtonClassName}
-        >
-          <Maximize2 className="size-4" />
-        </button>
+      <DialogTrigger
+        render={
+          <button
+            type="button"
+            aria-label="Abrir diagrama ampliado"
+            title="Abrir diagrama ampliado"
+            className={iconButtonClassName}
+          />
+        }
+      >
+        <Maximize2 className="size-4" />
       </DialogTrigger>
       {isOpen && <div className="fixed inset-0 z-40 bg-black/45 backdrop-blur-sm" />}
       <DialogContent

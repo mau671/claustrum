@@ -98,11 +98,13 @@ function CurriculumGrid({
               <div key={semester.levelNumber} className="w-48 flex-shrink-0">
                 <div className="border-border mb-4 border-b pb-2">
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <h2 className="text-foreground decoration-foreground/70 inline-block cursor-pointer text-lg font-semibold underline-offset-4 transition hover:underline">
-                        {semester.levelLabel}
-                      </h2>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <h2 className="text-foreground decoration-foreground/70 inline-block cursor-pointer text-lg font-semibold underline-offset-4 transition hover:underline">
+                          {semester.levelLabel}
+                        </h2>
+                      }
+                    />
                     <TooltipContent side="top" align="start">
                       <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
                         <span className="font-semibold">Cursos</span>
@@ -122,28 +124,29 @@ function CurriculumGrid({
                 <div className="space-y-4">
                   {semester.courses.map((course) => (
                     <ContextMenu key={course.id}>
-                      <ContextMenuTrigger asChild>
-                        <button
-                          type="button"
-                          className="block w-full text-left outline-none"
-                          onMouseEnter={() => setHoveredCourse(course.id)}
-                          onMouseLeave={() => setHoveredCourse(null)}
-                          onClick={() => handleCourseClick(course.id)}
-                        >
-                          <CourseCard
-                            id={`course-${course.id}`}
-                            course={course}
-                            transitionName={
-                              selectedCourseId === course.id
-                                ? `course-name-${course.id}`
-                                : undefined
-                            }
-                            isHovered={hoveredCourse === course.id}
-                            relationType={
-                              hoveredCourse ? getRelationType(hoveredCourse, course.id) : null
-                            }
+                      <ContextMenuTrigger
+                        render={
+                          <button
+                            type="button"
+                            className="block w-full text-left outline-none"
+                            onMouseEnter={() => setHoveredCourse(course.id)}
+                            onMouseLeave={() => setHoveredCourse(null)}
+                            onClick={() => handleCourseClick(course.id)}
+                            aria-label={course.name}
                           />
-                        </button>
+                        }
+                      >
+                        <CourseCard
+                          id={`course-${course.id}`}
+                          course={course}
+                          transitionName={
+                            selectedCourseId === course.id ? `course-name-${course.id}` : undefined
+                          }
+                          isHovered={hoveredCourse === course.id}
+                          relationType={
+                            hoveredCourse ? getRelationType(hoveredCourse, course.id) : null
+                          }
+                        />
                       </ContextMenuTrigger>
                       <ContextMenuContent>
                         <ContextMenuItem onClick={() => handleRegisterProgressClick(course.id)}>

@@ -29,8 +29,8 @@ export function hydrateLocalStudyPlan() {
     try {
       const parsed = JSON.parse(stored) as Partial<LocalStudyPlan>;
       localStudyPlanStore.setState(() => ({ ...getEmptyState(), ...parsed }));
-    } catch (e) {
-      console.error("Failed to parse local study plan", e);
+    } catch {
+      // Ignore parse failures from corrupted local storage
     }
   }
 }

@@ -13,25 +13,32 @@ export function FooterCTA() {
           Entrá con tu correo institucional, configurá tu carrera y empezá a planificar.
         </p>
         <div className="flex flex-col justify-center gap-3 sm:flex-row">
-          <Button asChild>
-            <a
-              href="/overview"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2"
-            >
-              Abrir Claustrum <ArrowRight className="size-[15px]" />
-            </a>
+          <Button
+            render={
+              <a
+                href="/overview"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Abrir Claustrum"
+                className="inline-flex items-center justify-center gap-2"
+              />
+            }
+          >
+            Abrir Claustrum <ArrowRight className="size-[15px]" />
           </Button>
-          <Button variant="outline" asChild>
-            <a
-              href="https://github.com/mau671/claustrum"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2"
-            >
-              <GitHubIcon className="size-[15px]" /> Ver en GitHub
-            </a>
+          <Button
+            variant="outline"
+            render={
+              <a
+                href="https://github.com/mau671/claustrum"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Ver en GitHub"
+                className="inline-flex items-center justify-center gap-2"
+              />
+            }
+          >
+            <GitHubIcon className="size-[15px]" /> Ver en GitHub
           </Button>
         </div>
       </div>

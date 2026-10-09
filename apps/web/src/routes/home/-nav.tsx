@@ -61,24 +61,31 @@ export function HomeNav({ starCount }: { starCount: number | null }) {
             {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </Button>
 
-          <Button variant="outline" size="sm" asChild>
-            <a href="/overview">Abrir</a>
+          <Button
+            variant="outline"
+            size="sm"
+            render={<a href="/overview" aria-label="Abrir Claustrum" />}
+          >
+            Abrir
           </Button>
 
-          <Button size="sm" asChild>
-            <a
-              href="https://github.com/mau671/claustrum"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Ver repositorio en GitHub"
-            >
-              <GitHubIcon className="size-[15px]" />
-              <span className="hidden sm:inline">GitHub</span>
-              <span className="bg-primary-foreground/15 text-primary-foreground hidden items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] sm:inline-flex">
-                <StarIcon className="size-2.5" />
-                <span className="leading-none">{starCount ?? "-"}</span>
-              </span>
-            </a>
+          <Button
+            size="sm"
+            render={
+              <a
+                href="https://github.com/mau671/claustrum"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Ver repositorio en GitHub"
+              />
+            }
+          >
+            <GitHubIcon className="size-[15px]" />
+            <span className="hidden sm:inline">GitHub</span>
+            <span className="bg-primary-foreground/15 text-primary-foreground hidden items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] sm:inline-flex">
+              <StarIcon className="size-2.5" />
+              <span className="leading-none">{starCount ?? "-"}</span>
+            </span>
           </Button>
         </div>
       </div>

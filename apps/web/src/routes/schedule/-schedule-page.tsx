@@ -4,12 +4,8 @@ import {
   AlertTriangle,
   CalendarDays,
   ChevronDown,
-  Link2,
   User,
   Save,
-  Bookmark,
-  Trash2,
-  Loader2,
   LayoutGrid,
   List,
 } from "lucide-react";
@@ -23,9 +19,12 @@ import {
   type CSSProperties,
 } from "react";
 import { flushSync } from "react-dom";
-import { toast } from "sonner";
 
 import type { Mode, CalendarEvent } from "@/components/calendar/calendar-types";
+import type {
+  ScheduleExportOptions,
+  ScheduleExportTheme,
+} from "@/components/schedule/schedule-export-dialog";
 import type { ScheduleCourse, ScheduleGroup } from "@/lib/types";
 
 import { START_HOUR, END_HOUR } from "@/components/calendar/body/day/calendar-body-day-margin";
@@ -33,21 +32,13 @@ import Calendar from "@/components/calendar/calendar";
 import { colorOptions } from "@/components/calendar/calendar-tailwind-classes";
 import CourseList from "@/components/course-list";
 import { CourseSearchInput } from "@/components/course-search-input";
-import {
-  ScheduleExportDialog,
-  type ScheduleExportOptions,
-  type ScheduleExportTheme,
-} from "@/components/schedule/schedule-export-dialog";
+import { ScheduleCornerActions } from "@/components/schedule/schedule-corner-actions";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
-import {
-  ScheduleZoomControls,
-  SCHEDULE_DEFAULT_HOUR_HEIGHT,
-} from "@/components/schedule/schedule-zoom-controls";
+import { SCHEDULE_DEFAULT_HOUR_HEIGHT } from "@/components/schedule/schedule-zoom-controls";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { sortTermsLogical } from "@/lib/academic-terms";
@@ -192,7 +183,8 @@ export function SchedulePage() {
     const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
     if (stored === "card" || stored === "table") setStoredViewMode(stored);
   }, []);
-  const viewMode = search.view ?? storedViewMode;
+  const SHOW_VIEW_MODE_TOGGLE = false;
+  const viewMode = SHOW_VIEW_MODE_TOGGLE ? (search.view ?? storedViewMode) : "card";
 
   const filtersOpen = search.filters ?? !(!!selectedCampusId && !!selectedTermId);
 
@@ -258,7 +250,6 @@ export function SchedulePage() {
   const calendarRef = useRef<HTMLDivElement>(null);
   const exportCalendarRef = useRef<HTMLDivElement>(null);
 
-  const [schedulesPopoverOpen, setSchedulesPopoverOpen] = useState(false);
   const [scheduleName, setScheduleName] = useState("");
   const { data: authUser, isLoading: isAuthLoading } = useAuthUser();
 
@@ -298,8 +289,8 @@ export function SchedulePage() {
     () => new Map(campuses.map((campus) => [campus.id, campus])),
     [campuses],
   );
-  const careers = careersQuery.data ?? [];
-  const plans = plansQuery.data ?? [];
+  const careers = useMemo(() => careersQuery.data ?? [], [careersQuery.data]);
+  const plans = useMemo(() => plansQuery.data ?? [], [plansQuery.data]);
   const terms = useMemo(() => sortTermsLogical(termsQuery.data ?? []), [termsQuery.data]);
   const isAutoSelectingLatestPlan =
     shouldAutoSelectPlanRef.current && !!selectedCareerId && !selectedPlanId && plans.length > 0;
@@ -1079,43 +1070,46 @@ export function SchedulePage() {
     [selectedGroups, updateSelectedGroups],
   );
 
-  const handleSaveSchedule = useCallback(() => {
-    if (!selectedTermId) return;
+  const handleSaveSchedule = useCallback(
+    (onSuccess?: () => void) => {
+      if (!selectedTermId) return;
 
-    const groupLookups: Array<{
-      courseCode: string;
-      campusId: number | null;
-      groupCode: string;
-    }> = [];
-    selectedGroups.forEach((groupId) => {
-      const data = groupById.get(groupId);
-      if (data) {
-        groupLookups.push({
-          courseCode: data.course.course_code,
-          campusId: data.campusId,
-          groupCode: data.group.group_code,
-        });
-      }
-    });
+      const groupLookups: Array<{
+        courseCode: string;
+        campusId: number | null;
+        groupCode: string;
+      }> = [];
+      selectedGroups.forEach((groupId) => {
+        const data = groupById.get(groupId);
+        if (data) {
+          groupLookups.push({
+            courseCode: data.course.course_code,
+            campusId: data.campusId,
+            groupCode: data.group.group_code,
+          });
+        }
+      });
 
-    saveScheduleMutation.mutate(
-      {
-        name: scheduleName.trim(),
-        academicTermId: selectedTermId,
-        groupLookups,
-      },
-      {
-        onSuccess: () => {
-          toast.success("Horario guardado correctamente");
-          setSchedulesPopoverOpen(false);
-          setScheduleName("");
+      saveScheduleMutation.mutate(
+        {
+          name: scheduleName.trim(),
+          academicTermId: selectedTermId,
+          groupLookups,
         },
-        onError: (error) => {
-          toast.error(error instanceof Error ? error.message : "Error al guardar el horario");
+        {
+          onSuccess: () => {
+            toast.success("Horario guardado correctamente");
+            setScheduleName("");
+            onSuccess?.();
+          },
+          onError: (error) => {
+            toast.error(error instanceof Error ? error.message : "Error al guardar el horario");
+          },
         },
-      },
-    );
-  }, [selectedGroups, groupById, selectedTermId, scheduleName, saveScheduleMutation]);
+      );
+    },
+    [selectedGroups, groupById, selectedTermId, scheduleName, saveScheduleMutation],
+  );
 
   const handleLoadSchedule = useCallback(
     (schedule: SavedSchedule) => {
@@ -1284,6 +1278,25 @@ export function SchedulePage() {
     );
   }
 
+  const cornerAction = (
+    <ScheduleCornerActions
+      onExport={handleExport}
+      onCopyShortLink={handleCopyShortLink}
+      hourHeight={hourHeight}
+      setHourHeight={setHourHeight}
+      isAuthenticated={isAuthenticated}
+      savedSchedules={savedSchedules}
+      scheduleName={scheduleName}
+      onScheduleNameChange={setScheduleName}
+      onSaveSchedule={handleSaveSchedule}
+      isSavingSchedule={saveScheduleMutation.isPending}
+      hasSelectedGroups={selectedGroups.size > 0}
+      onLoadSchedule={handleLoadSchedule}
+      onDeleteSchedule={handleDeleteSchedule}
+      onSaveLocalPlan={!isAuthenticated ? handleSaveLocalPlan : undefined}
+    />
+  );
+
   return (
     <>
       <div className="flex flex-1 flex-col">
@@ -1339,7 +1352,7 @@ export function SchedulePage() {
                     size="sm"
                     onClick={handleUseProfileDefaults}
                     disabled={isProfileActive}
-                    className="h-8 shrink-0 gap-1.5 text-xs"
+                    className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
                   >
                     <User className="size-3.5" />
                     {isProfileActive ? "Perfil activo" : "Usar mi perfil"}
@@ -1347,19 +1360,21 @@ export function SchedulePage() {
                 )}
                 {!isAuthenticated && (
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant={isProfileActive ? "secondary" : "outline"}
-                        size="sm"
-                        onClick={handleSaveLocalPlan}
-                        onPointerDown={(e) => e.preventDefault()}
-                        disabled={isProfileActive}
-                        className="h-8 shrink-0 gap-1.5 text-xs"
-                      >
-                        <Save className="size-3.5" />
-                        {isProfileActive ? "Guardado" : "Guardar"}
-                      </Button>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant={isProfileActive ? "secondary" : "outline"}
+                          size="sm"
+                          onClick={handleSaveLocalPlan}
+                          onPointerDown={(e) => e.preventDefault()}
+                          disabled={isProfileActive}
+                          className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                        />
+                      }
+                    >
+                      <Save className="size-3.5" />
+                      {isProfileActive ? "Guardado" : "Guardar"}
                     </TooltipTrigger>
                     <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
                   </Tooltip>
@@ -1394,7 +1409,7 @@ export function SchedulePage() {
               (orderedCourses.length > 0 || coursesQuery.isLoading || isPendingFilters) && (
                 <div className="flex flex-1 flex-col px-4 pb-6 md:pb-0 lg:px-6">
                   <div
-                    className="h-auto shrink-0 overflow-hidden rounded-lg border md:h-[var(--calendar-height)]"
+                    className="h-auto shrink-0 overflow-hidden md:h-[var(--calendar-height)]"
                     style={
                       {
                         "--calendar-height": `${calendarHeight}px`,
@@ -1402,8 +1417,8 @@ export function SchedulePage() {
                     }
                   >
                     {isMobile ? (
-                      <div className="flex flex-col">
-                        <div className={cn("flex flex-col", isCourseListOpen && "border-b")}>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-col">
                           <CourseSearchInput
                             initialQuery={search.q ?? ""}
                             onSearchChange={(q) =>
@@ -1417,21 +1432,23 @@ export function SchedulePage() {
                             availableCoursesCount={orderedCourses.length}
                             actionButtons={
                               <>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  className="h-9 w-9 rounded-md"
-                                  onClick={() =>
-                                    handleViewModeChange(viewMode === "card" ? "table" : "card")
-                                  }
-                                  aria-label="Cambiar vista"
-                                >
-                                  {viewMode === "card" ? (
-                                    <List className="size-4" />
-                                  ) : (
-                                    <LayoutGrid className="size-4" />
-                                  )}
-                                </Button>
+                                {SHOW_VIEW_MODE_TOGGLE && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="h-9 w-9 rounded-md"
+                                    onClick={() =>
+                                      handleViewModeChange(viewMode === "card" ? "table" : "card")
+                                    }
+                                    aria-label="Cambiar vista"
+                                  >
+                                    {viewMode === "card" ? (
+                                      <List className="size-4" />
+                                    ) : (
+                                      <LayoutGrid className="size-4" />
+                                    )}
+                                  </Button>
+                                )}
                                 <Button
                                   type="button"
                                   variant="ghost"
@@ -1498,126 +1515,7 @@ export function SchedulePage() {
                           </div>
                         </div>
 
-                        <div className="relative flex min-h-[65vh] flex-1 flex-col">
-                          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-                            <ScheduleZoomControls
-                              hourHeight={hourHeight}
-                              setHourHeight={setHourHeight}
-                              isFloating={false}
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="icon"
-                              title="Copiar enlace corto"
-                              onClick={handleCopyShortLink}
-                            >
-                              <Link2 className="size-4" />
-                            </Button>
-                            {isAuthenticated && (
-                              <>
-                                <Popover
-                                  open={schedulesPopoverOpen}
-                                  onOpenChange={setSchedulesPopoverOpen}
-                                >
-                                  <PopoverTrigger asChild>
-                                    <Button variant="outline" size="icon" title="Mis horarios">
-                                      <Bookmark className="size-4" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    align="end"
-                                    className="w-80"
-                                    onOpenAutoFocus={(e) => e.preventDefault()}
-                                  >
-                                    <div className="space-y-4">
-                                      <div className="space-y-2">
-                                        <h4 className="leading-none font-medium">
-                                          Guardar horario
-                                        </h4>
-                                        <div className="flex items-center gap-2">
-                                          <Input
-                                            id="schedule-name-mobile"
-                                            value={scheduleName}
-                                            onChange={(e) => setScheduleName(e.target.value)}
-                                            placeholder="Nombre (ej: IS-2026-1)"
-                                            className="h-8"
-                                          />
-                                          <Button
-                                            size="icon"
-                                            onClick={handleSaveSchedule}
-                                            disabled={
-                                              !scheduleName.trim() ||
-                                              !selectedGroups.size ||
-                                              saveScheduleMutation.isPending
-                                            }
-                                            className="h-8 w-8 shrink-0"
-                                            title="Guardar horario"
-                                          >
-                                            {saveScheduleMutation.isPending ? (
-                                              <Loader2 className="size-4 animate-spin" />
-                                            ) : (
-                                              <Save className="size-4" />
-                                            )}
-                                            <span className="sr-only">Guardar</span>
-                                          </Button>
-                                        </div>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <h4 className="leading-none font-medium">Mis horarios</h4>
-                                        <div className="grid gap-2">
-                                          {!savedSchedules?.length ? (
-                                            <div className="text-muted-foreground text-sm">
-                                              Sin horarios guardados
-                                            </div>
-                                          ) : (
-                                            savedSchedules.map((s) => (
-                                              <div
-                                                key={s.id}
-                                                role="button"
-                                                tabIndex={0}
-                                                className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex w-full cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-sm transition-colors outline-none"
-                                                onClick={() => {
-                                                  handleLoadSchedule(s);
-                                                  setSchedulesPopoverOpen(false);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                  if (e.key === "Enter" || e.key === " ") {
-                                                    e.preventDefault();
-                                                    handleLoadSchedule(s);
-                                                    setSchedulesPopoverOpen(false);
-                                                  }
-                                                }}
-                                              >
-                                                <span className="truncate pr-2">{s.name}</span>
-                                                <button
-                                                  type="button"
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteSchedule(s.id);
-                                                  }}
-                                                  onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
-                                                      e.stopPropagation();
-                                                      handleDeleteSchedule(s.id);
-                                                    }
-                                                  }}
-                                                  className="text-muted-foreground hover:text-destructive inline-flex shrink-0 cursor-pointer items-center"
-                                                >
-                                                  <Trash2 className="size-3.5" />
-                                                </button>
-                                              </div>
-                                            ))
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
-                              </>
-                            )}
-                            <ScheduleExportDialog onExport={handleExport} />
-                          </div>
+                        <div className="bg-background relative flex min-h-[65vh] flex-1 flex-col overflow-hidden rounded-lg border shadow-2xs">
                           <div ref={calendarRef} className="relative flex-1 overflow-hidden p-0">
                             {(coursesQuery.isLoading ||
                               isPendingFilters ||
@@ -1640,6 +1538,7 @@ export function SchedulePage() {
                                   onRemoveEvent={handleRemoveEvent}
                                   hourHeight={hourHeight}
                                   setHourHeight={setHourHeight}
+                                  cornerAction={cornerAction}
                                 />
                               </ClientOnly>
                             )}
@@ -1652,9 +1551,9 @@ export function SchedulePage() {
                           defaultSize="30%"
                           minSize="20%"
                           maxSize="50%"
-                          className="min-w-0 overflow-hidden"
+                          className="h-full min-w-0 overflow-hidden pr-3"
                         >
-                          <div className="flex h-full flex-col">
+                          <div className="flex h-full min-h-0 flex-col">
                             <CourseSearchInput
                               initialQuery={search.q ?? ""}
                               onSearchChange={(q) =>
@@ -1667,21 +1566,23 @@ export function SchedulePage() {
                               totalCredits={totalCredits}
                               availableCoursesCount={orderedCourses.length}
                               actionButtons={
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  className="h-9 w-9 rounded-md"
-                                  onClick={() =>
-                                    handleViewModeChange(viewMode === "card" ? "table" : "card")
-                                  }
-                                  aria-label="Cambiar vista"
-                                >
-                                  {viewMode === "card" ? (
-                                    <List className="size-4" />
-                                  ) : (
-                                    <LayoutGrid className="size-4" />
-                                  )}
-                                </Button>
+                                SHOW_VIEW_MODE_TOGGLE ? (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="h-9 w-9 rounded-md"
+                                    onClick={() =>
+                                      handleViewModeChange(viewMode === "card" ? "table" : "card")
+                                    }
+                                    aria-label="Cambiar vista"
+                                  >
+                                    {viewMode === "card" ? (
+                                      <List className="size-4" />
+                                    ) : (
+                                      <LayoutGrid className="size-4" />
+                                    )}
+                                  </Button>
+                                ) : undefined
                               }
                             />
                             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -1726,130 +1627,11 @@ export function SchedulePage() {
                           </div>
                         </ResizablePanel>
 
-                        <ResizableHandle withHandle />
+                        <ResizableHandle className="hover:bg-primary/20 z-20 -mr-1.5 w-1.5 cursor-col-resize bg-transparent transition-colors focus-visible:ring-0 focus-visible:outline-none" />
 
-                        <ResizablePanel defaultSize="70%" className="min-w-0 overflow-hidden">
-                          <div className="relative h-full">
-                            <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-                              <ScheduleZoomControls
-                                hourHeight={hourHeight}
-                                setHourHeight={setHourHeight}
-                                isFloating={false}
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                title="Copiar enlace corto"
-                                onClick={handleCopyShortLink}
-                              >
-                                <Link2 className="size-4" />
-                              </Button>
-                              {isAuthenticated && (
-                                <>
-                                  <Popover
-                                    open={schedulesPopoverOpen}
-                                    onOpenChange={setSchedulesPopoverOpen}
-                                  >
-                                    <PopoverTrigger asChild>
-                                      <Button variant="outline" size="icon" title="Mis horarios">
-                                        <Bookmark className="size-4" />
-                                      </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                      align="end"
-                                      className="w-80"
-                                      onOpenAutoFocus={(e) => e.preventDefault()}
-                                    >
-                                      <div className="space-y-4">
-                                        <div className="space-y-2">
-                                          <h4 className="leading-none font-medium">
-                                            Guardar horario
-                                          </h4>
-                                          <div className="flex items-center gap-2">
-                                            <Input
-                                              id="schedule-name-desktop"
-                                              value={scheduleName}
-                                              onChange={(e) => setScheduleName(e.target.value)}
-                                              placeholder="Nombre (ej: IS-2026-1)"
-                                              className="h-8"
-                                            />
-                                            <Button
-                                              size="icon"
-                                              onClick={handleSaveSchedule}
-                                              disabled={
-                                                !scheduleName.trim() ||
-                                                !selectedGroups.size ||
-                                                saveScheduleMutation.isPending
-                                              }
-                                              className="h-8 w-8 shrink-0"
-                                              title="Guardar horario"
-                                            >
-                                              {saveScheduleMutation.isPending ? (
-                                                <Loader2 className="size-4 animate-spin" />
-                                              ) : (
-                                                <Save className="size-4" />
-                                              )}
-                                              <span className="sr-only">Guardar</span>
-                                            </Button>
-                                          </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <h4 className="leading-none font-medium">Mis horarios</h4>
-                                          <div className="grid gap-2">
-                                            {!savedSchedules?.length ? (
-                                              <div className="text-muted-foreground text-sm">
-                                                Sin horarios guardados
-                                              </div>
-                                            ) : (
-                                              savedSchedules.map((s) => (
-                                                <div
-                                                  key={s.id}
-                                                  role="button"
-                                                  tabIndex={0}
-                                                  className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex w-full cursor-pointer items-center justify-between rounded-sm px-2 py-1.5 text-sm transition-colors outline-none"
-                                                  onClick={() => {
-                                                    handleLoadSchedule(s);
-                                                    setSchedulesPopoverOpen(false);
-                                                  }}
-                                                  onKeyDown={(e) => {
-                                                    if (e.key === "Enter" || e.key === " ") {
-                                                      e.preventDefault();
-                                                      handleLoadSchedule(s);
-                                                      setSchedulesPopoverOpen(false);
-                                                    }
-                                                  }}
-                                                >
-                                                  <span className="truncate pr-2">{s.name}</span>
-                                                  <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleDeleteSchedule(s.id);
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                      if (e.key === "Enter") {
-                                                        e.stopPropagation();
-                                                        handleDeleteSchedule(s.id);
-                                                      }
-                                                    }}
-                                                    className="text-muted-foreground hover:text-destructive inline-flex shrink-0 cursor-pointer items-center"
-                                                  >
-                                                    <Trash2 className="size-3.5" />
-                                                  </button>
-                                                </div>
-                                              ))
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </PopoverContent>
-                                  </Popover>
-                                </>
-                              )}
-                              <ScheduleExportDialog onExport={handleExport} />
-                            </div>
-                            <div ref={calendarRef} className="overflow-hidden p-0 lg:h-full">
+                        <ResizablePanel defaultSize="70%" className="min-w-0">
+                          <div className="bg-background relative flex h-full flex-col overflow-hidden rounded-lg border shadow-2xs">
+                            <div ref={calendarRef} className="h-full flex-1 overflow-hidden p-0">
                               {(coursesQuery.isLoading ||
                                 isPendingFilters ||
                                 isPendingLocalStorage) &&
@@ -1871,6 +1653,7 @@ export function SchedulePage() {
                                     onRemoveEvent={handleRemoveEvent}
                                     hourHeight={hourHeight}
                                     setHourHeight={setHourHeight}
+                                    cornerAction={cornerAction}
                                   />
                                 </ClientOnly>
                               )}

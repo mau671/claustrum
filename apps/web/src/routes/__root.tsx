@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/empty";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
-import { Toaster } from "@/components/ui/sonner";
+import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   appStateQueryOptions,
@@ -231,7 +231,7 @@ function RootComponent() {
               },
             }}
           >
-            <TooltipProvider delayDuration={200}>
+            <TooltipProvider delay={0}>
               {isPublicRoute ? (
                 <Outlet />
               ) : shouldHoldPrivateRender ? (
@@ -244,7 +244,7 @@ function RootComponent() {
                 </AppLayoutWrapper>
               )}
             </TooltipProvider>
-            <Toaster />
+            <ToastProvider />
           </RootProvider>
         </ThemeProvider>
         <Scripts />

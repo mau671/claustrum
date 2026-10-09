@@ -1,6 +1,5 @@
-import { FileUp, Minus, Plus, X } from "lucide-react";
+import { FileUp, Minus, Plus, X, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import type { AcademicTerm, CourseDetailRelatedCourse, CourseRecentProfessor } from "@/lib/types";
 
@@ -36,6 +35,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   formatClosedTermLabel,
@@ -419,13 +419,22 @@ export function EvaluationUploadDialog({
             >
               {selectedCourse ? formatCourseLabel(selectedCourse) : "Selecciona un curso"}
             </span>
+            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
           <ComboboxContent
             anchor={courseTriggerRef}
             container={comboboxPortalContainerRef}
+            aria-label="Curso"
             className="w-(--anchor-width) min-w-(--anchor-width)"
           >
-            <ComboboxInput showTrigger={false} placeholder="Buscar curso..." />
+            <div className="border-b p-2">
+              <ComboboxInput
+                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                placeholder="Buscar curso..."
+                showTrigger={false}
+                startAddon={<SearchIcon />}
+              />
+            </div>
             <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
             <ComboboxList className="max-h-48 scrollbar-none">
               {(option) => (
@@ -472,22 +481,31 @@ export function EvaluationUploadDialog({
                       ? "Selecciona un curso"
                       : "Sin períodos con oferta"}
               </span>
+              <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
             </ComboboxTrigger>
             <ComboboxContent
               anchor={termTriggerRef}
               container={comboboxPortalContainerRef}
+              aria-label="Período académico"
               className="w-(--anchor-width) min-w-(--anchor-width)"
             >
-              <ComboboxInput showTrigger={false} placeholder="Buscar período..." />
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar período..."
+                  showTrigger={false}
+                  startAddon={<SearchIcon />}
+                />
+              </div>
               <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
               <ComboboxList className="max-h-48 scrollbar-none">
                 {(group, index) => (
                   <ComboboxGroup key={group.value} items={group.items}>
-                    <ComboboxLabel>{group.value}</ComboboxLabel>
+                    <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
                     <ComboboxCollection>
                       {(term) => (
                         <ComboboxItem key={term.id} value={term}>
-                          <span className="block min-w-0 flex-1 truncate">
+                          <span className="block min-w-0 flex-1 truncate text-xs">
                             {formatTermNameWithoutYear(term.display_name)}
                           </span>
                         </ComboboxItem>
@@ -534,18 +552,29 @@ export function EvaluationUploadDialog({
                         ? "Seleccionar profesor"
                         : "Sin profesores en este período")}
               </span>
+              <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
             </ComboboxTrigger>
             <ComboboxContent
               anchor={professorTriggerRef}
               container={comboboxPortalContainerRef}
+              aria-label="Profesor"
               className="w-(--anchor-width) min-w-(--anchor-width)"
             >
-              <ComboboxInput showTrigger={false} placeholder="Buscar profesor..." />
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar profesor..."
+                  showTrigger={false}
+                  startAddon={<SearchIcon />}
+                />
+              </div>
               <ComboboxEmpty>No se encontraron profesores.</ComboboxEmpty>
               <ComboboxList className="max-h-48 scrollbar-none">
                 {(prof) => (
                   <ComboboxItem key={prof.professorId} value={prof}>
-                    <span className="block min-w-0 flex-1 truncate">{prof.professorName}</span>
+                    <span className="block min-w-0 flex-1 truncate text-xs">
+                      {prof.professorName}
+                    </span>
                   </ComboboxItem>
                 )}
               </ComboboxList>
@@ -578,18 +607,27 @@ export function EvaluationUploadDialog({
               <span className="block min-w-0 truncate text-left">
                 {selectedEvaluationType.label}
               </span>
+              <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
             </ComboboxTrigger>
             <ComboboxContent
               anchor={typeTriggerRef}
               container={comboboxPortalContainerRef}
+              aria-label="Tipo de evaluación"
               className="w-(--anchor-width) min-w-(--anchor-width)"
             >
-              <ComboboxInput showTrigger={false} placeholder="Buscar tipo..." />
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar tipo..."
+                  showTrigger={false}
+                  startAddon={<SearchIcon />}
+                />
+              </div>
               <ComboboxEmpty>No se encontraron tipos.</ComboboxEmpty>
               <ComboboxList className="max-h-48 scrollbar-none">
                 {(option) => (
                   <ComboboxItem key={option.value} value={option}>
-                    <span className="block min-w-0 flex-1 truncate">{option.label}</span>
+                    <span className="block min-w-0 flex-1 truncate text-xs">{option.label}</span>
                   </ComboboxItem>
                 )}
               </ComboboxList>

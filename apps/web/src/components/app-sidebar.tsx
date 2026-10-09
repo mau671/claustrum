@@ -100,7 +100,7 @@ export function AppSidebar() {
   return (
     <aside
       data-user-menu={isUserMenuOpen ? "open" : "closed"}
-      className="peer/sidebar group/sidebar bg-muted text-muted-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col px-4 pt-1 pb-4 transition-[width] duration-200 ease-out hover:w-72 data-[user-menu=open]:w-72 md:flex"
+      className="peer/sidebar group/sidebar bg-sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col px-4 pt-1 pb-4 transition-[width] duration-200 ease-out hover:w-72 data-[user-menu=open]:w-72 md:flex"
     >
       <Link
         to="/overview"
@@ -269,16 +269,14 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 rounded-full !p-0 text-left"
-            asChild
+            render={<Link to="/auth/signin" />}
           >
-            <Link to="/auth/signin">
-              <span className="flex size-12 shrink-0 items-center justify-center">
-                <LogIn className="size-5" />
-              </span>
-              <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
-                Iniciar sesión
-              </span>
-            </Link>
+            <span className="flex size-12 shrink-0 items-center justify-center">
+              <LogIn className="size-5" />
+            </span>
+            <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
+              Iniciar sesión
+            </span>
           </Button>
         )}
       </div>

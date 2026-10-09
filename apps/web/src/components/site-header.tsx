@@ -72,6 +72,9 @@ function getNumericPathSegment(pathname: string, prefix: string) {
   return Number.isFinite(value) && value > 0 ? value : null;
 }
 
+// Temporary flag to hide header search until the improved version is ready
+const SHOW_HEADER_SEARCH = false;
+
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();
   const { pathname } = useLocation();
@@ -191,8 +194,15 @@ export function SiteHeader() {
   ]);
 
   return (
-    <header className="bg-muted sticky top-0 z-40 hidden h-(--header-height) shrink-0 items-center px-4 md:flex lg:px-6">
-      <div className="grid w-full grid-cols-[1fr_auto] items-center gap-3 lg:grid-cols-[1fr_minmax(20rem,40rem)_1fr]">
+    <header className="bg-sidebar sticky top-0 z-40 hidden h-(--header-height) shrink-0 items-center px-4 md:flex lg:px-6">
+      <div
+        className={cn(
+          "w-full items-center gap-3",
+          SHOW_HEADER_SEARCH
+            ? "grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_minmax(20rem,40rem)_1fr]"
+            : "flex justify-between",
+        )}
+      >
         <div className="flex min-w-0 items-center gap-2">
           {breadcrumbItems.map((item, index) => {
             const isLast = index === breadcrumbItems.length - 1;
@@ -221,46 +231,53 @@ export function SiteHeader() {
           })}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsCommandOpen(true)}
-          className="bg-background text-muted-foreground ring-border/60 hover:text-foreground hover:ring-primary/30 focus-visible:ring-ring/50 hidden h-11 items-center gap-3 rounded-full px-5 shadow-sm ring-1 transition-colors focus-visible:ring-2 focus-visible:outline-none lg:flex"
-        >
-          <Search className="size-5 shrink-0" />
-          <span className="min-w-0 flex-1 text-left text-sm">Buscar…</span>
-          <KbdGroup>
-            <Kbd>Ctrl</Kbd>
-            <Kbd>K</Kbd>
-          </KbdGroup>
-        </button>
+        {SHOW_HEADER_SEARCH && (
+          <button
+            type="button"
+            onClick={() => setIsCommandOpen(true)}
+            className="bg-background text-muted-foreground ring-border/60 hover:text-foreground hover:ring-primary/30 focus-visible:ring-ring/50 hidden h-11 items-center gap-3 rounded-full px-5 shadow-sm ring-1 transition-colors focus-visible:ring-2 focus-visible:outline-none lg:flex"
+          >
+            <Search className="size-5 shrink-0" />
+            <span className="min-w-0 flex-1 text-left text-sm">Buscar…</span>
+            <KbdGroup>
+              <Kbd>Ctrl</Kbd>
+              <Kbd>K</Kbd>
+            </KbdGroup>
+          </button>
+        )}
 
         <div className="ml-auto flex items-center gap-2">
           {isAdmin ? (
-            <Button variant="ghost" size="icon" className="relative rounded-full" asChild>
-              <Link to="/moderation" aria-label="Moderación" title="Moderación">
-                <Shield className="size-[1.2rem]" />
-                {totalPending > 0 && (
-                  <span className="bg-foreground text-background ring-background absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[8px] font-bold ring-2">
-                    {totalPending > 9 ? "9+" : totalPending}
-                  </span>
-                )}
-              </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full"
+              render={<Link to="/moderation" aria-label="Moderación" title="Moderación" />}
+            >
+              <Shield className="size-[1.2rem]" />
+              {totalPending > 0 && (
+                <span className="bg-foreground text-background ring-background absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[8px] font-bold ring-2">
+                  {totalPending > 9 ? "9+" : totalPending}
+                </span>
+              )}
             </Button>
           ) : null}
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Notificaciones"
-                title="Notificaciones"
-                className="relative rounded-full"
-              >
-                <Bell className="size-[1.2rem]" />
-                {unreadCount > 0 && (
-                  <span className="bg-destructive ring-background absolute top-1 right-1 flex size-2 rounded-full ring-2" />
-                )}
-              </Button>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Notificaciones"
+                  title="Notificaciones"
+                  className="relative rounded-full"
+                />
+              }
+            >
+              <Bell className="size-[1.2rem]" />
+              {unreadCount > 0 && (
+                <span className="bg-destructive ring-background absolute top-1 right-1 flex size-2 rounded-full ring-2" />
+              )}
             </PopoverTrigger>
             <PopoverContent align="end" className="w-80 p-0">
               <div className="flex items-center justify-between border-b px-4 py-3">
@@ -279,10 +296,11 @@ export function SiteHeader() {
                 ) : (
                   <div className="flex flex-col">
                     {notificationsQuery.data?.map((n) => (
-                      <div
+                      <button
                         key={n.id}
+                        type="button"
                         className={cn(
-                          "hover:bg-muted/50 flex cursor-pointer flex-col gap-1 border-b px-4 py-3 text-sm transition-colors",
+                          "hover:bg-muted/50 focus-visible:bg-muted/50 flex cursor-pointer flex-col gap-1 border-b px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none",
                           !n.is_read && "bg-muted/30",
                         )}
                         onClick={() => {
@@ -299,7 +317,7 @@ export function SiteHeader() {
                         <span className="text-muted-foreground text-[10px]">
                           {new Date(n.created_at).toLocaleString()}
                         </span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -321,11 +339,11 @@ export function SiteHeader() {
             variant="ghost"
             size="icon"
             className="hidden rounded-full sm:inline-flex"
-            asChild
+            render={
+              <Link to="/settings/appearance" aria-label="Configuración" title="Configuración" />
+            }
           >
-            <Link to="/settings/appearance" aria-label="Configuración" title="Configuración">
-              <Settings className="size-[1.2rem]" />
-            </Link>
+            <Settings className="size-[1.2rem]" />
           </Button>
         </div>
       </div>

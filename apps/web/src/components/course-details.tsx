@@ -17,9 +17,10 @@ import {
   MoreVertical,
   User,
   Users,
+  ChevronsUpDownIcon,
+  SearchIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import type {
   AcademicTerm,
@@ -82,6 +83,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -269,16 +271,18 @@ function TimelineItem({
             <span className="text-muted-foreground text-xs">{date.toLocaleDateString()}</span>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="-my-1 size-7 shrink-0"
-                aria-label="Opciones de intento"
-              >
-                <MoreVertical className="size-3.5" />
-              </Button>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="-my-1 size-7 shrink-0"
+                  aria-label="Opciones de intento"
+                />
+              }
+            >
+              <MoreVertical className="size-3.5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(attempt)}>
@@ -416,14 +420,17 @@ function ScheduleGroupCard({
         </div>
 
         {group.campusName && (
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Badge
-                variant="outline"
-                className="bg-muted text-muted-foreground h-5 cursor-help px-1.5 text-[10px]"
-              >
-                {getCampusCodeFromName(group.campusName) || group.campusName}
-              </Badge>
+          <Tooltip>
+            <TooltipTrigger
+              delay={300}
+              render={
+                <Badge
+                  variant="outline"
+                  className="bg-muted text-muted-foreground h-5 cursor-help px-1.5 text-[10px]"
+                />
+              }
+            >
+              {getCampusCodeFromName(group.campusName) || group.campusName}
             </TooltipTrigger>
             <TooltipContent>{group.campusName}</TooltipContent>
           </Tooltip>
@@ -1020,15 +1027,30 @@ export function CourseDetails({
             }
           >
             <span
-              className={`block min-w-0 flex-1 truncate text-left ${!selectedAttemptCourse ? "text-muted-foreground" : ""}`}
+              className={cn(
+                "block min-w-0 flex-1 truncate text-left",
+                !selectedAttemptCourse && "text-muted-foreground",
+              )}
             >
               {selectedAttemptCourse
                 ? formatCourseLabel(selectedAttemptCourse)
                 : "Selecciona un curso"}
             </span>
+            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
-          <ComboboxContent anchor={attemptCourseTriggerRef} container={comboboxPortalContainerRef}>
-            <ComboboxInput showTrigger={false} placeholder="Buscar curso..." />
+          <ComboboxContent
+            anchor={attemptCourseTriggerRef}
+            container={comboboxPortalContainerRef}
+            aria-label="Curso a registrar"
+          >
+            <div className="border-b p-2">
+              <ComboboxInput
+                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                placeholder="Buscar curso..."
+                showTrigger={false}
+                startAddon={<SearchIcon />}
+              />
+            </div>
             <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
             <ComboboxList className="max-h-56 scrollbar-none">
               {(target) => (
@@ -1056,7 +1078,10 @@ export function CourseDetails({
             }
           >
             <span
-              className={`block min-w-0 flex-1 truncate text-left ${!selectedQuickTerm ? "text-muted-foreground" : ""}`}
+              className={cn(
+                "block min-w-0 flex-1 truncate text-left",
+                !selectedQuickTerm && "text-muted-foreground",
+              )}
             >
               {selectedQuickTerm
                 ? formatClosedTermLabel(selectedQuickTerm)
@@ -1064,22 +1089,31 @@ export function CourseDetails({
                   ? "Cargando..."
                   : "Selecciona un periodo"}
             </span>
+            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
           <ComboboxContent
             anchor={progressTermTriggerRef}
             container={comboboxPortalContainerRef}
+            aria-label="Período"
             className="w-72"
           >
-            <ComboboxInput showTrigger={false} placeholder="Buscar período..." />
+            <div className="border-b p-2">
+              <ComboboxInput
+                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                placeholder="Buscar período..."
+                showTrigger={false}
+                startAddon={<SearchIcon />}
+              />
+            </div>
             <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
             <ComboboxList className="max-h-56 scrollbar-none">
               {(group, index) => (
                 <ComboboxGroup key={group.value} items={group.items}>
-                  <ComboboxLabel>{group.value}</ComboboxLabel>
+                  <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
                   <ComboboxCollection>
                     {(term) => (
                       <ComboboxItem key={term.id} value={term}>
-                        <span className="block min-w-0 flex-1 truncate">
+                        <span className="block min-w-0 flex-1 truncate text-xs">
                           {formatTermNameWithoutYear(term.display_name)}
                         </span>
                       </ComboboxItem>
@@ -1429,7 +1463,10 @@ export function CourseDetails({
                 render={<Button variant="outline" className="w-[200px] justify-between sm:w-64" />}
               >
                 <span
-                  className={`block min-w-0 flex-1 truncate text-left ${!selectedOfferingTerm ? "text-muted-foreground" : ""}`}
+                  className={cn(
+                    "block min-w-0 flex-1 truncate text-left",
+                    !selectedOfferingTerm && "text-muted-foreground",
+                  )}
                 >
                   {selectedOfferingTerm
                     ? formatClosedTermLabel(selectedOfferingTerm)
@@ -1437,18 +1474,29 @@ export function CourseDetails({
                       ? "Cargando periodos..."
                       : "Selecciona un periodo"}
                 </span>
+                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
               </ComboboxTrigger>
-              <ComboboxContent className="w-(--anchor-width) min-w-(--anchor-width)">
-                <ComboboxInput showTrigger={false} placeholder="Buscar periodo..." />
-                <ComboboxEmpty>No se encontraron periodos.</ComboboxEmpty>
+              <ComboboxContent
+                aria-label="Período de horarios"
+                className="w-(--anchor-width) min-w-(--anchor-width)"
+              >
+                <div className="border-b p-2">
+                  <ComboboxInput
+                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                    placeholder="Buscar período..."
+                    showTrigger={false}
+                    startAddon={<SearchIcon />}
+                  />
+                </div>
+                <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
                 <ComboboxList className="max-h-56 scrollbar-none">
                   {(group, index) => (
                     <ComboboxGroup key={group.value} items={group.items}>
-                      <ComboboxLabel>{group.value}</ComboboxLabel>
+                      <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
                       <ComboboxCollection>
                         {(term) => (
                           <ComboboxItem key={term.id} value={term}>
-                            <span className="block min-w-0 flex-1 truncate">
+                            <span className="block min-w-0 flex-1 truncate text-xs">
                               {formatTermNameWithoutYear(term.display_name)}
                             </span>
                           </ComboboxItem>
@@ -1630,25 +1678,37 @@ export function CourseDetails({
                     }
                   >
                     <span
-                      className={`block min-w-0 flex-1 truncate text-left ${!editAttemptCourseId ? "text-muted-foreground" : ""}`}
+                      className={cn(
+                        "block min-w-0 flex-1 truncate text-left",
+                        !editAttemptCourseId && "text-muted-foreground",
+                      )}
                     >
                       {attemptCourseOptions.find(
                         (option) => String(option.id) === editAttemptCourseId,
                       )?.name ?? "Selecciona el curso equivalente"}
                     </span>
+                    <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
                   </ComboboxTrigger>
                   <ComboboxContent
                     anchor={editAttemptCourseTriggerRef}
                     container={comboboxPortalContainerRef}
+                    aria-label="Curso equivalente"
                     className="w-72"
                   >
-                    <ComboboxInput placeholder="Buscar curso..." />
+                    <div className="border-b p-2">
+                      <ComboboxInput
+                        className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                        placeholder="Buscar curso..."
+                        showTrigger={false}
+                        startAddon={<SearchIcon />}
+                      />
+                    </div>
                     <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
                     <ComboboxList className="max-h-56 scrollbar-none">
                       <ComboboxCollection>
                         {(course) => (
                           <ComboboxItem key={course.id} value={course}>
-                            <span className="block min-w-0 flex-1 truncate">
+                            <span className="block min-w-0 flex-1 truncate text-xs">
                               {course.code} - {course.name}
                             </span>
                           </ComboboxItem>
@@ -1681,7 +1741,10 @@ export function CourseDetails({
                   }
                 >
                   <span
-                    className={`block min-w-0 flex-1 truncate text-left ${!selectedEditTerm ? "text-muted-foreground" : ""}`}
+                    className={cn(
+                      "block min-w-0 flex-1 truncate text-left",
+                      !selectedEditTerm && "text-muted-foreground",
+                    )}
                   >
                     {selectedEditTerm
                       ? formatClosedTermLabel(selectedEditTerm)
@@ -1689,13 +1752,22 @@ export function CourseDetails({
                         ? "Cargando..."
                         : "Selecciona un periodo"}
                   </span>
+                  <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
                 </ComboboxTrigger>
                 <ComboboxContent
                   anchor={editTermTriggerRef}
                   container={comboboxPortalContainerRef}
+                  aria-label="Período"
                   className="w-72"
                 >
-                  <ComboboxInput showTrigger={false} placeholder="Buscar período..." />
+                  <div className="border-b p-2">
+                    <ComboboxInput
+                      className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                      placeholder="Buscar período..."
+                      showTrigger={false}
+                      startAddon={<SearchIcon />}
+                    />
+                  </div>
                   <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
                   <ComboboxList className="max-h-56 scrollbar-none">
                     {(group, index) => (

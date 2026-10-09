@@ -9,6 +9,7 @@ interface FiltersPanelProps {
   onExpandedChange: (open: boolean) => void;
   children: ReactNode;
   className?: string;
+  variant?: "card" | "plain";
 }
 
 export function FiltersPanel({
@@ -16,6 +17,7 @@ export function FiltersPanel({
   onExpandedChange,
   children,
   className,
+  variant = "card",
 }: FiltersPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -41,40 +43,52 @@ export function FiltersPanel({
     return () => window.removeEventListener("resize", checkScroll);
   }, [children]);
 
+  const isPlain = variant === "plain";
+
   return (
     <div className={cn("relative", className)}>
       {/* Desktop: horizontal scrollable bar with gradients */}
-      <div className="bg-muted/30 group relative hidden min-h-12 items-center overflow-hidden rounded-lg md:flex">
+      <div
+        className={cn(
+          "group relative hidden min-h-10 items-center overflow-hidden md:flex",
+          isPlain ? "" : "bg-muted/30 min-h-12 rounded-lg",
+        )}
+      >
         {canScrollLeft && (
-          <div className="from-background absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-start bg-gradient-to-r to-transparent pl-1">
+          <div className="from-background pointer-events-none absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-start bg-gradient-to-r to-transparent pl-1">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="icon"
-              className="size-6 rounded-full opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              className="border-border/80 bg-background text-foreground hover:bg-muted pointer-events-auto size-7 shrink-0 rounded-full border opacity-90 shadow-md transition-all hover:opacity-100 focus-visible:opacity-100"
               onClick={() => scrollByAmount(-200)}
+              aria-label="Desplazar filtros a la izquierda"
             >
-              <ChevronLeft className="size-3" />
+              <ChevronLeft className="size-3.5" />
             </Button>
           </div>
         )}
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex w-full scrollbar-none items-center gap-2.5 overflow-x-auto px-3 py-2 [&>*]:shrink-0"
+          className={cn(
+            "flex w-full scrollbar-none items-center gap-2.5 overflow-x-auto [&>*]:shrink-0",
+            isPlain ? "px-0.5 py-1" : "px-3 py-2",
+          )}
         >
           {children}
         </div>
         {canScrollRight && (
-          <div className="from-background absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-end bg-gradient-to-l to-transparent pr-1">
+          <div className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-end bg-gradient-to-l to-transparent pr-1">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="icon"
-              className="size-6 rounded-full opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              className="border-border/80 bg-background text-foreground hover:bg-muted pointer-events-auto size-7 shrink-0 rounded-full border opacity-90 shadow-md transition-all hover:opacity-100 focus-visible:opacity-100"
               onClick={() => scrollByAmount(200)}
+              aria-label="Desplazar filtros a la derecha"
             >
-              <ChevronRight className="size-3" />
+              <ChevronRight className="size-3.5" />
             </Button>
           </div>
         )}
@@ -82,7 +96,12 @@ export function FiltersPanel({
 
       {/* Mobile: collapsible */}
       <div className="md:hidden">
-        <div className="bg-muted/30 flex items-center justify-between gap-2 rounded-lg px-3 py-2">
+        <div
+          className={cn(
+            "flex items-center justify-between gap-2",
+            isPlain ? "py-1.5" : "bg-muted/30 rounded-lg px-3 py-2",
+          )}
+        >
           <div className="text-muted-foreground flex items-center gap-2">
             <SlidersHorizontal className="size-4" />
             <span className="text-sm font-medium">Filtros</span>
@@ -100,7 +119,9 @@ export function FiltersPanel({
 
         {isExpanded && (
           <div className="pt-2">
-            <div className="bg-muted/30 space-y-2.5 rounded-lg p-3">{children}</div>
+            <div className={cn("space-y-2.5", isPlain ? "" : "bg-muted/30 rounded-lg p-3")}>
+              {children}
+            </div>
           </div>
         )}
       </div>

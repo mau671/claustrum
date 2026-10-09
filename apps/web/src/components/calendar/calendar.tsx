@@ -17,6 +17,7 @@ export default function Calendar({
   dayWidth,
   setDayWidth,
   exportTheme,
+  cornerAction,
 }: CalendarProps) {
   return (
     <CalendarProvider
@@ -33,6 +34,7 @@ export default function Calendar({
       dayWidth={dayWidth}
       setDayWidth={setDayWidth}
       exportTheme={exportTheme}
+      cornerAction={cornerAction}
     >
       <CalendarBody />
     </CalendarProvider>

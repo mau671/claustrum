@@ -55,99 +55,101 @@ const CalendarEvent = memo(function CalendarEvent({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div
-          className={cn(
-            "group relative cursor-pointer rounded-md border px-1 py-0.5 transition-all duration-200 sm:px-2 sm:py-1",
-            colorClasses.bg,
-            colorClasses.hover,
-            colorClasses.border,
-            !month && "absolute overflow-hidden",
-            className,
-          )}
-          data-schedule-event-color={event.color}
-          style={style}
-        >
-          {!month && onRemoveEvent && (
-            <button
-              type="button"
-              className={cn(
-                "absolute top-1 right-1 z-10 flex cursor-pointer items-center justify-center rounded-sm p-0.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10",
-                colorClasses.text,
-              )}
-              onClick={(eventClick) => {
-                eventClick.stopPropagation();
-                onRemoveEvent(event);
-              }}
-              aria-label="Quitar grupo"
-            >
-              <X className="size-3.5" />
-            </button>
-          )}
-
-          <div className={cn("flex w-full flex-col gap-0.5", colorClasses.text)}>
-            <p
-              className={cn(
-                "line-clamp-2 pr-5 text-[11px] leading-tight font-semibold sm:text-[13px]",
-                isCompact && "text-[9px] sm:text-[10px]",
-              )}
-            >
-              {event.courseName}
-            </p>
-
-            {!isCompact && showClassroom && (
-              <div className="flex items-center gap-2 text-[10px] opacity-90 sm:text-xs">
-                <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
-                  <MapPin className="size-3 sm:size-4" />
-                </span>
-                <span className="leading-tight">{classroomLabel}</span>
-              </div>
+      <TooltipTrigger
+        render={
+          <div
+            className={cn(
+              "group relative cursor-pointer rounded-md border px-1 py-0.5 transition-all duration-200 sm:px-2 sm:py-1",
+              colorClasses.bg,
+              colorClasses.hover,
+              colorClasses.border,
+              !month && "absolute overflow-hidden",
+              className,
             )}
-            {!isCompact && (
-              <div className="flex items-center gap-2 text-[10px] opacity-85 sm:text-xs">
-                <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
-                  <Layers className="size-3 sm:size-4" />
-                </span>
-                <span className="leading-tight">{modalityLabel}</span>
-              </div>
+            data-schedule-event-color={event.color}
+            style={style}
+          />
+        }
+      >
+        {!month && onRemoveEvent && (
+          <button
+            type="button"
+            className={cn(
+              "absolute top-1 right-1 z-10 flex cursor-pointer items-center justify-center rounded-sm p-0.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10",
+              colorClasses.text,
             )}
-            <div
-              className={cn(
-                "flex items-center gap-2 text-[10px] opacity-85 sm:text-xs",
-                isCompact && "hidden",
-              )}
-            >
+            onClick={(eventClick) => {
+              eventClick.stopPropagation();
+              onRemoveEvent(event);
+            }}
+            aria-label="Quitar grupo"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
+
+        <div className={cn("flex w-full flex-col gap-0.5", colorClasses.text)}>
+          <p
+            className={cn(
+              "line-clamp-2 pr-5 text-[11px] leading-tight font-semibold sm:text-[13px]",
+              isCompact && "text-[9px] sm:text-[10px]",
+            )}
+          >
+            {event.courseName}
+          </p>
+
+          {!isCompact && showClassroom && (
+            <div className="flex items-center gap-2 text-[10px] opacity-90 sm:text-xs">
               <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
-                <User className="size-3 sm:size-4" />
+                <MapPin className="size-3 sm:size-4" />
               </span>
-              <div className="flex min-w-0 flex-1 flex-col justify-center">
-                {professorNames.map((name, i) => {
-                  const allowedLines = Math.max(
-                    1,
-                    Math.floor(professorLineCount / professorNames.length),
-                  );
-                  return (
-                    <span
-                      key={`${name}-${i}`}
-                      className={cn(
-                        "min-w-0 leading-tight",
-                        allowedLines === 1 && "truncate whitespace-nowrap",
-                        allowedLines === 2 && "line-clamp-2 break-words whitespace-normal",
-                        allowedLines >= 3 && "line-clamp-3 break-words whitespace-normal",
-                      )}
-                    >
-                      {name}
-                    </span>
-                  );
-                })}
-              </div>
+              <span className="leading-tight">{classroomLabel}</span>
             </div>
-            {isCompact && (
-              <p className="text-[9px] opacity-80 sm:text-[10px]">
-                {format(event.start, "h:mm a", { locale: es })}
-              </p>
+          )}
+          {!isCompact && (
+            <div className="flex items-center gap-2 text-[10px] opacity-85 sm:text-xs">
+              <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
+                <Layers className="size-3 sm:size-4" />
+              </span>
+              <span className="leading-tight">{modalityLabel}</span>
+            </div>
+          )}
+          <div
+            className={cn(
+              "flex items-center gap-2 text-[10px] opacity-85 sm:text-xs",
+              isCompact && "hidden",
             )}
+          >
+            <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
+              <User className="size-3 sm:size-4" />
+            </span>
+            <div className="flex min-w-0 flex-1 flex-col justify-center">
+              {professorNames.map((name, i) => {
+                const allowedLines = Math.max(
+                  1,
+                  Math.floor(professorLineCount / professorNames.length),
+                );
+                return (
+                  <span
+                    key={`${name}-${i}`}
+                    className={cn(
+                      "min-w-0 leading-tight",
+                      allowedLines === 1 && "truncate whitespace-nowrap",
+                      allowedLines === 2 && "line-clamp-2 break-words whitespace-normal",
+                      allowedLines >= 3 && "line-clamp-3 break-words whitespace-normal",
+                    )}
+                  >
+                    {name}
+                  </span>
+                );
+              })}
+            </div>
           </div>
+          {isCompact && (
+            <p className="text-[9px] opacity-80 sm:text-[10px]">
+              {format(event.start, "h:mm a", { locale: es })}
+            </p>
+          )}
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-xs text-wrap">

@@ -1,3 +1,4 @@
+import { ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import type {
@@ -62,6 +63,7 @@ interface ScheduleFiltersProps {
   onShowOtherCampusesChange?: (checked: boolean) => void;
   isVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
+  className?: string;
 }
 
 import {
@@ -99,6 +101,7 @@ export function ScheduleFilters({
   onShowOtherCampusesChange,
   isVisible = true,
   onVisibleChange,
+  className,
 }: ScheduleFiltersProps) {
   const hasUniversities = universities.length > 0;
   const shouldShowUniversityFilter = universities.length > 1;
@@ -167,7 +170,8 @@ export function ScheduleFilters({
     <FiltersPanel
       isExpanded={isVisible}
       onExpandedChange={onVisibleChange ?? (() => {})}
-      className="w-full"
+      variant="plain"
+      className={cn("w-full", className)}
     >
       <FilterCombobox
         label="Universidad"
@@ -235,7 +239,7 @@ export function ScheduleFilters({
             <Button
               variant="outline"
               disabled
-              className="text-muted-foreground h-8 w-full min-w-0 justify-between text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
+              className="text-muted-foreground h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
             >
               <span className="block min-w-0 flex-1 truncate text-left">Sin oferta disponible</span>
             </Button>
@@ -250,27 +254,41 @@ export function ScheduleFilters({
                 render={
                   <Button
                     variant="outline"
-                    className="h-8 w-full min-w-0 justify-between text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
+                    className="h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
                   />
                 }
               >
                 <span
-                  className={`block min-w-0 flex-1 truncate text-left ${!selectedTerm ? "text-muted-foreground" : ""}`}
+                  className={cn(
+                    "block min-w-0 flex-1 truncate text-left",
+                    !selectedTerm && "text-muted-foreground",
+                  )}
                 >
                   {selectedTerm ? formatClosedTermLabel(selectedTerm) : "Período académico"}
                 </span>
+                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
               </ComboboxTrigger>
-              <ComboboxContent className="w-(--anchor-width) min-w-(--anchor-width)">
-                <ComboboxInput showTrigger={false} placeholder="Buscar período" />
+              <ComboboxContent
+                aria-label="Período académico"
+                className="w-(--anchor-width) min-w-(--anchor-width)"
+              >
+                <div className="border-b p-2">
+                  <ComboboxInput
+                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                    placeholder="Buscar período..."
+                    showTrigger={false}
+                    startAddon={<SearchIcon />}
+                  />
+                </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                 <ComboboxList className="max-h-56 scrollbar-none">
                   {(group, index) => (
                     <ComboboxGroup key={group.value} items={group.items}>
-                      <ComboboxLabel>{group.value}</ComboboxLabel>
+                      <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
                       <ComboboxCollection>
                         {(term) => (
                           <ComboboxItem key={term.id} value={term}>
-                            <span className="block w-full min-w-0 truncate">
+                            <span className="block w-full min-w-0 truncate text-xs">
                               {formatTermNameWithoutYear(term.display_name)}
                             </span>
                           </ComboboxItem>
@@ -297,9 +315,7 @@ export function ScheduleFilters({
             {onShowAllChange !== undefined &&
               (isShowAllDisabled && showAllDisabledTooltip ? (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>{showAllControl}</div>
-                  </TooltipTrigger>
+                  <TooltipTrigger render={<div />}>{showAllControl}</TooltipTrigger>
                   <TooltipContent side="top">
                     <p>{showAllDisabledTooltip}</p>
                   </TooltipContent>

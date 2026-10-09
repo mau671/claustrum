@@ -1,5 +1,5 @@
 import { ImageDown } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -55,11 +55,21 @@ const formatOptions: Array<{
 
 interface ScheduleExportDialogProps {
   onExport: (options: ScheduleExportOptions) => Promise<void> | void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: ReactElement | null;
 }
 
-export function ScheduleExportDialog({ onExport }: ScheduleExportDialogProps) {
+export function ScheduleExportDialog({
+  onExport,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  trigger,
+}: ScheduleExportDialogProps) {
   const [format, setFormat] = useState<ScheduleExportFormat>("png");
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = controlledOnOpenChange ?? setInternalOpen;
   const [isExporting, setIsExporting] = useState(false);
   const isMobile = useIsMobile();
 
@@ -118,14 +128,17 @@ export function ScheduleExportDialog({ onExport }: ScheduleExportDialogProps) {
   if (isMobile) {
     return (
       <>
-        <Button
-          variant="outline"
-          size="icon"
-          title="Exportar calendario"
-          onClick={() => setIsOpen(true)}
-        >
-          <ImageDown className="size-4" />
-        </Button>
+        {trigger !== null &&
+          (trigger ?? (
+            <Button
+              variant="outline"
+              size="icon"
+              title="Exportar calendario"
+              onClick={() => setIsOpen(true)}
+            >
+              <ImageDown className="size-4" />
+            </Button>
+          ))}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent
             side="bottom"
@@ -153,11 +166,16 @@ export function ScheduleExportDialog({ onExport }: ScheduleExportDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" title="Exportar calendario">
-          <ImageDown className="size-4" />
-        </Button>
-      </DialogTrigger>
+      {trigger !== null &&
+        (trigger ? (
+          <DialogTrigger render={trigger} />
+        ) : (
+          <DialogTrigger
+            render={<Button variant="outline" size="icon" title="Exportar calendario" />}
+          >
+            <ImageDown className="size-4" />
+          </DialogTrigger>
+        ))}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Exportar calendario</DialogTitle>

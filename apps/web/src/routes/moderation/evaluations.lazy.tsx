@@ -1,9 +1,9 @@
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 
 import type { EvaluationModerationRow } from "@/lib/evaluations/types";
 
+import { toast } from "@/components/ui/toast";
 import { useEvaluationModerationQueue, useModerateEvaluation } from "@/lib/hooks/use-evaluations";
 
 import { EvaluationSection } from "./-moderation-components";

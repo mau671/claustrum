@@ -15,30 +15,37 @@ export function HeroSection({ starCount }: { starCount: number | null }) {
           curricular, evaluaciones de cursos y reseñas de profesores. Sin anuncios. Sin fricción.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Button asChild>
-            <a
-              href="/overview"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 sm:w-auto"
-            >
-              Probar la app <ArrowRight className="size-[15px]" />
-            </a>
+          <Button
+            render={
+              <a
+                href="/overview"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Probar la app"
+                className="inline-flex w-full items-center justify-center gap-2 sm:w-auto"
+              />
+            }
+          >
+            Probar la app <ArrowRight className="size-[15px]" />
           </Button>
-          <Button variant="outline" asChild>
-            <a
-              href="https://github.com/mau671/claustrum"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 sm:w-auto"
-            >
-              <GitHubIcon className="size-[15px]" />
-              <span>Ver código fuente</span>
-              <span className="bg-muted ml-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]">
-                <StarIcon className="size-2.5" />
-                <span className="leading-none">{starCount ?? "-"}</span>
-              </span>
-            </a>
+          <Button
+            variant="outline"
+            render={
+              <a
+                href="https://github.com/mau671/claustrum"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Ver código fuente en GitHub"
+                className="inline-flex w-full items-center justify-center gap-2 sm:w-auto"
+              />
+            }
+          >
+            <GitHubIcon className="size-[15px]" />
+            <span>Ver código fuente</span>
+            <span className="bg-muted ml-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]">
+              <StarIcon className="size-2.5" />
+              <span className="leading-none">{starCount ?? "-"}</span>
+            </span>
           </Button>
         </div>
       </div>

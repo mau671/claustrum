@@ -84,9 +84,9 @@ export function CurriculumPage() {
   const isPendingFilters = isProfileLoading || isAutoSelectingPlan;
   const userStudyPlanUniversityId = userStudyPlan?.universityId ?? CURRICULUM_DEFAULT_UNIVERSITY_ID;
 
-  const campuses = campusesQuery.data ?? [];
-  const academicUnits = academicUnitsQuery.data ?? [];
-  const plans = plansQuery.data ?? [];
+  const campuses = useMemo(() => campusesQuery.data ?? [], [campusesQuery.data]);
+  const academicUnits = useMemo(() => academicUnitsQuery.data ?? [], [academicUnitsQuery.data]);
+  const plans = useMemo(() => plansQuery.data ?? [], [plansQuery.data]);
 
   const mainCampuses = useMemo(
     () => campuses.filter((c: CatalogCampus) => MAIN_CAMPUS_CODES.has(c.code)),
@@ -189,7 +189,16 @@ export function CurriculumPage() {
       selectedPlanId === (userStudyPlan.studyPlanId ?? null);
 
     setIsUsingProfileDefaults(matchesProfile);
-  }, [search, userStudyPlan, selectedUniversityId, userStudyPlanUniversityId, hasMeaningfulSearch]);
+  }, [
+    search,
+    userStudyPlan,
+    selectedUniversityId,
+    userStudyPlanUniversityId,
+    hasMeaningfulSearch,
+    selectedCampusId,
+    selectedAcademicUnitId,
+    selectedPlanId,
+  ]);
 
   const handleUniversityChange = useCallback(
     (id: number | null) => {
@@ -446,19 +455,21 @@ export function CurriculumPage() {
               )}
               {!authUser && (
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant={isUsingProfileDefaults ? "secondary" : "outline"}
-                      size="sm"
-                      onClick={handleSaveLocalPlan}
-                      onPointerDown={(e) => e.preventDefault()}
-                      disabled={isUsingProfileDefaults}
-                      className="h-8 shrink-0 gap-1.5 text-xs"
-                    >
-                      <Save className="size-3.5" />
-                      {isUsingProfileDefaults ? "Guardado" : "Guardar"}
-                    </Button>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant={isUsingProfileDefaults ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={handleSaveLocalPlan}
+                        onPointerDown={(e) => e.preventDefault()}
+                        disabled={isUsingProfileDefaults}
+                        className="h-8 shrink-0 gap-1.5 text-xs"
+                      />
+                    }
+                  >
+                    <Save className="size-3.5" />
+                    {isUsingProfileDefaults ? "Guardado" : "Guardar"}
                   </TooltipTrigger>
                   <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
                 </Tooltip>

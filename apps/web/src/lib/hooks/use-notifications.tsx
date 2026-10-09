@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useEffect } from "react";
-import { toast } from "sonner";
 
+import { toast } from "@/components/ui/toast";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 export interface NotificationRow {

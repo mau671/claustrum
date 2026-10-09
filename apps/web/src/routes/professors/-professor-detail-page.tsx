@@ -3,7 +3,6 @@ import { useNavigate, useParams, useRouter, getRouteApi } from "@tanstack/react-
 const routeApi = getRouteApi("/professors/$professorId");
 import { ArrowLeft, PenLine, Plus } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types";
@@ -12,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getTurnstileSiteKey } from "@/lib/env/public";
 import {

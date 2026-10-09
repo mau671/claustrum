@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { toast } from "sonner";
 
 import type { Course, CourseStatus } from "@/lib/types";
 
@@ -38,6 +37,7 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
+import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   formatTermNameWithoutYear,
@@ -317,15 +317,30 @@ export function QuickRegisterDialog({
             }
           >
             <span
-              className={`block min-w-0 flex-1 truncate text-left ${!selectedAttemptCourse ? "text-muted-foreground" : ""}`}
+              className={cn(
+                "block min-w-0 flex-1 truncate text-left",
+                !selectedAttemptCourse && "text-muted-foreground",
+              )}
             >
               {selectedAttemptCourse
                 ? formatCourseLabel(selectedAttemptCourse)
                 : "Selecciona un curso"}
             </span>
+            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
-          <ComboboxContent anchor={attemptCourseTriggerRef} container={comboboxPortalContainerRef}>
-            <ComboboxInput showTrigger={false} placeholder="Buscar curso..." />
+          <ComboboxContent
+            anchor={attemptCourseTriggerRef}
+            container={comboboxPortalContainerRef}
+            aria-label="Curso"
+          >
+            <div className="border-b p-2">
+              <ComboboxInput
+                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                placeholder="Buscar curso..."
+                showTrigger={false}
+                startAddon={<SearchIcon />}
+              />
+            </div>
             <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
             <ComboboxList className="max-h-56 scrollbar-none">
               {(target) => (
@@ -353,7 +368,10 @@ export function QuickRegisterDialog({
             }
           >
             <span
-              className={`block min-w-0 flex-1 truncate text-left ${!selectedQuickTerm ? "text-muted-foreground" : ""}`}
+              className={cn(
+                "block min-w-0 flex-1 truncate text-left",
+                !selectedQuickTerm && "text-muted-foreground",
+              )}
             >
               {selectedQuickTerm
                 ? formatClosedTermLabel(selectedQuickTerm)
@@ -361,22 +379,31 @@ export function QuickRegisterDialog({
                   ? "Cargando..."
                   : "Selecciona un periodo"}
             </span>
+            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
           <ComboboxContent
             anchor={progressTermTriggerRef}
             container={comboboxPortalContainerRef}
+            aria-label="Período"
             className="w-72"
           >
-            <ComboboxInput showTrigger={false} placeholder="Buscar período..." />
+            <div className="border-b p-2">
+              <ComboboxInput
+                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                placeholder="Buscar período..."
+                showTrigger={false}
+                startAddon={<SearchIcon />}
+              />
+            </div>
             <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
             <ComboboxList className="max-h-56 scrollbar-none">
               {(group, index) => (
                 <ComboboxGroup key={group.value} items={group.items}>
-                  <ComboboxLabel>{group.value}</ComboboxLabel>
+                  <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
                   <ComboboxCollection>
                     {(term) => (
                       <ComboboxItem key={term.id} value={term}>
-                        <span className="block min-w-0 flex-1 truncate">
+                        <span className="block min-w-0 flex-1 truncate text-xs">
                           {formatTermNameWithoutYear(term.display_name)}
                         </span>
                       </ComboboxItem>

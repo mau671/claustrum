@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
@@ -163,10 +163,10 @@ export function InsetOnboardingPage() {
               </div>
               <div className="flex gap-2">
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="sm" onClick={skipForNow}>
-                      Configurar más tarde
-                    </Button>
+                  <TooltipTrigger
+                    render={<Button variant="ghost" size="sm" onClick={skipForNow} />}
+                  >
+                    Configurar más tarde
                   </TooltipTrigger>
                   <TooltipContent>Se te volverá a preguntar en 24 horas</TooltipContent>
                 </Tooltip>
@@ -215,7 +215,10 @@ export function InsetOnboardingPage() {
                       }
                     >
                       <span
-                        className={`block min-w-0 flex-1 truncate text-left ${!campusId ? "text-muted-foreground" : ""}`}
+                        className={cn(
+                          "block min-w-0 flex-1 truncate text-left",
+                          !campusId && "text-muted-foreground",
+                        )}
                       >
                         {(() => {
                           const item = (campuses.data ?? []).find((c) => String(c.id) === campusId);
@@ -223,12 +226,21 @@ export function InsetOnboardingPage() {
                           return item.code ? `${item.code}: ${item.name}` : item.name;
                         })()}
                       </span>
+                      <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
                     </ComboboxTrigger>
                     <ComboboxContent
                       anchor={campusTriggerRef}
+                      aria-label="Sede"
                       className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
                     >
-                      <ComboboxInput showTrigger={false} placeholder="Buscar sede" />
+                      <div className="border-b p-2">
+                        <ComboboxInput
+                          className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                          placeholder="Buscar sede..."
+                          showTrigger={false}
+                          startAddon={<SearchIcon />}
+                        />
+                      </div>
                       <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                       <ComboboxList className="max-h-56 scrollbar-none">
                         {(item) => (
@@ -278,7 +290,10 @@ export function InsetOnboardingPage() {
                       }
                     >
                       <span
-                        className={`block min-w-0 flex-1 truncate text-left ${!academicUnitId ? "text-muted-foreground" : ""}`}
+                        className={cn(
+                          "block min-w-0 flex-1 truncate text-left",
+                          !academicUnitId && "text-muted-foreground",
+                        )}
                       >
                         {(() => {
                           const item = (academicUnits.data ?? []).find(
@@ -288,12 +303,21 @@ export function InsetOnboardingPage() {
                           return item.code ? `${item.code}: ${item.name}` : item.name;
                         })()}
                       </span>
+                      <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
                     </ComboboxTrigger>
                     <ComboboxContent
                       anchor={academicUnitTriggerRef}
+                      aria-label="Carrera"
                       className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
                     >
-                      <ComboboxInput showTrigger={false} placeholder="Buscar carrera" />
+                      <div className="border-b p-2">
+                        <ComboboxInput
+                          className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                          placeholder="Buscar carrera..."
+                          showTrigger={false}
+                          startAddon={<SearchIcon />}
+                        />
+                      </div>
                       <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                       <ComboboxList className="max-h-56 scrollbar-none">
                         {(item) => (
@@ -342,7 +366,10 @@ export function InsetOnboardingPage() {
                       }
                     >
                       <span
-                        className={`block min-w-0 flex-1 truncate text-left ${!studyPlanId ? "text-muted-foreground" : ""}`}
+                        className={cn(
+                          "block min-w-0 flex-1 truncate text-left",
+                          !studyPlanId && "text-muted-foreground",
+                        )}
                       >
                         {(() => {
                           const item = (studyPlans.data ?? []).find(
@@ -354,12 +381,21 @@ export function InsetOnboardingPage() {
                             : item.name;
                         })()}
                       </span>
+                      <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
                     </ComboboxTrigger>
                     <ComboboxContent
                       anchor={studyPlanTriggerRef}
+                      aria-label="Plan de estudios"
                       className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
                     >
-                      <ComboboxInput showTrigger={false} placeholder="Buscar plan" />
+                      <div className="border-b p-2">
+                        <ComboboxInput
+                          className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                          placeholder="Buscar plan..."
+                          showTrigger={false}
+                          startAddon={<SearchIcon />}
+                        />
+                      </div>
                       <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                       <ComboboxList className="max-h-56 scrollbar-none">
                         {(item) => (

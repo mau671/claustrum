@@ -1,13 +1,14 @@
-import { User, Clock, MapPin, Users, ChevronDown } from "lucide-react";
+import { User, Clock, Users, ChevronDown } from "lucide-react";
 import { useMemo, useCallback, memo, useEffect, useRef, useState } from "react";
 
 import type { ScheduleCourse, ScheduleGroup } from "@/lib/types";
 
 import { colorOptions } from "@/components/calendar/calendar-tailwind-classes";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardPanel } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Frame, FrameHeader, FrameTitle } from "@/components/ui/frame";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -54,10 +55,12 @@ const TruncatableText = ({ text }: { text: string }) => {
 
   return (
     <Tooltip open={isOpen && isTruncated} onOpenChange={setIsOpen}>
-      <TooltipTrigger asChild>
-        <div ref={textRef} className={cn("w-full truncate", isTruncated && "cursor-help")}>
-          {text}
-        </div>
+      <TooltipTrigger
+        render={
+          <div ref={textRef} className={cn("w-full truncate", isTruncated && "cursor-help")} />
+        }
+      >
+        {text}
       </TooltipTrigger>
       <TooltipContent side="top" align="start">
         {text}
@@ -186,7 +189,7 @@ function createGroupView(
 
   const classrooms = meetingViews.map((meeting) => meeting.classroom);
   const sharedClassroom =
-    meetings.length > 1 &&
+    meetings.length > 0 &&
     classrooms.every((classroom): classroom is string => classroom !== null) &&
     classrooms.every((classroom) => classroom === classrooms[0])
       ? classrooms[0]
@@ -430,9 +433,9 @@ export default function CourseList({
     <div className="flex h-full flex-col overflow-hidden">
       <div ref={scrollAreaRootRef} className="flex-1 overflow-hidden">
         <ScrollArea className="h-full w-full [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full">
-          <div className={cn("w-full", viewMode === "card" ? "space-y-4 p-4" : "")}>
+          <div className={cn("w-full", viewMode === "card" ? "space-y-3 p-1 pt-2" : "")}>
             {viewMode === "table" ? (
-              <div className="flex flex-col rounded-md border">
+              <div className="bg-card/40 flex flex-col overflow-hidden rounded-xl border">
                 {filteredViewData.map((courseData) => (
                   <CourseTableItem
                     key={courseData.course.offering_id}
@@ -494,48 +497,66 @@ const CourseCard = memo(function CourseCard({
   onGroupToggle: (courseCode: string, groupCode: string) => void;
 }) {
   const [hoveredGroupId, setHoveredGroupId] = useState<string | null>(null);
+  const selectedGroup = groupViews.find((g) => selectedGroupIds.has(g.groupId));
 
   return (
-    <Card
-      className="w-full max-w-full gap-2"
-      style={{ contentVisibility: "auto", containIntrinsicSize: "0 280px" }}
+    <Frame
+      className={cn(
+        "w-full max-w-full p-1.5 transition-all",
+        selectedGroup && "border-primary/40 ring-primary/20 ring-1",
+      )}
+      style={{ contentVisibility: "auto", containIntrinsicSize: "0 270px" }}
     >
-      <CardHeader className="gap-1 px-4">
-        <CardTitle className="text-base leading-tight">
-          <div className="flex items-start justify-between gap-2">
-            <span>
-              {course.course_code}: {course.course_name}
+      <FrameHeader className="flex flex-row items-baseline justify-between gap-2 px-3 pt-2 pb-1.5">
+        <div className="min-w-0 flex-1">
+          <FrameTitle className="leading-snug">
+            <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+              {course.course_code}:
             </span>
-            <span className="bg-muted text-muted-foreground mt-0.5 shrink-0 rounded-md px-1.5 py-0.5 text-xs leading-none font-normal">
-              {course.credits} créditos
-            </span>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="max-w-full px-4">
-        <ScrollArea className="w-full max-w-full">
-          <div className="flex snap-x snap-mandatory items-start gap-3 pt-1 pb-2">
-            {groupViews.map((groupView) => {
-              const isSelected = selectedGroupIds.has(groupView.groupId);
-              const disabled = disabledGroupIdSet.has(groupView.groupId);
-              const reasons = conflictReasonsByGroupId.get(groupView.groupId) ?? [];
+            <span className="text-foreground text-sm font-medium">{course.course_name}</span>
+            {selectedGroup && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "ml-2 inline-flex h-4.5 border px-1.5 align-middle text-[10px] font-medium",
+                  colorStyles.bg,
+                  colorStyles.border,
+                )}
+              >
+                GR {selectedGroup.group.group_code}
+              </Badge>
+            )}
+          </FrameTitle>
+        </div>
+        <Badge
+          variant="secondary"
+          className="text-muted-foreground shrink-0 py-0.5 text-xs font-normal tabular-nums"
+        >
+          {course.credits} cr.
+        </Badge>
+      </FrameHeader>
 
-              return (
-                <Tooltip
-                  key={groupView.groupId}
-                  open={disabled && hoveredGroupId === groupView.groupId}
-                >
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      disabled={disabled}
+      <div className="w-full max-w-full [scrollbar-width:none] scrollbar-none overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex snap-x snap-mandatory items-stretch gap-1.5">
+          {groupViews.map((groupView) => {
+            const isSelected = selectedGroupIds.has(groupView.groupId);
+            const disabled = disabledGroupIdSet.has(groupView.groupId);
+            const reasons = conflictReasonsByGroupId.get(groupView.groupId) ?? [];
+
+            return (
+              <Tooltip
+                key={groupView.groupId}
+                open={disabled && hoveredGroupId === groupView.groupId}
+              >
+                <TooltipTrigger
+                  render={
+                    <Card
+                      data-selected={isSelected}
+                      data-disabled={disabled}
                       className={cn(
-                        "relative flex w-64 shrink-0 cursor-pointer snap-start flex-col rounded-lg border-2 p-3 text-left transition-all duration-200",
-                        "hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm",
-                        disabled &&
-                          "cursor-not-allowed opacity-50 hover:translate-y-0 hover:shadow-none",
-                        !disabled && !isSelected && "hover:bg-muted/50 border-border",
-                        isSelected && "-translate-y-0.5 shadow-md",
+                        "bg-card relative flex w-auto min-w-fit shrink-0 cursor-pointer snap-start flex-col rounded-xl border text-left transition-colors duration-200 before:rounded-[inherit]",
+                        disabled && "cursor-not-allowed opacity-50",
+                        !disabled && !isSelected && "hover:bg-muted/40 border-border/80",
                         isSelected && colorStyles.bg,
                         isSelected && colorStyles.border,
                       )}
@@ -548,32 +569,33 @@ const CourseCard = memo(function CourseCard({
                           current === groupView.groupId ? null : current,
                         )
                       }
-                    >
-                      <div className="mb-2 flex items-center gap-2">
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "text-xs whitespace-nowrap",
-                            isSelected && "border",
-                            isSelected && "bg-background/50",
-                            isSelected && colorStyles.border,
-                          )}
-                        >
-                          <span className="sm:hidden">GR</span>
-                          <span className="hidden sm:inline">Grupo</span>{" "}
-                          {groupView.group.group_code}
-                        </Badge>
-                        <span
-                          className={cn(
-                            "text-foreground text-xs whitespace-nowrap",
-                            isSelected && "opacity-80",
-                          )}
-                        >
-                          {groupView.group.group_type}
-                        </span>
-                        {groupView.campusCode && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+                    />
+                  }
+                >
+                  <CardPanel className="p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "text-xs whitespace-nowrap",
+                          isSelected && "bg-background/50 border",
+                          isSelected && colorStyles.border,
+                        )}
+                      >
+                        GR {groupView.group.group_code}
+                      </Badge>
+                      <span
+                        className={cn(
+                          "text-foreground text-xs whitespace-nowrap",
+                          isSelected && "opacity-80",
+                        )}
+                      >
+                        {groupView.group.group_type}
+                      </span>
+                      {groupView.campusCode && (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
                               <Badge
                                 variant="outline"
                                 className={cn(
@@ -582,143 +604,151 @@ const CourseCard = memo(function CourseCard({
                                     ? "border-foreground/20 bg-background/50 text-inherit"
                                     : "bg-muted text-muted-foreground",
                                 )}
-                              >
-                                {groupView.campusCode}
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {groupView.campusName || groupView.campusCode}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
+                              />
+                            }
+                          >
+                            {groupView.campusCode}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {groupView.campusName || groupView.campusCode}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+
+                    <Separator
+                      className={cn("mb-2 transition-colors", isSelected && "bg-foreground/20")}
+                    />
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <User
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0 self-center",
+                            isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
+                          )}
+                        />
+                        <div className="flex flex-col justify-center gap-1">
+                          {groupView.professors.map((professor, i) => (
+                            <span
+                              key={`${professor.id}-${i}`}
+                              className={cn(
+                                "text-foreground text-xs leading-tight whitespace-nowrap",
+                                isSelected && "opacity-80",
+                              )}
+                            >
+                              {professor.name}
+                            </span>
+                          ))}
+                        </div>
                       </div>
 
-                      <Separator
-                        className={cn("mb-2 transition-colors", isSelected && "bg-foreground/20")}
-                      />
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <User
-                            className={cn(
-                              "h-3.5 w-3.5 shrink-0 self-center",
-                              isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
-                            )}
-                          />
-                          <div className="flex flex-col justify-center gap-1">
-                            {groupView.professors.map((professor, i) => (
-                              <span
-                                key={`${professor.id}-${i}`}
-                                className={cn(
-                                  "text-foreground text-xs leading-tight",
-                                  isSelected && "opacity-80",
-                                )}
-                              >
-                                {professor.name}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className={cn("relative", groupView.sharedClassroom && "pr-16")}>
-                          <div className="flex items-start gap-2">
-                            <Clock
-                              className={cn(
-                                "h-3.5 w-3.5 shrink-0 self-center",
-                                isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
-                              )}
-                            />
-                            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-                              {groupView.meetingViews.map((meeting) => (
-                                <div
-                                  key={meeting.id}
-                                  className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2"
-                                >
+                      <div className="flex items-center gap-2">
+                        <Clock
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0 self-center",
+                            isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
+                          )}
+                        />
+                        <div className="min-w-0 flex-1">
+                          {groupView.sharedClassroom ? (
+                            <div className="flex min-w-0 items-center gap-2">
+                              <div className="flex min-w-0 flex-col gap-1">
+                                {groupView.meetingViews.map((meeting) => (
                                   <span
+                                    key={meeting.id}
                                     className={cn(
-                                      "min-w-0 text-xs leading-tight whitespace-nowrap",
+                                      "font-mono text-xs leading-tight whitespace-nowrap tabular-nums",
                                       isSelected ? "text-foreground opacity-80" : "text-foreground",
                                     )}
                                     title={meeting.label}
                                   >
                                     {meeting.shortLabel}
                                   </span>
-                                  {!groupView.sharedClassroom && meeting.classroom && (
-                                    <span
-                                      className={cn(
-                                        "text-muted-foreground flex items-center gap-1 justify-self-end text-xs whitespace-nowrap",
-                                        isSelected && "opacity-80",
-                                      )}
-                                    >
-                                      <MapPin className="h-3.5 w-3.5 shrink-0" />
-                                      <span>{meeting.classroom}</span>
-                                    </span>
-                                  )}
+                                ))}
+                              </div>
+                              <span
+                                className={cn(
+                                  "text-muted-foreground self-center font-mono text-xs whitespace-nowrap",
+                                  isSelected && "opacity-80",
+                                )}
+                              >
+                                {groupView.sharedClassroom}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="grid min-w-0 grid-cols-[auto_auto] items-center gap-x-2.5 gap-y-1">
+                              {groupView.meetingViews.map((meeting) => (
+                                <div key={meeting.id} className="contents">
+                                  <span
+                                    className={cn(
+                                      "font-mono text-xs leading-tight whitespace-nowrap tabular-nums",
+                                      isSelected ? "text-foreground opacity-80" : "text-foreground",
+                                    )}
+                                    title={meeting.label}
+                                  >
+                                    {meeting.shortLabel}
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      "text-muted-foreground text-right font-mono text-xs whitespace-nowrap",
+                                      isSelected && "opacity-80",
+                                    )}
+                                  >
+                                    {meeting.classroom ?? ""}
+                                  </span>
                                 </div>
                               ))}
                             </div>
-                          </div>
-
-                          {groupView.sharedClassroom && (
-                            <div
-                              className={cn(
-                                "text-muted-foreground absolute top-1/2 right-0 flex -translate-y-1/2 items-center gap-1 text-xs whitespace-nowrap",
-                                isSelected && "opacity-80",
-                              )}
-                            >
-                              <MapPin className="h-3.5 w-3.5 shrink-0" />
-                              <span>{groupView.sharedClassroom}</span>
-                            </div>
                           )}
                         </div>
+                      </div>
 
-                        <div className="flex items-start gap-2">
-                          <Users
-                            className={cn(
-                              "mt-0.5 h-3.5 w-3.5 shrink-0",
-                              isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "text-foreground text-xs whitespace-nowrap",
-                              isSelected && "opacity-70",
-                            )}
-                          >
-                            {groupView.group.capacity} cupos
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Users
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0",
+                            isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "text-foreground font-mono text-xs whitespace-nowrap tabular-nums",
+                            isSelected && "opacity-70",
+                          )}
+                        >
+                          {groupView.group.capacity}
+                        </span>
                       </div>
-                    </button>
-                  </TooltipTrigger>
-                  {disabled && reasons.length > 0 && (
-                    <TooltipContent className="bg-destructive max-w-xs text-white">
-                      <div className="space-y-1.5">
-                        <p className="text-sm font-semibold">Este grupo choca con:</p>
-                        <ul className="space-y-2">
-                          {reasons.map((r, idx) => (
-                            <li key={idx} className="flex flex-col gap-0.5">
-                              <span className="text-xs font-semibold">
-                                {r.courseCode}: {r.courseName}
-                              </span>
-                              <div className="ml-1 flex flex-col pl-2 text-xs opacity-90">
-                                <span>Grupo {r.groupCode}</span>
-                                {r.campusLabel && <span>{r.campusLabel}</span>}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              );
-            })}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </CardContent>
-    </Card>
+                    </div>
+                  </CardPanel>
+                </TooltipTrigger>
+                {disabled && reasons.length > 0 && (
+                  <TooltipContent className="bg-destructive max-w-xs text-white">
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-semibold">Este grupo choca con:</p>
+                      <ul className="space-y-2">
+                        {reasons.map((r, idx) => (
+                          <li key={idx} className="flex flex-col gap-0.5">
+                            <span className="text-xs font-semibold">
+                              {r.courseCode}: {r.courseName}
+                            </span>
+                            <div className="ml-1 flex flex-col pl-2 text-xs opacity-90">
+                              <span>Grupo {r.groupCode}</span>
+                              {r.campusLabel && <span>{r.campusLabel}</span>}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            );
+          })}
+        </div>
+      </div>
+    </Frame>
   );
 });
 
@@ -742,30 +772,53 @@ const CourseTableItem = memo(function CourseTableItem({
   showCampus: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const selectedGroup = groupViews.find((g) => selectedGroupIds.has(g.groupId));
 
   return (
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className="bg-card border-border w-full border-b last:border-b-0"
+      className="bg-card/50 border-border/70 w-full border-b last:border-b-0"
     >
-      <CollapsibleTrigger asChild>
-        <div className="hover:bg-muted/30 flex cursor-pointer items-center justify-between p-4 transition-colors">
-          <div className="flex min-w-0 flex-1 items-start justify-between gap-2 pr-4">
-            <span className="text-base leading-tight font-semibold">
-              {course.course_code}: {course.course_name}
-            </span>
-            <span className="bg-muted text-muted-foreground mt-0.5 shrink-0 rounded-md px-1.5 py-0.5 text-xs leading-none font-normal">
-              {course.credits} créditos
-            </span>
+      <CollapsibleTrigger
+        render={
+          <div className="hover:bg-muted/30 flex cursor-pointer items-center justify-between p-3 transition-colors sm:p-3.5" />
+        }
+      >
+        <div className="flex min-w-0 flex-1 items-baseline justify-between gap-2 pr-3">
+          <div className="min-w-0 flex-1">
+            <div className="text-foreground text-sm leading-snug font-medium">
+              <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+                {course.course_code}:
+              </span>
+              <span>{course.course_name}</span>
+              {selectedGroup && (
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "ml-2 inline-flex h-4.5 border px-1.5 align-middle text-[10px] font-medium",
+                    colorStyles.bg,
+                    colorStyles.border,
+                  )}
+                >
+                  GR {selectedGroup.group.group_code}
+                </Badge>
+              )}
+            </div>
           </div>
-          <ChevronDown
-            className={cn(
-              "text-muted-foreground size-5 transition-transform duration-200",
-              isOpen && "rotate-180",
-            )}
-          />
+          <Badge
+            variant="secondary"
+            className="text-muted-foreground shrink-0 py-0.5 text-xs font-normal tabular-nums"
+          >
+            {course.credits} cr.
+          </Badge>
         </div>
+        <ChevronDown
+          className={cn(
+            "text-muted-foreground size-4 shrink-0 transition-transform duration-200",
+            isOpen && "rotate-180",
+          )}
+        />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="bg-muted/10 border-t">
@@ -791,80 +844,87 @@ const CourseTableItem = memo(function CourseTableItem({
 
                 return (
                   <Tooltip key={groupView.groupId} open={disabled ? undefined : false}>
-                    <TooltipTrigger asChild>
-                      <TableRow
-                        onClick={() =>
-                          !disabled && onGroupToggle(course.course_code, groupView.group.group_code)
-                        }
-                        className={cn(
-                          "cursor-pointer transition-colors",
-                          isSelected && "hover:bg-muted/90",
-                          isSelected && !disabled && colorStyles.bg,
-                          !isSelected && !disabled && "hover:bg-muted/50",
-                          disabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
-                        )}
-                      >
-                        <TableCell className="pl-4 text-center">
-                          <Badge
-                            variant="secondary"
-                            className={cn(
-                              isSelected && "bg-background/50 text-foreground border",
-                              isSelected && colorStyles.border,
-                            )}
-                          >
-                            {groupView.group.group_code}
-                          </Badge>
+                    <TooltipTrigger
+                      render={
+                        <TableRow
+                          onClick={() =>
+                            !disabled &&
+                            onGroupToggle(course.course_code, groupView.group.group_code)
+                          }
+                          className={cn(
+                            "cursor-pointer transition-colors",
+                            isSelected && "hover:bg-muted/90",
+                            isSelected && !disabled && colorStyles.bg,
+                            !isSelected && !disabled && "hover:bg-muted/50",
+                            disabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
+                          )}
+                        />
+                      }
+                    >
+                      <TableCell className="pl-4 text-center">
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            isSelected && "bg-background/50 text-foreground border",
+                            isSelected && colorStyles.border,
+                          )}
+                        >
+                          {groupView.group.group_code}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {groupView.group.group_type}
+                      </TableCell>
+                      {showCampus && (
+                        <TableCell className="text-muted-foreground text-center text-xs">
+                          {groupView.campusName ? (
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={
+                                  <span className="border-muted-foreground/50 cursor-help border-b border-dotted" />
+                                }
+                              >
+                                {groupView.campusCode}
+                              </TooltipTrigger>
+                              <TooltipContent>{groupView.campusName}</TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            groupView.campusCode
+                          )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-xs">
-                          {groupView.group.group_type}
-                        </TableCell>
-                        {showCampus && (
-                          <TableCell className="text-muted-foreground text-center text-xs">
-                            {groupView.campusName ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="border-muted-foreground/50 cursor-help border-b border-dotted">
-                                    {groupView.campusCode}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>{groupView.campusName}</TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              groupView.campusCode
-                            )}
-                          </TableCell>
-                        )}
-                        <TableCell className="w-full max-w-[0] min-w-[120px]">
-                          <div className="flex w-full flex-col gap-1 text-xs">
-                            {groupView.professors.map((prof, i) => (
-                              <TruncatableText key={`${prof.id ?? "nop"}-${i}`} text={prof.name} />
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1 text-xs whitespace-nowrap">
-                            {groupView.meetingViews.map((meeting) => (
-                              <span key={meeting.id} title={meeting.label}>
-                                {meeting.shortLabel}
-                              </span>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="text-muted-foreground flex flex-col items-center gap-1 text-xs whitespace-nowrap">
-                            {groupView.sharedClassroom ? (
-                              <span>{groupView.sharedClassroom}</span>
-                            ) : (
-                              groupView.meetingViews.map((meeting) => (
-                                <span key={meeting.id}>{meeting.classroom || "-"}</span>
-                              ))
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="pr-4 text-center text-xs">
-                          <span className="text-muted-foreground">{groupView.group.capacity}</span>
-                        </TableCell>
-                      </TableRow>
+                      )}
+                      <TableCell className="w-full max-w-[0] min-w-[120px]">
+                        <div className="flex w-full flex-col gap-1 text-xs">
+                          {groupView.professors.map((prof, i) => (
+                            <TruncatableText key={`${prof.id ?? "nop"}-${i}`} text={prof.name} />
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 font-mono text-xs whitespace-nowrap">
+                          {groupView.meetingViews.map((meeting) => (
+                            <span key={meeting.id} title={meeting.label} className="tabular-nums">
+                              {meeting.shortLabel}
+                            </span>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="text-muted-foreground flex flex-col items-center gap-1 font-mono text-xs whitespace-nowrap">
+                          {groupView.sharedClassroom ? (
+                            <span>{groupView.sharedClassroom}</span>
+                          ) : (
+                            groupView.meetingViews.map((meeting) => (
+                              <span key={meeting.id}>{meeting.classroom || "-"}</span>
+                            ))
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="pr-4 text-center font-mono text-xs">
+                        <span className="text-muted-foreground tabular-nums">
+                          {groupView.group.capacity}
+                        </span>
+                      </TableCell>
                     </TooltipTrigger>
                     {disabled && reasons.length > 0 && (
                       <TooltipContent className="bg-destructive max-w-xs text-white">

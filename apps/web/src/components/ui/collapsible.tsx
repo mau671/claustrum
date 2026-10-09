@@ -1,19 +1,42 @@
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
+"use client";
 
-function Collapsible({ ...props }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
+import type React from "react";
+
+import { Collapsible as CollapsiblePrimitive } from "@base-ui/react/collapsible";
+
+import { cn } from "@/lib/utils";
+
+export function Collapsible({ ...props }: CollapsiblePrimitive.Root.Props): React.ReactElement {
   return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />;
 }
 
-function CollapsibleTrigger({
+export function CollapsibleTrigger({
+  className,
   ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
-  return <CollapsiblePrimitive.CollapsibleTrigger data-slot="collapsible-trigger" {...props} />;
+}: CollapsiblePrimitive.Trigger.Props): React.ReactElement {
+  return (
+    <CollapsiblePrimitive.Trigger
+      className={className}
+      data-slot="collapsible-trigger"
+      {...props}
+    />
+  );
 }
 
-function CollapsibleContent({
+export function CollapsiblePanel({
+  className,
   ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
-  return <CollapsiblePrimitive.CollapsibleContent data-slot="collapsible-content" {...props} />;
+}: CollapsiblePrimitive.Panel.Props): React.ReactElement {
+  return (
+    <CollapsiblePrimitive.Panel
+      className={cn(
+        "h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 data-ending-style:h-0 data-starting-style:h-0",
+        className,
+      )}
+      data-slot="collapsible-panel"
+      {...props}
+    />
+  );
 }
 
-export { Collapsible, CollapsibleTrigger, CollapsibleContent };
+export { CollapsiblePrimitive, CollapsiblePanel as CollapsibleContent };

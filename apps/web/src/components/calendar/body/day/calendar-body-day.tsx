@@ -16,7 +16,7 @@ export default function CalendarBodyDay() {
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="relative flex min-w-0 flex-1" style={{ minHeight: contentHeight }}>
             <CalendarBodyDayMargin />
-            <CalendarBodyDayContent date={date} headerClassName="border-l" />
+            <CalendarBodyDayContent date={date} />
           </div>
         </div>
       </div>

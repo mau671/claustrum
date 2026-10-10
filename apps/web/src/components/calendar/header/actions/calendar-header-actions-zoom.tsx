@@ -1,4 +1,5 @@
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { ZoomInIcon, ZoomOutIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
 
@@ -34,7 +35,7 @@ export default function CalendarHeaderActionsZoom() {
         disabled={!canZoomOut}
         title="Reducir zoom (Ctrl + rueda del ratón)"
       >
-        <ZoomOut className="size-4" />
+        <HugeiconsIcon icon={ZoomOutIcon} size={16} />
       </Button>
       <Button
         variant="outline"
@@ -44,7 +45,7 @@ export default function CalendarHeaderActionsZoom() {
         disabled={!canZoomIn}
         title="Aumentar zoom (Ctrl + rueda del ratón)"
       >
-        <ZoomIn className="size-4" />
+        <HugeiconsIcon icon={ZoomInIcon} size={16} />
       </Button>
     </div>
   );

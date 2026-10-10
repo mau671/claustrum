@@ -9,7 +9,6 @@ import {
   Clock,
   FileText,
   GraduationCap,
-  MapPin,
   Minus,
   Pencil,
   Plus,
@@ -40,6 +39,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogPopup,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +66,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -74,15 +82,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { toast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -212,18 +213,6 @@ function formatFileSize(bytes: number): string {
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
-
-function StatusBadge({ status }: { status: CourseStatus }) {
-  const cfg = statusConfig[status];
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${cfg.bg} ${cfg.color} ${cfg.ring}`}
-    >
-      <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-      {statusLabels[status]}
-    </span>
-  );
-}
 
 function SectionHeader({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
@@ -411,12 +400,10 @@ function ScheduleGroupCard({
     <div className="border-border bg-card space-y-3 rounded-xl border p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs font-semibold">
-            <span className="hidden sm:inline">Grupo </span>
-            <span className="sm:hidden">GR </span>
-            {group.groupCode}
+          <Badge variant="secondary" className="text-xs font-semibold whitespace-nowrap">
+            GR {group.groupCode}
           </Badge>
-          <span className="text-muted-foreground text-xs">{group.groupType}</span>
+          <span className="text-foreground text-xs whitespace-nowrap">{group.groupType}</span>
         </div>
 
         {group.campusName && (
@@ -453,12 +440,15 @@ function ScheduleGroupCard({
           <User className="text-muted-foreground size-3.5 shrink-0 self-center" />
           <div className="flex flex-col justify-center gap-1">
             {professors.length === 0 ? (
-              <span className="text-muted-foreground text-xs">Sin asignar</span>
+              <span className="text-muted-foreground text-xs leading-tight">Sin asignar</span>
             ) : (
               professors.map((professor) => {
                 const transitionKey = `group-${group.groupId}-${professor.id}`;
                 return (
-                  <span key={transitionKey} className="text-xs">
+                  <span
+                    key={transitionKey}
+                    className="text-foreground text-xs leading-tight whitespace-nowrap"
+                  >
                     {professor.name}
                   </span>
                 );
@@ -467,44 +457,51 @@ function ScheduleGroupCard({
           </div>
         </div>
 
-        <div className={cn("relative", sharedClassroom && "pr-16")}>
-          <div className="flex items-start gap-2">
-            <Clock className="text-muted-foreground size-3.5 shrink-0 self-center" />
-            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-              {meetings.length === 0 ? (
-                <span className="text-muted-foreground text-xs">Sin horario registrado</span>
-              ) : (
-                meetings.map((meeting) => (
-                  <div
-                    key={`${meeting.weekday}-${meeting.starts_at}`}
-                    className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2"
-                  >
-                    <span className="text-foreground min-w-0 text-xs leading-tight whitespace-nowrap">
-                      {WEEKDAYS[meeting.weekday] ?? `Dia ${meeting.weekday}`}{" "}
+        <div className="flex items-center gap-2">
+          <Clock className="text-muted-foreground size-3.5 shrink-0 self-center" />
+          <div className="min-w-0 flex-1">
+            {meetings.length === 0 ? (
+              <span className="text-muted-foreground text-xs">Sin horario registrado</span>
+            ) : sharedClassroom ? (
+              <div className="flex min-w-0 items-center gap-2">
+                <div className="flex min-w-0 flex-col gap-1">
+                  {meetings.map((meeting) => (
+                    <span
+                      key={`${meeting.weekday}-${meeting.starts_at}`}
+                      className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums"
+                    >
+                      {WEEKDAYS[meeting.weekday] ?? `Día ${meeting.weekday}`}{" "}
                       {formatTime(meeting.starts_at)}-{formatTime(meeting.ends_at)}
                     </span>
-                    {!sharedClassroom && meeting.classroom && (
-                      <span className="text-muted-foreground flex items-center gap-1 justify-self-end text-xs whitespace-nowrap">
-                        <MapPin className="size-3.5 shrink-0" />
-                        <span>{meeting.classroom}</span>
-                      </span>
-                    )}
+                  ))}
+                </div>
+                <span className="text-muted-foreground self-center font-mono text-xs whitespace-nowrap">
+                  {sharedClassroom}
+                </span>
+              </div>
+            ) : (
+              <div className="grid min-w-0 grid-cols-[auto_auto] items-center gap-x-2.5 gap-y-1">
+                {meetings.map((meeting) => (
+                  <div key={`${meeting.weekday}-${meeting.starts_at}`} className="contents">
+                    <span className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums">
+                      {WEEKDAYS[meeting.weekday] ?? `Día ${meeting.weekday}`}{" "}
+                      {formatTime(meeting.starts_at)}-{formatTime(meeting.ends_at)}
+                    </span>
+                    <span className="text-muted-foreground text-right font-mono text-xs whitespace-nowrap">
+                      {meeting.classroom ?? ""}
+                    </span>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
-          {sharedClassroom && (
-            <div className="text-muted-foreground absolute top-1/2 right-0 flex -translate-y-1/2 items-center gap-1 text-xs whitespace-nowrap">
-              <MapPin className="size-3.5 shrink-0" />
-              <span>{sharedClassroom}</span>
-            </div>
-          )}
         </div>
 
-        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-          <Users className="size-3.5 shrink-0" />
-          {group.capacity} cupos
+        <div className="flex items-center gap-2">
+          <Users className="text-muted-foreground size-3.5 shrink-0" />
+          <span className="text-foreground font-mono text-xs whitespace-nowrap tabular-nums">
+            {group.capacity}
+          </span>
         </div>
       </div>
     </div>
@@ -602,6 +599,7 @@ export function CourseDetails({
   const [gradeInput, setGradeInput] = useState("");
   const [academicTermId, setAcademicTermId] = useState<string>("");
   const [isProgressSheetOpen, setIsProgressSheetOpen] = useState(initialOpenProgressSheet ?? false);
+  const [confirmProgressOpen, setConfirmProgressOpen] = useState(false);
   const [progressStatus, setProgressStatus] =
     useState<Exclude<CourseStatus, "not_taken">>("approved");
   const [isSaving, setIsSaving] = useState(false);
@@ -856,6 +854,30 @@ export function CourseDetails({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const isProgressDirty =
+    gradeInput.trim() !== "" ||
+    progressStatus !== "approved" ||
+    (isPlaceholderCourse && attemptCourseId !== course.id);
+
+  const handleRequestCloseProgress = () => {
+    if (isProgressDirty) {
+      setConfirmProgressOpen(true);
+    } else {
+      setIsProgressSheetOpen(false);
+      setGradeInput("");
+      setProgressStatus("approved");
+      if (isPlaceholderCourse) setAttemptCourseId(course.id);
+    }
+  };
+
+  const handleDiscardProgress = () => {
+    setConfirmProgressOpen(false);
+    setIsProgressSheetOpen(false);
+    setGradeInput("");
+    setProgressStatus("approved");
+    if (isPlaceholderCourse) setAttemptCourseId(course.id);
   };
 
   const handleGradeInputChange = (value: string) => {
@@ -1226,10 +1248,7 @@ export function CourseDetails({
                 <span className="text-muted-foreground mr-2 text-xl md:text-2xl">
                   {course.code}:
                 </span>
-                <span className="mr-2">{course.name}</span>
-                <span className="inline-flex pb-1 align-middle">
-                  <StatusBadge status={currentStatus} />
-                </span>
+                <span>{course.name}</span>
               </h1>
             </div>
           </div>
@@ -1320,55 +1339,99 @@ export function CourseDetails({
         </section>
       ) : null}
 
-      {isMobile ? (
-        <Sheet open={isProgressSheetOpen} onOpenChange={setIsProgressSheetOpen}>
-          <SheetContent
-            side="bottom"
-            className="grid max-h-[86vh] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0"
+      {(() => {
+        const confirmProgressDialog = (
+          <AlertDialog open={confirmProgressOpen} onOpenChange={setConfirmProgressOpen}>
+            <AlertDialogPopup>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Descartar cambios?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tienes cambios sin guardar en el progreso. Si sales ahora, se perderán.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Volver</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDiscardProgress}>
+                  Descartar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogPopup>
+          </AlertDialog>
+        );
+
+        const progressFooterActions = (
+          <>
+            <Button type="button" variant="ghost" onClick={handleRequestCloseProgress}>
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSaveProgress}
+              disabled={isSaving || !canSaveProgress}
+            >
+              {isSaving ? "Guardando..." : "Guardar progreso"}
+            </Button>
+          </>
+        );
+
+        if (isMobile) {
+          return (
+            <Drawer
+              open={isProgressSheetOpen}
+              onOpenChange={(nextOpen) => {
+                if (!nextOpen) handleRequestCloseProgress();
+                else setIsProgressSheetOpen(true);
+              }}
+            >
+              <DrawerPopup
+                showBar
+                className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+              >
+                <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
+                <DrawerHeader className="px-4 pt-4 pb-2">
+                  <DrawerTitle>Registrar progreso</DrawerTitle>
+                  <DrawerDescription>
+                    Guarda el estado de este curso para el periodo seleccionado.
+                  </DrawerDescription>
+                </DrawerHeader>
+                <ScrollArea className="min-h-0">
+                  <div className="space-y-6 px-4 pb-4">{progressForm}</div>
+                </ScrollArea>
+                <DrawerFooter>{progressFooterActions}</DrawerFooter>
+              </DrawerPopup>
+              {confirmProgressDialog}
+            </Drawer>
+          );
+        }
+
+        return (
+          <Dialog
+            open={isProgressSheetOpen}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) handleRequestCloseProgress();
+              else setIsProgressSheetOpen(true);
+            }}
           >
-            <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
-            <SheetHeader className="px-4 pt-4 pb-2">
-              <SheetTitle>Registrar progreso</SheetTitle>
-              <SheetDescription>
-                Guarda el estado de este curso para el periodo seleccionado.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="min-h-0 overflow-y-auto px-4 pb-4">{progressForm}</div>
-            <SheetFooter className="border-t px-4 pt-3 pb-4">
-              <Button
-                type="button"
-                onClick={handleSaveProgress}
-                disabled={isSaving || !canSaveProgress}
-                className="w-full"
-              >
-                {isSaving ? "Guardando..." : "Guardar progreso"}
-              </Button>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      ) : (
-        <Dialog open={isProgressSheetOpen} onOpenChange={setIsProgressSheetOpen}>
-          <DialogContent className="max-h-[90vh] overflow-hidden sm:max-w-lg">
-            <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
-            <DialogHeader>
-              <DialogTitle>Registrar progreso</DialogTitle>
-              <DialogDescription>
-                Guarda el estado de este curso para el periodo seleccionado.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6 px-1 pb-1">{progressForm}</div>
-            <DialogFooter>
-              <Button
-                type="button"
-                onClick={handleSaveProgress}
-                disabled={isSaving || !canSaveProgress}
-              >
-                {isSaving ? "Guardando..." : "Guardar progreso"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+            <DialogContent
+              className="max-h-[90vh] max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+              initialFocus={false}
+            >
+              <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
+              <DialogHeader>
+                <DialogTitle>Registrar progreso</DialogTitle>
+                <DialogDescription>
+                  Guarda el estado de este curso para el periodo seleccionado.
+                </DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="min-h-0">
+                <div className="space-y-6 px-6 pb-6">{progressForm}</div>
+              </ScrollArea>
+              <DialogFooter>{progressFooterActions}</DialogFooter>
+            </DialogContent>
+            {confirmProgressDialog}
+          </Dialog>
+        );
+      })()}
 
       {/* ========== COURSE RELATIONS ========== */}
       {(prerequisites.length > 0 || corequisites.length > 0 || isPrerequisiteFor.length > 0) && (

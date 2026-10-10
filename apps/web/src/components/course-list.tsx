@@ -1,4 +1,10 @@
-import { User, Clock, Users, ChevronDown } from "lucide-react";
+import {
+  ArrowDown01Icon,
+  Clock01Icon,
+  UserIcon,
+  UserMultiple02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useCallback, memo, useEffect, useRef, useState } from "react";
 
 import type { ScheduleCourse, ScheduleGroup } from "@/lib/types";
@@ -497,13 +503,13 @@ const CourseCard = memo(function CourseCard({
   onGroupToggle: (courseCode: string, groupCode: string) => void;
 }) {
   const [hoveredGroupId, setHoveredGroupId] = useState<string | null>(null);
-  const selectedGroup = groupViews.find((g) => selectedGroupIds.has(g.groupId));
+  const hasSelectedGroup = groupViews.some((g) => selectedGroupIds.has(g.groupId));
 
   return (
     <Frame
       className={cn(
         "w-full max-w-full p-1.5 transition-all",
-        selectedGroup && "border-primary/40 ring-primary/20 ring-1",
+        hasSelectedGroup && "border-primary/40 ring-primary/20 ring-1",
       )}
       style={{ contentVisibility: "auto", containIntrinsicSize: "0 270px" }}
     >
@@ -514,18 +520,6 @@ const CourseCard = memo(function CourseCard({
               {course.course_code}:
             </span>
             <span className="text-foreground text-sm font-medium">{course.course_name}</span>
-            {selectedGroup && (
-              <Badge
-                variant="outline"
-                className={cn(
-                  "ml-2 inline-flex h-4.5 border px-1.5 align-middle text-[10px] font-medium",
-                  colorStyles.bg,
-                  colorStyles.border,
-                )}
-              >
-                GR {selectedGroup.group.group_code}
-              </Badge>
-            )}
           </FrameTitle>
         </div>
         <Badge
@@ -622,9 +616,11 @@ const CourseCard = memo(function CourseCard({
 
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <User
+                        <HugeiconsIcon
+                          icon={UserIcon}
+                          size={14}
                           className={cn(
-                            "h-3.5 w-3.5 shrink-0 self-center",
+                            "shrink-0 self-center",
                             isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
                           )}
                         />
@@ -644,9 +640,11 @@ const CourseCard = memo(function CourseCard({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Clock
+                        <HugeiconsIcon
+                          icon={Clock01Icon}
+                          size={14}
                           className={cn(
-                            "h-3.5 w-3.5 shrink-0 self-center",
+                            "shrink-0 self-center",
                             isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
                           )}
                         />
@@ -705,9 +703,11 @@ const CourseCard = memo(function CourseCard({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Users
+                        <HugeiconsIcon
+                          icon={UserMultiple02Icon}
+                          size={14}
                           className={cn(
-                            "h-3.5 w-3.5 shrink-0",
+                            "shrink-0",
                             isSelected ? "text-foreground opacity-70" : "text-muted-foreground",
                           )}
                         />
@@ -772,7 +772,6 @@ const CourseTableItem = memo(function CourseTableItem({
   showCampus: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedGroup = groupViews.find((g) => selectedGroupIds.has(g.groupId));
 
   return (
     <Collapsible
@@ -792,18 +791,6 @@ const CourseTableItem = memo(function CourseTableItem({
                 {course.course_code}:
               </span>
               <span>{course.course_name}</span>
-              {selectedGroup && (
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "ml-2 inline-flex h-4.5 border px-1.5 align-middle text-[10px] font-medium",
-                    colorStyles.bg,
-                    colorStyles.border,
-                  )}
-                >
-                  GR {selectedGroup.group.group_code}
-                </Badge>
-              )}
             </div>
           </div>
           <Badge
@@ -813,9 +800,11 @@ const CourseTableItem = memo(function CourseTableItem({
             {course.credits} cr.
           </Badge>
         </div>
-        <ChevronDown
+        <HugeiconsIcon
+          icon={ArrowDown01Icon}
+          size={16}
           className={cn(
-            "text-muted-foreground size-4 shrink-0 transition-transform duration-200",
+            "text-muted-foreground shrink-0 transition-transform duration-200",
             isOpen && "rotate-180",
           )}
         />

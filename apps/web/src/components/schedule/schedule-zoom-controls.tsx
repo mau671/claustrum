@@ -1,4 +1,11 @@
-import { ZoomIn, ZoomOut, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  RotateLeft01Icon,
+  ZoomInIcon,
+  ZoomOutIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import React from "react";
 
 import {
@@ -57,7 +64,11 @@ export function ScheduleZoomControls({
         title={isPanelOpen ? "Ocultar controles" : "Mostrar controles"}
       >
         <span className="text-sm font-medium">{zoomPercentage}%</span>
-        {isPanelOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+        {isPanelOpen ? (
+          <HugeiconsIcon icon={ArrowUp01Icon} size={16} />
+        ) : (
+          <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
+        )}
       </button>
 
       {isPanelOpen && (
@@ -69,7 +80,7 @@ export function ScheduleZoomControls({
               className="hover:bg-muted rounded-md p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Alejar"
             >
-              <ZoomOut className="size-4" />
+              <HugeiconsIcon icon={ZoomOutIcon} size={16} />
             </button>
             <button
               onClick={handleZoomIn}
@@ -77,7 +88,7 @@ export function ScheduleZoomControls({
               className="hover:bg-muted rounded-md p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Acercar"
             >
-              <ZoomIn className="size-4" />
+              <HugeiconsIcon icon={ZoomInIcon} size={16} />
             </button>
             <div className="bg-border mx-1 h-5 w-px" />
             <button
@@ -85,7 +96,7 @@ export function ScheduleZoomControls({
               className="hover:bg-muted rounded-md p-2 transition-colors"
               title="Restablecer tamaño"
             >
-              <RotateCcw className="size-4" />
+              <HugeiconsIcon icon={RotateLeft01Icon} size={16} />
             </button>
           </div>
 

@@ -1,6 +1,16 @@
+import {
+  Building03Icon,
+  Cancel01Icon,
+  Clock01Icon,
+  GraduationCapIcon,
+  Layers01Icon,
+  Location01Icon,
+  UserIcon,
+  UserMultiple02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Building2, Clock, Layers, MapPin, User, Users, X, GraduationCap } from "lucide-react";
 import { memo } from "react";
 
 import type { CalendarEvent as CalendarEventType } from "@/lib/types";
@@ -59,10 +69,9 @@ const CalendarEvent = memo(function CalendarEvent({
         render={
           <div
             className={cn(
-              "group relative cursor-pointer rounded-md border px-1 py-0.5 transition-all duration-200 sm:px-2 sm:py-1",
+              "group relative cursor-pointer rounded-md px-1 py-0.5 transition-all duration-200 sm:px-2 sm:py-1",
               colorClasses.bg,
               colorClasses.hover,
-              colorClasses.border,
               !month && "absolute overflow-hidden",
               className,
             )}
@@ -84,7 +93,7 @@ const CalendarEvent = memo(function CalendarEvent({
             }}
             aria-label="Quitar grupo"
           >
-            <X className="size-3.5" />
+            <HugeiconsIcon icon={Cancel01Icon} size={14} />
           </button>
         )}
 
@@ -101,7 +110,7 @@ const CalendarEvent = memo(function CalendarEvent({
           {!isCompact && showClassroom && (
             <div className="flex items-center gap-2 text-[10px] opacity-90 sm:text-xs">
               <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
-                <MapPin className="size-3 sm:size-4" />
+                <HugeiconsIcon icon={Location01Icon} size={14} />
               </span>
               <span className="leading-tight">{classroomLabel}</span>
             </div>
@@ -109,7 +118,7 @@ const CalendarEvent = memo(function CalendarEvent({
           {!isCompact && (
             <div className="flex items-center gap-2 text-[10px] opacity-85 sm:text-xs">
               <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
-                <Layers className="size-3 sm:size-4" />
+                <HugeiconsIcon icon={Layers01Icon} size={14} />
               </span>
               <span className="leading-tight">{modalityLabel}</span>
             </div>
@@ -121,7 +130,7 @@ const CalendarEvent = memo(function CalendarEvent({
             )}
           >
             <span className="flex size-3 shrink-0 items-center justify-center sm:size-4">
-              <User className="size-3 sm:size-4" />
+              <HugeiconsIcon icon={UserIcon} size={14} />
             </span>
             <div className="flex min-w-0 flex-1 flex-col justify-center">
               {professorNames.map((name, i) => {
@@ -159,13 +168,13 @@ const CalendarEvent = memo(function CalendarEvent({
           </p>
           <p className="flex items-center gap-2 text-sm">
             <span className="flex size-4 shrink-0 items-center justify-center">
-              <Users className="size-4" />
+              <HugeiconsIcon icon={UserMultiple02Icon} size={16} />
             </span>
             <span>GRUPO {event.groupCode}</span>
           </p>
           <p className="flex items-center gap-2 text-sm">
             <span className="flex size-4 shrink-0 items-center justify-center">
-              <GraduationCap className="size-4" />
+              <HugeiconsIcon icon={GraduationCapIcon} size={16} />
             </span>
             <span>
               {event.credits} {event.credits === 1 ? "CRÉDITO" : "CRÉDITOS"}
@@ -173,7 +182,7 @@ const CalendarEvent = memo(function CalendarEvent({
           </p>
           <p className="flex items-center gap-2 text-sm">
             <span className="flex size-4 shrink-0 items-center justify-center">
-              <Clock className="size-4" />
+              <HugeiconsIcon icon={Clock01Icon} size={16} />
             </span>
             <span>
               {format(event.start, "h:mm a", { locale: es })} -{" "}
@@ -183,7 +192,7 @@ const CalendarEvent = memo(function CalendarEvent({
           {campusLabel && (
             <p className="flex items-center gap-2 text-sm">
               <span className="flex size-4 shrink-0 items-center justify-center">
-                <Building2 className="size-4" />
+                <HugeiconsIcon icon={Building03Icon} size={16} />
               </span>
               <span className="min-w-0 flex-1 truncate">{campusLabel}</span>
             </p>
@@ -191,20 +200,20 @@ const CalendarEvent = memo(function CalendarEvent({
           {showClassroom && (
             <p className="flex items-center gap-2 text-sm">
               <span className="flex size-4 shrink-0 items-center justify-center">
-                <MapPin className="size-4" />
+                <HugeiconsIcon icon={Location01Icon} size={16} />
               </span>
               <span>{classroomLabel}</span>
             </p>
           )}
           <p className="flex items-center gap-2 text-sm">
             <span className="flex size-4 shrink-0 items-center justify-center">
-              <Layers className="size-4" />
+              <HugeiconsIcon icon={Layers01Icon} size={16} />
             </span>
             <span>{modalityLabel}</span>
           </p>
           <div className="flex items-center gap-2 text-sm">
             <span className="flex size-4 shrink-0 items-center justify-center">
-              <User className="size-4" />
+              <HugeiconsIcon icon={UserIcon} size={16} />
             </span>
             <div className="flex min-w-0 flex-1 flex-col justify-center">
               {professorNames.map((professorName, i) => (

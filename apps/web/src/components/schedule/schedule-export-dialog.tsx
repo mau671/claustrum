@@ -1,4 +1,5 @@
-import { ImageDown } from "lucide-react";
+import { ImageDownload02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState, type ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -136,30 +138,28 @@ export function ScheduleExportDialog({
               title="Exportar calendario"
               onClick={() => setIsOpen(true)}
             >
-              <ImageDown className="size-4" />
+              <HugeiconsIcon icon={ImageDownload02Icon} size={16} />
             </Button>
           ))}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetContent
-            side="bottom"
-            className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerPopup
+            showBar
+            className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
           >
-            <SheetHeader className="px-4 pt-4 pb-2">
-              <SheetTitle>Exportar calendario</SheetTitle>
-              <SheetDescription>
+            <DrawerHeader className="px-4 pt-4 pb-2 text-left">
+              <DrawerTitle>Exportar calendario</DrawerTitle>
+              <DrawerDescription>
                 Descarga el horario como imagen o archivo de calendario.
-              </SheetDescription>
-            </SheetHeader>
-            <div className="min-h-0 overflow-y-auto px-4 pb-4">
-              {formFields}
-              <div className="mt-5">
-                <Button onClick={handleExport} disabled={isExporting} className="w-full">
-                  {isExporting ? "Exportando..." : format === "ics" ? "Descargar" : "Exportar"}
-                </Button>
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="min-h-0 overflow-y-auto px-4 pb-4">{formFields}</div>
+            <DrawerFooter className="px-4 pt-2 pb-6">
+              <Button onClick={handleExport} disabled={isExporting} className="w-full">
+                {isExporting ? "Exportando..." : format === "ics" ? "Descargar" : "Exportar"}
+              </Button>
+            </DrawerFooter>
+          </DrawerPopup>
+        </Drawer>
       </>
     );
   }
@@ -173,7 +173,7 @@ export function ScheduleExportDialog({
           <DialogTrigger
             render={<Button variant="outline" size="icon" title="Exportar calendario" />}
           >
-            <ImageDown className="size-4" />
+            <HugeiconsIcon icon={ImageDownload02Icon} size={16} />
           </DialogTrigger>
         ))}
       <DialogContent>
@@ -184,7 +184,7 @@ export function ScheduleExportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {formFields}
+        <div className="px-6 pb-2">{formFields}</div>
 
         <DialogFooter>
           <Button onClick={handleExport} disabled={isExporting}>

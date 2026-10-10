@@ -31,16 +31,13 @@ export default function CalendarBodyWeek() {
         }
       >
         <CalendarBodyDayMargin />
-        {weekDays.map((day, index) => (
+        {weekDays.map((day) => (
           <div
             key={day.toISOString()}
-            className={`flex min-w-[var(--day-width)] flex-1 lg:min-w-0 ${index > 0 ? "border-l" : ""}`}
+            className="flex min-w-[var(--day-width)] flex-1 lg:min-w-0"
             style={{ "--day-width": `${dayWidth}px` } as CSSProperties}
           >
-            <CalendarBodyDayContent
-              date={day}
-              headerClassName={index === 0 ? "border-l" : undefined}
-            />
+            <CalendarBodyDayContent date={day} />
           </div>
         ))}
       </div>

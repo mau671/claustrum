@@ -1,4 +1,5 @@
-import { SearchIcon } from "lucide-react";
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +45,7 @@ export function CourseSearchInput({
       <div className="flex w-full items-center gap-2">
         <InputGroup className="h-9 flex-1 rounded-lg">
           <InputGroupAddon>
-            <SearchIcon className="size-4" aria-hidden="true" />
+            <HugeiconsIcon icon={Search01Icon} size={16} aria-hidden="true" />
           </InputGroupAddon>
           <InputGroupInput
             aria-label="Buscar curso por código o nombre"

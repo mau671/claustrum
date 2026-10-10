@@ -1,5 +1,6 @@
 "use client";
 
+import { Link01Icon, LockIcon, LockOpenIcon } from "@hugeicons/core-free-icons";
 import {
   BaseEdge,
   ReactFlow,
@@ -13,13 +14,13 @@ import {
   type EdgeProps,
   type ReactFlowInstance,
 } from "@xyflow/react";
-import { Link, Lock, Unlock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 
 import type { Course } from "@/lib/types";
 
 import { CourseCard } from "@/components/course-card";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
@@ -95,22 +96,22 @@ const RELATION_LABELS: Record<RelationType, string> = {
 const RELATION_LEGEND = [
   {
     relation: "prerequisite",
-    Icon: Lock,
+    icon: LockIcon,
     className: "border-amber-500 text-amber-600",
   },
   {
     relation: "corequisite",
-    Icon: Link,
+    icon: Link01Icon,
     className: "border-blue-500 text-blue-600",
   },
   {
     relation: "postrequisite",
-    Icon: Unlock,
+    icon: LockOpenIcon,
     className: "border-emerald-500 text-emerald-600",
   },
 ] satisfies Array<{
   relation: RelationType;
-  Icon: typeof Lock;
+  icon: typeof LockIcon;
   className: string;
 }>;
 
@@ -1293,7 +1294,7 @@ export function CourseRelationFlow({
                 Relaciones
               </h3>
               <div className="flex flex-wrap gap-x-3 gap-y-2 sm:gap-4">
-                {RELATION_LEGEND.map(({ relation, Icon, className }) => (
+                {RELATION_LEGEND.map(({ relation, icon, className }) => (
                   <div key={relation} className="flex items-center gap-1.5 sm:gap-2">
                     <div
                       className={cn(
@@ -1301,7 +1302,7 @@ export function CourseRelationFlow({
                         className,
                       )}
                     >
-                      <Icon className="size-2.5 shrink-0 sm:size-3" />
+                      <Icon icon={icon} className="size-2.5 shrink-0 sm:size-3" />
                     </div>
                     <span className="text-muted-foreground text-xs sm:text-sm">
                       {RELATION_LABELS[relation]}

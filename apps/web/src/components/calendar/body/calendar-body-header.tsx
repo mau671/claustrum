@@ -15,7 +15,7 @@ export default function CalendarBodyHeader({
   return (
     <div
       className={cn(
-        "bg-background sticky top-0 z-10 flex h-[33px] w-full items-center justify-center gap-1 border-b",
+        "bg-background border-border/50 sticky top-0 z-10 flex h-[33px] w-full items-center justify-center gap-1 border-b",
         className,
       )}
     >

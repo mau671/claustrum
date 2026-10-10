@@ -104,9 +104,11 @@ export default function CalendarBodyDayContent({
           />
         ))}
 
-        {dayEvents.map((event) => (
-          <CalendarEvent key={event.id} event={event} position={eventLayouts[event.id]} />
-        ))}
+        <div className="pointer-events-none absolute inset-x-0.5 inset-y-0 [&>*]:pointer-events-auto">
+          {dayEvents.map((event) => (
+            <CalendarEvent key={event.id} event={event} position={eventLayouts[event.id]} />
+          ))}
+        </div>
       </div>
     </div>
   );

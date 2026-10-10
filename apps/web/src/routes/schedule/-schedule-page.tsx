@@ -1,14 +1,15 @@
+import {
+  Alert02Icon,
+  ArrowDown01Icon,
+  Calendar03Icon,
+  FloppyDiskIcon,
+  GridViewIcon,
+  ListViewIcon,
+  UserIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useSearch, ClientOnly } from "@tanstack/react-router";
 import { startOfWeek } from "date-fns";
-import {
-  AlertTriangle,
-  CalendarDays,
-  ChevronDown,
-  User,
-  Save,
-  LayoutGrid,
-  List,
-} from "lucide-react";
 import {
   useState,
   useMemo,
@@ -78,6 +79,14 @@ const SHOW_OTHER_CAMPUSES_STORAGE_KEY = "schedule-show-other-campuses";
 const VIEW_MODE_STORAGE_KEY = "schedule-list-view";
 
 import { EmptyState } from "@/components/ui/empty-state";
+
+function EmptyStateAlertIcon(props: { className?: string }) {
+  return <HugeiconsIcon icon={Alert02Icon} {...props} />;
+}
+
+function EmptyStateCalendarIcon(props: { className?: string }) {
+  return <HugeiconsIcon icon={Calendar03Icon} {...props} />;
+}
 
 // Export constants - fixed, independent of user zoom/viewport
 const EXPORT_HOUR_HEIGHT = 64;
@@ -1268,7 +1277,7 @@ export function SchedulePage() {
                     ? coursesQuery.error.message
                     : "Error desconocido"
                 }
-                icon={AlertTriangle}
+                icon={EmptyStateAlertIcon}
                 variant="error"
               />
             </div>
@@ -1354,7 +1363,7 @@ export function SchedulePage() {
                     disabled={isProfileActive}
                     className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
                   >
-                    <User className="size-3.5" />
+                    <HugeiconsIcon icon={UserIcon} size={14} />
                     {isProfileActive ? "Perfil activo" : "Usar mi perfil"}
                   </Button>
                 )}
@@ -1373,7 +1382,7 @@ export function SchedulePage() {
                         />
                       }
                     >
-                      <Save className="size-3.5" />
+                      <HugeiconsIcon icon={FloppyDiskIcon} size={14} />
                       {isProfileActive ? "Guardado" : "Guardar"}
                     </TooltipTrigger>
                     <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
@@ -1387,7 +1396,7 @@ export function SchedulePage() {
                 <EmptyState
                   title="Selecciona los filtros del horario"
                   description="Selecciona una sede y un periodo para visualizar los cursos disponibles."
-                  icon={CalendarDays}
+                  icon={EmptyStateCalendarIcon}
                 />
               </div>
             )}
@@ -1400,7 +1409,7 @@ export function SchedulePage() {
                   <EmptyState
                     title="No hay cursos disponibles"
                     description="No se encontraron cursos con los filtros actuales. Prueba cambiando el periodo, carrera o sede."
-                    icon={CalendarDays}
+                    icon={EmptyStateCalendarIcon}
                   />
                 </div>
               )}
@@ -1443,9 +1452,9 @@ export function SchedulePage() {
                                     aria-label="Cambiar vista"
                                   >
                                     {viewMode === "card" ? (
-                                      <List className="size-4" />
+                                      <HugeiconsIcon icon={ListViewIcon} size={16} />
                                     ) : (
-                                      <LayoutGrid className="size-4" />
+                                      <HugeiconsIcon icon={GridViewIcon} size={16} />
                                     )}
                                   </Button>
                                 )}
@@ -1460,9 +1469,11 @@ export function SchedulePage() {
                                   }
                                   onClick={() => setIsCourseListOpen((open) => !open)}
                                 >
-                                  <ChevronDown
+                                  <HugeiconsIcon
+                                    icon={ArrowDown01Icon}
+                                    size={16}
                                     className={cn(
-                                      "size-4 transition-transform",
+                                      "transition-transform",
                                       isCourseListOpen ? "rotate-0" : "-rotate-90",
                                     )}
                                   />
@@ -1577,9 +1588,9 @@ export function SchedulePage() {
                                     aria-label="Cambiar vista"
                                   >
                                     {viewMode === "card" ? (
-                                      <List className="size-4" />
+                                      <HugeiconsIcon icon={ListViewIcon} size={16} />
                                     ) : (
-                                      <LayoutGrid className="size-4" />
+                                      <HugeiconsIcon icon={GridViewIcon} size={16} />
                                     )}
                                   </Button>
                                 ) : undefined

@@ -1,4 +1,5 @@
-import { ChevronsUpDownIcon, SearchIcon } from "lucide-react";
+import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useMemo, useState } from "react";
 
 import type {
@@ -266,7 +267,11 @@ export function ScheduleFilters({
                 >
                   {selectedTerm ? formatClosedTermLabel(selectedTerm) : "Período académico"}
                 </span>
-                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                <HugeiconsIcon
+                  icon={UnfoldMoreIcon}
+                  size={14}
+                  className="-me-1! shrink-0 opacity-60"
+                />
               </ComboboxTrigger>
               <ComboboxContent
                 aria-label="Período académico"
@@ -277,7 +282,7 @@ export function ScheduleFilters({
                     className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                     placeholder="Buscar período..."
                     showTrigger={false}
-                    startAddon={<SearchIcon />}
+                    startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
                   />
                 </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>

@@ -80,40 +80,31 @@ export const Route = createFileRoute("/schedule/")({
     otherCampuses: search.otherCampuses,
     showAll: search.showAll,
   }),
-  loader: async ({ context: { queryClient }, deps }) => {
-    const promises: Promise<unknown>[] = [];
-    promises.push(queryClient.ensureQueryData(universitiesQueryOptions()));
+  loader: ({ context: { queryClient }, deps }) => {
+    // Warm up metadata and queries in background without stalling router transition
+    void queryClient.ensureQueryData(universitiesQueryOptions());
 
     const u = deps.university ?? SCHEDULE_DEFAULT_UNIVERSITY_ID;
-    if (u) promises.push(queryClient.ensureQueryData(campusesQueryOptions(u)));
+    if (u) void queryClient.ensureQueryData(campusesQueryOptions(u));
+    if (deps.campus) void queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus));
+    if (deps.career) void queryClient.ensureQueryData(studyPlansQueryOptions(deps.career));
     if (deps.campus)
-      promises.push(queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus)));
-    if (deps.career)
-      promises.push(queryClient.ensureQueryData(studyPlansQueryOptions(deps.career)));
-    if (deps.campus)
-      promises.push(
-        queryClient.ensureQueryData(academicTermsQueryOptions(deps.campus, deps.plan ?? null)),
-      );
+      void queryClient.ensureQueryData(academicTermsQueryOptions(deps.campus, deps.plan ?? null));
 
     if (deps.campus && deps.term) {
       const appState = queryClient.getQueryData(appStateQueryOptions().queryKey);
-      const userId = appState?.session?.user?.id ?? null;
-      promises.push(
-        queryClient.ensureQueryData(
-          scheduleCoursesQueryOptions({
-            termId: deps.term,
-            campusId: deps.campus,
-            careerId: deps.career ?? null,
-            planId: deps.plan ?? null,
-            includeOtherCampuses: deps.otherCampuses ?? false,
-            showAllCourses: deps.showAll ?? false,
-            userId,
-          }),
-        ),
+      const userId = appState?.user?.id ?? null;
+      void queryClient.ensureQueryData(
+        scheduleCoursesQueryOptions({
+          termId: deps.term,
+          campusId: deps.campus,
+          careerId: deps.career ?? null,
+          planId: deps.plan ?? null,
+          includeOtherCampuses: deps.otherCampuses ?? false,
+          showAllCourses: deps.showAll ?? false,
+          userId,
+        }),
       );
     }
-
-    await Promise.allSettled(promises);
   },
-  pendingComponent: () => <div className="bg-background flex-1" />,
 });

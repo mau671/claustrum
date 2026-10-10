@@ -3,7 +3,7 @@
 import type * as React from "react";
 
 import { Dialog as CommandDialogPrimitive } from "@base-ui/react/dialog";
-import { SearchIcon } from "lucide-react";
+import { Search01Icon } from "@hugeicons/core-free-icons";
 
 import {
   Autocomplete,
@@ -16,6 +16,7 @@ import {
   AutocompleteList,
   AutocompleteSeparator,
 } from "@/components/ui/autocomplete";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 export function CommandDialog({
@@ -139,7 +140,7 @@ export function CommandInput({
         )}
         placeholder={placeholder}
         size="lg"
-        startAddon={<SearchIcon />}
+        startAddon={<Icon icon={Search01Icon} size={16} />}
         {...props}
       />
     </div>

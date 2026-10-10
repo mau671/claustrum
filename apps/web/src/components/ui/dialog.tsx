@@ -5,9 +5,10 @@ import type React from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { XIcon } from "lucide-react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -95,7 +96,7 @@ export function DialogPopup({
               render={<Button size="icon" variant="ghost" />}
               {...closeProps}
             >
-              <XIcon />
+              <Icon icon={Cancel01Icon} size={16} />
             </DialogPrimitive.Close>
           )}
         </DialogPrimitive.Popup>

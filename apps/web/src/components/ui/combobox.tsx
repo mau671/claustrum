@@ -1,9 +1,10 @@
 "use client";
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react/combobox";
-import { ChevronsUpDownIcon, XIcon } from "lucide-react";
+import { Cancel01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import * as React from "react";
 
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -111,7 +112,7 @@ export function ComboboxInput({
           {...triggerProps}
         >
           <ComboboxPrimitive.Icon data-slot="combobox-icon">
-            <ChevronsUpDownIcon />
+            <Icon icon={UnfoldMoreIcon} size={16} />
           </ComboboxPrimitive.Icon>
         </ComboboxTrigger>
       )}
@@ -123,7 +124,7 @@ export function ComboboxInput({
           )}
           {...clearProps}
         >
-          <XIcon />
+          <Icon icon={Cancel01Icon} size={16} />
         </ComboboxClear>
       )}
     </ComboboxPrimitive.InputGroup>
@@ -404,7 +405,7 @@ export function ComboboxChipRemove(props: ComboboxPrimitive.ChipRemove.Props): R
       data-slot="combobox-chip-remove"
       {...props}
     >
-      <XIcon />
+      <Icon icon={Cancel01Icon} size={14} />
     </ComboboxPrimitive.ChipRemove>
   );
 }

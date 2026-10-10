@@ -5,9 +5,10 @@ import type * as React from "react";
 import { mergeProps } from "@base-ui/react/merge-props";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { useRender } from "@base-ui/react/use-render";
+import { ChevronDownIcon, ChevronUpIcon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { cva, type VariantProps } from "class-variance-authority";
-import { ChevronDownIcon, ChevronsUpDownIcon, ChevronUpIcon } from "lucide-react";
 
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 export const Select: typeof SelectPrimitive.Root = SelectPrimitive.Root;
@@ -51,7 +52,7 @@ export function SelectButton({
         <span className="in-data-placeholder:text-muted-foreground/72 flex-1 truncate">
           {children}
         </span>
-        <ChevronsUpDownIcon className={selectTriggerIconClassName} />
+        <Icon icon={UnfoldMoreIcon} size={16} className={selectTriggerIconClassName} />
       </>
     ),
     className: cn(selectTriggerVariants({ size }), "min-w-0", className),
@@ -80,7 +81,7 @@ export function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon data-slot="select-icon">
-        <ChevronsUpDownIcon className={selectTriggerIconClassName} />
+        <Icon icon={UnfoldMoreIcon} size={16} className={selectTriggerIconClassName} />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
@@ -140,7 +141,7 @@ export function SelectPopup({
             className="before:from-popover top-0 z-50 flex h-6 w-full cursor-default items-center justify-center before:pointer-events-none before:absolute before:inset-x-px before:top-px before:h-[200%] before:rounded-t-[calc(var(--radius-lg)-1px)] before:bg-linear-to-b before:from-50%"
             data-slot="select-scroll-up-arrow"
           >
-            <ChevronUpIcon className="relative size-4.5 sm:size-4" />
+            <Icon icon={ChevronUpIcon} size={16} className="relative size-4.5 sm:size-4" />
           </SelectPrimitive.ScrollUpArrow>
           <div className="bg-popover relative h-full min-w-(--anchor-width) rounded-lg border shadow-lg/5 not-dark:bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:before:shadow-[0_-1px_--theme(--color-white/6%)]">
             <SelectPrimitive.List
@@ -154,7 +155,7 @@ export function SelectPopup({
             className="before:from-popover bottom-0 z-50 flex h-6 w-full cursor-default items-center justify-center before:pointer-events-none before:absolute before:inset-x-px before:bottom-px before:h-[200%] before:rounded-b-[calc(var(--radius-lg)-1px)] before:bg-linear-to-t before:from-50%"
             data-slot="select-scroll-down-arrow"
           >
-            <ChevronDownIcon className="relative size-4.5 sm:size-4" />
+            <Icon icon={ChevronDownIcon} size={16} className="relative size-4.5 sm:size-4" />
           </SelectPrimitive.ScrollDownArrow>
         </SelectPrimitive.Popup>
       </SelectPrimitive.Positioner>

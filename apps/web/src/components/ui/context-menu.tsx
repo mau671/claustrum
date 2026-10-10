@@ -3,8 +3,9 @@
 import type * as React from "react";
 
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon } from "@hugeicons/core-free-icons";
 
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 export const ContextMenu: typeof ContextMenuPrimitive.Root = ContextMenuPrimitive.Root;
@@ -287,7 +288,7 @@ export function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ms-auto -me-0.5 opacity-80" />
+      <Icon icon={ChevronRightIcon} size={16} className="ms-auto -me-0.5 opacity-80" />
     </ContextMenuPrimitive.SubmenuTrigger>
   );
 }

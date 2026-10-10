@@ -4,9 +4,10 @@ import type * as React from "react";
 
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { type Button, buttonVariants } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 export function Pagination({
@@ -76,34 +77,36 @@ export function PaginationLink({
 
 export function PaginationPrevious({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof PaginationLink>): React.ReactElement {
   return (
     <PaginationLink
-      aria-label="Go to previous page"
+      aria-label="Ir a la página anterior"
       className={cn("max-sm:aspect-square max-sm:p-0", className)}
       size="default"
       {...props}
     >
-      <ChevronLeftIcon className="sm:-ms-1" />
-      <span className="max-sm:hidden">Previous</span>
+      <Icon icon={ChevronLeftIcon} size={16} className="sm:-ms-1" />
+      <span className="max-sm:hidden">{children ?? "Anterior"}</span>
     </PaginationLink>
   );
 }
 
 export function PaginationNext({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof PaginationLink>): React.ReactElement {
   return (
     <PaginationLink
-      aria-label="Go to next page"
+      aria-label="Ir a la página siguiente"
       className={cn("max-sm:aspect-square max-sm:p-0", className)}
       size="default"
       {...props}
     >
-      <span className="max-sm:hidden">Next</span>
-      <ChevronRightIcon className="sm:-me-1" />
+      <span className="max-sm:hidden">{children ?? "Siguiente"}</span>
+      <Icon icon={ChevronRightIcon} size={16} className="sm:-me-1" />
     </PaginationLink>
   );
 }
@@ -119,7 +122,7 @@ export function PaginationEllipsis({
       data-slot="pagination-ellipsis"
       {...props}
     >
-      <MoreHorizontalIcon className="size-5 sm:size-4" />
+      <Icon icon={MoreHorizontalIcon} size={16} className="size-5 sm:size-4" />
       <span className="sr-only">More pages</span>
     </span>
   );

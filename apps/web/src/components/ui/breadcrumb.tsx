@@ -4,8 +4,9 @@ import type * as React from "react";
 
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { ChevronRightIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 export function Breadcrumb({ ...props }: React.ComponentProps<"nav">): React.ReactElement {
@@ -85,7 +86,7 @@ export function BreadcrumbSeparator({
       role="presentation"
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? <Icon icon={ChevronRightIcon} size={16} />}
     </li>
   );
 }
@@ -102,7 +103,7 @@ export function BreadcrumbEllipsis({
       role="presentation"
       {...props}
     >
-      <MoreHorizontal className="size-4" />
+      <Icon icon={MoreHorizontalIcon} size={16} className="size-4" />
       <span className="sr-only">More</span>
     </span>
   );

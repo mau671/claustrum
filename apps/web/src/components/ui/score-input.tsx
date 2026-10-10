@@ -1,6 +1,7 @@
-import { Minus, Plus } from "lucide-react";
+import { Add01Icon, Remove01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -12,6 +13,7 @@ export function ScoreInput({
   step = 0.1,
   regex = /^\d{0,2}(\.\d?)?$/,
   placeholder = "0-10",
+  optional = false,
 }: {
   label: string;
   value: string;
@@ -20,6 +22,7 @@ export function ScoreInput({
   step?: number;
   regex?: RegExp;
   placeholder?: string;
+  optional?: boolean;
 }) {
   const handleValueChange = (nextValue: string) => {
     if (nextValue === "") {
@@ -55,7 +58,16 @@ export function ScoreInput({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      {optional ? (
+        <div className="inline-flex w-full items-center justify-between gap-2">
+          <Label>{label}</Label>
+          <Label className="text-muted-foreground font-normal" render={<span />}>
+            Opcional
+          </Label>
+        </div>
+      ) : (
+        <Label>{label}</Label>
+      )}
       <div className="border-input focus-within:border-ring focus-within:ring-ring/50 flex h-9 w-full items-center overflow-hidden rounded-md border bg-transparent transition-[color,box-shadow] focus-within:ring-[3px]">
         <Input
           className="h-full w-full rounded-none border-0 bg-transparent px-2 text-center tabular-nums shadow-none focus-visible:ring-0"
@@ -73,7 +85,7 @@ export function ScoreInput({
           disabled={isAtMin}
           aria-label={`Disminuir ${label.toLowerCase()}`}
         >
-          <Minus className="size-3.5" />
+          <Icon icon={Remove01Icon} size={14} className="size-3.5" />
         </Button>
         <Button
           type="button"
@@ -83,7 +95,7 @@ export function ScoreInput({
           disabled={isAtMax}
           aria-label={`Aumentar ${label.toLowerCase()}`}
         >
-          <Plus className="size-3.5" />
+          <Icon icon={Add01Icon} size={14} className="size-3.5" />
         </Button>
       </div>
     </div>

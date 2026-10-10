@@ -1,12 +1,13 @@
 "use client";
 
+import { Cancel01Icon, CheckIcon, LoaderCircleIcon } from "@hugeicons/core-free-icons";
 import { useMachine } from "@xstate/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Check, X, LoaderCircle } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion, type Transition } from "motion/react";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Progress } from "@/components/ui/progress";
 import { statefulButtonMachine } from "@/lib/stateful-button-machine";
 import { cn } from "@/lib/utils";
@@ -332,7 +333,13 @@ const StatefulButton: React.FC<StatefulButtonProps> = ({
 
   const loadingContent = (
     <>
-      <LoaderCircle className="animate-spin" aria-hidden="true" data-cy="spinner-icon" />
+      <Icon
+        icon={LoaderCircleIcon}
+        size={16}
+        className="animate-spin"
+        aria-hidden="true"
+        data-cy="spinner-icon"
+      />
       <span className="sr-only">{ariaMsg.loading}</span>
     </>
   );
@@ -346,13 +353,13 @@ const StatefulButton: React.FC<StatefulButtonProps> = ({
   );
   const successContent = (
     <>
-      <Check aria-hidden="true" data-cy="check-icon" />
+      <Icon icon={CheckIcon} size={16} aria-hidden="true" data-cy="check-icon" />
       <span className="sr-only">{ariaMsg.success}</span>
     </>
   );
   const errorContent = (
     <>
-      <X aria-hidden="true" data-cy="x-icon" />
+      <Icon icon={Cancel01Icon} size={16} aria-hidden="true" data-cy="x-icon" />
       <span className="sr-only">{ariaMsg.error}</span>
     </>
   );

@@ -1,11 +1,11 @@
-import { LucideIcon } from "lucide-react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 export interface EmptyStateProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
   variant?: "default" | "error";
   className?: string;
 }

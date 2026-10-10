@@ -1,6 +1,7 @@
-import { GripVerticalIcon } from "lucide-react";
+import { GripVerticalIcon } from "@hugeicons/core-free-icons";
 import * as ResizablePrimitive from "react-resizable-panels";
 
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 function ResizablePanelGroup({ className, ...props }: ResizablePrimitive.GroupProps) {
@@ -35,7 +36,7 @@ function ResizableHandle({
     >
       {withHandle && (
         <div className="bg-border z-10 flex h-4 w-3 items-center justify-center rounded-xs border">
-          <GripVerticalIcon className="size-2.5" />
+          <Icon icon={GripVerticalIcon} size={10} className="size-2.5" />
         </div>
       )}
     </ResizablePrimitive.Separator>

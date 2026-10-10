@@ -1,5 +1,5 @@
+import { Logout01Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Icon } from "@/components/ui/icon";
 import { signOut } from "@/lib/auth/client";
 
 interface UserMenuDropdownProps {
@@ -72,7 +73,7 @@ export function UserMenuDropdown({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>
-            <Settings className="size-4" />
+            <Icon icon={Settings01Icon} size={16} className="size-4" />
             Configuración
           </DropdownMenuLinkItem>
         </DropdownMenuGroup>
@@ -85,7 +86,7 @@ export function UserMenuDropdown({
             void navigate({ to: "/auth/signin" });
           }}
         >
-          <LogOut className="size-4" />
+          <Icon icon={Logout01Icon} size={16} className="size-4" />
           Cerrar sesión
         </DropdownMenuItem>
       </DropdownMenuContent>

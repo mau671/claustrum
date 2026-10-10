@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { type LucideIcon } from "lucide-react";
 
+import { Icon, type IconSvgElement } from "@/components/ui/icon";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -15,7 +15,7 @@ export function NavMain({
   items: {
     title: string;
     url: string;
-    icon?: LucideIcon;
+    icon?: IconSvgElement;
   }[];
 }) {
   return (
@@ -28,7 +28,7 @@ export function NavMain({
                 render={<Link to={item.url} preload="intent" />}
                 tooltip={item.title}
               >
-                {item.icon && <item.icon />}
+                {item.icon && <Icon icon={item.icon} size={16} />}
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

@@ -1,8 +1,8 @@
 "use client";
 
-import { type LucideIcon } from "lucide-react";
 import * as React from "react";
 
+import { Icon, type IconSvgElement } from "@/components/ui/icon";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -18,7 +18,7 @@ export function NavSecondary({
   items: {
     title: string;
     url: string;
-    icon: LucideIcon;
+    icon: IconSvgElement;
   }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
@@ -28,7 +28,7 @@ export function NavSecondary({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton render={<a href={item.url} aria-label={item.title} />}>
-                <item.icon />
+                <Icon icon={item.icon} size={16} />
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

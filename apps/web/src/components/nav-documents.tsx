@@ -1,6 +1,11 @@
 "use client";
 
-import { Folder, MoreHorizontal, Share, Trash2, type LucideIcon } from "lucide-react";
+import {
+  Delete02Icon,
+  Folder01Icon,
+  MoreHorizontalIcon,
+  Share01Icon,
+} from "@hugeicons/core-free-icons";
 
 import {
   DropdownMenu,
@@ -9,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Icon, type IconSvgElement } from "@/components/ui/icon";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -25,7 +31,7 @@ export function NavDocuments({
   items: {
     name: string;
     url: string;
-    icon: LucideIcon;
+    icon: IconSvgElement;
   }[];
 }) {
   const { isMobile } = useSidebar();
@@ -37,7 +43,7 @@ export function NavDocuments({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton render={<a href={item.url} aria-label={item.name} />}>
-              <item.icon />
+              <Icon icon={item.icon} size={16} />
               <span>{item.name}</span>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -49,7 +55,7 @@ export function NavDocuments({
                   />
                 }
               >
-                <MoreHorizontal />
+                <Icon icon={MoreHorizontalIcon} size={16} />
                 <span className="sr-only">More</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -58,16 +64,16 @@ export function NavDocuments({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <Folder />
+                  <Icon icon={Folder01Icon} size={16} />
                   <span>Open</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Share />
+                  <Icon icon={Share01Icon} size={16} />
                   <span>Share</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
-                  <Trash2 />
+                  <Icon icon={Delete02Icon} size={16} />
                   <span>Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -76,7 +82,7 @@ export function NavDocuments({
         ))}
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
+            <Icon icon={MoreHorizontalIcon} size={16} className="text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
         </SidebarMenuItem>

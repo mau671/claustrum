@@ -1,20 +1,21 @@
+import {
+  ArrowRight01Icon,
+  Calendar03Icon,
+  GraduationCapIcon,
+  Home01Icon,
+  Moon02Icon,
+  Notification03Icon,
+  PaintBoardIcon,
+  Search01Icon,
+  Settings01Icon,
+  Shield01Icon,
+  Sun03Icon,
+  UserIcon,
+  UserMultiple02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import {
-  Bell,
-  CalendarDays,
-  ChevronRight,
-  GraduationCap,
-  Home,
-  Moon,
-  Palette,
-  Search,
-  Settings,
-  Shield,
-  Sun,
-  User,
-  Users,
-} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { useTheme } from "@/components/theme-provider";
@@ -28,6 +29,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { MorphIcon } from "@/components/ui/icon";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -44,13 +46,13 @@ type BreadcrumbItem = {
 };
 
 const quickLinks = [
-  { label: "Inicio", to: "/overview", icon: Home },
-  { label: "Horarios", to: "/schedule", icon: CalendarDays },
-  { label: "Plan de estudios", to: "/curriculum", icon: GraduationCap },
-  { label: "Profesores", to: "/professors", icon: Users },
-  { label: "Perfil", to: "/settings/profile", icon: User },
-  { label: "Seguridad", to: "/settings/security", icon: Shield },
-  { label: "Apariencia", to: "/settings/appearance", icon: Palette },
+  { label: "Inicio", to: "/overview", icon: Home01Icon },
+  { label: "Horarios", to: "/schedule", icon: Calendar03Icon },
+  { label: "Plan de estudios", to: "/curriculum", icon: GraduationCapIcon },
+  { label: "Profesores", to: "/professors", icon: UserMultiple02Icon },
+  { label: "Perfil", to: "/settings/profile", icon: UserIcon },
+  { label: "Seguridad", to: "/settings/security", icon: Shield01Icon },
+  { label: "Apariencia", to: "/settings/appearance", icon: PaintBoardIcon },
 ] as const;
 
 const pageTitles: Record<string, string> = {
@@ -194,7 +196,7 @@ export function SiteHeader() {
   ]);
 
   return (
-    <header className="bg-sidebar sticky top-0 z-40 hidden h-(--header-height) shrink-0 items-center px-4 md:flex lg:px-6">
+    <header className="sticky top-0 z-40 hidden h-(--header-height) shrink-0 items-center bg-transparent px-4 md:flex lg:px-6">
       <div
         className={cn(
           "w-full items-center gap-3",
@@ -210,7 +212,11 @@ export function SiteHeader() {
             return (
               <div key={item.to ?? item.label} className="flex min-w-0 items-center gap-2">
                 {index > 0 ? (
-                  <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+                  <HugeiconsIcon
+                    icon={ArrowRight01Icon}
+                    size={16}
+                    className="text-muted-foreground shrink-0"
+                  />
                 ) : null}
                 {item.isLoading ? (
                   <span className="bg-muted-foreground/20 h-4 w-40 animate-pulse rounded" />
@@ -237,7 +243,7 @@ export function SiteHeader() {
             onClick={() => setIsCommandOpen(true)}
             className="bg-background text-muted-foreground ring-border/60 hover:text-foreground hover:ring-primary/30 focus-visible:ring-ring/50 hidden h-11 items-center gap-3 rounded-full px-5 shadow-sm ring-1 transition-colors focus-visible:ring-2 focus-visible:outline-none lg:flex"
           >
-            <Search className="size-5 shrink-0" />
+            <HugeiconsIcon icon={Search01Icon} size={20} className="shrink-0" />
             <span className="min-w-0 flex-1 text-left text-sm">Buscar…</span>
             <KbdGroup>
               <Kbd>Ctrl</Kbd>
@@ -254,7 +260,7 @@ export function SiteHeader() {
               className="relative rounded-full"
               render={<Link to="/moderation" aria-label="Moderación" title="Moderación" />}
             >
-              <Shield className="size-[1.2rem]" />
+              <HugeiconsIcon icon={Shield01Icon} size={20} />
               {totalPending > 0 && (
                 <span className="bg-foreground text-background ring-background absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[8px] font-bold ring-2">
                   {totalPending > 9 ? "9+" : totalPending}
@@ -274,7 +280,7 @@ export function SiteHeader() {
                 />
               }
             >
-              <Bell className="size-[1.2rem]" />
+              <HugeiconsIcon icon={Notification03Icon} size={20} />
               {unreadCount > 0 && (
                 <span className="bg-destructive ring-background absolute top-1 right-1 flex size-2 rounded-full ring-2" />
               )}
@@ -332,8 +338,10 @@ export function SiteHeader() {
             title="Alternar tema"
             className="rounded-full"
           >
-            <Sun className="size-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-            <Moon className="absolute size-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+            <MorphIcon
+              icon={theme === "dark" ? Moon02Icon : Sun03Icon}
+              size={theme === "dark" ? 20 : 22}
+            />
           </Button>
           <Button
             variant="ghost"
@@ -343,7 +351,7 @@ export function SiteHeader() {
               <Link to="/settings/appearance" aria-label="Configuración" title="Configuración" />
             }
           >
-            <Settings className="size-[1.2rem]" />
+            <HugeiconsIcon icon={Settings01Icon} size={20} />
           </Button>
         </div>
       </div>
@@ -364,7 +372,7 @@ export function SiteHeader() {
                   value={`${item.label} ${item.to}`}
                   onSelect={() => runCommand(() => void navigate({ to: item.to }))}
                 >
-                  <item.icon />
+                  <HugeiconsIcon icon={item.icon} size={16} />
                   <span>{item.label}</span>
                 </CommandItem>
               ))}
@@ -372,13 +380,17 @@ export function SiteHeader() {
             <CommandSeparator />
             <CommandGroup heading="Acciones">
               <CommandItem onSelect={() => runCommand(toggleTheme)}>
-                {theme === "dark" ? <Sun /> : <Moon />}
+                {theme === "dark" ? (
+                  <HugeiconsIcon icon={Sun03Icon} size={16} />
+                ) : (
+                  <HugeiconsIcon icon={Moon02Icon} size={16} />
+                )}
                 <span>{theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => runCommand(() => void navigate({ to: "/settings/appearance" }))}
               >
-                <Settings />
+                <HugeiconsIcon icon={Settings01Icon} size={16} />
                 <span>Abrir configuración</span>
               </CommandItem>
             </CommandGroup>

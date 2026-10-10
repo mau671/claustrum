@@ -1,16 +1,17 @@
-import { Link } from "@tanstack/react-router";
 import {
-  CalendarClock,
-  EllipsisVertical,
-  FileText,
-  GraduationCap,
-  LayoutDashboard,
-  Loader2,
-  LogIn,
-  MessageCircle,
-  Users,
-} from "lucide-react";
-import { useState } from "react";
+  BubbleChatUserIcon,
+  Calendar03Icon,
+  File01Icon,
+  GraduationCapIcon,
+  Home01Icon,
+  Loading02Icon,
+  Login01Icon,
+  MoreVerticalIcon,
+  UserMultiple02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import { Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,34 +21,66 @@ import { useAppAuth } from "@/lib/auth/app-auth-context";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
 import { cn } from "@/lib/utils";
 
+function createFilledIcon(icon: IconSvgElement, invertKeys: string[] = []): IconSvgElement {
+  return icon.map(([tag, attrs]) => {
+    const isClosed = typeof attrs.d === "string" && attrs.d.includes("Z");
+    const isInverted = invertKeys.includes(String(attrs.key));
+    if (isInverted) {
+      return [
+        tag,
+        {
+          ...attrs,
+          stroke: "var(--background)",
+          fill: isClosed ? "var(--background)" : "none",
+        },
+      ];
+    }
+    if (isClosed) {
+      return [
+        tag,
+        {
+          ...attrs,
+          fill: "currentColor",
+        },
+      ];
+    }
+    return [tag, attrs];
+  });
+}
+
 const data = {
   navMain: [
     {
       title: "Inicio",
       url: "/overview",
-      icon: LayoutDashboard,
+      icon: Home01Icon,
+      filledIcon: createFilledIcon(Home01Icon),
     },
     {
       title: "Horarios",
       url: "/schedule",
-      icon: CalendarClock,
+      icon: Calendar03Icon,
+      filledIcon: createFilledIcon(Calendar03Icon, ["2", "3"]),
     },
     {
       title: "Plan de estudios",
       url: "/curriculum",
-      icon: GraduationCap,
+      icon: GraduationCapIcon,
+      filledIcon: createFilledIcon(GraduationCapIcon),
     },
     {
       title: "Profesores",
       url: "/professors",
-      icon: Users,
+      icon: UserMultiple02Icon,
+      filledIcon: createFilledIcon(UserMultiple02Icon),
     },
   ],
   navSecondary: [
     {
       title: "Reglamento y políticas",
       url: "/policies",
-      icon: FileText,
+      icon: File01Icon,
+      filledIcon: createFilledIcon(File01Icon, ["0", "1"]),
     },
   ],
 };
@@ -87,6 +120,41 @@ export function AppSidebar() {
   const { activePlan } = useActiveStudyPlan();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const enterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+    enterTimerRef.current = setTimeout(() => {
+      setIsHovered(true);
+      enterTimerRef.current = null;
+    }, 160);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (enterTimerRef.current) {
+      clearTimeout(enterTimerRef.current);
+      enterTimerRef.current = null;
+    }
+    leaveTimerRef.current = setTimeout(() => {
+      setIsHovered(false);
+      leaveTimerRef.current = null;
+    }, 120);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (enterTimerRef.current) clearTimeout(enterTimerRef.current);
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+    };
+  }, []);
+
+  const isExpanded = isHovered || isUserMenuOpen;
 
   const user = authUser
     ? {
@@ -99,21 +167,24 @@ export function AppSidebar() {
 
   return (
     <aside
+      data-state={isExpanded ? "expanded" : "collapsed"}
       data-user-menu={isUserMenuOpen ? "open" : "closed"}
-      className="peer/sidebar group/sidebar bg-sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col px-4 pt-1 pb-4 transition-[width] duration-200 ease-out hover:w-72 data-[user-menu=open]:w-72 md:flex"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="peer/sidebar group/sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out data-[state=expanded]:w-72 md:flex"
     >
       <Link
         to="/overview"
         preload="intent"
         aria-label="Claustrum"
-        className="text-foreground hover:bg-background/70 flex h-12 items-center gap-3 rounded-full transition-colors"
+        className="text-foreground hover:bg-background/70 flex h-12 items-center gap-3 overflow-hidden rounded-full whitespace-nowrap transition-colors"
       >
         <span className="flex size-12 shrink-0 items-center justify-center">
           <span className="flex size-9 items-center justify-center rounded-full">
             <ClaustrumLogo className="size-8" />
           </span>
         </span>
-        <span className="truncate text-sm font-semibold opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
+        <span className="truncate text-sm font-semibold opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
           Claustrum
         </span>
       </Link>
@@ -126,7 +197,7 @@ export function AppSidebar() {
               to={item.url}
               preload="intent"
               activeOptions={{
-                exact: true,
+                exact: false,
                 includeSearch: false,
                 includeHash: false,
               }}
@@ -143,24 +214,26 @@ export function AppSidebar() {
               }
               aria-label={item.title}
               className={cn(
-                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 rounded-full text-sm font-medium transition-colors",
-                "data-[status=active]:text-foreground data-[status=active]:group-hover/sidebar:bg-background data-[status=active]:group-data-[user-menu=open]/sidebar:bg-background",
-                "data-[status=active]:group-hover/sidebar:shadow-sm data-[status=active]:group-data-[user-menu=open]/sidebar:shadow-sm",
+                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                "data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-sm",
                 "data-[status=pending]:text-muted-foreground data-[status=pending]:bg-transparent data-[status=pending]:shadow-none",
               )}
             >
-              <span
-                className={cn(
-                  "flex size-12 shrink-0 items-center justify-center rounded-full transition-colors group-hover/sidebar:bg-transparent group-hover/sidebar:shadow-none group-data-[user-menu=open]/sidebar:bg-transparent group-data-[user-menu=open]/sidebar:shadow-none",
-                  "group-data-[status=active]/nav-item:bg-background group-data-[status=active]/nav-item:shadow-sm",
-                  "group-data-[status=pending]/nav-item:bg-transparent group-data-[status=pending]/nav-item:shadow-none",
-                )}
-              >
-                <item.icon className="size-5" />
-              </span>
-              <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
-                {item.title}
-              </span>
+              {({ isActive }) => (
+                <>
+                  <span className="flex size-12 shrink-0 items-center justify-center">
+                    <HugeiconsIcon
+                      icon={item.icon}
+                      altIcon={item.filledIcon}
+                      showAlt={isActive}
+                      size={20}
+                    />
+                  </span>
+                  <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                    {item.title}
+                  </span>
+                </>
+              )}
             </Link>
           );
         })}
@@ -171,17 +244,13 @@ export function AppSidebar() {
           onClick={() => setIsFeedbackOpen(true)}
           aria-label="Retroalimentación"
           className={cn(
-            "group/nav-item hover:bg-background/70 hover:text-foreground focus-visible:ring-ring flex h-12 w-full cursor-pointer items-center gap-3 rounded-full text-sm font-medium transition-colors outline-none focus-visible:ring-2",
+            "group/nav-item hover:bg-background/70 hover:text-foreground focus-visible:ring-ring flex h-12 w-full cursor-pointer items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2",
           )}
         >
-          <span
-            className={cn(
-              "flex size-12 shrink-0 items-center justify-center rounded-full transition-colors group-hover/sidebar:bg-transparent group-hover/sidebar:shadow-none group-data-[user-menu=open]/sidebar:bg-transparent group-data-[user-menu=open]/sidebar:shadow-none",
-            )}
-          >
-            <MessageCircle className="size-5" />
+          <span className="flex size-12 shrink-0 items-center justify-center">
+            <HugeiconsIcon icon={BubbleChatUserIcon} size={20} />
           </span>
-          <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
+          <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
             Retroalimentación
           </span>
         </button>
@@ -193,30 +262,32 @@ export function AppSidebar() {
               to={item.url}
               preload="intent"
               activeOptions={{
-                exact: true,
+                exact: false,
                 includeSearch: false,
                 includeHash: false,
               }}
               aria-label={item.title}
               className={cn(
-                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 rounded-full text-sm font-medium transition-colors",
-                "data-[status=active]:text-foreground data-[status=active]:group-hover/sidebar:bg-background data-[status=active]:group-data-[user-menu=open]/sidebar:bg-background",
-                "data-[status=active]:group-hover/sidebar:shadow-sm data-[status=active]:group-data-[user-menu=open]/sidebar:shadow-sm",
+                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                "data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-sm",
                 "data-[status=pending]:text-muted-foreground data-[status=pending]:bg-transparent data-[status=pending]:shadow-none",
               )}
             >
-              <span
-                className={cn(
-                  "flex size-12 shrink-0 items-center justify-center rounded-full transition-colors group-hover/sidebar:bg-transparent group-hover/sidebar:shadow-none group-data-[user-menu=open]/sidebar:bg-transparent group-data-[user-menu=open]/sidebar:shadow-none",
-                  "group-data-[status=active]/nav-item:bg-background group-data-[status=active]/nav-item:shadow-sm",
-                  "group-data-[status=pending]/nav-item:bg-transparent group-data-[status=pending]/nav-item:shadow-none",
-                )}
-              >
-                <item.icon className="size-5" />
-              </span>
-              <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
-                {item.title}
-              </span>
+              {({ isActive }) => (
+                <>
+                  <span className="flex size-12 shrink-0 items-center justify-center">
+                    <HugeiconsIcon
+                      icon={item.icon}
+                      altIcon={item.filledIcon}
+                      showAlt={isActive}
+                      size={20}
+                    />
+                  </span>
+                  <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                    {item.title}
+                  </span>
+                </>
+              )}
             </Link>
           );
         })}
@@ -230,7 +301,7 @@ export function AppSidebar() {
               <Button
                 type="button"
                 variant="ghost"
-                className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 rounded-full !p-0 text-left"
+                className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 overflow-hidden rounded-full !p-0 text-left whitespace-nowrap"
               >
                 <span className="flex size-12 shrink-0 items-center justify-center">
                   <Avatar className="border-muted-foreground/35 bg-background size-8 rounded-full border">
@@ -240,11 +311,15 @@ export function AppSidebar() {
                     </AvatarFallback>
                   </Avatar>
                 </span>
-                <span className="grid min-w-0 flex-1 opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
+                <span className="grid min-w-0 flex-1 opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
                   <span className="truncate text-sm font-medium">{user.name}</span>
                   <span className="text-muted-foreground truncate text-xs">{user.email}</span>
                 </span>
-                <EllipsisVertical className="ml-auto size-4 shrink-0 opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100" />
+                <HugeiconsIcon
+                  icon={MoreVerticalIcon}
+                  size={16}
+                  className="ml-auto shrink-0 opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out"
+                />
               </Button>
             }
             align="start"
@@ -253,31 +328,33 @@ export function AppSidebar() {
             contentClass="w-56 rounded-lg"
           />
         ) : isAuthLoading ? (
-          <Button
-            variant="ghost"
-            disabled
-            className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 rounded-full !p-0 text-left"
-          >
+          <div className="text-muted-foreground flex h-12 w-full items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap">
             <span className="flex size-12 shrink-0 items-center justify-center">
-              <Loader2 className="size-5 animate-spin" />
+              <HugeiconsIcon
+                icon={Loading02Icon}
+                size={20}
+                className="size-5 shrink-0 animate-spin"
+              />
             </span>
-            <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
+            <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
               Cargando sesión
             </span>
-          </Button>
+          </div>
         ) : (
-          <Button
-            variant="ghost"
-            className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 rounded-full !p-0 text-left"
-            render={<Link to="/auth/signin" />}
+          <Link
+            to="/auth/signin"
+            aria-label="Iniciar sesión"
+            className={cn(
+              "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+            )}
           >
             <span className="flex size-12 shrink-0 items-center justify-center">
-              <LogIn className="size-5" />
+              <HugeiconsIcon icon={Login01Icon} size={20} className="size-5 shrink-0" />
             </span>
-            <span className="truncate opacity-0 transition-opacity duration-150 group-hover/sidebar:opacity-100 group-data-[user-menu=open]/sidebar:opacity-100">
+            <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
               Iniciar sesión
             </span>
-          </Button>
+          </Link>
         )}
       </div>
 

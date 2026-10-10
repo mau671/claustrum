@@ -1,6 +1,6 @@
+import { Logout01Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Icon } from "@/components/ui/icon";
 import { signOut } from "@/lib/auth/client";
 import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
 
@@ -54,7 +55,7 @@ export function UserMenu({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>
-            <Settings />
+            <Icon icon={Settings01Icon} size={16} />
             Configuración
           </DropdownMenuLinkItem>
         </DropdownMenuGroup>
@@ -67,7 +68,7 @@ export function UserMenu({
             void navigate({ to: "/" });
           }}
         >
-          <LogOut />
+          <Icon icon={Logout01Icon} size={16} />
           Cerrar sesión
         </DropdownMenuItem>
       </DropdownMenuContent>

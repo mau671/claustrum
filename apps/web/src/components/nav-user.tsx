@@ -1,7 +1,8 @@
+import { Login01Icon, MoreVerticalIcon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
-import { EllipsisVertical, LogIn, Settings } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Icon } from "@/components/ui/icon";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -30,7 +31,7 @@ export function NavUser({
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <LogIn className="size-4" />
+            <Icon icon={Login01Icon} size={16} className="size-4" />
             <span className="flex-1 text-left">Iniciar sesión</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -40,7 +41,7 @@ export function NavUser({
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <Settings className="size-4" />
+            <Icon icon={Settings01Icon} size={16} className="size-4" />
             <span className="flex-1 text-left">Configuración</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -68,7 +69,7 @@ export function NavUser({
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="text-muted-foreground truncate text-xs">{user.email}</span>
               </div>
-              <EllipsisVertical className="ml-auto size-4" />
+              <Icon icon={MoreVerticalIcon} size={16} className="ml-auto size-4" />
             </SidebarMenuButton>
           }
           align="end"

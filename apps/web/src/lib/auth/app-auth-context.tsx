@@ -28,10 +28,12 @@ export function AppAuthProvider({ children }: { children: ReactNode }) {
   return <AppAuthContext.Provider value={value}>{children}</AppAuthContext.Provider>;
 }
 
+const defaultAuthContext: AppAuthContextValue = {
+  authUser: null as unknown as AppAuthUser,
+  isAuthLoading: false,
+};
+
 export function useAppAuth() {
   const context = use(AppAuthContext);
-  if (!context) {
-    throw new Error("useAppAuth must be used within AppAuthProvider");
-  }
-  return context;
+  return context ?? defaultAuthContext;
 }

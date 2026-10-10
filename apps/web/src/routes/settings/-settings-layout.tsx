@@ -1,16 +1,17 @@
-import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+  BubbleChatUserIcon,
+  File01Icon,
+  Logout01Icon,
+  PaintBoardIcon,
+  Shield01Icon,
   UserIcon,
-  ShieldIcon,
-  PaletteIcon,
-  LogOutIcon,
-  MessageCircleIcon,
-  FileTextIcon,
-} from "lucide-react";
+} from "@hugeicons/core-free-icons";
+import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { signOut } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -23,12 +24,12 @@ const navItems = [
   {
     label: "Seguridad",
     path: "/settings/security",
-    icon: ShieldIcon,
+    icon: Shield01Icon,
   },
   {
     label: "Apariencia",
     path: "/settings/appearance",
-    icon: PaletteIcon,
+    icon: PaintBoardIcon,
   },
 ];
 
@@ -61,7 +62,7 @@ export function SettingsLayout() {
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                     )}
                   >
-                    <item.icon className="size-4" />
+                    <Icon icon={item.icon} size={16} className="size-4" />
                     {item.label}
                   </Link>
                 );
@@ -72,14 +73,14 @@ export function SettingsLayout() {
                 onClick={() => setIsFeedbackOpen(true)}
                 className="hover:bg-accent hover:text-accent-foreground text-muted-foreground flex items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium transition-colors lg:hidden"
               >
-                <MessageCircleIcon className="size-4" />
+                <Icon icon={BubbleChatUserIcon} size={16} className="size-4" />
                 Retroalimentación
               </button>
               <Link
                 to="/policies"
                 className="hover:bg-accent hover:text-accent-foreground text-muted-foreground flex items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium transition-colors lg:hidden"
               >
-                <FileTextIcon className="size-4" />
+                <Icon icon={File01Icon} size={16} className="size-4" />
                 Reglamento y políticas
               </Link>
               <div className="bg-border my-1 h-px lg:hidden" />
@@ -93,7 +94,7 @@ export function SettingsLayout() {
                 }}
                 className="text-destructive hover:bg-destructive/10 flex items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium transition-colors lg:hidden"
               >
-                <LogOutIcon className="size-4" />
+                <Icon icon={Logout01Icon} size={16} className="size-4" />
                 Cerrar sesión
               </button>
             </nav>

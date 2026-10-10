@@ -1,6 +1,6 @@
+import { Loading02Icon, Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Loader2Icon, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
@@ -16,6 +16,7 @@ import {
   ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth/client";
@@ -145,7 +146,11 @@ export function InsetOnboardingPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Loader2Icon className="text-muted-foreground size-6 animate-spin" />
+        <Icon
+          icon={Loading02Icon}
+          size={24}
+          className="text-muted-foreground size-6 animate-spin"
+        />
       </div>
     );
   }
@@ -226,7 +231,11 @@ export function InsetOnboardingPage() {
                           return item.code ? `${item.code}: ${item.name}` : item.name;
                         })()}
                       </span>
-                      <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                      <Icon
+                        icon={UnfoldMoreIcon}
+                        size={14}
+                        className="-me-1! size-3.5 shrink-0 opacity-60"
+                      />
                     </ComboboxTrigger>
                     <ComboboxContent
                       anchor={campusTriggerRef}
@@ -238,7 +247,7 @@ export function InsetOnboardingPage() {
                           className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                           placeholder="Buscar sede..."
                           showTrigger={false}
-                          startAddon={<SearchIcon />}
+                          startAddon={<Icon icon={Search01Icon} size={16} />}
                         />
                       </div>
                       <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -303,7 +312,11 @@ export function InsetOnboardingPage() {
                           return item.code ? `${item.code}: ${item.name}` : item.name;
                         })()}
                       </span>
-                      <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                      <Icon
+                        icon={UnfoldMoreIcon}
+                        size={14}
+                        className="-me-1! size-3.5 shrink-0 opacity-60"
+                      />
                     </ComboboxTrigger>
                     <ComboboxContent
                       anchor={academicUnitTriggerRef}
@@ -315,7 +328,7 @@ export function InsetOnboardingPage() {
                           className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                           placeholder="Buscar carrera..."
                           showTrigger={false}
-                          startAddon={<SearchIcon />}
+                          startAddon={<Icon icon={Search01Icon} size={16} />}
                         />
                       </div>
                       <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -381,7 +394,11 @@ export function InsetOnboardingPage() {
                             : item.name;
                         })()}
                       </span>
-                      <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                      <Icon
+                        icon={UnfoldMoreIcon}
+                        size={14}
+                        className="-me-1! size-3.5 shrink-0 opacity-60"
+                      />
                     </ComboboxTrigger>
                     <ComboboxContent
                       anchor={studyPlanTriggerRef}
@@ -393,7 +410,7 @@ export function InsetOnboardingPage() {
                           className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                           placeholder="Buscar plan..."
                           showTrigger={false}
-                          startAddon={<SearchIcon />}
+                          startAddon={<Icon icon={Search01Icon} size={16} />}
                         />
                       </div>
                       <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -439,7 +456,9 @@ export function InsetOnboardingPage() {
                 </Button>
               ) : (
                 <Button onClick={finishOnboarding} disabled={isSaving}>
-                  {isSaving ? <Loader2Icon className="size-4 animate-spin" /> : null}
+                  {isSaving ? (
+                    <Icon icon={Loading02Icon} size={16} className="size-4 animate-spin" />
+                  ) : null}
                   Finalizar
                 </Button>
               )}

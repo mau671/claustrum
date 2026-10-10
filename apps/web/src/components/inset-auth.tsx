@@ -1,21 +1,22 @@
+import {
+  ArrowLeft01Icon,
+  Cancel01Icon,
+  Loading02Icon,
+  Mail01Icon,
+  ShuffleIcon,
+  Tick01Icon,
+  ViewIcon,
+  ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-  ChevronLeftIcon,
-  CheckIcon,
-  EyeIcon,
-  EyeOffIcon,
-  Loader2Icon,
-  MailIcon,
-  ShuffleIcon,
-  XIcon,
-} from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
@@ -225,10 +226,16 @@ function LeftPanel() {
         <div className="flex items-start justify-between">
           <button
             type="button"
-            onClick={() => window.history.back()}
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                window.history.back();
+              } else {
+                window.location.href = "/overview";
+              }
+            }}
             className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-md bg-black/20 px-2 py-1 font-mono text-[11px] tracking-[0.2em] text-white/65 uppercase backdrop-blur-sm transition-colors hover:text-white"
           >
-            <ChevronLeftIcon className="size-3.5" />
+            <Icon icon={ArrowLeft01Icon} size={14} className="size-3.5" />
             Volver
           </button>
           <ShuffleButton onClick={shuffle} paletteName={palette.name} />
@@ -269,7 +276,11 @@ function ShuffleButton({ onClick, paletteName }: { onClick: () => void; paletteN
       onClick={onClick}
       className="group inline-flex items-center gap-2 rounded-md border border-white/10 bg-black/30 px-2.5 py-1.5 text-white/75 backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-black/40 hover:text-white focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:outline-none"
     >
-      <ShuffleIcon className="size-3.5 transition-transform group-hover:rotate-12" />
+      <Icon
+        icon={ShuffleIcon}
+        size={14}
+        className="size-3.5 transition-transform group-hover:rotate-12"
+      />
       <span className="font-mono text-[10px] tracking-[0.2em] uppercase">{paletteName}</span>
     </button>
   );
@@ -555,7 +566,7 @@ function MagicLinkButton({ email = "" }: { email?: string }) {
       disabled={pending}
       onClick={onSendMagicLink}
     >
-      <MailIcon />
+      <Icon icon={Mail01Icon} size={16} />
       {pending ? "Enviando enlace..." : "Continuar con enlace mágico"}
       {lastMethod === "magic-link" && (
         <Badge
@@ -715,14 +726,18 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
               aria-label={reveal ? "Ocultar contraseña" : "Mostrar contraseña"}
               className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
-              {reveal ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+              {reveal ? (
+                <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
+              ) : (
+                <Icon icon={ViewIcon} size={16} className="size-4" />
+              )}
             </button>
           </InputGroupAddon>
         </InputGroup>
       </Field>
 
       <Button type="submit" size="lg" className="mt-2" disabled={pending}>
-        {pending ? <Loader2Icon className="animate-spin" /> : null}
+        {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
         {pending ? "Iniciando sesión..." : "Iniciar sesión"}
       </Button>
     </form>
@@ -791,6 +806,8 @@ function SignUpForm() {
     () => passwordStrength.filter((requirement) => requirement.met).length,
     [passwordStrength],
   );
+
+  const doPasswordsMatch = Boolean(confirmPassword && password === confirmPassword);
 
   useEffect(() => {
     const bootstrapSession = async () => {
@@ -894,7 +911,7 @@ function SignUpForm() {
           required
           placeholder="Juan Pérez"
           value={name}
-          aria-invalid={Boolean(nameError)}
+          aria-invalid={nameError ? true : undefined}
           onChange={(e) => {
             setName(e.target.value);
             setNameError(null);
@@ -914,7 +931,7 @@ function SignUpForm() {
           required
           placeholder="nombre@ejemplo.com"
           value={email}
-          aria-invalid={Boolean(emailError)}
+          aria-invalid={emailError ? true : undefined}
           onChange={(e) => {
             setEmail(e.target.value);
             setEmailError(null);
@@ -935,7 +952,7 @@ function SignUpForm() {
             required
             placeholder="••••••••"
             value={password}
-            aria-invalid={Boolean(passwordError)}
+            aria-invalid={passwordError ? true : undefined}
             onChange={(e) => {
               setPassword(e.target.value);
               setPasswordError(null);
@@ -951,9 +968,9 @@ function SignUpForm() {
               className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {isPasswordVisible ? (
-                <EyeOffIcon className="size-4" />
+                <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
               ) : (
-                <EyeIcon className="size-4" />
+                <Icon icon={ViewIcon} size={16} className="size-4" />
               )}
             </button>
           </InputGroupAddon>
@@ -979,9 +996,13 @@ function SignUpForm() {
             {passwordStrength.map((requirement) => (
               <li key={requirement.text} className="flex items-center gap-2">
                 {requirement.met ? (
-                  <CheckIcon className="size-4 text-green-600 dark:text-green-400" />
+                  <Icon
+                    icon={Tick01Icon}
+                    size={16}
+                    className="size-4 text-green-600 dark:text-green-400"
+                  />
                 ) : (
-                  <XIcon className="text-muted-foreground size-4" />
+                  <Icon icon={Cancel01Icon} size={16} className="text-muted-foreground size-4" />
                 )}
                 <span
                   className={cn(
@@ -1013,7 +1034,7 @@ function SignUpForm() {
             required
             placeholder="••••••••"
             value={confirmPassword}
-            aria-invalid={Boolean(confirmPasswordError)}
+            aria-invalid={confirmPasswordError ? true : undefined}
             onChange={(e) => {
               setConfirmPassword(e.target.value);
               setConfirmPasswordError(null);
@@ -1030,19 +1051,44 @@ function SignUpForm() {
               className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               {isConfirmPasswordVisible ? (
-                <EyeOffIcon className="size-4" />
+                <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
               ) : (
-                <EyeIcon className="size-4" />
+                <Icon icon={ViewIcon} size={16} className="size-4" />
               )}
             </button>
           </InputGroupAddon>
         </InputGroup>
         <FieldError>{confirmPasswordError}</FieldError>
-        <FieldDescription>Por favor confirma tu contraseña.</FieldDescription>
+        <div className="mt-1 space-y-1">
+          <div className="flex items-center gap-2">
+            {doPasswordsMatch ? (
+              <Icon
+                icon={Tick01Icon}
+                size={16}
+                className="size-4 text-green-600 dark:text-green-400"
+              />
+            ) : (
+              <Icon icon={Cancel01Icon} size={16} className="text-muted-foreground size-4" />
+            )}
+            <span
+              className={cn(
+                "text-xs",
+                doPasswordsMatch
+                  ? "font-medium text-green-600 dark:text-green-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              {doPasswordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
+              <span className="sr-only">
+                {doPasswordsMatch ? " - Requisito cumplido" : " - Requisito pendiente"}
+              </span>
+            </span>
+          </div>
+        </div>
       </Field>
 
       <Button type="submit" size="lg" className="mt-2" disabled={pending}>
-        {pending ? <Loader2Icon className="animate-spin" /> : null}
+        {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
         {pending ? "Creando cuenta..." : "Crear cuenta"}
       </Button>
     </form>

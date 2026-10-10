@@ -1,10 +1,11 @@
+import { HelpCircleIcon, Loading02Icon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { CircleHelpIcon, Loader2Icon } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { authClient, getSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -162,12 +163,14 @@ export function AuthTwoFactorPage() {
       </fieldset>
 
       <Button type="submit" size="lg" disabled={!canVerify || isVerifying || isLoadingFactor}>
-        {isVerifying && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+        {isVerifying && (
+          <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+        )}
         {isLoadingFactor ? "Cargando..." : "Verificar"}
       </Button>
 
       <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">
-        <CircleHelpIcon className="size-3.5" />
+        <Icon icon={HelpCircleIcon} size={14} className="size-3.5" />
         ¿Perdiste el acceso?{" "}
         <Link to="/policies" className="text-foreground underline underline-offset-4">
           Contactar a soporte

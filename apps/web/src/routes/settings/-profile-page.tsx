@@ -1,6 +1,12 @@
+import {
+  Loading02Icon,
+  Search01Icon,
+  UnfoldMoreIcon,
+  Upload01Icon,
+  UserIcon,
+} from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
-import { UserIcon, Loader2Icon, UploadIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 
@@ -17,6 +23,7 @@ import {
   ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth/client";
@@ -36,7 +43,11 @@ export function ProfilePageRoute() {
     <ClientOnly
       fallback={
         <div className="flex items-center justify-center py-12">
-          <Loader2Icon className="text-muted-foreground size-6 animate-spin" />
+          <Icon
+            icon={Loading02Icon}
+            size={24}
+            className="text-muted-foreground size-6 animate-spin"
+          />
         </div>
       }
     >
@@ -267,7 +278,11 @@ function ProfilePage() {
   if (isInitialLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2Icon className="text-muted-foreground size-6 animate-spin" />
+        <Icon
+          icon={Loading02Icon}
+          size={24}
+          className="text-muted-foreground size-6 animate-spin"
+        />
       </div>
     );
   }
@@ -284,7 +299,7 @@ function ProfilePage() {
   if (!authUser) {
     return (
       <div className="py-12 text-center">
-        <UserIcon className="text-muted-foreground mx-auto mb-4 size-12" />
+        <Icon icon={UserIcon} size={48} className="text-muted-foreground mx-auto mb-4 size-12" />
         <h3 className="mb-2 text-lg font-semibold">Inicia sesión para acceder a tu perfil</h3>
         <p className="text-muted-foreground mx-auto mb-6 max-w-md">
           Necesitas estar autenticado para ver y editar tu información académica.
@@ -312,7 +327,7 @@ function ProfilePage() {
             </Avatar>
             <div className="space-y-1.5">
               <Button disabled size="sm" variant="outline" className="w-fit">
-                <UploadIcon className="mr-2 size-4" />
+                <Icon icon={Upload01Icon} size={16} className="mr-2 size-4" />
                 Subir foto
               </Button>
               <p className="text-muted-foreground text-xs">PNG o SVG, 1024x1024 máx.</p>
@@ -342,7 +357,9 @@ function ProfilePage() {
               onClick={() => void handleSaveIdentity()}
               disabled={isSavingIdentity || !hasIdentityChanges}
             >
-              {isSavingIdentity && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+              {isSavingIdentity && (
+                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+              )}
               Guardar
             </Button>
           </div>
@@ -396,7 +413,11 @@ function ProfilePage() {
                             .name
                       : "Selecciona tu sede"}
                 </span>
-                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                <Icon
+                  icon={UnfoldMoreIcon}
+                  size={14}
+                  className="-me-1! size-3.5 shrink-0 opacity-60"
+                />
               </ComboboxTrigger>
               <ComboboxContent
                 anchor={campusTriggerRef}
@@ -408,7 +429,7 @@ function ProfilePage() {
                     className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                     placeholder="Buscar sede..."
                     showTrigger={false}
-                    startAddon={<SearchIcon />}
+                    startAddon={<Icon icon={Search01Icon} size={16} />}
                   />
                 </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -467,7 +488,11 @@ function ProfilePage() {
                           )!.name
                       : "Selecciona tu escuela"}
                 </span>
-                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                <Icon
+                  icon={UnfoldMoreIcon}
+                  size={14}
+                  className="-me-1! size-3.5 shrink-0 opacity-60"
+                />
               </ComboboxTrigger>
               <ComboboxContent
                 anchor={academicUnitTriggerRef}
@@ -479,7 +504,7 @@ function ProfilePage() {
                     className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                     placeholder="Buscar escuela..."
                     showTrigger={false}
-                    startAddon={<SearchIcon />}
+                    startAddon={<Icon icon={Search01Icon} size={16} />}
                   />
                 </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -530,7 +555,11 @@ function ProfilePage() {
                           .name.replace(" - ", ": ")
                       : "Selecciona tu plan"}
                 </span>
-                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                <Icon
+                  icon={UnfoldMoreIcon}
+                  size={14}
+                  className="-me-1! size-3.5 shrink-0 opacity-60"
+                />
               </ComboboxTrigger>
               <ComboboxContent
                 anchor={studyPlanTriggerRef}
@@ -542,7 +571,7 @@ function ProfilePage() {
                     className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                     placeholder="Buscar plan..."
                     showTrigger={false}
-                    startAddon={<SearchIcon />}
+                    startAddon={<Icon icon={Search01Icon} size={16} />}
                   />
                 </div>
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -570,7 +599,9 @@ function ProfilePage() {
 
           <div className="flex justify-end pt-2">
             <Button onClick={() => void handleSave()} disabled={isSaving || !hasUnsavedChanges}>
-              {isSaving && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+              {isSaving && (
+                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+              )}
               Guardar
             </Button>
           </div>

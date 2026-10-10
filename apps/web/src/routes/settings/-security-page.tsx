@@ -1,27 +1,28 @@
+import {
+  Cancel01Icon,
+  ComputerIcon,
+  Copy01Icon,
+  Globe02Icon,
+  Link01Icon,
+  Loading02Icon,
+  Logout01Icon,
+  Mail01Icon,
+  Shield01Icon,
+  SmartPhone01Icon,
+  Tablet01Icon,
+  Tick01Icon,
+  ViewIcon,
+  ViewOffSlashIcon,
+} from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  CheckIcon,
-  CopyIcon,
-  EyeIcon,
-  EyeOffIcon,
-  LinkIcon,
-  MailIcon,
-  Loader2Icon,
-  LogOutIcon,
-  MonitorIcon,
-  ShieldIcon,
-  SmartphoneIcon,
-  TabletIcon,
-  GlobeIcon,
-  XIcon,
-} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactQrCode from "react-qr-code";
 
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { Icon, MorphIcon } from "@/components/ui/icon";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { StatefulButton } from "@/components/ui/stateful-button";
 import { toast } from "@/components/ui/toast";
@@ -152,10 +153,10 @@ function getSessionMetaItems(session: ActiveSession) {
 
 function SessionDeviceIcon({ userAgent }: { userAgent: string | null | undefined }) {
   const deviceType = getSessionDeviceType(userAgent);
-  if (deviceType === "mobile") return <SmartphoneIcon className="size-4" />;
-  if (deviceType === "tablet") return <TabletIcon className="size-4" />;
-  if (deviceType === "desktop") return <MonitorIcon className="size-4" />;
-  return <GlobeIcon className="size-4" />;
+  if (deviceType === "mobile") return <Icon icon={SmartPhone01Icon} size={16} className="size-4" />;
+  if (deviceType === "tablet") return <Icon icon={Tablet01Icon} size={16} className="size-4" />;
+  if (deviceType === "desktop") return <Icon icon={ComputerIcon} size={16} className="size-4" />;
+  return <Icon icon={Globe02Icon} size={16} className="size-4" />;
 }
 
 function getReadableErrorMessage(err: unknown, fallback: string) {
@@ -310,9 +311,13 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
         {passwordStrength.map((requirement) => (
           <li key={requirement.text} className="flex items-center gap-2">
             {requirement.met ? (
-              <CheckIcon className="size-4 text-green-600 dark:text-green-400" />
+              <Icon
+                icon={Tick01Icon}
+                size={16}
+                className="size-4 text-green-600 dark:text-green-400"
+              />
             ) : (
-              <XIcon className="text-muted-foreground size-4" />
+              <Icon icon={Cancel01Icon} size={16} className="text-muted-foreground size-4" />
             )}
             <span
               className={cn(
@@ -355,6 +360,7 @@ export function SecurityPage() {
     secret: string | null;
   } | null>(null);
   const [totpCode, setTotpCode] = useState("");
+  const [hasCopiedTotp, setHasCopiedTotp] = useState(false);
   const [isRevokingOtherSessions, setIsRevokingOtherSessions] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
@@ -409,7 +415,11 @@ export function SecurityPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2Icon className="text-muted-foreground size-6 animate-spin" />
+        <Icon
+          icon={Loading02Icon}
+          size={24}
+          className="text-muted-foreground size-6 animate-spin"
+        />
       </div>
     );
   }
@@ -417,7 +427,11 @@ export function SecurityPage() {
   if (!authUser) {
     return (
       <div className="py-12 text-center">
-        <ShieldIcon className="text-muted-foreground mx-auto mb-4 size-12" />
+        <Icon
+          icon={Shield01Icon}
+          size={48}
+          className="text-muted-foreground mx-auto mb-4 size-12"
+        />
         <h3 className="mb-2 text-lg font-semibold">Inicia sesión para acceder a seguridad</h3>
         <p className="text-muted-foreground mx-auto mb-6 max-w-md">
           Necesitas estar autenticado para cambiar tu contraseña y configurar opciones de seguridad.
@@ -501,6 +515,8 @@ export function SecurityPage() {
     const value = totpEnrollment?.secret ?? totpEnrollment?.qrCode;
     if (!value) return;
     await navigator.clipboard.writeText(value);
+    setHasCopiedTotp(true);
+    setTimeout(() => setHasCopiedTotp(false), 2000);
     toast.success("Clave copiada");
   }
 
@@ -646,9 +662,9 @@ export function SecurityPage() {
                       disabled={!hasCredentialAccount}
                     >
                       {isNewPasswordVisible ? (
-                        <EyeOffIcon className="size-4" />
+                        <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
                       ) : (
-                        <EyeIcon className="size-4" />
+                        <Icon icon={ViewIcon} size={16} className="size-4" />
                       )}
                     </button>
                   </InputGroupAddon>
@@ -677,9 +693,9 @@ export function SecurityPage() {
                       disabled={!hasCredentialAccount}
                     >
                       {isConfirmPasswordVisible ? (
-                        <EyeOffIcon className="size-4" />
+                        <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
                       ) : (
-                        <EyeIcon className="size-4" />
+                        <Icon icon={ViewIcon} size={16} className="size-4" />
                       )}
                     </button>
                   </InputGroupAddon>
@@ -697,7 +713,9 @@ export function SecurityPage() {
                 onClick={handlePasswordReset}
                 disabled={!hasCredentialAccount || isSendingPasswordReset || !canSavePassword}
               >
-                {isSendingPasswordReset && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+                {isSendingPasswordReset && (
+                  <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+                )}
                 Guardar contraseña
               </Button>
             </div>
@@ -722,7 +740,11 @@ export function SecurityPage() {
               <div className="flex items-center gap-2">
                 <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
                   {connection.key === "email" ? (
-                    <MailIcon className="text-muted-foreground size-4 shrink-0" />
+                    <Icon
+                      icon={Mail01Icon}
+                      size={16}
+                      className="text-muted-foreground size-4 shrink-0"
+                    />
                   ) : connection.key === "github" ? (
                     <GitHubIcon className="size-4 shrink-0" />
                   ) : (
@@ -735,7 +757,7 @@ export function SecurityPage() {
                 </div>
               </div>
               <Button variant="outline" size="sm" disabled className="h-8">
-                <LinkIcon className="mr-1.5 size-3.5" />
+                <Icon icon={Link01Icon} size={14} className="mr-1.5 size-3.5" />
                 {connection.linked ? "Desvincular" : "Vincular"}
               </Button>
             </div>
@@ -832,7 +854,7 @@ export function SecurityPage() {
           )}
           {isLoadingMfa ? (
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Loader2Icon className="size-4 animate-spin" />
+              <Icon icon={Loading02Icon} size={16} className="size-4 animate-spin" />
               Cargando configuración de 2FA…
             </div>
           ) : verifiedTotpFactorId ? (
@@ -843,7 +865,9 @@ export function SecurityPage() {
                   onClick={handleDisableMfa}
                   disabled={isDisablingMfa || (hasCredentialAccount && !mfaPassword.trim())}
                 >
-                  {isDisablingMfa && <Loader2Icon className="mr-2 size-4 animate-spin" />}
+                  {isDisablingMfa && (
+                    <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+                  )}
                   Desactivar
                 </Button>
               </div>
@@ -885,7 +909,7 @@ export function SecurityPage() {
                         aria-label="Copiar clave manual"
                         className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                       >
-                        <CopyIcon className="size-3.5" />
+                        <MorphIcon icon={hasCopiedTotp ? Tick01Icon : Copy01Icon} size={14} />
                       </button>
                     </div>
                   </div>
@@ -964,9 +988,9 @@ export function SecurityPage() {
               className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
             >
               {isRevokingOtherSessions ? (
-                <Loader2Icon className="mr-2 size-4 animate-spin" />
+                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
               ) : (
-                <LogOutIcon className="mr-2 size-4" />
+                <Icon icon={Logout01Icon} size={16} className="mr-2 size-4" />
               )}
               Revocar todas las demás sesiones
             </Button>
@@ -974,7 +998,7 @@ export function SecurityPage() {
           <div className="space-y-2">
             {isLoadingSessions ? (
               <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Loader2Icon className="size-4 animate-spin" />
+                <Icon icon={Loading02Icon} size={16} className="size-4 animate-spin" />
                 Cargando sesiones activas...
               </div>
             ) : activeSessions.length === 0 ? (
@@ -1014,9 +1038,13 @@ export function SecurityPage() {
                             className="text-muted-foreground hover:text-destructive focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {revokingSessionToken === session.token ? (
-                              <Loader2Icon className="size-4 animate-spin" />
+                              <Icon
+                                icon={Loading02Icon}
+                                size={16}
+                                className="size-4 animate-spin"
+                              />
                             ) : (
-                              <LogOutIcon className="size-4" />
+                              <Icon icon={Logout01Icon} size={16} className="size-4" />
                             )}
                           </button>
                         )}

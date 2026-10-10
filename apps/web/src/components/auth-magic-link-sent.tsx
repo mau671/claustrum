@@ -1,9 +1,10 @@
+import { LinkSquare01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
-import { ExternalLinkIcon } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { signIn } from "@/lib/auth/client";
@@ -184,7 +185,7 @@ export function AuthMagicLinkSentPage() {
             }
           >
             Abrir correo
-            <ExternalLinkIcon />
+            <Icon icon={LinkSquare01Icon} size={16} />
           </Button>
           <Button
             variant="ghost"

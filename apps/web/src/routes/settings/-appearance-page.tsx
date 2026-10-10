@@ -1,24 +1,25 @@
-import { SunIcon, MoonIcon, MonitorIcon } from "lucide-react";
+import { ComputerIcon, Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { useTheme } from "@/components/theme-provider";
+import { MorphIcon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 const themes = [
   {
     value: "light",
     label: "Claro",
-    icon: SunIcon,
+    icon: Sun03Icon,
   },
   {
     value: "dark",
     label: "Oscuro",
-    icon: MoonIcon,
+    icon: Moon02Icon,
   },
   {
     value: "system",
     label: "Sistema",
-    icon: MonitorIcon,
+    icon: ComputerIcon,
   },
 ];
 
@@ -35,7 +36,6 @@ export function AppearancePage() {
           <div className="grid gap-3 sm:grid-cols-3">
             {themes.map((themeOption) => {
               const isActive = theme === themeOption.value;
-              const Icon = themeOption.icon;
 
               return (
                 <button
@@ -55,7 +55,7 @@ export function AppearancePage() {
                       isActive ? "bg-primary text-primary-foreground" : "bg-muted",
                     )}
                   >
-                    <Icon className="size-6" />
+                    <MorphIcon icon={themeOption.icon} size={24} />
                   </div>
                   <div className="text-sm font-medium">{themeOption.label}</div>
                 </button>

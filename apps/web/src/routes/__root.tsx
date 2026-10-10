@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 
+import { Search01Icon } from "@hugeicons/core-free-icons";
 import {
   createRootRouteWithContext,
   Link,
@@ -11,7 +12,6 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
-import { SearchIcon } from "lucide-react";
 
 import { AppLayoutWrapper } from "@/components/app-layout-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -22,10 +22,12 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Icon } from "@/components/ui/icon";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
 import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppAuthProvider } from "@/lib/auth/app-auth-context";
 import {
   appStateQueryOptions,
   useAuthUser,
@@ -206,7 +208,12 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           <RootProvider
             key={pathname.startsWith("/docs") ? "docs-framework" : "app-framework"}
             theme={{
@@ -231,19 +238,21 @@ function RootComponent() {
               },
             }}
           >
-            <TooltipProvider delay={0}>
-              {isPublicRoute ? (
-                <Outlet />
-              ) : shouldHoldPrivateRender ? (
-                <AppLayoutWrapper>
-                  <div className="bg-background flex-1" />
-                </AppLayoutWrapper>
-              ) : (
-                <AppLayoutWrapper>
+            <AppAuthProvider>
+              <TooltipProvider delay={0}>
+                {isPublicRoute ? (
                   <Outlet />
-                </AppLayoutWrapper>
-              )}
-            </TooltipProvider>
+                ) : shouldHoldPrivateRender ? (
+                  <AppLayoutWrapper>
+                    <div className="bg-background flex-1" />
+                  </AppLayoutWrapper>
+                ) : (
+                  <AppLayoutWrapper>
+                    <Outlet />
+                  </AppLayoutWrapper>
+                )}
+              </TooltipProvider>
+            </AppAuthProvider>
             <ToastProvider />
           </RootProvider>
         </ThemeProvider>
@@ -268,7 +277,7 @@ function NotFound() {
           <InputGroup className="sm:w-3/4">
             <InputGroupInput placeholder="Buscar páginas..." />
             <InputGroupAddon>
-              <SearchIcon className="size-4" />
+              <Icon icon={Search01Icon} size={16} className="size-4" />
             </InputGroupAddon>
             <InputGroupAddon align="inline-end">
               <Kbd>/</Kbd>

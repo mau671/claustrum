@@ -1,11 +1,12 @@
+import { ArrowLeft01Icon, Loading02Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
-import { CheckIcon, ChevronLeftIcon, Loader2Icon } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient } from "@/lib/auth/client";
@@ -188,7 +189,7 @@ function RequestState({
           </Field>
 
           <Button type="submit" size="lg" disabled={pending} className="mt-1">
-            {pending ? <Loader2Icon className="animate-spin" /> : null}
+            {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
             {pending ? "Enviando..." : "Enviar enlace"}
           </Button>
         </form>
@@ -198,7 +199,7 @@ function RequestState({
           to="/auth/signin"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
         >
-          <ChevronLeftIcon className="size-3.5" />
+          <Icon icon={ArrowLeft01Icon} size={14} className="size-3.5" />
           Volver a iniciar sesión
         </Link>
       </div>
@@ -211,7 +212,7 @@ function SentState({ email, onTryDifferent }: { email: string; onTryDifferent: (
     <>
       <div className="items-center text-center">
         <div className="flex size-14 items-center justify-center rounded-full bg-emerald-500/15">
-          <CheckIcon className="size-6 text-emerald-600" />
+          <Icon icon={Tick01Icon} size={24} className="size-6 text-emerald-600" />
         </div>
         <h1 className="font-heading mt-4 text-2xl tracking-tight">Revisa tu correo</h1>
         <CardDescription className="text-sm break-words">
@@ -310,7 +311,7 @@ function UpdateState({
           </Field>
 
           <Button type="submit" size="lg" disabled={pending || passwordMismatch} className="mt-1">
-            {pending ? <Loader2Icon className="animate-spin" /> : null}
+            {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
             {pending ? "Actualizando..." : "Guardar nueva contraseña"}
           </Button>
         </form>

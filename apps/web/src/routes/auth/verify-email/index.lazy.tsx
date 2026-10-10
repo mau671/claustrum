@@ -1,9 +1,15 @@
+import {
+  CheckmarkCircle02Icon,
+  Loading02Icon,
+  Mail01Icon,
+  RefreshCwIcon,
+} from "@hugeicons/core-free-icons";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
-import { Mail, CheckCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { authClient, getSession } from "@/lib/auth/client";
 
 const VERIFY_EMAIL_KEY = "claustrum.auth.verify_email";
@@ -110,11 +116,19 @@ function VerifyEmailPage() {
           }`}
         >
           {isLoading ? (
-            <RefreshCw className="text-muted-foreground size-7 animate-spin" />
+            <Icon
+              icon={Loading02Icon}
+              size={28}
+              className="text-muted-foreground size-7 animate-spin"
+            />
           ) : isSuccess ? (
-            <CheckCircle className="size-7 text-emerald-600 dark:text-emerald-400" />
+            <Icon
+              icon={CheckmarkCircle02Icon}
+              size={28}
+              className="size-7 text-emerald-600 dark:text-emerald-400"
+            />
           ) : (
-            <Mail className="text-primary size-7" />
+            <Icon icon={Mail01Icon} size={28} className="text-primary size-7" />
           )}
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
@@ -147,7 +161,11 @@ function VerifyEmailPage() {
                   onClick={handleResendEmail}
                   disabled={resending}
                 >
-                  <RefreshCw className={`mr-2 size-4 ${resending ? "animate-spin" : ""}`} />
+                  <Icon
+                    icon={RefreshCwIcon}
+                    size={16}
+                    className={`mr-2 size-4 ${resending ? "animate-spin" : ""}`}
+                  />
                   Reenviar correo de verificación
                 </Button>
                 {resending && (

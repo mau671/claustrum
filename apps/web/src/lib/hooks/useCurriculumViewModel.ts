@@ -13,11 +13,17 @@ interface CourseRelations {
 export function useCurriculumViewModel(
   planDetail: StudyPlanDetail | null,
   statusMap: StudentCourseStatusMap | undefined,
+  options?: {
+    isGuest?: boolean;
+  },
 ) {
   const semesters = useMemo(() => {
     if (!planDetail) return [];
 
+    const isGuest = !!options?.isGuest;
+
     const checkEligibility = (courseId: number, visited: Set<number> = new Set()): boolean => {
+      if (isGuest) return false;
       if (visited.has(courseId)) return true;
       visited.add(courseId);
 
@@ -52,10 +58,11 @@ export function useCurriculumViewModel(
         const relations: CourseRelations = (planDetail.courseRelations.get(
           course.courseId,
         ) as CourseRelations) || { prerequisites: [], corequisites: [] };
-        const effectiveStatus = statusMap?.get(course.courseId);
+        const effectiveStatus = isGuest ? undefined : statusMap?.get(course.courseId);
         const status = effectiveStatus?.status || "not_taken";
 
         const isAvailable =
+          !isGuest &&
           !!statusMap &&
           status !== "approved" &&
           status !== "in_progress" &&
@@ -93,7 +100,7 @@ export function useCurriculumViewModel(
         courses,
       };
     });
-  }, [planDetail, statusMap]);
+  }, [planDetail, statusMap, options?.isGuest]);
 
   const courses = useMemo(() => semesters.flatMap((s) => s.courses), [semesters]);
 

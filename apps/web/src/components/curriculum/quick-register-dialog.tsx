@@ -1,5 +1,10 @@
+import {
+  MinusSignIcon,
+  PlusSignIcon,
+  Search01Icon,
+  UnfoldMoreIcon,
+} from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Minus, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 
 import type { Course, CourseStatus } from "@/lib/types";
@@ -26,6 +31,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -326,7 +332,7 @@ export function QuickRegisterDialog({
                 ? formatCourseLabel(selectedAttemptCourse)
                 : "Selecciona un curso"}
             </span>
-            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+            <Icon icon={UnfoldMoreIcon} className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
           <ComboboxContent
             anchor={attemptCourseTriggerRef}
@@ -338,7 +344,7 @@ export function QuickRegisterDialog({
                 className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                 placeholder="Buscar curso..."
                 showTrigger={false}
-                startAddon={<SearchIcon />}
+                startAddon={<Icon icon={Search01Icon} className="size-4" />}
               />
             </div>
             <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
@@ -379,7 +385,7 @@ export function QuickRegisterDialog({
                   ? "Cargando..."
                   : "Selecciona un periodo"}
             </span>
-            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+            <Icon icon={UnfoldMoreIcon} className="-me-1! size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
           <ComboboxContent
             anchor={progressTermTriggerRef}
@@ -392,7 +398,7 @@ export function QuickRegisterDialog({
                 className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                 placeholder="Buscar período..."
                 showTrigger={false}
-                startAddon={<SearchIcon />}
+                startAddon={<Icon icon={Search01Icon} className="size-4" />}
               />
             </div>
             <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
@@ -465,7 +471,7 @@ export function QuickRegisterDialog({
             aria-label="Disminuir nota"
             disabled={!requiresProgressGrade}
           >
-            <Minus className="size-4" />
+            <Icon icon={MinusSignIcon} className="size-4" />
           </Button>
           <Input
             className="text-center"
@@ -484,7 +490,7 @@ export function QuickRegisterDialog({
             aria-label="Aumentar nota"
             disabled={!requiresProgressGrade}
           >
-            <Plus className="size-4" />
+            <Icon icon={PlusSignIcon} className="size-4" />
           </Button>
         </div>
       </div>

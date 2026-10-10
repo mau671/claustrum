@@ -21,8 +21,7 @@ export const Route = createFileRoute("/curriculum/$planId/$courseId")({
       filters: search.filters === true || search.filters === "true" ? true : undefined,
     };
   },
-  loader: async ({ context: { queryClient }, params }) => {
-    await queryClient.ensureQueryData(studyPlanDetailQueryOptions(Number(params.planId)));
+  loader: ({ context: { queryClient }, params }) => {
+    void queryClient.ensureQueryData(studyPlanDetailQueryOptions(Number(params.planId)));
   },
-  pendingComponent: () => <div className="bg-background flex-1" />,
 });

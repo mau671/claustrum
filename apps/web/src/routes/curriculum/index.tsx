@@ -53,20 +53,13 @@ export const Route = createFileRoute("/curriculum/")({
     career: search.career,
     plan: search.plan,
   }),
-  loader: async ({ context: { queryClient }, deps }) => {
-    const promises: Promise<unknown>[] = [];
-    promises.push(queryClient.ensureQueryData(universitiesQueryOptions()));
+  loader: ({ context: { queryClient }, deps }) => {
+    void queryClient.ensureQueryData(universitiesQueryOptions());
 
     const u = deps.university ?? CURRICULUM_DEFAULT_UNIVERSITY_ID;
-    if (u) promises.push(queryClient.ensureQueryData(campusesQueryOptions(u)));
-    if (deps.campus)
-      promises.push(queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus)));
-    if (deps.career)
-      promises.push(queryClient.ensureQueryData(studyPlansQueryOptions(deps.career)));
-    if (deps.plan)
-      promises.push(queryClient.ensureQueryData(studyPlanDetailQueryOptions(deps.plan)));
-
-    await Promise.allSettled(promises);
+    if (u) void queryClient.ensureQueryData(campusesQueryOptions(u));
+    if (deps.campus) void queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus));
+    if (deps.career) void queryClient.ensureQueryData(studyPlansQueryOptions(deps.career));
+    if (deps.plan) void queryClient.ensureQueryData(studyPlanDetailQueryOptions(deps.plan));
   },
-  pendingComponent: () => <div className="bg-background flex-1" />,
 });

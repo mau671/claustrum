@@ -13,6 +13,7 @@ import {
   normalizeText,
   removePlanPrefixFromName,
 } from "@/components/filters/shared-filters";
+import { cn } from "@/lib/utils";
 
 interface CurriculumFiltersProps {
   universities: CatalogUniversity[];
@@ -36,6 +37,7 @@ interface CurriculumFiltersProps {
   onUseProfileDefaults?: () => void;
   isVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
+  className?: string;
 }
 
 export function CurriculumFilters({
@@ -57,6 +59,7 @@ export function CurriculumFilters({
   isLoadingPlans,
   isVisible = true,
   onVisibleChange,
+  className,
 }: CurriculumFiltersProps) {
   const [skipAnimation, setSkipAnimation] = useState(
     () =>
@@ -84,7 +87,12 @@ export function CurriculumFilters({
   }, []);
 
   return (
-    <FiltersPanel isExpanded={isVisible} onExpandedChange={onVisibleChange ?? (() => {})}>
+    <FiltersPanel
+      isExpanded={isVisible}
+      onExpandedChange={onVisibleChange ?? (() => {})}
+      variant="plain"
+      className={cn("w-full", className)}
+    >
       <FilterCombobox
         label="Universidad"
         value={selectedUniversityId?.toString() || ""}

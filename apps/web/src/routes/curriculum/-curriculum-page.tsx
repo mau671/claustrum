@@ -1,5 +1,5 @@
+import { Alert02Icon, BookOpen01Icon, FloppyDiskIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { AlertTriangle, User, Save, BookOpen } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { CatalogCampus, CatalogStudyPlan } from "@/lib/types";
@@ -9,6 +9,7 @@ import { CurriculumFilters } from "@/components/curriculum/curriculum-filters";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -32,6 +33,14 @@ import {
 } from "./-curriculum-search";
 
 const MAIN_CAMPUS_CODES = new Set(["AL", "CA", "LM", "SC", "SJ"]);
+
+function EmptyStateAlertIcon(props: { className?: string }) {
+  return <Icon icon={Alert02Icon} {...props} />;
+}
+
+function EmptyStateBookIcon(props: { className?: string }) {
+  return <Icon icon={BookOpen01Icon} {...props} />;
+}
 
 export function CurriculumPage() {
   const search = useSearch({ from: "/curriculum/" });
@@ -447,9 +456,9 @@ export function CurriculumPage() {
                   size="sm"
                   onClick={handleUseProfileDefaults}
                   disabled={isUsingProfileDefaults}
-                  className="h-8 shrink-0 gap-1.5 text-xs"
+                  className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
                 >
-                  <User className="size-3.5" />
+                  <Icon icon={UserIcon} className="size-3.5" />
                   {isUsingProfileDefaults ? "Perfil activo" : "Usar mi perfil"}
                 </Button>
               )}
@@ -464,11 +473,11 @@ export function CurriculumPage() {
                         onClick={handleSaveLocalPlan}
                         onPointerDown={(e) => e.preventDefault()}
                         disabled={isUsingProfileDefaults}
-                        className="h-8 shrink-0 gap-1.5 text-xs"
+                        className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
                       />
                     }
                   >
-                    <Save className="size-3.5" />
+                    <Icon icon={FloppyDiskIcon} className="size-3.5" />
                     {isUsingProfileDefaults ? "Guardado" : "Guardar"}
                   </TooltipTrigger>
                   <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
@@ -486,7 +495,7 @@ export function CurriculumPage() {
                     ? planDetailQuery.error.message
                     : "Ocurrió un problema de conexión o el plan no existe. Intenta de nuevo."
                 }
-                icon={AlertTriangle}
+                icon={EmptyStateAlertIcon}
                 variant="error"
               />
             </div>
@@ -502,7 +511,7 @@ export function CurriculumPage() {
 
           {selectedPlanId && planDetailQuery.isSuccess && planDetailQuery.data && (
             <div className="min-h-0 flex-1 px-4 lg:px-6">
-              <Card className="h-full min-h-0 overflow-auto py-0">
+              <Card className="h-full min-h-0 overflow-hidden py-0">
                 <MemoizedCurriculumBoard planDetail={planDetailQuery.data} />
               </Card>
             </div>
@@ -521,7 +530,7 @@ export function CurriculumPage() {
               <EmptyState
                 title="Busca un plan de estudios"
                 description="Selecciona una sede y una carrera para visualizar la malla curricular correspondiente."
-                icon={BookOpen}
+                icon={EmptyStateBookIcon}
               />
             </div>
           )}

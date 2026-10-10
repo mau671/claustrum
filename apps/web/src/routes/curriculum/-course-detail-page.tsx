@@ -1,7 +1,7 @@
+import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCanGoBack } from "@tanstack/react-router";
 import { useNavigate, useParams, useSearch, useRouter } from "@tanstack/react-router";
-import { AlertTriangle } from "lucide-react";
 import { useCallback } from "react";
 
 import type { CourseStatus } from "@/lib/types";
@@ -9,6 +9,7 @@ import type { CourseStatus } from "@/lib/types";
 import { CourseDetails } from "@/components/course-details";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import {
   useAuthUser,
   useCreateCourseAttempt,
@@ -32,7 +33,9 @@ export function CourseDetailPage() {
   const { data: statusMap } = useStudentCourseStatuses(authUser?.id ?? null, selectedPlanId);
   const createCourseAttempt = useCreateCourseAttempt();
 
-  const { courseById } = useCurriculumViewModel(planDetailQuery.data ?? null, statusMap);
+  const { courseById } = useCurriculumViewModel(planDetailQuery.data ?? null, statusMap, {
+    isGuest: !authUser,
+  });
   const selectedCourse = courseById.get(params.courseId);
 
   const canGoBack = useCanGoBack();
@@ -91,7 +94,7 @@ export function CourseDetailPage() {
           {planDetailQuery.isError ? (
             <div className="px-4 lg:px-6">
               <Alert variant="destructive">
-                <AlertTriangle className="size-4" />
+                <Icon icon={Alert02Icon} className="size-4" />
                 <AlertDescription>
                   Error al cargar el plan de estudios. Intenta de nuevo.
                 </AlertDescription>

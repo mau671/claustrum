@@ -1,8 +1,9 @@
+import { ViewIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "@tanstack/react-router";
-import { Eye } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import {
   Table,
   TableBody,
@@ -101,7 +102,7 @@ export function EvaluationList({ courseId }: EvaluationListProps) {
                   }
                   aria-label="Vista previa"
                 >
-                  <Eye className="size-4" />
+                  <Icon icon={ViewIcon} className="size-4" />
                 </Button>
               </TableCell>
             </TableRow>

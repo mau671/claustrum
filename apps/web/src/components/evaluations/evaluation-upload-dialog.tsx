@@ -3,6 +3,16 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 
 import type { AcademicTerm, CourseDetailRelatedCourse, CourseRecentProfessor } from "@/lib/types";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPopup,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -26,15 +36,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -189,6 +201,8 @@ export function EvaluationUploadDialog({
     turnstileToken,
   ]);
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const resetForm = useCallback(() => {
     setEvaluationFile(null);
     setAnswersFile(null);
@@ -204,13 +218,30 @@ export function EvaluationUploadDialog({
     setTurnstileToken(null);
   }, [courseId]);
 
-  const handleClose = useCallback(
-    (value: boolean) => {
-      if (!value) resetForm();
-      onOpenChange(value);
-    },
-    [onOpenChange, resetForm],
-  );
+  const isDirty =
+    evaluationFile !== null ||
+    answersFile !== null ||
+    evaluationNumberInput.trim() !== "" ||
+    customName.trim() !== "" ||
+    professorId !== "" ||
+    isCatedra ||
+    includesAnswers ||
+    hasSeparateAnswers;
+
+  const handleRequestClose = useCallback(() => {
+    if (isDirty) {
+      setConfirmOpen(true);
+    } else {
+      resetForm();
+      onOpenChange(false);
+    }
+  }, [isDirty, onOpenChange, resetForm]);
+
+  const handleDiscard = useCallback(() => {
+    setConfirmOpen(false);
+    resetForm();
+    onOpenChange(false);
+  }, [onOpenChange, resetForm]);
 
   const validateFile = (file: File): string | null => {
     if (file.type !== "application/pdf") {
@@ -303,7 +334,8 @@ export function EvaluationUploadDialog({
       toast.success("Evaluación enviada", {
         description: "Estará visible tras ser revisada por nuestro equipo",
       });
-      handleClose(false);
+      resetForm();
+      onOpenChange(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Error al subir la evaluación.");
     }
@@ -783,48 +815,89 @@ export function EvaluationUploadDialog({
     </div>
   );
 
+  const confirmDialog = (
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogPopup>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Descartar evaluación?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tienes datos sin subir. Si sales ahora, se perderán.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Volver</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={handleDiscard}>
+            Descartar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogPopup>
+    </AlertDialog>
+  );
+
+  const footerActions = (
+    <>
+      <Button type="button" variant="ghost" onClick={handleRequestClose}>
+        Cancelar
+      </Button>
+      <Button onClick={handleSubmit} disabled={!canSubmit || uploadMutation.isPending}>
+        {uploadMutation.isPending ? "Subiendo..." : "Subir evaluación"}
+      </Button>
+    </>
+  );
+
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={handleClose}>
-        <SheetContent
-          side="bottom"
-          className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
+      <Drawer
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) handleRequestClose();
+          else onOpenChange(true);
+        }}
+      >
+        <DrawerPopup
+          showBar
+          className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
         >
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
-          <SheetHeader className="px-4 pt-4 pb-2">
-            <SheetTitle>Subir evaluación</SheetTitle>
-            <SheetDescription>Comparte material de estudio con otros estudiantes.</SheetDescription>
-          </SheetHeader>
-          <div className="min-h-0 overflow-y-auto px-4 pb-4">
-            {formFields}
-            <div className="mt-5">
-              <Button onClick={handleSubmit} disabled={!canSubmit} className="w-full">
-                {uploadMutation.isPending ? "Subiendo..." : "Subir evaluación"}
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+          <DrawerHeader className="px-4 pt-4 pb-2">
+            <DrawerTitle>Subir evaluación</DrawerTitle>
+            <DrawerDescription>
+              Comparte material de estudio con otros estudiantes.
+            </DrawerDescription>
+          </DrawerHeader>
+          <ScrollArea className="min-h-0">
+            <div className="space-y-5 px-4 pb-4">{formFields}</div>
+          </ScrollArea>
+          <DrawerFooter>{footerActions}</DrawerFooter>
+        </DrawerPopup>
+        {confirmDialog}
+      </Drawer>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) handleRequestClose();
+        else onOpenChange(true);
+      }}
+    >
+      <DialogContent
+        className="max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+        initialFocus={false}
+      >
         <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
         <DialogHeader>
           <DialogTitle>Subir evaluación</DialogTitle>
           <DialogDescription>Comparte material de estudio con otros estudiantes.</DialogDescription>
         </DialogHeader>
-
-        {formFields}
-
-        <DialogFooter>
-          <Button onClick={handleSubmit} disabled={!canSubmit}>
-            {uploadMutation.isPending ? "Subiendo..." : "Subir evaluación"}
-          </Button>
-        </DialogFooter>
+        <ScrollArea className="min-h-0">
+          <div className="space-y-5 px-6 pb-6">{formFields}</div>
+        </ScrollArea>
+        <DialogFooter>{footerActions}</DialogFooter>
       </DialogContent>
+      {confirmDialog}
     </Dialog>
   );
 }

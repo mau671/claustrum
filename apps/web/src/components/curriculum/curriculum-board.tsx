@@ -1,10 +1,11 @@
-import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { RotateCcwIcon, ZoomInIcon, ZoomOutIcon } from "@hugeicons/core-free-icons";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 
 import type { StudyPlanDetail } from "@/lib/types";
 import type { CourseEffectiveStatus } from "@/lib/types";
 
 import { MemoizedCurriculumGrid } from "@/components/curriculum-grid";
+import { Icon } from "@/components/ui/icon";
 import { useAppAuth } from "@/lib/auth/app-auth-context";
 
 interface CurriculumBoardProps {
@@ -159,7 +160,7 @@ function CurriculumBoard({
               className="hover:bg-muted rounded-full p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Alejar"
             >
-              <ZoomOut className="size-4" />
+              <Icon icon={ZoomOutIcon} className="size-4" />
             </button>
 
             <span className="min-w-[3.5rem] cursor-default px-2 py-1 text-center text-xs font-medium">
@@ -172,7 +173,7 @@ function CurriculumBoard({
               className="hover:bg-muted rounded-full p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Acercar"
             >
-              <ZoomIn className="size-4" />
+              <Icon icon={ZoomInIcon} className="size-4" />
             </button>
 
             <div className="bg-border mx-0.5 h-4 w-px" />
@@ -183,7 +184,7 @@ function CurriculumBoard({
               className="hover:bg-muted rounded-full p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Restablecer tamaño"
             >
-              <RotateCcw className="size-4" />
+              <Icon icon={RotateCcwIcon} className="size-4" />
             </button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
+import { Link01Icon, LockIcon, LockOpenIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "@tanstack/react-router";
-import { Lock, Unlock, Link } from "lucide-react";
 import React, { useState, useCallback } from "react";
 import { flushSync } from "react-dom";
 
@@ -13,6 +13,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Icon } from "@/components/ui/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useStudentCourseStatuses } from "@/lib/hooks/use-queries";
 import { useCurriculumViewModel } from "@/lib/hooks/useCurriculumViewModel";
@@ -45,7 +46,8 @@ function CurriculumGrid({
 
   const { data: fetchedStatusMap } = useStudentCourseStatuses(userId ?? null, studyPlanId ?? null);
   const statusMap = mockStatusMap ?? fetchedStatusMap;
-  const { semesters, courseById } = useCurriculumViewModel(planDetail, statusMap);
+  const isGuest = !userId && !mockStatusMap;
+  const { semesters, courseById } = useCurriculumViewModel(planDetail, statusMap, { isGuest });
 
   const getRelationType = useCallback(
     (targetId: string, courseId: string): RelationType => {
@@ -92,7 +94,7 @@ function CurriculumGrid({
           readOnly ? "overflow-hidden" : "overflow-x-auto overflow-y-auto",
         )}
       >
-        <div className="px-4" style={{ zoom }}>
+        <div className="w-max min-w-full px-4" style={{ zoom }}>
           <div className="flex gap-4 py-4">
             {semesters.map((semester) => (
               <div key={semester.levelNumber} className="w-48 flex-shrink-0">
@@ -200,19 +202,19 @@ function CurriculumGrid({
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
                   <div className="bg-background flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-amber-500 text-amber-600 shadow-sm">
-                    <Lock className="size-3 shrink-0" />
+                    <Icon icon={LockIcon} className="size-3 shrink-0" />
                   </div>
                   <span className="text-muted-foreground text-sm">Requisito</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="bg-background flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 shadow-sm">
-                    <Link className="size-3 shrink-0" />
+                    <Icon icon={Link01Icon} className="size-3 shrink-0" />
                   </div>
                   <span className="text-muted-foreground text-sm">Correquisito</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="bg-background flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-emerald-500 text-emerald-600 shadow-sm">
-                    <Unlock className="size-3 shrink-0" />
+                    <Icon icon={LockOpenIcon} className="size-3 shrink-0" />
                   </div>
                   <span className="text-muted-foreground text-sm">Desbloquea</span>
                 </div>

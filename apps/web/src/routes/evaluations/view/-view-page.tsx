@@ -1,5 +1,5 @@
+import { ArrowLeft01Icon, Loading03Icon } from "@hugeicons/core-free-icons";
 import { useParams } from "@tanstack/react-router";
-import { ArrowLeft, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { lazy, Suspense } from "react";
 
@@ -7,6 +7,7 @@ const PdfViewer = lazy(() =>
   import("@/components/pdf-viewer").then((mod) => ({ default: mod.PdfViewer })),
 );
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { getEvaluationDocument } from "@/lib/evaluations/api";
 
 export function EvaluationViewPage() {
@@ -57,7 +58,7 @@ export function EvaluationViewPage() {
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <Loader2 className="text-muted-foreground size-8 animate-spin" />
+        <Icon icon={Loading03Icon} className="text-muted-foreground size-8 animate-spin" />
         <p className="text-muted-foreground text-sm">Cargando documento…</p>
       </div>
     );
@@ -68,7 +69,7 @@ export function EvaluationViewPage() {
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <p className="text-destructive text-sm">{error ?? "No se pudo cargar el documento"}</p>
         <Button variant="outline" onClick={() => window.history.back()}>
-          <ArrowLeft className="mr-2 size-4" />
+          <Icon icon={ArrowLeft01Icon} className="mr-2 size-4" />
           Volver
         </Button>
       </div>
@@ -79,7 +80,7 @@ export function EvaluationViewPage() {
     <Suspense
       fallback={
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <Loader2 className="text-muted-foreground size-8 animate-spin" />
+          <Icon icon={Loading03Icon} className="text-muted-foreground size-8 animate-spin" />
           <p className="text-muted-foreground text-sm">Cargando visor…</p>
         </div>
       }

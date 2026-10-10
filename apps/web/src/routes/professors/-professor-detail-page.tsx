@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useRouter, getRouteApi } from "@tanstack/react-router";
 const routeApi = getRouteApi("/professors/$professorId");
-import { ArrowLeft, PenLine, Plus } from "lucide-react";
+import { Add01Icon, ArrowLeft02Icon, PencilLineIcon } from "@hugeicons/core-free-icons";
 import { lazy, Suspense, useState } from "react";
 import { z } from "zod";
 
@@ -10,6 +10,7 @@ import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -203,7 +204,7 @@ export function ProfessorDetailPage() {
               aria-label="Atrás"
               title="Atrás"
             >
-              <ArrowLeft className="size-4" />
+              <Icon icon={ArrowLeft02Icon} size={16} className="size-4" />
             </Button>
             <h1
               className="min-w-0 text-xl font-semibold break-words md:text-2xl md:leading-tight"
@@ -213,8 +214,8 @@ export function ProfessorDetailPage() {
             </h1>
           </div>
           <Button type="button" className="shrink-0" onClick={() => setIsComposerOpen(true)}>
-            <PenLine className="mr-2 hidden size-4 md:inline-block" />
-            <Plus className="mr-1 size-4 md:hidden" />
+            <Icon icon={PencilLineIcon} size={16} className="mr-2 hidden size-4 md:inline-block" />
+            <Icon icon={Add01Icon} size={16} className="mr-1 size-4 md:hidden" />
             <span className="hidden md:inline">Escribir reseña</span>
             <span className="md:hidden">Agregar</span>
           </Button>
@@ -264,8 +265,10 @@ export function ProfessorDetailPage() {
               ) : summary?.tag_counts?.length ? (
                 <div className="flex flex-wrap gap-2">
                   {summary.tag_counts.slice(0, 10).map((tag) => (
-                    <Badge key={tag.tag} variant="secondary">
-                      {tag.tag} ({tag.count})
+                    <Badge key={tag.tag} variant="secondary" className="gap-1.5 px-1.5">
+                      <span>{tag.tag}</span>
+                      <Separator orientation="vertical" className="h-3" />
+                      <span className="tabular-nums">{tag.count}</span>
                     </Badge>
                   ))}
                 </div>

@@ -1,7 +1,14 @@
-import { SlidersHorizontal, ChevronDown, X, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Cancel01Icon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SlidersHorizontalIcon,
+} from "@hugeicons/core-free-icons";
 import { useState, useRef, useEffect, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 interface FiltersPanelProps {
@@ -55,17 +62,20 @@ export function FiltersPanel({
         )}
       >
         {canScrollLeft && (
-          <div className="from-background pointer-events-none absolute inset-y-0 left-0 z-10 flex w-12 items-center justify-start bg-gradient-to-r to-transparent pl-1">
-            <Button
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-y-0 left-0 z-10 flex w-14 items-center justify-start bg-gradient-to-r to-transparent pl-1",
+              isPlain ? "from-background" : "from-muted/80",
+            )}
+          >
+            <button
               type="button"
-              variant="outline"
-              size="icon"
-              className="border-border/80 bg-background text-foreground hover:bg-muted pointer-events-auto size-7 shrink-0 rounded-full border opacity-90 shadow-md transition-all hover:opacity-100 focus-visible:opacity-100"
+              className="border-border pointer-events-auto flex size-7 shrink-0 items-center justify-center rounded-full border bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
               onClick={() => scrollByAmount(-200)}
               aria-label="Desplazar filtros a la izquierda"
             >
-              <ChevronLeft className="size-3.5" />
-            </Button>
+              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
+            </button>
           </div>
         )}
         <div
@@ -79,17 +89,20 @@ export function FiltersPanel({
           {children}
         </div>
         {canScrollRight && (
-          <div className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 flex w-12 items-center justify-end bg-gradient-to-l to-transparent pr-1">
-            <Button
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-y-0 right-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l to-transparent pr-1",
+              isPlain ? "from-background" : "from-muted/80",
+            )}
+          >
+            <button
               type="button"
-              variant="outline"
-              size="icon"
-              className="border-border/80 bg-background text-foreground hover:bg-muted pointer-events-auto size-7 shrink-0 rounded-full border opacity-90 shadow-md transition-all hover:opacity-100 focus-visible:opacity-100"
+              className="border-border pointer-events-auto flex size-7 shrink-0 items-center justify-center rounded-full border bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
               onClick={() => scrollByAmount(200)}
               aria-label="Desplazar filtros a la derecha"
             >
-              <ChevronRight className="size-3.5" />
-            </Button>
+              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
+            </button>
           </div>
         )}
       </div>
@@ -103,7 +116,7 @@ export function FiltersPanel({
           )}
         >
           <div className="text-muted-foreground flex items-center gap-2">
-            <SlidersHorizontal className="size-4" />
+            <Icon icon={SlidersHorizontalIcon} size={16} className="size-4" />
             <span className="text-sm font-medium">Filtros</span>
           </div>
           <Button
@@ -113,7 +126,11 @@ export function FiltersPanel({
             aria-label={isExpanded ? "Ocultar filtros" : "Mostrar filtros"}
             onClick={() => onExpandedChange(!isExpanded)}
           >
-            {isExpanded ? <X className="size-4" /> : <ChevronDown className="size-4" />}
+            {isExpanded ? (
+              <Icon icon={Cancel01Icon} size={16} className="size-4" />
+            ) : (
+              <Icon icon={ChevronDownIcon} size={16} className="size-4" />
+            )}
           </Button>
         </div>
 

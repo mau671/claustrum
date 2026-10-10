@@ -1,10 +1,17 @@
+import {
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  FloppyDiskIcon,
+  Loading02Icon,
+} from "@hugeicons/core-free-icons";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
-import { Check, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import type { FeedbackRow } from "@/lib/feedback/api";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -89,7 +96,11 @@ function FeedbackModerationPage() {
   if (feedbackQuery.isLoading) {
     return (
       <div className="flex h-full items-center justify-center p-6">
-        <Loader2 className="text-muted-foreground size-8 animate-spin" />
+        <Icon
+          icon={Loading02Icon}
+          size={32}
+          className="text-muted-foreground size-8 animate-spin"
+        />
       </div>
     );
   }
@@ -120,7 +131,7 @@ function FeedbackModerationPage() {
             disabled={queryPage === 0 || feedbackQuery.isFetching}
             onClick={() => handlePageChange(Math.max(1, page - 1))}
           >
-            <ChevronLeft className="size-4" />
+            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
           </Button>
           <span className="text-sm font-medium">Página {page.toString().padStart(2, "0")}</span>
           <Button
@@ -130,7 +141,7 @@ function FeedbackModerationPage() {
             disabled={!hasMore || feedbackQuery.isFetching}
             onClick={() => handlePageChange(page + 1)}
           >
-            <ChevronRight className="size-4" />
+            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
           </Button>
         </div>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
@@ -220,7 +231,7 @@ function FeedbackModerationPage() {
                     disabled={markAsReviewed.isPending}
                     className="shrink-0"
                   >
-                    <Check className="mr-2 size-4" />
+                    <Icon icon={CheckIcon} size={16} className="mr-2 size-4" />
                     Marcar como revisado
                   </Button>
                 )}
@@ -293,9 +304,9 @@ function FeedbackModerationPage() {
                     className="w-full sm:w-auto"
                   >
                     {replyToFeedback.isPending ? (
-                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
                     ) : (
-                      <Save className="mr-2 size-4" />
+                      <Icon icon={FloppyDiskIcon} size={16} className="mr-2 size-4" />
                     )}
                     Guardar
                   </Button>
@@ -313,7 +324,7 @@ function FeedbackModerationPage() {
                     className="w-full sm:w-auto"
                   >
                     {replyToFeedback.isPending ? (
-                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
                     ) : null}
                     Enviar respuesta al usuario
                   </Button>

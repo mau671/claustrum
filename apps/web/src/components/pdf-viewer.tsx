@@ -1,8 +1,15 @@
-import { ArrowLeft, Download, Loader2, Minus, Plus } from "lucide-react";
+import {
+  ArrowLeft01Icon,
+  Download01Icon,
+  Loading03Icon,
+  MinusSignIcon,
+  PlusSignIcon,
+} from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -116,7 +123,7 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
         <p className="text-destructive text-sm">{error}</p>
         {onClose && (
           <Button variant="outline" onClick={onClose}>
-            <ArrowLeft className="mr-2 size-4" />
+            <Icon icon={ArrowLeft01Icon} className="mr-2 size-4" />
             Volver
           </Button>
         )}
@@ -130,7 +137,7 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
     >
       {!isViewerReady && (
         <div className="bg-background absolute inset-0 z-50 flex flex-col items-center justify-center gap-4">
-          <Loader2 className="text-muted-foreground size-8 animate-spin" />
+          <Icon icon={Loading03Icon} className="text-muted-foreground size-8 animate-spin" />
           <p className="text-muted-foreground text-sm">Cargando documento…</p>
         </div>
       )}
@@ -178,7 +185,7 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
                   aria-label="Volver"
                   title="Volver"
                 >
-                  <ArrowLeft className="size-4" />
+                  <Icon icon={ArrowLeft01Icon} className="size-4" />
                 </Button>
                 <div className="bg-border mx-1 h-4 w-px" />
               </>
@@ -197,7 +204,7 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
               disabled={zoom <= MIN_ZOOM}
               aria-label="Reducir zoom"
             >
-              <Minus className="size-4" />
+              <Icon icon={MinusSignIcon} className="size-4" />
             </Button>
             <span className="text-muted-foreground w-12 text-center text-sm tabular-nums">
               {Math.round(zoom * 100)}%
@@ -210,7 +217,7 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
               disabled={zoom >= MAX_ZOOM}
               aria-label="Aumentar zoom"
             >
-              <Plus className="size-4" />
+              <Icon icon={PlusSignIcon} className="size-4" />
             </Button>
             <div className="bg-border mx-1 h-4 w-px" />
             <Button
@@ -226,7 +233,7 @@ export function PdfViewer({ blobUrl, fileName, onClose, className = "" }: PdfVie
                 />
               }
             >
-              <Download className="size-4" />
+              <Icon icon={Download01Icon} className="size-4" />
             </Button>
           </div>
         </div>

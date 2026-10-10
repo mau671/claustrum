@@ -1,12 +1,12 @@
 import type { Dispatch, SetStateAction } from "react";
 
+import { Flag01Icon, ThumbsDownIcon, ThumbsUpIcon } from "@hugeicons/core-free-icons";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Flag, ThumbsDown, ThumbsUp } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 
 import type {
@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Icon } from "@/components/ui/icon";
 import {
   Pagination,
   PaginationContent,
@@ -207,7 +208,7 @@ function ReviewActions({
           isLiked ? "bg-green-100 dark:bg-green-950" : "",
         ].join(" ")}
       >
-        <ThumbsUp className="size-4" />
+        <Icon icon={ThumbsUpIcon} size={16} className="size-4" />
         <span className="text-xs tabular-nums">{review.like_count}</span>
       </button>
       <button
@@ -221,7 +222,7 @@ function ReviewActions({
           isDisliked ? "bg-red-100 dark:bg-red-950" : "",
         ].join(" ")}
       >
-        <ThumbsDown className="size-4" />
+        <Icon icon={ThumbsDownIcon} size={16} className="size-4" />
         <span className="text-xs tabular-nums">{review.dislike_count}</span>
       </button>
       <div className="bg-border mx-1 h-4 w-px" />
@@ -231,7 +232,7 @@ function ReviewActions({
         onClick={() => onReport(review)}
         className="text-muted-foreground hover:bg-muted inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors disabled:pointer-events-none disabled:opacity-50"
       >
-        <Flag className="size-3.5" />
+        <Icon icon={Flag01Icon} size={14} className="size-3.5" />
         Reportar
       </button>
     </div>
@@ -536,14 +537,14 @@ export function ProfessorReviewsList({
       )}
 
       {showPagination && (
-        <div className="flex items-center justify-between gap-4 px-4">
+        <div className="flex items-center justify-between gap-4 px-2 sm:px-4">
           <span className="text-muted-foreground text-xs">
             {reviewRows.length === 0
               ? "Sin resultados"
               : `Mostrando ${firstRow}-${lastRow} de ${totalCount}`}{" "}
             · Página {page + 1} de {totalPages}
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Pagination className="w-auto">
               <PaginationContent>
                 <PaginationItem>
@@ -570,7 +571,7 @@ export function ProfessorReviewsList({
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
-            <div className="w-28">
+            <div className="w-24 shrink-0">
               <Select
                 items={PAGE_SIZE_OPTIONS}
                 value={String(pageSize)}
@@ -579,10 +580,10 @@ export function ProfessorReviewsList({
                   onPageSizeChange(Number(value));
                 }}
               >
-                <SelectTrigger className="h-8 w-full">
+                <SelectTrigger size="sm" className="h-8 w-full min-w-0 gap-1 px-2.5 text-xs">
                   <SelectValue placeholder="Filas" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent align="end" sideOffset={4}>
                   {PAGE_SIZE_OPTIONS.map((item) => (
                     <SelectItem key={item.value} value={item.value}>
                       {item.label}

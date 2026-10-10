@@ -1,18 +1,18 @@
+import {
+  ArrowDown02Icon,
+  ArrowExpand01Icon,
+  ArrowLeft02Icon,
+  ArrowRight02Icon,
+  ArrowUp02Icon,
+  CheckIcon,
+  Copy01Icon,
+  RotateCcwIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
+} from "@hugeicons/core-free-icons";
 import { renderMermaidSVG } from "beautiful-mermaid";
 import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 import { Popover, PopoverContent, PopoverTrigger } from "fumadocs-ui/components/ui/popover";
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  Check,
-  Copy,
-  Maximize2,
-  RotateCcw,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -27,6 +27,7 @@ import {
 } from "react";
 
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 const minScale = 0.1;
@@ -354,28 +355,28 @@ function MermaidFrame({
       <div className="absolute right-3 bottom-3 grid grid-cols-3 gap-1">
         <span />
         <IconButton label="Mover arriba" onClick={() => panBy(0, panStep)}>
-          <ArrowUp className="size-4" />
+          <Icon icon={ArrowUp02Icon} size={16} className="size-4" />
         </IconButton>
         <IconButton label="Acercar" onClick={() => zoomBy(zoomStep)}>
-          <ZoomIn className="size-4" />
+          <Icon icon={ZoomInIcon} size={16} className="size-4" />
         </IconButton>
 
         <IconButton label="Mover izquierda" onClick={() => panBy(panStep, 0)}>
-          <ArrowLeft className="size-4" />
+          <Icon icon={ArrowLeft02Icon} size={16} className="size-4" />
         </IconButton>
         <IconButton label="Restablecer zoom" onClick={resetZoom}>
-          <RotateCcw className="size-4" />
+          <Icon icon={RotateCcwIcon} size={16} className="size-4" />
         </IconButton>
         <IconButton label="Mover derecha" onClick={() => panBy(-panStep, 0)}>
-          <ArrowRight className="size-4" />
+          <Icon icon={ArrowRight02Icon} size={16} className="size-4" />
         </IconButton>
 
         <span />
         <IconButton label="Mover abajo" onClick={() => panBy(0, -panStep)}>
-          <ArrowDown className="size-4" />
+          <Icon icon={ArrowDown02Icon} size={16} className="size-4" />
         </IconButton>
         <IconButton label="Alejar" onClick={() => zoomBy(-zoomStep)} disabled={isAtBaseZoom}>
-          <ZoomOut className="size-4" />
+          <Icon icon={ZoomOutIcon} size={16} className="size-4" />
         </IconButton>
       </div>
     </div>
@@ -400,7 +401,7 @@ function OpenDiagramDialogButton({ svg }: { svg: string }) {
           />
         }
       >
-        <Maximize2 className="size-4" />
+        <Icon icon={ArrowExpand01Icon} size={16} className="size-4" />
       </DialogTrigger>
       {isOpen && <div className="fixed inset-0 z-40 bg-black/45 backdrop-blur-sm" />}
       <DialogContent
@@ -454,7 +455,11 @@ function CopyDiagramButton({ chart }: { chart: string }) {
         onClick={copySource}
         className={iconButtonClassName}
       >
-        {hasCopied ? <Check className="size-4 text-green-500" /> : <Copy className="size-4" />}
+        {hasCopied ? (
+          <Icon icon={CheckIcon} size={16} className="size-4 text-green-500" />
+        ) : (
+          <Icon icon={Copy01Icon} size={16} className="size-4" />
+        )}
       </PopoverTrigger>
       <PopoverContent
         sideOffset={8}

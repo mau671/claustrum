@@ -1,10 +1,20 @@
+import { Cancel01Icon, Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
-import { X, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types";
 import type { ReviewTag } from "@/lib/professor-reviews/types";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPopup,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -21,29 +31,39 @@ import {
   ComboboxList,
   ComboboxSeparator,
   ComboboxTrigger,
+  ComboboxValue,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScoreInput } from "@/components/ui/score-input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Icon } from "@/components/ui/icon";
+import { Label } from "@/components/ui/label";
+import {
+  NumberField,
+  NumberFieldDecrement,
+  NumberFieldGroup,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
+import { Radio, RadioGroup } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   formatClosedTermLabel,
   formatTermNameWithoutYear,
@@ -105,6 +125,64 @@ const Turnstile = lazy(() =>
     default: module.Turnstile,
   })),
 );
+
+function ScoreNumberField({
+  id,
+  label,
+  value,
+  onChange,
+  min = 0,
+  max = 10,
+  step = 0.1,
+  placeholder = "0 a 10",
+  optional = false,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (nextValue: string) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  placeholder?: string;
+  optional?: boolean;
+}) {
+  return (
+    <div className="flex w-full flex-col gap-2">
+      {optional ? (
+        <div className="inline-flex w-full items-center justify-between gap-2">
+          <Label htmlFor={id} className="text-xs font-medium whitespace-nowrap">
+            {label}
+          </Label>
+          <Label className="text-muted-foreground font-normal" render={<span />}>
+            Opcional
+          </Label>
+        </div>
+      ) : (
+        <Label htmlFor={id} className="text-xs font-medium whitespace-nowrap">
+          {label}
+        </Label>
+      )}
+      <NumberField
+        id={id}
+        min={min}
+        max={max}
+        step={step}
+        value={value.trim() === "" ? null : Number(value)}
+        onValueChange={(val) =>
+          onChange(val !== null && val !== undefined && !Number.isNaN(val) ? String(val) : "")
+        }
+        className="w-full"
+      >
+        <NumberFieldGroup className="h-9 w-full sm:h-9">
+          <NumberFieldDecrement aria-label={`Disminuir ${label.toLowerCase()}`} />
+          <NumberFieldInput placeholder={placeholder} />
+          <NumberFieldIncrement aria-label={`Aumentar ${label.toLowerCase()}`} />
+        </NumberFieldGroup>
+      </NumberField>
+    </div>
+  );
+}
 
 type ReviewComposerProps = {
   isMobile: boolean;
@@ -175,10 +253,11 @@ export function ReviewComposer({
   onSubmit,
   onCloseReset,
 }: ReviewComposerProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [showReviewExample, setShowReviewExample] = useState(false);
   const comboboxPortalContainerRef = useRef<HTMLDivElement | null>(null);
-  const termTriggerRef = useRef<HTMLButtonElement | null>(null);
   const courseAnchorRef = useComboboxAnchor();
+  const termTriggerRef = useRef<HTMLButtonElement | null>(null);
   const tagAnchorRef = useComboboxAnchor();
   const parsedEngagementLevel = Number(engagementLevel);
   const clampedEngagementLevel = Number.isFinite(parsedEngagementLevel)
@@ -216,11 +295,76 @@ export function ReviewComposer({
     }
   }, [courseOptions, selectedCourses, setSelectedCourses]);
 
+  const scoreDirty = (score: string) => score.trim() === "" || Number(score) !== 8;
+  const isDirty =
+    comment.trim() !== "" ||
+    selectedCourses.length > 0 ||
+    academicTermId !== "" ||
+    gradeReceived.trim() !== "" ||
+    tags.length > 0 ||
+    scoreDirty(easeScore) ||
+    scoreDirty(qualityScore) ||
+    scoreDirty(clarityScore) ||
+    scoreDirty(fairnessScore) ||
+    engagementLevel !== "4" ||
+    !attendanceRequired;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && isDirty) {
+      setConfirmOpen(true);
+      return;
+    }
+    onOpenChange(nextOpen);
+    if (!nextOpen) onCloseReset();
+  };
+
+  const requestClose = () => {
+    handleOpenChange(false);
+  };
+
+  const handleDiscard = () => {
+    onOpenChange(false);
+    onCloseReset();
+  };
+
+  const confirmDialog = (
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogPopup>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Descartar reseña?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tienes cambios sin enviar. Si sales ahora, se perderán.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Volver</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={handleDiscard}>
+            Descartar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogPopup>
+    </AlertDialog>
+  );
+
+  const footerActions = (
+    <>
+      <Button type="button" variant="ghost" onClick={requestClose}>
+        Cancelar
+      </Button>
+      <Button
+        onClick={onSubmit}
+        disabled={submitMutationPending || !turnstileSiteKey || !turnstileToken}
+      >
+        {submitMutationPending ? "Enviando..." : "Enviar reseña"}
+      </Button>
+    </>
+  );
+
   const form = (
-    <div className={`space-y-4 ${isMobile ? "px-4 pb-4" : "px-1 pb-2"}`}>
+    <div className={`space-y-4 ${isMobile ? "px-4 pb-4" : "px-6 pb-6"}`}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label>Cursos</Label>
+          <Label htmlFor="composer-courses-trigger">Cursos</Label>
           <Combobox
             multiple
             autoHighlight
@@ -230,25 +374,36 @@ export function ReviewComposer({
               if (Array.isArray(courses)) setSelectedCourses(courses);
             }}
             itemToStringValue={(course) => `${course.code}: ${course.name}`}
-            disabled={coursesQuery.isLoading || courseOptions.length === 0}
           >
-            <ComboboxChips ref={courseAnchorRef} className="w-full content-start items-start">
-              {selectedCourses.map((course) => (
-                <Tooltip key={course.id}>
-                  <TooltipTrigger render={<ComboboxChip />}>{course.code}</TooltipTrigger>
-                  <TooltipContent side="top" sideOffset={4}>
-                    {course.code}: {course.name}
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-              <ComboboxChipsInput
-                className="min-w-0"
-                placeholder={selectedCourses.length === 0 ? "Seleccionar cursos" : undefined}
-              />
+            <ComboboxChips ref={courseAnchorRef} className="w-full">
+              <ComboboxValue>
+                {(courses: ProfessorReviewCourseOption[]) => (
+                  <>
+                    {courses?.map((course) => (
+                      <ComboboxChip
+                        key={course.id}
+                        aria-label={`${course.code}: ${course.name}`}
+                        title={`${course.code}: ${course.name}`}
+                      >
+                        {course.code}
+                      </ComboboxChip>
+                    ))}
+                    <ComboboxChipsInput
+                      id="composer-courses-trigger"
+                      className="min-w-0"
+                      aria-label="Seleccionar cursos"
+                      placeholder={
+                        courses && courses.length > 0 ? undefined : "Seleccionar cursos..."
+                      }
+                    />
+                  </>
+                )}
+              </ComboboxValue>
             </ComboboxChips>
             <ComboboxContent
               anchor={courseAnchorRef}
               container={comboboxPortalContainerRef}
+              aria-label="Cursos"
               className="w-80"
             >
               <ComboboxEmpty>No se encontraron cursos para este profesor.</ComboboxEmpty>
@@ -266,7 +421,12 @@ export function ReviewComposer({
         </div>
 
         <div className="space-y-2">
-          <Label>Periodo (opcional)</Label>
+          <div className="inline-flex w-full items-center justify-between gap-2">
+            <Label htmlFor="composer-term-trigger">Periodo</Label>
+            <Label className="text-muted-foreground font-normal" render={<span />}>
+              Opcional
+            </Label>
+          </div>
           <Combobox
             items={termGroups}
             value={selectedTerm}
@@ -277,6 +437,7 @@ export function ReviewComposer({
               ref={termTriggerRef}
               render={
                 <Button
+                  id="composer-term-trigger"
                   variant="outline"
                   className="w-full min-w-0 justify-between overflow-hidden px-3 font-normal"
                   disabled={termsQuery.isLoading || termOptions.length === 0}
@@ -298,7 +459,7 @@ export function ReviewComposer({
               {selectedTerm ? (
                 <button
                   type="button"
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted z-10 -mr-1.5 flex h-full items-center justify-center rounded-sm p-0.5 transition-colors"
+                  className="text-muted-foreground z-10 -mr-1 flex h-full shrink-0 items-center justify-center p-0.5 opacity-60 transition-opacity hover:opacity-100"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -312,11 +473,15 @@ export function ReviewComposer({
                     }
                   }}
                 >
-                  <X className="size-4" />
+                  <Icon icon={Cancel01Icon} size={16} className="size-4" />
                   <span className="sr-only">Limpiar periodo seleccionado</span>
                 </button>
               ) : (
-                <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+                <Icon
+                  icon={UnfoldMoreIcon}
+                  size={14}
+                  className="-me-1! size-3.5 shrink-0 opacity-60"
+                />
               )}
             </ComboboxTrigger>
             <ComboboxContent
@@ -330,7 +495,7 @@ export function ReviewComposer({
                   className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
                   placeholder="Buscar periodo..."
                   showTrigger={false}
-                  startAddon={<SearchIcon />}
+                  startAddon={<Icon icon={Search01Icon} size={16} />}
                 />
               </div>
               <ComboboxEmpty>No se encontraron periodos.</ComboboxEmpty>
@@ -356,47 +521,40 @@ export function ReviewComposer({
         </div>
 
         <div className="space-y-2">
-          <ScoreInput
-            label="Calificación obtenida (opcional)"
+          <ScoreNumberField
+            id="composer-grade-received"
+            label="Calificación obtenida"
+            optional
             value={gradeReceived}
             onChange={setGradeReceived}
             max={100}
             step={1}
-            regex={/^\d{0,3}(\.\d?)?$/}
             placeholder="0 a 100"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label className="block">Asistencia obligatoria</Label>
+        <div className="flex flex-col gap-2">
+          <Label className="text-xs font-medium">Asistencia obligatoria</Label>
           <div className="flex h-9 items-center">
             <RadioGroup
               value={attendanceRequired ? "yes" : "no"}
               onValueChange={(value) => setAttendanceRequired(value === "yes")}
-              className="flex items-center gap-4"
+              className="flex flex-row items-center gap-4"
             >
-              <label
-                htmlFor="composer-attendance-yes"
-                className="inline-flex items-center gap-2 text-sm"
-              >
-                <RadioGroupItem value="yes" id="composer-attendance-yes" />
-                Sí
-              </label>
-              <label
-                htmlFor="composer-attendance-no"
-                className="inline-flex items-center gap-2 text-sm"
-              >
-                <RadioGroupItem value="no" id="composer-attendance-no" />
-                No
-              </label>
+              <Label className="cursor-pointer text-sm font-normal">
+                <Radio value="yes" /> Sí
+              </Label>
+              <Label className="cursor-pointer text-sm font-normal">
+                <Radio value="no" /> No
+              </Label>
             </RadioGroup>
           </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <Label htmlFor="composer-comment">Comentario</Label>
+      <Field className="w-full">
+        <div className="flex w-full items-center justify-between gap-2">
+          <FieldLabel htmlFor="composer-comment">Comentario</FieldLabel>
           <Button
             type="button"
             variant="ghost"
@@ -407,7 +565,7 @@ export function ReviewComposer({
           </Button>
         </div>
         {showReviewExample ? (
-          <div className="grid gap-2">
+          <div className="grid w-full gap-2">
             <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm">
               <p className="font-medium text-emerald-700 dark:text-emerald-400">
                 Ejemplo de buena reseña
@@ -433,15 +591,38 @@ export function ReviewComposer({
           placeholder="Describe método de enseñanza, evaluación y recomendaciones prácticas para futuros estudiantes"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
+          className="w-full"
         />
-        <p className="text-muted-foreground text-xs">{comment.length}/1000</p>
-      </div>
+        <FieldDescription>
+          Describe método de enseñanza y evaluación ({comment.length}/1000 caracteres).
+        </FieldDescription>
+      </Field>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <ScoreInput label="Facilidad" value={easeScore} onChange={setEaseScore} />
-        <ScoreInput label="Calidad" value={qualityScore} onChange={setQualityScore} />
-        <ScoreInput label="Claridad" value={clarityScore} onChange={setClarityScore} />
-        <ScoreInput label="Justicia" value={fairnessScore} onChange={setFairnessScore} />
+        <ScoreNumberField
+          id="composer-ease-score"
+          label="Facilidad"
+          value={easeScore}
+          onChange={setEaseScore}
+        />
+        <ScoreNumberField
+          id="composer-quality-score"
+          label="Calidad"
+          value={qualityScore}
+          onChange={setQualityScore}
+        />
+        <ScoreNumberField
+          id="composer-clarity-score"
+          label="Claridad"
+          value={clarityScore}
+          onChange={setClarityScore}
+        />
+        <ScoreNumberField
+          id="composer-fairness-score"
+          label="Justicia"
+          value={fairnessScore}
+          onChange={setFairnessScore}
+        />
       </div>
 
       <div className="space-y-2">
@@ -455,8 +636,9 @@ export function ReviewComposer({
         </div>
         <div className="flex h-9 items-center">
           <Slider
-            className="w-full -translate-y-px [&_[data-slot=slider-range]]:bg-transparent [&_[data-slot=slider-track]]:bg-gradient-to-r [&_[data-slot=slider-track]]:from-red-500 [&_[data-slot=slider-track]]:to-green-500"
+            className="w-full -translate-y-px [&_[data-slot=slider-indicator]]:hidden [&_[data-slot=slider-track]::before]:inset-x-0 [&_[data-slot=slider-track]::before]:bg-gradient-to-r [&_[data-slot=slider-track]::before]:from-red-500 [&_[data-slot=slider-track]::before]:to-green-500"
             id="composer-engagement-level"
+            thumbAlignment="center"
             min={1}
             max={5}
             step={1}
@@ -533,36 +715,20 @@ export function ReviewComposer({
           Turnstile no está configurado. Define VITE_TURNSTILE_SITE_KEY para habilitar envío.
         </p>
       )}
-
-      <div className="flex justify-end">
-        <Button
-          onClick={onSubmit}
-          disabled={submitMutationPending || !turnstileSiteKey || !turnstileToken}
-        >
-          {submitMutationPending ? "Enviando..." : "Enviar reseña"}
-        </Button>
-      </div>
     </div>
   );
 
   if (isMobile) {
     return (
-      <Sheet
-        open={open}
-        onOpenChange={(nextOpen) => {
-          onOpenChange(nextOpen);
-          if (!nextOpen) onCloseReset();
-        }}
-      >
-        <SheetContent
-          side="bottom"
-          className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
-          initialFocus={false}
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerPopup
+          showBar
+          className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
         >
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
-          <SheetHeader className="px-4 pt-4 pb-2">
-            <SheetTitle>Enviar reseña</SheetTitle>
-            <SheetDescription className="space-y-2">
+          <DrawerHeader className="px-4 pt-4 pb-2">
+            <DrawerTitle>Enviar reseña</DrawerTitle>
+            <DrawerDescription className="space-y-2">
               <span className="block">
                 Tu reseña es anónima y requiere aprobación antes de publicarse.
               </span>
@@ -581,24 +747,20 @@ export function ReviewComposer({
               >
                 Ver reglamento de reseñas
               </Button>
-            </SheetDescription>
-          </SheetHeader>
+            </DrawerDescription>
+          </DrawerHeader>
           <ScrollArea className="min-h-0">{form}</ScrollArea>
-        </SheetContent>
-      </Sheet>
+          <DrawerFooter>{footerActions}</DrawerFooter>
+        </DrawerPopup>
+        {confirmDialog}
+      </Drawer>
     );
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(nextOpen) => {
-        onOpenChange(nextOpen);
-        if (!nextOpen) onCloseReset();
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-h-[90vh] max-w-3xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
+        className="max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
         initialFocus={false}
       >
         <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
@@ -626,7 +788,9 @@ export function ReviewComposer({
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="min-h-0">{form}</ScrollArea>
+        <DialogFooter>{footerActions}</DialogFooter>
       </DialogContent>
+      {confirmDialog}
     </Dialog>
   );
 }

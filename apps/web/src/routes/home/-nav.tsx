@@ -1,7 +1,8 @@
-import { Moon, Sun } from "lucide-react";
+import { Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 import { GitHubIcon, Logo, StarIcon } from "./-icons";
 
@@ -58,7 +59,7 @@ export function HomeNav({ starCount }: { starCount: number | null }) {
             aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
             onClick={() => setTheme(isDark ? "light" : "dark")}
           >
-            {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            {isDark ? <Icon icon={Sun03Icon} size={18} /> : <Icon icon={Moon02Icon} size={16} />}
           </Button>
 
           <Button

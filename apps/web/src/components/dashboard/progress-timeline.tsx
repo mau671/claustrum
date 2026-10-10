@@ -1,10 +1,11 @@
 "use client";
 
-import { CheckCircle2, Circle, CircleDashed } from "lucide-react";
+import { CheckmarkCircle02Icon, CircleDashedIcon, CircleIcon } from "@hugeicons/core-free-icons";
 
 import type { SemesterProgress } from "@/lib/types";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 
 interface ProgressTimelineProps {
   semesters: SemesterProgress[];
@@ -31,11 +32,11 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
                   }`}
                 >
                   {semester.status === "completed" ? (
-                    <CheckCircle2 className="size-5" />
+                    <Icon icon={CheckmarkCircle02Icon} className="size-5" />
                   ) : semester.status === "in_progress" ? (
-                    <CircleDashed className="size-5 animate-pulse" />
+                    <Icon icon={CircleDashedIcon} className="size-5 animate-pulse" />
                   ) : (
-                    <Circle className="size-5" />
+                    <Icon icon={CircleIcon} className="size-5" />
                   )}
                 </div>
                 {index < semesters.length - 1 && (

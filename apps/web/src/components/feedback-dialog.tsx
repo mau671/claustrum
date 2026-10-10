@@ -1,11 +1,25 @@
+import { Loading02Icon } from "@hugeicons/core-free-icons";
 import { useForm } from "@tanstack/react-form";
-import { Loader2 } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -15,13 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -101,7 +108,7 @@ export function FeedbackDialog({
         e.stopPropagation();
         void form.handleSubmit();
       }}
-      className="flex flex-col gap-4 px-6 pb-6"
+      className="flex flex-col gap-4 px-4 pb-6 sm:px-6"
     >
       <form.Field
         name="type"
@@ -229,7 +236,9 @@ export function FeedbackDialog({
               disabled={!canSubmit || isSubmitting || (!!turnstileSiteKey && !turnstileToken)}
               className="w-full shrink-0 sm:w-auto"
             >
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {isSubmitting && (
+                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+              )}
               Enviar
             </Button>
           )}
@@ -238,36 +247,29 @@ export function FeedbackDialog({
     </form>
   );
 
-  const TitleAndDescription = () => (
-    <>
-      <SheetTitle>Retroalimentación</SheetTitle>
-      <SheetDescription>
-        Ayúdanos a mejorar Claustrum enviando tus sugerencias o reportes de errores. Si lo deseas,
-        puedes hacerlo de forma anónima.
-      </SheetDescription>
-    </>
-  );
-
   if (isMobile) {
     return (
-      <Sheet
+      <Drawer
         open={open}
         onOpenChange={(nextOpen) => {
           onOpenChange(nextOpen);
           if (!nextOpen) onCloseReset();
         }}
       >
-        <SheetContent
-          side="bottom"
-          className="grid max-h-[90vh] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
-          initialFocus={false}
+        <DrawerPopup
+          showBar
+          className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
         >
-          <SheetHeader className="px-6 pt-6 pb-2 text-left">
-            <TitleAndDescription />
-          </SheetHeader>
+          <DrawerHeader className="px-4 pt-4 pb-2 text-left">
+            <DrawerTitle>Retroalimentación</DrawerTitle>
+            <DrawerDescription>
+              Ayúdanos a mejorar Claustrum enviando tus sugerencias o reportes de errores. Si lo
+              deseas, puedes hacerlo de forma anónima.
+            </DrawerDescription>
+          </DrawerHeader>
           <ScrollArea className="min-h-0">{formContent}</ScrollArea>
-        </SheetContent>
-      </Sheet>
+        </DrawerPopup>
+      </Drawer>
     );
   }
 
@@ -284,7 +286,11 @@ export function FeedbackDialog({
         initialFocus={false}
       >
         <DialogHeader className="px-6 pt-6 pb-2 text-left">
-          <TitleAndDescription />
+          <DialogTitle>Retroalimentación</DialogTitle>
+          <DialogDescription>
+            Ayúdanos a mejorar Claustrum enviando tus sugerencias o reportes de errores. Si lo
+            deseas, puedes hacerlo de forma anónima.
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="min-h-0 flex-1">{formContent}</ScrollArea>
       </DialogContent>

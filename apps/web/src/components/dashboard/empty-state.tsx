@@ -1,8 +1,9 @@
 "use client";
 
-import { GraduationCap, ArrowRight } from "lucide-react";
+import { ArrowRight01Icon, GraduationCapIcon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 interface EmptyDashboardProps {
   isAuthenticated: boolean;
@@ -27,7 +28,7 @@ export function EmptyDashboard({ isAuthenticated, hasProfile }: EmptyDashboardPr
   return (
     <div className="flex min-h-[calc(100svh-var(--header-height)-6rem)] flex-col items-center justify-center px-4 py-12 md:min-h-[calc(100svh-var(--header-height)-3rem)]">
       <div className="bg-primary/10 mb-4 rounded-full p-4">
-        <GraduationCap className="text-primary size-12" />
+        <Icon icon={GraduationCapIcon} className="text-primary size-12" />
       </div>
       <h1 className="mb-2 text-xl font-semibold">{title}</h1>
       <p className="text-muted-foreground mb-6 max-w-md text-center">{description}</p>
@@ -35,7 +36,7 @@ export function EmptyDashboard({ isAuthenticated, hasProfile }: EmptyDashboardPr
         <a href={actionHref}>
           <Button>
             {actionLabel}
-            <ArrowRight className="ml-2 size-4" />
+            <Icon icon={ArrowRight01Icon} className="ml-2 size-4" />
           </Button>
         </a>
       ) : (

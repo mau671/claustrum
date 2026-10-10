@@ -1,18 +1,26 @@
+import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon } from "@hugeicons/core-free-icons";
 import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, getRouteApi } from "@tanstack/react-router";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { useMemo, useState, useCallback } from "react";
 
 import type { ProfessorReviewStatsRow } from "@/lib/professor-reviews/types";
 
 import { FilterCombobox, normalizeText } from "@/components/filters/shared-filters";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Frame, FrameFooter } from "@/components/ui/frame";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  NumberField,
+  NumberFieldDecrement,
+  NumberFieldGroup,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import {
   Pagination,
   PaginationContent,
@@ -20,7 +28,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ScoreInput } from "@/components/ui/score-input";
 import {
   Select,
   SelectContent,
@@ -133,7 +140,9 @@ export function ProfessorsReviewsPage() {
       >
         {title}
         <div className="ml-1.5 flex flex-col -space-y-[6px]">
-          <ChevronUp
+          <Icon
+            icon={ChevronUpIcon}
+            size={10}
             className={cn(
               "size-[10px]",
               sortBy === colId && sortDesc === false
@@ -141,7 +150,9 @@ export function ProfessorsReviewsPage() {
                 : "text-muted-foreground/50",
             )}
           />
-          <ChevronDown
+          <Icon
+            icon={ChevronDownIcon}
+            size={10}
             className={cn(
               "size-[10px]",
               sortBy === colId && sortDesc === true
@@ -229,7 +240,7 @@ export function ProfessorsReviewsPage() {
                 params={{ professorId }}
                 preload="intent"
                 viewTransition={{ types: ["professor-open"] }}
-                className="block truncate leading-tight font-medium underline-offset-4 hover:underline"
+                className="text-foreground inline-block max-w-full truncate py-0.5 leading-normal font-medium underline-offset-2 hover:underline"
                 style={{ viewTransitionName: getProfessorNameTransitionName(professorId) }}
                 onMouseEnter={prefetchProfessorDetail}
                 onPointerDown={prefetchProfessorDetail}
@@ -300,33 +311,64 @@ export function ProfessorsReviewsPage() {
     getCoreRowModel: getCoreRowModel(),
   });
   const filterMinAverage = (
-    <ScoreInput
-      label="Promedio mínimo"
-      value={minAverageScoreInput}
-      onChange={(val) => {
-        setMinAverageScoreInput(val);
-      }}
-      max={10}
-      step={0.1}
-    />
+    <div className="flex w-full flex-col gap-2">
+      <Label htmlFor="min-average-score" className="text-xs font-medium whitespace-nowrap">
+        Promedio mínimo
+      </Label>
+      <NumberField
+        id="min-average-score"
+        min={0}
+        max={10}
+        step={0.1}
+        value={minAverageScoreInput === "" ? null : Number(minAverageScoreInput)}
+        onValueChange={(val) =>
+          setMinAverageScoreInput(
+            val !== null && val !== undefined && !Number.isNaN(val) ? String(val) : "",
+          )
+        }
+        className="w-full"
+      >
+        <NumberFieldGroup className="h-9 w-full sm:h-9">
+          <NumberFieldDecrement />
+          <NumberFieldInput placeholder="0 a 10" />
+          <NumberFieldIncrement />
+        </NumberFieldGroup>
+      </NumberField>
+    </div>
   );
 
   const filterMinReviews = (
-    <ScoreInput
-      label="Mínimo de reseñas"
-      value={minReviewCountInput}
-      onChange={(val) => {
-        setMinReviewCountInput(val);
-      }}
-      max={100}
-      step={1}
-      regex={/^\d*$/}
-    />
+    <div className="flex w-full flex-col gap-2">
+      <Label htmlFor="min-review-count" className="text-xs font-medium whitespace-nowrap">
+        Mínimo de reseñas
+      </Label>
+      <NumberField
+        id="min-review-count"
+        min={0}
+        max={100}
+        step={1}
+        value={minReviewCountInput === "" ? null : Number(minReviewCountInput)}
+        onValueChange={(val) =>
+          setMinReviewCountInput(
+            val !== null && val !== undefined && !Number.isNaN(val) ? String(val) : "",
+          )
+        }
+        className="w-full"
+      >
+        <NumberFieldGroup className="h-9 w-full sm:h-9">
+          <NumberFieldDecrement />
+          <NumberFieldInput placeholder="Mín. reseñas" />
+          <NumberFieldIncrement />
+        </NumberFieldGroup>
+      </NumberField>
+    </div>
   );
 
   const filterSchool = (
-    <div className="space-y-2">
-      <Label>Escuela</Label>
+    <div className="flex w-full flex-col gap-2">
+      <Label htmlFor="school-filter" className="text-xs font-medium whitespace-nowrap">
+        Escuela
+      </Label>
       <FilterCombobox
         label="escuela"
         value={academicUnitIdInput?.toString() || ""}
@@ -342,7 +384,7 @@ export function ProfessorsReviewsPage() {
             ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
             : normalizeText(item.name)
         }
-        triggerClassName="h-9 sm:max-w-none"
+        triggerClassName="h-9 sm:h-9 w-full sm:min-w-0 sm:max-w-none text-xs"
       />
     </div>
   );
@@ -361,11 +403,13 @@ export function ProfessorsReviewsPage() {
       <Collapsible open={filtersExpanded} onOpenChange={setFiltersExpanded}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <div className="flex flex-1 items-end gap-2">
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="professor-search">Nombre</Label>
+            <div className="flex flex-1 flex-col gap-2">
+              <Label htmlFor="professor-search" className="text-xs font-medium whitespace-nowrap">
+                Nombre
+              </Label>
               <Input
                 id="professor-search"
-                className="h-9"
+                className="h-9 w-full sm:h-9"
                 placeholder="Ej: María González"
                 aria-label="Buscar por nombre de profesor"
                 value={searchInput}
@@ -390,9 +434,9 @@ export function ProfessorsReviewsPage() {
               className="lg:hidden"
             >
               {filtersExpanded ? (
-                <ChevronDown className="size-4" />
+                <Icon icon={ChevronDownIcon} size={16} className="size-4" />
               ) : (
-                <ChevronRight className="size-4" />
+                <Icon icon={ChevronRightIcon} size={16} className="size-4" />
               )}
             </CollapsibleTrigger>
           </div>
@@ -413,144 +457,142 @@ export function ProfessorsReviewsPage() {
         </CollapsibleContent>
       </Collapsible>
 
-      <Card className="h-fit overflow-hidden p-0">
-        <CardContent className="p-0">
-          <div className="relative">
-            <Table className="table-fixed">
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className={cn(
-                          header.column.id === "professor_name" && "w-auto sm:w-[35%]",
-                          header.column.id === "academic_unit" && "w-[32%]",
-                          header.column.id === "approved_review_count" && "w-[72px] sm:w-[15%]",
-                          header.column.id === "average_overall_score" && "w-[80px] sm:w-[18%]",
-                          (header.column.id === "approved_review_count" ||
-                            header.column.id === "average_overall_score") &&
-                            "text-right",
-                        )}
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
+      <Frame className="w-full">
+        <Table variant="card" className="table-fixed">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      header.column.id === "professor_name" && "w-auto sm:w-[35%]",
+                      header.column.id === "academic_unit" && "w-[32%]",
+                      header.column.id === "approved_review_count" && "w-[72px] sm:w-[15%]",
+                      header.column.id === "average_overall_score" && "w-[80px] sm:w-[18%]",
+                      (header.column.id === "approved_review_count" ||
+                        header.column.id === "average_overall_score") &&
+                        "text-right",
+                    )}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {query.isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="p-0">
+                  <div className="flex h-[650px] items-center justify-center">
+                    <Spinner className="text-muted-foreground size-8" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <span className="text-muted-foreground text-sm">
+                    No hay resultados para los filtros seleccionados.
+                  </span>
+                </TableCell>
+              </TableRow>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        (cell.column.id === "professor_name" ||
+                          cell.column.id === "academic_unit") &&
+                          "max-w-0",
+                      )}
+                    >
+                      {cell.column.id === "professor_name" || cell.column.id === "academic_unit" ? (
+                        <div className="max-w-full min-w-0">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </div>
+                      ) : (
+                        flexRender(cell.column.columnDef.cell, cell.getContext())
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <FrameFooter className="p-2 sm:px-4 sm:py-3">
+          <div className="flex w-full items-center justify-between gap-2">
+            <span className="text-muted-foreground text-xs">
+              {rows.length === 0
+                ? "Sin resultados"
+                : `Mostrando ${firstRow}-${lastRow} de ${totalCount}`}{" "}
+              · Página {page + 1} de {totalPages}
+              {query.isFetching ? (
+                <span className="ml-1 animate-pulse">(Actualizando…)</span>
+              ) : null}
+            </span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Pagination className="w-auto">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setPage((value) => Math.max(value - 1, 0));
+                      }}
+                      aria-disabled={page === 0 || query.isFetching}
+                      className={cn(
+                        page === 0 || query.isFetching ? "pointer-events-none opacity-50" : "",
+                      )}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setPage((value) => value + 1);
+                      }}
+                      aria-disabled={!hasMore || query.isFetching}
+                      className={cn(
+                        !hasMore || query.isFetching ? "pointer-events-none opacity-50" : "",
+                      )}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+              <div className="w-24 shrink-0">
+                <Select
+                  items={PAGE_SIZE_OPTIONS}
+                  value={String(pageSize)}
+                  onValueChange={(value) => {
+                    setPage(0);
+                    setPageSize(Number(value));
+                  }}
+                >
+                  <SelectTrigger size="sm" className="h-8 w-full min-w-0 gap-1 px-2.5 text-xs">
+                    <SelectValue placeholder="Filas" />
+                  </SelectTrigger>
+                  <SelectContent align="end" sideOffset={4}>
+                    {PAGE_SIZE_OPTIONS.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
                     ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {query.isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="p-0">
-                      <div className="flex h-[650px] items-center justify-center">
-                        <Spinner className="text-muted-foreground size-8" />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : rows.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      <span className="text-muted-foreground text-sm">
-                        No hay resultados para los filtros seleccionados.
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className={cn(
-                            (cell.column.id === "professor_name" ||
-                              cell.column.id === "academic_unit") &&
-                              "max-w-0",
-                          )}
-                        >
-                          {cell.column.id === "professor_name" ||
-                          cell.column.id === "academic_unit" ? (
-                            <div className="max-w-full min-w-0 truncate">
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </div>
-                          ) : (
-                            flexRender(cell.column.columnDef.cell, cell.getContext())
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="mt-2 flex items-center justify-between px-2">
-        <span className="text-muted-foreground text-xs">
-          {rows.length === 0
-            ? "Sin resultados"
-            : `Mostrando ${firstRow}-${lastRow} de ${totalCount}`}{" "}
-          · Página {page + 1} de {totalPages}
-          {query.isFetching ? <span className="ml-1 animate-pulse">(Actualizando…)</span> : null}
-        </span>
-        <div className="flex items-center gap-3">
-          <Pagination className="w-auto">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setPage((value) => Math.max(value - 1, 0));
-                  }}
-                  aria-disabled={page === 0 || query.isFetching}
-                  className={cn(
-                    page === 0 || query.isFetching ? "pointer-events-none opacity-50" : "",
-                  )}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setPage((value) => value + 1);
-                  }}
-                  aria-disabled={!hasMore || query.isFetching}
-                  className={cn(
-                    !hasMore || query.isFetching ? "pointer-events-none opacity-50" : "",
-                  )}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-          <div className="w-28">
-            <Select
-              items={PAGE_SIZE_OPTIONS}
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                setPage(0);
-                setPageSize(Number(value));
-              }}
-            >
-              <SelectTrigger className="h-8">
-                <SelectValue placeholder="Filas" />
-              </SelectTrigger>
-              <SelectContent align="end" sideOffset={4}>
-                {PAGE_SIZE_OPTIONS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
+        </FrameFooter>
+      </Frame>
     </div>
   );
 }

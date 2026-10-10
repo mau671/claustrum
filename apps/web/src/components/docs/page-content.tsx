@@ -1,13 +1,20 @@
 import type { TOCItemType } from "fumadocs-core/toc";
 import type { MDXComponents } from "mdx/types";
 
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  Copy01Icon,
+  ExternalLinkIcon,
+  TextIcon,
+} from "@hugeicons/core-free-icons";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "fumadocs-ui/components/ui/popover";
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { useCopyButton } from "fumadocs-ui/utils/use-copy-button";
-import { Check, ChevronDown, Copy, ExternalLinkIcon, TextIcon } from "lucide-react";
 import { createContext, type ComponentType, type ReactNode, use } from "react";
 
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 import { useMDXComponents } from "./mdx";
@@ -81,7 +88,7 @@ function DocsPageActions({ path }: { path: string }) {
             )}
           >
             Abrir
-            <ChevronDown className="text-fd-muted-foreground size-3.5" />
+            <Icon icon={ChevronDownIcon} size={14} className="text-fd-muted-foreground size-3.5" />
           </PopoverTrigger>
           <PopoverContent className="flex w-64 flex-col p-1" align="start">
             <a
@@ -92,7 +99,11 @@ function DocsPageActions({ path }: { path: string }) {
             >
               <GitHubIcon className="size-4" />
               Abrir en github
-              <ExternalLinkIcon className="text-fd-muted-foreground ms-auto size-3.5" />
+              <Icon
+                icon={ExternalLinkIcon}
+                size={14}
+                className="text-fd-muted-foreground ms-auto size-3.5"
+              />
             </a>
             <a
               href={markdownUrl}
@@ -100,9 +111,13 @@ function DocsPageActions({ path }: { path: string }) {
               rel="noreferrer noopener"
               className="hover:bg-fd-accent hover:text-fd-accent-foreground inline-flex items-start gap-2 rounded-lg p-2 text-sm"
             >
-              <TextIcon className="size-4" />
+              <Icon icon={TextIcon} size={16} className="size-4" />
               Ver como markdown
-              <ExternalLinkIcon className="text-fd-muted-foreground ms-auto size-3.5" />
+              <Icon
+                icon={ExternalLinkIcon}
+                size={14}
+                className="text-fd-muted-foreground ms-auto size-3.5"
+              />
             </a>
           </PopoverContent>
         </Popover>
@@ -127,7 +142,7 @@ function CopyMarkdownButton({ path }: { path: string }) {
         "[&_svg]:text-fd-muted-foreground gap-2 [&_svg]:size-3.5",
       )}
     >
-      {checked ? <Check /> : <Copy />}
+      {checked ? <Icon icon={CheckIcon} size={14} /> : <Icon icon={Copy01Icon} size={14} />}
       Copiar como markdown
     </button>
   );

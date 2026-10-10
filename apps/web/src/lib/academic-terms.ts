@@ -1,5 +1,8 @@
 export function formatTermNameWithoutYear(displayName: string): string {
-  return displayName.replace(/^\s*\d{4}\s*-\s*/, "").trim();
+  return displayName
+    .replace(/^\s*\d{4}\s*[-:]\s*/, "")
+    .replace(/CENTROS?(?:\s+DE)?\s+FORMACI[OÓ]N\s+HUMAN[IÍ]STICA/gi, "CFH")
+    .trim();
 }
 
 export function formatClosedTermLabel<T extends { year: number; display_name: string }>(

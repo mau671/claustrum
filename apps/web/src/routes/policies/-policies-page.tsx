@@ -1,8 +1,9 @@
+import { CheckIcon, Copy01Icon, Mail01Icon } from "@hugeicons/core-free-icons";
 import { useLocation } from "@tanstack/react-router";
-import { Check, Copy, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -30,31 +31,39 @@ const EmailContact = () => {
       >
         {email}
       </PopoverTrigger>
-      <PopoverContent
-        className="w-[90vw] space-y-4 p-4 sm:w-[420px]"
-        align="start"
-        initialFocus={false}
-      >
-        <Input readOnly value={email} className="bg-muted/50 cursor-text" />
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-center gap-2 sm:flex-1"
-            onClick={handleCopy}
-          >
-            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            {copied ? "Copiado" : "Copiar correo"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-center gap-2 sm:flex-1"
-            render={<a href={`mailto:${email}`} aria-label="Abrir aplicación de correo" />}
-          >
-            <Mail className="h-4 w-4" />
-            Abrir aplicación de correo
-          </Button>
+      <PopoverContent className="w-80" align="start" initialFocus={false}>
+        <div className="flex flex-col gap-2.5">
+          <Input aria-label="Correo de contacto" disabled value={email} type="text" />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1 gap-1.5"
+              onClick={handleCopy}
+            >
+              {copied ? (
+                <Icon
+                  icon={CheckIcon}
+                  size={14}
+                  className="size-3.5 text-green-600 dark:text-green-500"
+                />
+              ) : (
+                <Icon icon={Copy01Icon} size={14} className="size-3.5" />
+              )}
+              {copied ? "Copiado" : "Copiar"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex-1 gap-1.5"
+              render={<a href={`mailto:${email}`} aria-label="Abrir aplicación de correo" />}
+            >
+              <Icon icon={Mail01Icon} size={14} className="size-3.5" />
+              Abrir correo
+            </Button>
+          </div>
         </div>
       </PopoverContent>
     </Popover>

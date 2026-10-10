@@ -1,4 +1,12 @@
-import { Calendar, Check, ChevronLeft, ChevronRight, Clock, Loader2, X } from "lucide-react";
+import {
+  Calendar03Icon,
+  Cancel01Icon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Clock01Icon,
+  Loading02Icon,
+} from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 import { lazy, Suspense } from "react";
 
@@ -11,6 +19,7 @@ import type {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -143,7 +152,7 @@ export function ReviewReportSection({
             disabled={page === 0 || isFetching}
             onClick={() => onPageChange(Math.max(page - 1, 0))}
           >
-            <ChevronLeft className="size-4" />
+            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
           </Button>
           <span className="text-sm font-medium">
             Página {(page + 1).toString().padStart(2, "0")}
@@ -155,14 +164,18 @@ export function ReviewReportSection({
             disabled={!hasMore || isFetching}
             onClick={() => onPageChange(page + 1)}
           >
-            <ChevronRight className="size-4" />
+            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
           </Button>
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
           {isLoading ? (
             <div className="flex flex-1 items-center justify-center p-4">
-              <Loader2 className="text-muted-foreground size-5 animate-spin" />
+              <Icon
+                icon={Loading02Icon}
+                size={20}
+                className="text-muted-foreground size-5 animate-spin"
+              />
             </div>
           ) : rows.length === 0 ? (
             <p className="text-muted-foreground p-4 text-center text-sm">
@@ -268,7 +281,7 @@ export function ReviewReportSection({
                   onClick={() => void onResolve(selectedReport.report_id)}
                   disabled={isPending}
                 >
-                  <Check className="mr-2 size-4" /> Resolver
+                  <Icon icon={CheckIcon} size={16} className="mr-2 size-4" /> Resolver
                 </Button>
                 <Button
                   variant="destructive"
@@ -276,7 +289,7 @@ export function ReviewReportSection({
                   onClick={() => void onDismiss(selectedReport.report_id)}
                   disabled={isPending}
                 >
-                  <X className="mr-2 size-4" /> Descartar
+                  <Icon icon={Cancel01Icon} size={16} className="mr-2 size-4" /> Descartar
                 </Button>
               </div>
             </div>
@@ -367,7 +380,7 @@ export function ReviewSection({
               disabled={page === 0 || isFetching}
               onClick={() => onPageChange(Math.max(page - 1, 0))}
             >
-              <ChevronLeft className="size-4" />
+              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
             </Button>
             <span className="text-sm font-medium">
               Página {(page + 1).toString().padStart(2, "0")}
@@ -379,7 +392,7 @@ export function ReviewSection({
               disabled={!hasMore || isFetching}
               onClick={() => onPageChange(page + 1)}
             >
-              <ChevronRight className="size-4" />
+              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
             </Button>
           </div>
 
@@ -483,7 +496,7 @@ export function ReviewSection({
               {/* Date and time details adapted to user's browser timezone */}
               <div className="bg-muted/40 border-border/60 text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border px-3 py-2 text-xs">
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="size-3.5" />
+                  <Icon icon={Calendar03Icon} size={14} className="size-3.5" />
                   <span>
                     Enviada:{" "}
                     <strong className="text-foreground font-medium">
@@ -493,7 +506,7 @@ export function ReviewSection({
                 </div>
                 {selectedReview.reviewed_at && (
                   <div className="flex items-center gap-1.5">
-                    <Clock className="size-3.5" />
+                    <Icon icon={Clock01Icon} size={14} className="size-3.5" />
                     <span>
                       Moderada:{" "}
                       <strong className="text-foreground font-medium">
@@ -557,7 +570,7 @@ export function ReviewSection({
                   onClick={() => void onApprove(selectedReview.review_id)}
                   disabled={isPending}
                 >
-                  <Check className="mr-2 size-4" /> Aprobar
+                  <Icon icon={CheckIcon} size={16} className="mr-2 size-4" /> Aprobar
                 </Button>
                 <Button
                   variant="destructive"
@@ -565,7 +578,7 @@ export function ReviewSection({
                   onClick={() => void onReject(selectedReview.review_id)}
                   disabled={isPending}
                 >
-                  <X className="mr-2 size-4" /> Rechazar
+                  <Icon icon={Cancel01Icon} size={16} className="mr-2 size-4" /> Rechazar
                 </Button>
               </div>
             </div>
@@ -659,7 +672,11 @@ function EvaluationPdfViewer({
 
       {fileLoading && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <Loader2 className="text-muted-foreground size-8 animate-spin" />
+          <Icon
+            icon={Loading02Icon}
+            size={32}
+            className="text-muted-foreground size-8 animate-spin"
+          />
           <p className="text-muted-foreground text-sm">Cargando documento…</p>
         </div>
       )}
@@ -674,7 +691,11 @@ function EvaluationPdfViewer({
         <Suspense
           fallback={
             <div className="flex flex-1 flex-col items-center justify-center gap-4">
-              <Loader2 className="text-muted-foreground size-8 animate-spin" />
+              <Icon
+                icon={Loading02Icon}
+                size={32}
+                className="text-muted-foreground size-8 animate-spin"
+              />
               <p className="text-muted-foreground text-sm">Cargando visor…</p>
             </div>
           }
@@ -740,7 +761,7 @@ export function EvaluationSection({
             disabled={page === 0 || isFetching}
             onClick={() => onPageChange(Math.max(page - 1, 0))}
           >
-            <ChevronLeft className="size-4" />
+            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
           </Button>
           <span className="text-sm font-medium">
             Página {(page + 1).toString().padStart(2, "0")}
@@ -752,7 +773,7 @@ export function EvaluationSection({
             disabled={!hasMore || isFetching}
             onClick={() => onPageChange(page + 1)}
           >
-            <ChevronRight className="size-4" />
+            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
           </Button>
         </div>
 
@@ -893,7 +914,7 @@ export function EvaluationSection({
                   onClick={() => void onApprove(selectedEvaluation.id)}
                   disabled={isPending}
                 >
-                  <Check className="mr-2 size-4" /> Aprobar
+                  <Icon icon={CheckIcon} size={16} className="mr-2 size-4" /> Aprobar
                 </Button>
                 <Button
                   variant="destructive"
@@ -901,7 +922,7 @@ export function EvaluationSection({
                   onClick={() => void onReject(selectedEvaluation.id)}
                   disabled={isPending}
                 >
-                  <X className="mr-2 size-4" /> Rechazar
+                  <Icon icon={Cancel01Icon} size={16} className="mr-2 size-4" /> Rechazar
                 </Button>
               </div>
             </div>

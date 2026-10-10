@@ -1,4 +1,5 @@
-import { ChevronsUpDownIcon, SearchIcon } from "lucide-react";
+import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,74 @@ export type FilterItem = {
   external_plan_id?: number | string;
 };
 
+export function parseItemCodeAndName(
+  item: FilterItem,
+  itemLabel?: (item: FilterItem) => string,
+): { code: string | null; name: string } {
+  if (
+    item.external_plan_id !== undefined &&
+    item.external_plan_id !== null &&
+    item.external_plan_id !== ""
+  ) {
+    return {
+      code: String(item.external_plan_id),
+      name: removePlanPrefixFromName(item.name, item.external_plan_id),
+    };
+  }
+  if (item.code) {
+    return {
+      code: normalizeText(item.code),
+      name: normalizeText(item.name),
+    };
+  }
+  if (itemLabel) {
+    const raw = itemLabel(item);
+    const colonIndex = raw.indexOf(":");
+    if (colonIndex !== -1) {
+      return {
+        code: raw.substring(0, colonIndex).trim(),
+        name: raw.substring(colonIndex + 1).trim(),
+      };
+    }
+    return {
+      code: null,
+      name: raw,
+    };
+  }
+  return {
+    code: null,
+    name: normalizeText(item.name),
+  };
+}
+
+export function FilterItemDisplay({
+  item,
+  itemLabel,
+  className,
+}: {
+  item: FilterItem;
+  itemLabel?: (item: FilterItem) => string;
+  className?: string;
+}) {
+  const { code, name } = parseItemCodeAndName(item, itemLabel);
+
+  if (code) {
+    return (
+      <span
+        className={cn(
+          "inline-flex max-w-full min-w-0 items-baseline truncate text-left",
+          className,
+        )}
+      >
+        <span className="shrink-0 font-mono text-[11px] font-semibold tabular-nums">{code}:</span>
+        <span className="ml-1.5 truncate">{name}</span>
+      </span>
+    );
+  }
+
+  return <span className={cn("block min-w-0 truncate text-left", className)}>{name}</span>;
+}
+
 export function FilterCombobox({
   label,
   value,
@@ -67,16 +136,17 @@ export function FilterCombobox({
 
   const selectedItem = items.find((item) => item.id.toString() === value) ?? null;
   const getItemLabel = (item: FilterItem) => {
-    if (itemLabel) return itemLabel(item);
-    if (showCode && item.code) return `${normalizeText(item.code)} - ${normalizeText(item.name)}`;
-    return normalizeText(item.name);
+    const { code, name } = parseItemCodeAndName(item, itemLabel);
+    if (code) return `${code}: ${name}`;
+    if (showCode && item.code) return `${normalizeText(item.code)}: ${normalizeText(item.name)}`;
+    return name;
   };
-  const selectedText = selectedItem ? getItemLabel(selectedItem) : null;
 
   return (
     <div
       className={cn(
         "min-w-0 shrink-0",
+        triggerClassName?.includes("w-full") && "w-full shrink",
         !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
       )}
     >
@@ -101,12 +171,12 @@ export function FilterCombobox({
           <span
             className={cn(
               "block min-w-0 flex-1 truncate text-left",
-              !selectedText && "text-muted-foreground",
+              !selectedItem && "text-muted-foreground",
             )}
           >
-            {selectedText ?? placeholder}
+            {selectedItem ? getItemLabel(selectedItem) : placeholder}
           </span>
-          <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
+          <HugeiconsIcon icon={UnfoldMoreIcon} size={14} className="-me-1! shrink-0 opacity-60" />
         </ComboboxTrigger>
         <ComboboxPopup
           anchor={triggerRef}
@@ -118,7 +188,7 @@ export function FilterCombobox({
               className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
               placeholder={label ? `Buscar ${label.toLowerCase()}...` : "Buscar..."}
               showTrigger={false}
-              startAddon={<SearchIcon />}
+              startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
             />
           </div>
           <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
@@ -133,7 +203,7 @@ export function FilterCombobox({
                   }
                 }}
               >
-                <span className="block w-full min-w-0 truncate text-xs">{getItemLabel(item)}</span>
+                <FilterItemDisplay item={item} itemLabel={itemLabel} className="w-full text-xs" />
               </ComboboxItem>
             )}
           </ComboboxList>

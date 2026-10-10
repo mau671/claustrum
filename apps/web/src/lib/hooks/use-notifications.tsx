@@ -1,7 +1,8 @@
+import { CheckIcon } from "@hugeicons/core-free-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check } from "lucide-react";
 import { useEffect } from "react";
 
+import { Icon } from "@/components/ui/icon";
 import { toast } from "@/components/ui/toast";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
@@ -41,7 +42,7 @@ export function useNotifications(userId?: string | null) {
             action: {
               label: (
                 <div className="flex items-center gap-1.5">
-                  <Check className="size-3.5" />
+                  <Icon icon={CheckIcon} size={14} className="size-3.5" />
                   <span>Visto</span>
                 </div>
               ),

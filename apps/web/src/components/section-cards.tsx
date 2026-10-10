@@ -1,4 +1,4 @@
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { TrendingDownIcon, TrendingUpIcon } from "@hugeicons/core-free-icons";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 
 export function SectionCards() {
   return (
@@ -21,14 +22,14 @@ export function SectionCards() {
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <TrendingUp className="mr-1 size-4" />
+              <Icon icon={TrendingUpIcon} className="mr-1 size-4" />
               +12.5%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <TrendingUp className="size-4" />
+            Trending up this month <Icon icon={TrendingUpIcon} className="size-4" />
           </div>
           <div className="text-muted-foreground">Visitors for the last 6 months</div>
         </CardFooter>
@@ -41,14 +42,14 @@ export function SectionCards() {
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <TrendingDown className="mr-1 size-4" />
+              <Icon icon={TrendingDownIcon} className="mr-1 size-4" />
               -20%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period <TrendingDown className="size-4" />
+            Down 20% this period <Icon icon={TrendingDownIcon} className="size-4" />
           </div>
           <div className="text-muted-foreground">Acquisition needs attention</div>
         </CardFooter>
@@ -61,14 +62,14 @@ export function SectionCards() {
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <TrendingUp className="mr-1 size-4" />
+              <Icon icon={TrendingUpIcon} className="mr-1 size-4" />
               +12.5%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention <TrendingUp className="size-4" />
+            Strong user retention <Icon icon={TrendingUpIcon} className="size-4" />
           </div>
           <div className="text-muted-foreground">Engagement exceed targets</div>
         </CardFooter>
@@ -81,14 +82,14 @@ export function SectionCards() {
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <TrendingUp className="mr-1 size-4" />
+              <Icon icon={TrendingUpIcon} className="mr-1 size-4" />
               +4.5%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance increase <TrendingUp className="size-4" />
+            Steady performance increase <Icon icon={TrendingUpIcon} className="size-4" />
           </div>
           <div className="text-muted-foreground">Meets growth projections</div>
         </CardFooter>

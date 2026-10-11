@@ -649,21 +649,23 @@ export function SecurityPage() {
                     disabled={!hasCredentialAccount}
                   />
                   <InputGroupAddon align="inline-end">
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       onClick={() => setIsNewPasswordVisible((value) => !value)}
                       aria-label={
                         isNewPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"
                       }
-                      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                      className="text-muted-foreground hover:text-foreground"
                       disabled={!hasCredentialAccount}
                     >
-                      {isNewPasswordVisible ? (
-                        <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
-                      ) : (
-                        <Icon icon={ViewIcon} size={16} className="size-4" />
-                      )}
-                    </button>
+                      <Icon
+                        icon={isNewPasswordVisible ? ViewOffSlashIcon : ViewIcon}
+                        size={16}
+                        className="size-4"
+                      />
+                    </Button>
                   </InputGroupAddon>
                 </InputGroup>
               </Field>
@@ -680,21 +682,23 @@ export function SecurityPage() {
                     disabled={!hasCredentialAccount}
                   />
                   <InputGroupAddon align="inline-end">
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       onClick={() => setIsConfirmPasswordVisible((value) => !value)}
                       aria-label={
                         isConfirmPasswordVisible ? "Ocultar confirmación" : "Mostrar confirmación"
                       }
-                      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                      className="text-muted-foreground hover:text-foreground"
                       disabled={!hasCredentialAccount}
                     >
-                      {isConfirmPasswordVisible ? (
-                        <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
-                      ) : (
-                        <Icon icon={ViewIcon} size={16} className="size-4" />
-                      )}
-                    </button>
+                      <Icon
+                        icon={isConfirmPasswordVisible ? ViewOffSlashIcon : ViewIcon}
+                        size={16}
+                        className="size-4"
+                      />
+                    </Button>
                   </InputGroupAddon>
                 </InputGroup>
               </Field>

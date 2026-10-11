@@ -720,18 +720,16 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
             onChange={(e) => setPassword(e.target.value)}
           />
           <InputGroupAddon align="inline-end">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => setReveal((v) => !v)}
               aria-label={reveal ? "Ocultar contraseña" : "Mostrar contraseña"}
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground"
             >
-              {reveal ? (
-                <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
-              ) : (
-                <Icon icon={ViewIcon} size={16} className="size-4" />
-              )}
-            </button>
+              <Icon icon={reveal ? ViewOffSlashIcon : ViewIcon} size={16} className="size-4" />
+            </Button>
           </InputGroupAddon>
         </InputGroup>
       </Field>
@@ -961,18 +959,20 @@ function SignUpForm() {
             }}
           />
           <InputGroupAddon align="inline-end">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => setIsPasswordVisible((v) => !v)}
               aria-label={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground"
             >
-              {isPasswordVisible ? (
-                <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
-              ) : (
-                <Icon icon={ViewIcon} size={16} className="size-4" />
-              )}
-            </button>
+              <Icon
+                icon={isPasswordVisible ? ViewOffSlashIcon : ViewIcon}
+                size={16}
+                className="size-4"
+              />
+            </Button>
           </InputGroupAddon>
         </InputGroup>
         <FieldError>{passwordError}</FieldError>
@@ -1042,20 +1042,22 @@ function SignUpForm() {
             }}
           />
           <InputGroupAddon align="inline-end">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => setIsConfirmPasswordVisible((v) => !v)}
               aria-label={
                 isConfirmPasswordVisible ? "Ocultar confirmación" : "Mostrar confirmación"
               }
-              className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="text-muted-foreground hover:text-foreground"
             >
-              {isConfirmPasswordVisible ? (
-                <Icon icon={ViewOffSlashIcon} size={16} className="size-4" />
-              ) : (
-                <Icon icon={ViewIcon} size={16} className="size-4" />
-              )}
-            </button>
+              <Icon
+                icon={isConfirmPasswordVisible ? ViewOffSlashIcon : ViewIcon}
+                size={16}
+                className="size-4"
+              />
+            </Button>
           </InputGroupAddon>
         </InputGroup>
         <FieldError>{confirmPasswordError}</FieldError>

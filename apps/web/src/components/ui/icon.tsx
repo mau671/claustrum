@@ -37,31 +37,42 @@ export const MorphIcon = React.forwardRef<unknown, MorphIconProps>(function Morp
   );
 });
 
-export function createFilledIcon(icon: IconSvgElement, invertKeys: string[] = []): IconSvgElement {
-  return icon.map(([tag, attrs]) => {
+export function createFilledIcon(
+  icon: IconSvgElement,
+  invertKeys: string[] = [],
+  invertColor: string = "var(--icon-cutout, var(--background))",
+): IconSvgElement {
+  const mapped = icon.map(([tag, attrs]) => {
     const isClosed = typeof attrs.d === "string" && attrs.d.includes("Z");
     const isInverted = invertKeys.includes(String(attrs.key));
     if (isInverted) {
-      return [
-        tag,
-        {
-          ...attrs,
-          stroke: "var(--background)",
-          fill: isClosed ? "var(--background)" : "none",
-        },
-      ];
+      return {
+        el: [
+          tag,
+          {
+            ...attrs,
+            stroke: invertColor,
+            fill: isClosed ? invertColor : "none",
+          },
+        ] as IconSvgElement[number],
+        isBase: false,
+      };
     }
     if (isClosed) {
-      return [
-        tag,
-        {
-          ...attrs,
-          fill: "currentColor",
-        },
-      ];
+      return {
+        el: [tag, { ...attrs, fill: "currentColor" }] as IconSvgElement[number],
+        isBase: true,
+      };
     }
-    return [tag, attrs];
+    return { el: [tag, attrs] as IconSvgElement[number], isBase: false };
   });
+
+  // Paint filled base shapes first so detail strokes/cutouts
+  // stay visible on top instead of being covered by the fill.
+  return [
+    ...mapped.filter((entry) => entry.isBase).map((entry) => entry.el),
+    ...mapped.filter((entry) => !entry.isBase).map((entry) => entry.el),
+  ];
 }
 
 export { HugeiconsIcon };

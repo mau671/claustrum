@@ -1,4 +1,4 @@
-import { Loading02Icon, Search01Icon, UnfoldMoreIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { Search01Icon, UnfoldMoreIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
@@ -18,8 +18,8 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { UserAvatar } from "@/components/ui/user-avatar";
 import { authClient } from "@/lib/auth/client";
 import {
   useAuthUser,
@@ -37,11 +37,7 @@ export function ProfilePageRoute() {
     <ClientOnly
       fallback={
         <div className="flex items-center justify-center py-12">
-          <Icon
-            icon={Loading02Icon}
-            size={24}
-            className="text-muted-foreground size-6 animate-spin"
-          />
+          <Spinner className="text-muted-foreground size-6" />
         </div>
       }
     >
@@ -272,11 +268,7 @@ function ProfilePage() {
   if (isInitialLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Icon
-          icon={Loading02Icon}
-          size={24}
-          className="text-muted-foreground size-6 animate-spin"
-        />
+        <Spinner className="text-muted-foreground size-6" />
       </div>
     );
   }
@@ -309,20 +301,6 @@ function ProfilePage() {
     <SettingsPage>
       <SettingsSection title="Identidad" description="Visible en tu cuenta y menú de usuario.">
         <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <UserAvatar
-              id={authUser.id}
-              name={nameDraft}
-              email={authUser.email}
-              className="size-16"
-            />
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Avatar de la cuenta</p>
-              <p className="text-muted-foreground text-xs">
-                Se genera automáticamente un avatar único para tu cuenta.
-              </p>
-            </div>
-          </div>
           <Field>
             <FieldLabel>Nombre</FieldLabel>
             <Input
@@ -347,9 +325,7 @@ function ProfilePage() {
               onClick={() => void handleSaveIdentity()}
               disabled={isSavingIdentity || !hasIdentityChanges}
             >
-              {isSavingIdentity && (
-                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-              )}
+              {isSavingIdentity && <Spinner className="mr-2 size-4" />}
               Guardar
             </Button>
           </div>
@@ -589,9 +565,7 @@ function ProfilePage() {
 
           <div className="flex justify-end pt-2">
             <Button onClick={() => void handleSave()} disabled={isSaving || !hasUnsavedChanges}>
-              {isSaving && (
-                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-              )}
+              {isSaving && <Spinner className="mr-2 size-4" />}
               Guardar
             </Button>
           </div>

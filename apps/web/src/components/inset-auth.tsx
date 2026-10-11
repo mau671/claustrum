@@ -706,9 +706,17 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="login-password">
-          Contraseña <span className="text-muted-foreground">*</span>
-        </FieldLabel>
+        <div className="inline-flex w-full items-center justify-between gap-2">
+          <FieldLabel htmlFor="login-password">
+            Contraseña <span className="text-muted-foreground">*</span>
+          </FieldLabel>
+          <Link
+            to="/auth/reset-password"
+            className="text-muted-foreground hover:text-foreground text-xs font-normal transition-colors hover:underline"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
         <InputGroup>
           <InputGroupInput
             id="login-password"

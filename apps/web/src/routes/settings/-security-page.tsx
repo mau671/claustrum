@@ -497,10 +497,12 @@ export function SecurityPage() {
     const { data, error } = await authClient.twoFactor.enable(enablePayload);
     if (error) throw toErrorWithCode(error, "No se pudo verificar la contraseña");
 
-    pendingTotpEnrollmentRef.current = {
-      qrCode: data.totpURI,
-      secret: getTotpSecretFromUri(data.totpURI),
-    };
+    if (data && "totpURI" in data && data.totpURI) {
+      pendingTotpEnrollmentRef.current = {
+        qrCode: data.totpURI,
+        secret: getTotpSecretFromUri(data.totpURI),
+      };
+    }
   }
 
   async function handleCancelMfaEnrollment() {

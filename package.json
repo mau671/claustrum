@@ -15,6 +15,7 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
+    "supabase:migrate": "supabase migration up",
     "supabase:migrate-dev": "supabase migration up",
     "supabase:migrate-prod": "supabase migration up --linked",
     "supabase:seed": "tsx scripts/apply-seeds.ts",

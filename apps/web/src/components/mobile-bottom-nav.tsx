@@ -93,15 +93,19 @@ export function MobileBottomNav() {
     select: (state) => state.location.pathname,
   });
 
-  const isProfileActive = targetPath.startsWith("/settings") || targetPath.startsWith("/auth");
-  const currentRoute = isProfileActive
-    ? null
-    : (getMatchingMainRoute(targetPath) ?? (targetPath === "/" ? "/overview" : null));
+  const isProfileActive = targetPath.startsWith("/settings");
+  const matchingRoute =
+    getMatchingMainRoute(targetPath) ?? (targetPath === "/" ? "/overview" : null);
+  const currentRoute = isProfileActive ? null : matchingRoute;
   const [activeTab, setActiveTab] = useState<string | null>(currentRoute);
 
   useEffect(() => {
-    setActiveTab(currentRoute);
-  }, [currentRoute]);
+    if (currentRoute !== null) {
+      setActiveTab(currentRoute);
+    } else if (isProfileActive) {
+      setActiveTab(null);
+    }
+  }, [currentRoute, isProfileActive]);
 
   const transition = shouldReduceMotion ? instantTransition : springTransition;
 

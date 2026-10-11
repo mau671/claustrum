@@ -141,8 +141,18 @@ export function createAuth(env: AuthEnv, pool: Pool): ReturnType<typeof betterAu
     },
     plugins: [
       openAPI(),
-      lastLoginMethod(),
+      lastLoginMethod({
+        storeInDatabase: true,
+        customResolveMethod: (ctx) => {
+          if (ctx.path === "/magic-link/verify") {
+            return "magic-link";
+          }
+          return null;
+        },
+      }),
       magicLink({
+        disableSignUp: true,
+        expiresIn: 600,
         sendMagicLink: async ({ email, url }) => {
           await sendAuthEmail(env, {
             to: email,

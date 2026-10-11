@@ -31,7 +31,6 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAppAuth } from "@/lib/auth/app-auth-context";
 import { signOut } from "@/lib/auth/client";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
-import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
 import { cn } from "@/lib/utils";
 
 const mainNavItems = [
@@ -304,7 +303,6 @@ export function MobileBottomNav() {
                   <DropdownMenuItem
                     onClick={async () => {
                       await signOut();
-                      resetSupabaseAuthTokenState();
                       queryClient.clear();
                       void navigate({ to: "/auth/signin" });
                     }}

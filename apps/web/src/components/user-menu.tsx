@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/icon";
 import { signOut } from "@/lib/auth/client";
-import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
 
 export function UserMenu({
   user,
@@ -57,7 +56,6 @@ export function UserMenu({
         <DropdownMenuItem
           onClick={async () => {
             await signOut();
-            resetSupabaseAuthTokenState();
             queryClient.clear();
             void navigate({ to: "/" });
           }}

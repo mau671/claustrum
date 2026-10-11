@@ -31,8 +31,6 @@ interface UserMenuDropdownProps {
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
-
 export function UserMenuDropdown({
   user,
   trigger,
@@ -74,7 +72,6 @@ export function UserMenuDropdown({
         <DropdownMenuItem
           onClick={async () => {
             await signOut();
-            resetSupabaseAuthTokenState();
             queryClient.clear();
             void navigate({ to: "/auth/signin" });
           }}

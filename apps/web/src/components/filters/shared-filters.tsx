@@ -12,6 +12,7 @@ import {
   ComboboxPopup,
   ComboboxTrigger,
 } from "@/components/ui/combobox";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 export const normalizeText = (text: string) =>
@@ -118,6 +119,7 @@ export function FilterCombobox({
   itemLabel,
   triggerClassName,
   skipAnimation = false,
+  isLoading = false,
 }: {
   label?: string;
   value: string;
@@ -129,11 +131,13 @@ export function FilterCombobox({
   itemLabel?: (item: FilterItem) => string;
   triggerClassName?: string;
   skipAnimation?: boolean;
+  isLoading?: boolean;
 }) {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   if (!isVisible) return null;
 
+  const isActuallyLoading = isLoading && items.length === 0;
   const selectedItem = items.find((item) => item.id.toString() === value) ?? null;
   const getItemLabel = (item: FilterItem) => {
     const { code, name } = parseItemCodeAndName(item, itemLabel);
@@ -161,6 +165,7 @@ export function FilterCombobox({
           render={
             <Button
               variant="outline"
+              disabled={isActuallyLoading}
               className={cn(
                 "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
                 triggerClassName,
@@ -174,9 +179,17 @@ export function FilterCombobox({
               !selectedItem && "text-muted-foreground",
             )}
           >
-            {selectedItem ? getItemLabel(selectedItem) : placeholder}
+            {isActuallyLoading
+              ? `Cargando ${label?.toLowerCase() ?? placeholder.toLowerCase()}...`
+              : selectedItem
+                ? getItemLabel(selectedItem)
+                : placeholder}
           </span>
-          <HugeiconsIcon icon={UnfoldMoreIcon} size={14} className="-me-1! shrink-0 opacity-60" />
+          {isActuallyLoading ? (
+            <Spinner className="text-muted-foreground size-3.5 shrink-0" />
+          ) : (
+            <HugeiconsIcon icon={UnfoldMoreIcon} size={14} className="-me-1! shrink-0 opacity-60" />
+          )}
         </ComboboxTrigger>
         <ComboboxPopup
           anchor={triggerRef}

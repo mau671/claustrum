@@ -43,8 +43,9 @@ import {
   useMarkNotificationAsRead,
   useMarkAllNotificationsAsRead,
 } from "@/lib/hooks/use-notifications";
-import { useIsAdmin, useProfessorById } from "@/lib/hooks/use-professor-reviews";
+import { useProfessorById } from "@/lib/hooks/use-professor-reviews";
 import { useAuthUser, useStudyPlanDetail, useCoursesByIds } from "@/lib/hooks/use-queries";
+import { useCanModerate } from "@/lib/hooks/use-roles";
 import { cn } from "@/lib/utils";
 
 type BreadcrumbItem = {
@@ -93,9 +94,9 @@ export function SiteHeader() {
   const queryClient = useQueryClient();
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const { data: authUser } = useAuthUser();
-  const { data: isAdmin } = useIsAdmin(authUser?.id ?? null);
-  const { data: moderationCounts } = useModerationCounts(!!authUser && isAdmin === true);
-  const totalPending = isAdmin
+  const canModerate = useCanModerate();
+  const { data: moderationCounts } = useModerationCounts(!!authUser && canModerate);
+  const totalPending = canModerate
     ? (moderationCounts?.pendingReviews ?? 0) +
       (moderationCounts?.pendingEvaluations ?? 0) +
       (moderationCounts?.pendingReviewReports ?? 0) +
@@ -267,7 +268,7 @@ export function SiteHeader() {
         )}
 
         <div className="ml-auto flex items-center gap-2">
-          {isAdmin ? (
+          {canModerate ? (
             <Button
               variant="ghost"
               size="icon"
@@ -324,7 +325,7 @@ export function SiteHeader() {
                       markAllAsRead.mutate(authUser.id);
                     }
                   }}
-                  disabled={unreadCount === 0 || markAllAsRead.isPending}
+                  disabled={!authUser?.id || unreadCount === 0 || markAllAsRead.isPending}
                   className="text-muted-foreground hover:text-foreground !h-7 gap-1.5 px-2 text-xs font-medium"
                 >
                   <HugeiconsIcon icon={TickDouble01Icon} size={15} className="size-3.5" />
@@ -339,13 +340,13 @@ export function SiteHeader() {
                       <div className="text-muted-foreground p-6 text-center text-sm">
                         Cargando...
                       </div>
-                    ) : notificationsQuery.data?.length === 0 ? (
+                    ) : !notificationsQuery.data || notificationsQuery.data.length === 0 ? (
                       <div className="text-muted-foreground p-6 text-center text-sm">
                         No tienes notificaciones.
                       </div>
                     ) : (
                       <div className="flex flex-col">
-                        {notificationsQuery.data?.map((n, idx) => (
+                        {notificationsQuery.data.map((n, idx) => (
                           <div key={n.id} className="w-full">
                             {idx > 0 && <Separator className="w-full" />}
                             <button

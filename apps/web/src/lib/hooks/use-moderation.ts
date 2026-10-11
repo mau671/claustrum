@@ -1,13 +1,12 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
+import { apiClient } from "@/lib/api/client";
 import { getEvaluationModerationQueue } from "@/lib/evaluations/api";
 import { getUnreviewedFeedbackCount } from "@/lib/feedback/api";
 import {
   getProfessorReviewReportsForModeration,
   getProfessorReviewsForModeration,
 } from "@/lib/professor-reviews/api";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 export type ModerationCounts = {
   pendingReviews: number;
@@ -16,68 +15,46 @@ export type ModerationCounts = {
   pendingFeedback: number;
 };
 
-export function useModerationRealtime(enabled = true) {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (!enabled) return;
-
-    const supabase = getSupabaseBrowserClient();
-
-    // Use a unique channel name per hook instance to avoid collisions
-    // if multiple components use this hook at the same time.
-    const channelId = `moderation-updates-${crypto.randomUUID()}`;
-    const channel = supabase
-      .channel(channelId)
-      .on("postgres_changes", { event: "*", schema: "public", table: "professor_review" }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["moderationCounts"] });
-        void queryClient.invalidateQueries({ queryKey: ["professorModerationQueue"] });
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "course_evaluations" }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["moderationCounts"] });
-        void queryClient.invalidateQueries({ queryKey: ["evaluationModerationQueue"] });
-      })
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "professor_review_report" },
-        () => {
-          void queryClient.invalidateQueries({ queryKey: ["moderationCounts"] });
-          void queryClient.invalidateQueries({
-            queryKey: ["professorReviewReportModerationQueue"],
-          });
-        },
-      )
-      .on("postgres_changes", { event: "*", schema: "public", table: "user_feedback" }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["moderationCounts"] });
-      })
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(channel);
-    };
-  }, [enabled, queryClient]);
+export function useModerationRealtime(_enabled = true) {
+  // Realtime updates handled automatically by periodic refetch in useModerationCounts
 }
 
 export function useModerationCounts(enabled = true) {
-  useModerationRealtime(enabled);
-
   return useQuery({
     queryKey: ["moderationCounts"],
     queryFn: async (): Promise<ModerationCounts> => {
-      const [reviews, evaluations, reviewReports, feedback] = await Promise.all([
-        getProfessorReviewsForModeration("pending", 1, 0),
-        getEvaluationModerationQueue("pending", 1, 0),
-        getProfessorReviewReportsForModeration("pending", 1, 0),
-        getUnreviewedFeedbackCount(),
-      ]);
-      return {
-        pendingReviews: reviews[0]?.total_count ?? 0,
-        pendingEvaluations: evaluations[0]?.total_count ?? 0,
-        pendingReviewReports: reviewReports[0]?.total_count ?? 0,
-        pendingFeedback: feedback[0]?.total_count ?? 0,
-      };
+      try {
+        const counts = await apiClient<{
+          pendingReviews: number;
+          pendingEvaluations: number;
+          pendingReports: number;
+          pendingFeedback: number;
+        }>("/moderation/counts");
+
+        return {
+          pendingReviews: counts.pendingReviews ?? 0,
+          pendingEvaluations: counts.pendingEvaluations ?? 0,
+          pendingReviewReports: counts.pendingReports ?? 0,
+          pendingFeedback: counts.pendingFeedback ?? 0,
+        };
+      } catch {
+        const [reviews, evaluations, reviewReports, feedback] = await Promise.all([
+          getProfessorReviewsForModeration("pending", 1, 0).catch(() => []),
+          getEvaluationModerationQueue("pending", 1, 0).catch(() => []),
+          getProfessorReviewReportsForModeration("pending", 1, 0).catch(() => []),
+          getUnreviewedFeedbackCount().catch(() => [{ total_count: 0 }]),
+        ]);
+
+        return {
+          pendingReviews: reviews.length,
+          pendingEvaluations: evaluations.length,
+          pendingReviewReports: reviewReports.length,
+          pendingFeedback: feedback[0]?.total_count ?? 0,
+        };
+      }
     },
+    staleTime: 15_000,
+    refetchInterval: enabled ? 15_000 : false,
     enabled,
-    staleTime: 30_000,
   });
 }

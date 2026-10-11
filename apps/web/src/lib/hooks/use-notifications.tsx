@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { Icon } from "@/components/ui/icon";
 import { toast } from "@/components/ui/toast";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { apiClient, getApiV1Url } from "@/lib/api/client";
 
 export interface NotificationRow {
   id: string;
@@ -20,78 +20,68 @@ export function useNotifications(userId?: string | null) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || typeof window === "undefined") return;
 
-    const supabase = getSupabaseBrowserClient();
-    const channel = supabase
-      .channel(`notifications-${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
-          const newNotif = payload.new as NotificationRow;
+    let eventSource: EventSource | null = null;
+    try {
+      const streamUrl = getApiV1Url("/notifications/stream");
+      eventSource = new EventSource(streamUrl, { withCredentials: true });
 
-          toast.info(newNotif.title, {
-            description: newNotif.message,
-            action: {
-              label: (
-                <div className="flex items-center gap-1.5">
-                  <Icon icon={CheckIcon} size={14} className="size-3.5" />
-                  <span>Visto</span>
-                </div>
-              ),
-              onClick: () => {
-                void supabase
-                  .from("notifications")
-                  .update({ is_read: true })
-                  .eq("id", newNotif.id)
-                  .then(() => {
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data && typeof data === "object" && "title" in data && "message" in data) {
+            void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+            const notif = data as NotificationRow;
+
+            toast.info(notif.title, {
+              description: notif.message,
+              action: {
+                label: (
+                  <div className="flex items-center gap-1.5">
+                    <Icon icon={CheckIcon} size={14} className="size-3.5" />
+                    <span>Visto</span>
+                  </div>
+                ),
+                onClick: () => {
+                  void apiClient(`/notifications/${notif.id}`, {
+                    method: "PATCH",
+                    body: JSON.stringify({ isRead: true }),
+                  }).then(() => {
                     void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
                   });
+                },
               },
-            },
-          });
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${userId}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
-        },
-      )
-      .subscribe();
+            });
+          } else {
+            void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+          }
+        } catch {
+          // ignore non-json messages / heartbeat
+        }
+      };
+
+      eventSource.onerror = () => {
+        // Fallback handled by browser EventSource reconnecting
+      };
+    } catch {
+      // EventSource instantiation fallback
+    }
 
     return () => {
-      void supabase.removeChannel(channel);
+      if (eventSource) {
+        eventSource.close();
+      }
     };
   }, [userId, queryClient]);
 
   return useQuery({
-    queryKey: ["notifications", userId],
+    queryKey: ["notifications", userId ?? "anonymous"],
     queryFn: async () => {
-      const supabase = getSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      return data as NotificationRow[];
+      const data = await apiClient<NotificationRow[]>("/notifications");
+      return data ?? [];
     },
-    enabled: !!userId,
+    staleTime: 10_000,
   });
 }
 
@@ -100,9 +90,10 @@ export function useMarkNotificationAsRead() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const supabase = getSupabaseBrowserClient();
-      const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
-      if (error) throw error;
+      await apiClient(`/notifications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isRead: true }),
+      });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -114,14 +105,10 @@ export function useMarkAllNotificationsAsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (userId: string) => {
-      const supabase = getSupabaseBrowserClient();
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("user_id", userId)
-        .eq("is_read", false);
-      if (error) throw error;
+    mutationFn: async (_userId?: string) => {
+      await apiClient("/notifications/read", {
+        method: "POST",
+      });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["notifications"] });

@@ -1,11 +1,12 @@
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
-import { magicLink, twoFactor, jwt, openAPI, lastLoginMethod } from "better-auth/plugins";
+import { magicLink, twoFactor, jwt, openAPI, lastLoginMethod, admin } from "better-auth/plugins";
 import { importJWK, SignJWT, type JWK, type JWTPayload } from "jose";
 import { Pool } from "pg";
 import { Resend } from "resend";
 
 import { renderAuthEmailTemplate } from "./email-templates";
+import { ac, roles } from "./lib/auth/permissions";
 
 export interface AuthEnv {
   DATABASE_URL: string;
@@ -96,6 +97,15 @@ export function createAuth(env: AuthEnv, pool: Pool): ReturnType<typeof betterAu
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
+      customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
+        ...coreFields,
+        role: "user",
+        banned: false,
+        banReason: null,
+        banExpires: null,
+        ...additionalFields,
+        id,
+      }),
       password: {
         hash: async (password) => await bcrypt.hash(password, 10),
         verify: async ({ hash, password }) => await bcrypt.compare(password, hash),
@@ -181,9 +191,15 @@ export function createAuth(env: AuthEnv, pool: Pool): ReturnType<typeof betterAu
           definePayload: ({ user }) => ({
             email: user.email,
             role: "authenticated",
+            app_role: (user as any).role ?? "user",
           }),
           sign: async (payload) => await signSupabaseJwt(env, payload),
         },
+      }),
+      admin({
+        ac,
+        roles,
+        defaultRole: "user",
       }),
     ],
   });

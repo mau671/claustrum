@@ -38,11 +38,11 @@ import { ScheduleFilters } from "@/components/schedule/schedule-filters";
 import { SCHEDULE_DEFAULT_HOUR_HEIGHT } from "@/components/schedule/schedule-zoom-controls";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { sortTermsLogical } from "@/lib/academic-terms";
+import { apiClient } from "@/lib/api/client";
 import { getGroupId, sessionToEvent } from "@/lib/calendar-utils";
 import { buildScheduleIcs } from "@/lib/calendar/ics";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
@@ -63,7 +63,6 @@ import {
   type SavedSchedule,
 } from "@/lib/hooks/use-saved-schedules";
 import { hydrateLocalStudyPlan, saveLocalStudyPlan } from "@/lib/store/local-study-plan";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { cn } from "@/lib/utils";
 
 import {
@@ -272,7 +271,8 @@ export function SchedulePage() {
   const plansQuery = useStudyPlans(selectedCareerId);
   const termsQuery = useAcademicTerms(selectedCampusId, selectedPlanId);
   const isAuthenticated = !!authUser;
-  const isPendingLocalStorage = !isAuthenticated && !isHydrated;
+  const hasRequiredScheduleFilters = !!selectedCampusId && !!selectedTermId;
+  const isPendingLocalStorage = !isAuthenticated && !isHydrated && !hasRequiredScheduleFilters;
   const effectiveShowAllCourses = isAuthenticated ? showAllCourses : true;
   const coursesQuery = useScheduleCourses({
     termId: selectedTermId,
@@ -591,21 +591,27 @@ export function SchedulePage() {
 
     void (async () => {
       try {
-        const sb = getSupabaseBrowserClient();
-        const { data: items, error } = await sb.rpc("get_user_saved_schedule_group_lookups", {
-          p_saved_schedule_id: search.loadSchedule,
-        });
+        const items = await apiClient<
+          Array<{
+            course_code?: string;
+            courseCode?: string;
+            campus_id?: number | null;
+            campusId?: number | null;
+            group_code?: string;
+            groupCode?: string;
+          }>
+        >(`/schedules/${search.loadSchedule}/items`);
 
-        if (error) throw error;
         if (cancelled) return;
 
-        const savedGroupLookups = (items ?? []) as Array<{
-          course_code: string;
-          campus_id: number | null;
-          group_code: string;
-        }>;
+        const savedGroupLookups = items ?? [];
         const lookupSet = new Set(
-          savedGroupLookups.map((i) => `${i.course_code}-${i.campus_id ?? ""}-${i.group_code}`),
+          savedGroupLookups.map((i) => {
+            const courseCode = i.courseCode ?? i.course_code ?? "";
+            const campusId = i.campusId ?? i.campus_id ?? "";
+            const groupCode = i.groupCode ?? i.group_code ?? "";
+            return `${courseCode}-${campusId}-${groupCode}`;
+          }),
         );
         const matchingGroups: string[] = [];
 
@@ -1158,14 +1164,6 @@ export function SchedulePage() {
     [deleteScheduleMutation],
   );
 
-  const isLoadingFilters =
-    isLoadingUniversities ||
-    campusesQuery.isLoading ||
-    careersQuery.isLoading ||
-    plansQuery.isLoading ||
-    termsQuery.isLoading;
-  const isInitialLoading = isLoadingFilters && !universities?.length;
-  const hasRequiredScheduleFilters = !!selectedCampusId && !!selectedTermId;
   const [isProfileActive, setIsProfileActive] = useState(false);
 
   useEffect(() => {
@@ -1211,58 +1209,6 @@ export function SchedulePage() {
     isWaitingForProfileNavigation ||
     isAutoSelectingPlan ||
     isAutoSelectingTerm;
-
-  if (isInitialLoading) {
-    return (
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-2">
-          <div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <div className="px-4 lg:px-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                <div className="min-w-0 flex-1">
-                  <ScheduleFilters
-                    universities={universities ?? []}
-                    campuses={mainCampuses}
-                    careers={careers}
-                    plans={plans}
-                    terms={terms}
-                    selectedUniversityId={selectedUniversityId}
-                    selectedCampusId={selectedCampusId}
-                    selectedCareerId={selectedCareerId}
-                    selectedPlanId={selectedPlanId}
-                    selectedTermId={selectedTermId}
-                    onUniversityChange={handleUniversityChange}
-                    onCampusChange={handleCampusChange}
-                    onCareerChange={handleCareerChange}
-                    onPlanChange={handlePlanChange}
-                    onTermChange={handleTermChange}
-                    isLoadingUniversities={isLoadingUniversities}
-                    isLoadingCampuses={campusesQuery.isFetching && campusesQuery.data?.length === 0}
-                    isLoadingCareers={careersQuery.isFetching && careersQuery.data?.length === 0}
-                    isLoadingPlans={isLoadingPlansForFilters}
-                    isLoadingTerms={termsQuery.isFetching && termsQuery.data?.length === 0}
-                    showAll={effectiveShowAllCourses}
-                    onShowAllChange={handleShowAllChange}
-                    showAllDisabled={!isAuthenticated}
-                    showAllDisabledTooltip="Inicia sesión para habilitar este filtro"
-                    showOtherCampuses={showOtherCampuses}
-                    onShowOtherCampusesChange={handleOtherCampusesChange}
-                    isVisible={filtersOpen}
-                    onVisibleChange={handleFiltersChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-1 px-4 lg:px-6">
-              <div className="bg-card flex min-h-[45svh] w-full items-center justify-center rounded-lg border p-6 md:min-h-96">
-                <Spinner className="text-muted-foreground size-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (coursesQuery.isError) {
     return (

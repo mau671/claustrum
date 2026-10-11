@@ -1,40 +1,35 @@
-import { createClient } from "@supabase/supabase-js";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getSupabasePublicEnv } from "@/lib/env/public";
+import { apiClient } from "@/lib/api/client";
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const { supabaseUrl, supabasePublishableKey } = getSupabasePublicEnv();
-        const supabase = createClient(supabaseUrl, supabasePublishableKey, {
-          auth: {
-            persistSession: false,
-          },
-        });
-
         let allProfessors: { id: string | number }[] = [];
-        let page = 0;
-        const pageSize = 1000;
+        let offset = 0;
+        const limit = 1000;
 
         while (true) {
-          const { data, error } = await supabase
-            .from("professor")
-            .select("id")
-            .range(page * pageSize, (page + 1) * pageSize - 1);
+          try {
+            const data = await apiClient<Array<{ id: number }>>(
+              `/professors?limit=${limit}&offset=${offset}`,
+            );
 
-          if (error || !data || data.length === 0) {
+            if (!data || data.length === 0) {
+              break;
+            }
+
+            allProfessors = allProfessors.concat(data);
+
+            if (data.length < limit) {
+              break;
+            }
+
+            offset += limit;
+          } catch {
             break;
           }
-
-          allProfessors = allProfessors.concat(data);
-
-          if (data.length < pageSize) {
-            break;
-          }
-
-          page++;
         }
 
         const baseUrl = "https://claustrum.maugp.com";
@@ -74,7 +69,7 @@ ${urls
         return new Response(xml, {
           headers: {
             "Content-Type": "application/xml",
-            "Cache-Control": "public, max-age=3600",
+            "Cache-Control": "public, max-age=86400, s-maxage=86400",
           },
         });
       },

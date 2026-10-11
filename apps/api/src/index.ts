@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import type { Env } from "./types";
+import type { HonoEnv } from "./types";
 
 import { getAllowedOrigins } from "./lib/cors";
 import { fail, HttpError } from "./lib/http";
@@ -9,8 +9,9 @@ import authRoutes from "./routes/auth";
 import evaluationsRoutes from "./routes/evaluations";
 import feedbackRoutes from "./routes/feedback";
 import professorReviewsRoutes from "./routes/professor-reviews";
+import v1Routes from "./routes/v1/index";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<HonoEnv>();
 
 app.use(
   "/api/*",
@@ -21,12 +22,13 @@ app.use(
       return c.env.BETTER_AUTH_URL;
     },
     allowHeaders: ["Authorization", "X-Client-Info", "Apikey", "Content-Type"],
-    allowMethods: ["POST", "GET", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Disposition", "Content-Length", "set-auth-jwt"],
     credentials: true,
   }),
 );
 
+app.route("/api/v1", v1Routes);
 app.route("/api/auth", authRoutes);
 app.route("/api", evaluationsRoutes);
 app.route("/api", professorReviewsRoutes);

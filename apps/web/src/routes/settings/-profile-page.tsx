@@ -1,8 +1,7 @@
 import { Search01Icon, UnfoldMoreIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { apiClient } from "@/lib/api/client";
 import { authClient } from "@/lib/auth/client";
 import {
   useAuthUser,
@@ -29,7 +29,6 @@ import {
   useStudyPlans,
   useProfileContext,
 } from "@/lib/hooks/use-queries";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { cn } from "@/lib/utils";
 
 export function ProfilePageRoute() {
@@ -45,6 +44,8 @@ export function ProfilePageRoute() {
     </ClientOnly>
   );
 }
+
+const MAIN_CAMPUS_CODES = new Set(["AL", "CA", "LM", "SC", "SJ"]);
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -84,6 +85,13 @@ function ProfilePage() {
     : academicUnitId;
 
   const campuses = useCampuses(effectiveUniversityId);
+  const mainCampuses = useMemo(
+    () =>
+      (campuses.data ?? []).filter(
+        (c) => MAIN_CAMPUS_CODES.has(c.code) || String(c.id) === campusIdDraft,
+      ),
+    [campuses.data, campusIdDraft],
+  );
   const academicUnits = useAcademicUnits(effectiveCampusId);
   const studyPlans = useStudyPlans(effectiveAcademicUnitId);
 
@@ -193,51 +201,19 @@ function ProfilePage() {
 
     setIsSaving(true);
     try {
-      const supabase = getSupabaseBrowserClient();
-
       const studyPlanId = Number(studyPlanIdDraft);
       const campusId = Number(campusIdDraft);
       const entryYear = carnetDraft ? parseInt(carnetDraft.substring(0, 4), 10) : null;
 
-      if (carnetDraft !== "") {
-        const { error: userError } = await supabase.from("user").upsert({
-          id: authUser.id,
-          carnet: carnetDraft,
-        });
-
-        if (userError) throw userError;
-      }
-
-      const { data: uspData, error: uspCheckError } = await supabase
-        .from("user_study_plan")
-        .select("id")
-        .eq("user_id", authUser.id)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (uspCheckError) throw uspCheckError;
-
-      if (uspData) {
-        const { error: updateError } = await supabase
-          .from("user_study_plan")
-          .update({
-            study_plan_id: studyPlanId,
-            campus_id: campusId,
-            ...(entryYear && { entry_year: entryYear }),
-          })
-          .eq("id", uspData.id);
-
-        if (updateError) throw updateError;
-      } else {
-        const { error: insertError } = await supabase.from("user_study_plan").insert({
-          user_id: authUser.id,
-          study_plan_id: studyPlanId,
-          campus_id: campusId,
-          entry_year: entryYear || new Date().getFullYear(),
-        });
-
-        if (insertError) throw insertError;
-      }
+      await apiClient("/users/me/studyplan", {
+        method: "PATCH",
+        body: JSON.stringify({
+          studyPlanId,
+          campusId,
+          entryYear: entryYear || new Date().getFullYear(),
+          carnet: carnetDraft !== "" ? carnetDraft : null,
+        }),
+      });
 
       await queryClient.invalidateQueries({ queryKey: ["appState"] });
       toast.success("Perfil actualizado correctamente");
@@ -346,10 +322,8 @@ function ProfilePage() {
           <Field>
             <FieldLabel>Sede</FieldLabel>
             <Combobox
-              items={campuses.data ?? []}
-              value={
-                (campuses.data ?? []).find((item) => String(item.id) === campusIdDraft) ?? null
-              }
+              items={mainCampuses}
+              value={mainCampuses.find((item) => String(item.id) === campusIdDraft) ?? null}
               onValueChange={(item) => handleCampusChange(item ? String(item.id) : "")}
               itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
               disabled={!effectiveUniversityId || campuses.isLoading}
@@ -371,12 +345,10 @@ function ProfilePage() {
                 >
                   {campuses.isLoading
                     ? "Cargando..."
-                    : (campuses.data ?? []).find((item) => String(item.id) === campusIdDraft)
-                      ? (campuses.data ?? []).find((item) => String(item.id) === campusIdDraft)!
-                          .code
-                        ? `${(campuses.data ?? []).find((item) => String(item.id) === campusIdDraft)!.code}: ${(campuses.data ?? []).find((item) => String(item.id) === campusIdDraft)!.name}`
-                        : (campuses.data ?? []).find((item) => String(item.id) === campusIdDraft)!
-                            .name
+                    : mainCampuses.find((item) => String(item.id) === campusIdDraft)
+                      ? mainCampuses.find((item) => String(item.id) === campusIdDraft)!.code
+                        ? `${mainCampuses.find((item) => String(item.id) === campusIdDraft)!.code}: ${mainCampuses.find((item) => String(item.id) === campusIdDraft)!.name}`
+                        : mainCampuses.find((item) => String(item.id) === campusIdDraft)!.name
                       : "Selecciona tu sede"}
                 </span>
                 <Icon

@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const TOTAL_STEPS = 4;
+const MAIN_CAMPUS_CODES = new Set(["AL", "CA", "LM", "SC", "SJ"]);
 
 export function InsetOnboardingPage() {
   const navigate = useNavigate();
@@ -138,9 +139,14 @@ export function InsetOnboardingPage() {
   const showAcademicUnitError = showStepError && step === 2 && !academicUnitId;
   const showStudyPlanError = showStepError && step === 3 && !studyPlanId;
 
+  const mainCampuses = useMemo(
+    () => (campuses.data ?? []).filter((c) => MAIN_CAMPUS_CODES.has(c.code)),
+    [campuses.data],
+  );
+
   const selectedCampus = useMemo(
-    () => (campuses.data ?? []).find((c) => String(c.id) === campusId) ?? null,
-    [campuses.data, campusId],
+    () => mainCampuses.find((c) => String(c.id) === campusId) ?? null,
+    [mainCampuses, campusId],
   );
   const selectedAcademicUnit = useMemo(
     () => (academicUnits.data ?? []).find((a) => String(a.id) === academicUnitId) ?? null,
@@ -164,7 +170,7 @@ export function InsetOnboardingPage() {
         error: showCampusError ? (currentStepError ?? undefined) : undefined,
         content: (
           <Combobox
-            items={campuses.data ?? []}
+            items={mainCampuses}
             value={selectedCampus}
             onValueChange={(item) => {
               const value = item ? String(item.id) : "";
@@ -423,7 +429,7 @@ export function InsetOnboardingPage() {
       },
     ],
     [
-      campuses.data,
+      mainCampuses,
       selectedCampus,
       campusId,
       showCampusError,

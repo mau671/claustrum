@@ -3,10 +3,13 @@ import {
   magicLinkClient,
   twoFactorClient,
   lastLoginMethodClient,
+  adminClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 import { getApiBaseUrl } from "@/lib/env/public";
+
+import { ac, roles } from "./permissions";
 
 const apiBaseUrl =
   getApiBaseUrl() ??
@@ -21,6 +24,7 @@ export const authClient = createAuthClient({
       twoFactorPage: "/auth/2fa",
     }),
     jwtClient(),
+    adminClient({ ac, roles }),
   ],
 });
 

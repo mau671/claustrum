@@ -24,6 +24,7 @@ import type {
   CourseDetailRelatedCourse,
 } from "@/lib/types";
 
+import { apiClient } from "@/lib/api/client";
 import { authClient } from "@/lib/auth/client";
 import { appStateServerFn } from "@/lib/auth/server-fn";
 import {
@@ -31,9 +32,7 @@ import {
   getCampusesServerFn,
   getAcademicUnitsServerFn,
   getStudyPlansServerFn,
-  getAcademicTermsServerFn,
 } from "@/lib/catalog-server-fns";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { getLocalCourseStatusChanges } from "@/lib/utils/local-storage-utils";
 
 export function universitiesQueryOptions() {
@@ -100,11 +99,15 @@ export function useAcademicUnits(campusId: number | null) {
 
 export function studyPlansQueryOptions(academicUnitId: number | null) {
   return queryOptions({
-    queryKey: ["studyPlansV2", academicUnitId],
+    queryKey: ["studyPlans", academicUnitId],
     queryFn: async () => {
       if (!academicUnitId) return [];
       const data = await getStudyPlansServerFn({ data: academicUnitId });
-      return (data ?? []) as CatalogStudyPlan[];
+      return ((data ?? []) as CatalogStudyPlan[]).sort(
+        (a, b) =>
+          Number(b.external_plan_id ?? b.id) - Number(a.external_plan_id ?? a.id) ||
+          Number(b.id) - Number(a.id),
+      );
     },
     enabled: !!academicUnitId,
     staleTime: 5 * 60 * 1000,
@@ -273,36 +276,63 @@ export type CourseRelation = {
   relationType: "PREREQUISITE" | "COREQUISITE" | "EQUIVALENT";
 };
 
-function buildStudyPlanPeriods(items: Array<Record<string, unknown>>): StudyPeriod[] {
+function buildStudyPlanPeriods(
+  items:
+    | Array<Record<string, unknown>>
+    | { courses?: Array<Record<string, unknown>> }
+    | null
+    | undefined,
+): StudyPeriod[] {
+  const list = Array.isArray(items)
+    ? items
+    : Array.isArray((items as { courses?: Array<Record<string, unknown>> })?.courses)
+      ? (items as { courses: Array<Record<string, unknown>> }).courses
+      : [];
   const periods = new Map<number | null, { levelLabel?: string; courses: StudyPlanCourse[] }>();
-  for (const item of items ?? []) {
+  for (const item of list ?? []) {
+    const courseCode =
+      typeof item.courseCode === "string"
+        ? item.courseCode
+        : typeof item.course_code === "string"
+          ? item.course_code
+          : "";
+    const courseName =
+      typeof item.courseName === "string"
+        ? item.courseName
+        : typeof item.course_name === "string"
+          ? item.course_name
+          : "";
+
     const course: StudyPlanCourse = {
-      courseId: item.course_id as number,
-      levelNumber: item.level_number as number | null,
-      credits: item.credits as number,
-      weeklyHours: item.weekly_hours as number,
-      sortOrder: item.sort_order as number,
-      courseCode: item.course_code as string,
-      courseName: item.course_name as string,
-      courseDefaultCredits: item.default_credits as number,
-      courseDefaultWeeklyHours: item.default_weekly_hours as number,
+      courseId: Number(item.courseId ?? item.course_id ?? 0),
+      levelNumber: (item.levelNumber ?? item.level_number ?? null) as number | null,
+      credits: Number(item.credits ?? 0),
+      weeklyHours: Number(item.weeklyHours ?? item.weekly_hours ?? 0),
+      sortOrder: Number(item.sortOrder ?? item.sort_order ?? 0),
+      courseCode,
+      courseName,
+      courseDefaultCredits: Number(item.courseDefaultCredits ?? item.default_credits ?? 0),
+      courseDefaultWeeklyHours: Number(
+        item.courseDefaultWeeklyHours ?? item.default_weekly_hours ?? 0,
+      ),
     };
-    const level = (item.level_number as number | null) ?? 0;
+    const level = (item.levelNumber ?? item.level_number ?? 0) as number;
     if (!periods.has(level)) {
-      periods.set(level, { levelLabel: item.level_label as string | undefined, courses: [] });
+      periods.set(level, {
+        levelLabel: (item.levelLabel ?? item.level_label) as string | undefined,
+        courses: [],
+      });
     }
     periods.get(level)!.courses.push(course);
   }
 
   return Array.from(periods.entries())
     .sort(([a], [b]) => (a ?? 0) - (b ?? 0))
-    .map(
-      ([levelNumber, { levelLabel, courses }]): StudyPeriod => ({
-        levelNumber: levelNumber ?? 0,
-        levelLabel,
-        courses,
-      }),
-    );
+    .map(([levelNumber, { levelLabel, courses }]): StudyPeriod => ({
+      levelNumber: levelNumber ?? 0,
+      levelLabel,
+      courses,
+    }));
 }
 
 export function studyPlanCoursesDetailsQueryOptions(planId: number | null) {
@@ -310,12 +340,10 @@ export function studyPlanCoursesDetailsQueryOptions(planId: number | null) {
     queryKey: ["studyPlanCourses", planId],
     queryFn: async () => {
       if (!planId) return null;
-      const sb = getSupabaseBrowserClient();
-      const coursesResult = await sb.rpc("get_study_plan_courses_details", {
-        p_study_plan_id: planId,
-      });
-      if (coursesResult.error) throw coursesResult.error;
-      return buildStudyPlanPeriods(coursesResult.data ?? []);
+      const coursesResult = await apiClient<Array<Record<string, unknown>>>(
+        `/studyplans/${planId}/courses`,
+      );
+      return buildStudyPlanPeriods(coursesResult ?? []);
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -333,57 +361,75 @@ export function studyPlanDetailQueryOptions(planId: number | null) {
     queryKey: ["studyPlanDetail", planId],
     queryFn: async () => {
       if (!planId) return null;
-      const sb = getSupabaseBrowserClient();
+
+      type PlanRelation = {
+        from_course_id?: number;
+        fromCourseId?: number;
+        to_course_id?: number;
+        toCourseId?: number;
+        relation_type?: "PREREQUISITE" | "COREQUISITE" | "EQUIVALENT";
+        relationType?: "PREREQUISITE" | "COREQUISITE" | "EQUIVALENT";
+      };
+
+      type RawPlanDetail = {
+        id: number;
+        academic_unit_id?: number;
+        academicUnitId?: number;
+        external_plan_id?: number | string;
+        externalPlanId?: number | string;
+        name: string;
+        academic_degree?: string | null;
+        academicDegree?: string | null;
+        modality_name?: string;
+        academic_modality?: { name: string } | null;
+      };
 
       const [coursesResult, relationsResult, planResult] = await Promise.all([
-        sb.rpc("get_study_plan_courses_details", { p_study_plan_id: planId }),
-        sb
-          .from("course_relation")
-          .select("from_course_id, to_course_id, relation_type")
-          .eq("study_plan_id", planId),
-        sb
-          .from("study_plan")
-          .select(
-            "id, academic_unit_id, external_plan_id, name, academic_degree, academic_modality(name)",
-          )
-          .eq("id", planId)
-          .single(),
+        apiClient<Array<Record<string, unknown>>>(`/studyplans/${planId}/courses`),
+        apiClient<PlanRelation[]>(`/studyplans/${planId}/relations`),
+        apiClient<RawPlanDetail>(`/studyplans/${planId}`),
       ]);
-
-      if (coursesResult.error) throw coursesResult.error;
-      if (relationsResult.error) throw relationsResult.error;
-      if (planResult.error) throw planResult.error;
 
       const courseRelations = new Map<
         number,
         { prerequisites: number[]; corequisites: number[]; equivalents: number[] }
       >();
-      for (const r of relationsResult.data ?? []) {
-        const existing = courseRelations.get(r.from_course_id) ?? {
+      for (const r of relationsResult ?? []) {
+        const fromId = (r.fromCourseId ?? r.from_course_id)!;
+        const toId = (r.toCourseId ?? r.to_course_id)!;
+        const relType = (r.relationType ?? r.relation_type)!;
+        const existing = courseRelations.get(fromId) ?? {
           prerequisites: [],
           corequisites: [],
           equivalents: [],
         };
-        if (r.relation_type === "PREREQUISITE") {
-          existing.prerequisites.push(r.to_course_id);
-        } else if (r.relation_type === "COREQUISITE") {
-          existing.corequisites.push(r.to_course_id);
-        } else if (r.relation_type === "EQUIVALENT") {
-          existing.equivalents.push(r.to_course_id);
+        if (relType === "PREREQUISITE") {
+          existing.prerequisites.push(toId);
+        } else if (relType === "COREQUISITE") {
+          existing.corequisites.push(toId);
+        } else if (relType === "EQUIVALENT") {
+          existing.equivalents.push(toId);
         }
-        courseRelations.set(r.from_course_id, existing);
+        courseRelations.set(fromId, existing);
       }
 
-      const periodArray = buildStudyPlanPeriods(coursesResult.data ?? []);
+      const periodArray = buildStudyPlanPeriods(coursesResult ?? []);
 
-      const rawPlan = planResult.data;
+      const rawPlan =
+        (planResult as { plan?: RawPlanDetail })?.plan ?? (planResult as RawPlanDetail);
+      const rawExternalId = rawPlan?.externalPlanId ?? rawPlan?.external_plan_id ?? 0;
+      const externalIdStr = String(rawExternalId);
+      const rawName = rawPlan?.name ?? "Plan de Estudios";
+      const planName = rawName.includes(externalIdStr) ? rawName : `${externalIdStr} - ${rawName}`;
+
       const formattedPlan: CatalogStudyPlan = {
-        id: rawPlan.id,
-        academic_unit_id: rawPlan.academic_unit_id,
-        external_plan_id: rawPlan.external_plan_id,
-        name: `${rawPlan.external_plan_id} - ${rawPlan.name}`,
-        academic_degree: rawPlan.academic_degree,
-        modality_name: (rawPlan.academic_modality as any)?.name,
+        id: rawPlan?.id ?? planId,
+        academic_unit_id: rawPlan?.academicUnitId ?? rawPlan?.academic_unit_id ?? 0,
+        external_plan_id:
+          typeof rawExternalId === "number" ? rawExternalId : parseInt(rawExternalId, 10) || 0,
+        name: planName,
+        academic_degree: rawPlan?.academicDegree ?? rawPlan?.academic_degree ?? null,
+        modality_name: rawPlan?.modality_name ?? rawPlan?.academic_modality?.name,
       };
 
       return {
@@ -440,7 +486,10 @@ export function academicTermsQueryOptions(campusId: number | null, studyPlanId?:
     queryKey: ["academicTerms", campusId, studyPlanId],
     queryFn: async () => {
       if (!campusId) return [];
-      const data = await getAcademicTermsServerFn({ data: { campusId, studyPlanId } });
+      const q = new URLSearchParams();
+      q.set("campusId", String(campusId));
+      if (studyPlanId) q.set("studyPlanId", String(studyPlanId));
+      const data = await apiClient<AcademicTerm[]>(`/terms?${q.toString()}`);
       return (data ?? []) as AcademicTerm[];
     },
     enabled: !!campusId,
@@ -463,19 +512,12 @@ export function useCourseOfferingTerms(
     queryFn: async () => {
       if (!courseId) return [];
 
-      const sb = getSupabaseBrowserClient();
-      const { data, error } = await sb
-        .rpc("get_course_offering_terms", {
-          p_course_id: courseId,
-          p_campus_id: campusId,
-          p_academic_unit_id: academicUnitId,
-          p_study_plan_id: studyPlanId,
-        })
-        .select("*")
-        .order("year", { ascending: false })
-        .order("period_number", { ascending: false });
+      const q = new URLSearchParams();
+      if (campusId) q.set("campusId", String(campusId));
+      if (academicUnitId) q.set("academicUnitId", String(academicUnitId));
+      if (studyPlanId) q.set("studyPlanId", String(studyPlanId));
 
-      if (error) throw error;
+      const data = await apiClient<AcademicTerm[]>(`/courses/${courseId}/terms?${q.toString()}`);
       return (data ?? []) as AcademicTerm[];
     },
     enabled: !!courseId,
@@ -505,21 +547,18 @@ export function scheduleCoursesQueryOptions(params: {
     ],
     queryFn: async () => {
       if (!params.termId || !params.campusId) return null;
-      const sb = getSupabaseBrowserClient();
 
-      const { data, error } = await sb
-        .rpc("get_schedule_courses", {
-          p_user_id: params.userId,
-          p_academic_term_id: params.termId,
-          p_campus_id: params.campusId,
-          p_study_plan_id: params.planId,
-          p_academic_unit_id: params.careerId,
-          p_include_other_campuses: params.includeOtherCampuses,
-          p_show_all_courses: params.userId ? params.showAllCourses : true,
-        })
-        .select("*");
+      const q = new URLSearchParams();
+      q.set("termId", String(params.termId));
+      q.set("campusId", String(params.campusId));
+      if (params.careerId) q.set("careerId", String(params.careerId));
+      if (params.planId) q.set("planId", String(params.planId));
+      q.set("otherCampuses", String(params.includeOtherCampuses));
+      q.set("showAll", String(params.userId ? params.showAllCourses : true));
 
-      if (error) throw error;
+      const data = await apiClient<import("@/lib/types").ScheduleCourse[]>(
+        `/schedules/courses?${q.toString()}`,
+      );
       return (data ?? []) as import("@/lib/types").ScheduleCourse[];
     },
     staleTime: 2 * 60 * 1000,
@@ -548,12 +587,14 @@ export function useSuggestedAcademicTerm(studyPlanId: number | null, enabled = t
     queryKey: ["suggestedAcademicTerm", studyPlanId],
     queryFn: async () => {
       if (!studyPlanId) return null;
-      const sb = getSupabaseBrowserClient();
-      const { data, error } = await sb.rpc("get_suggested_academic_term", {
-        p_study_plan_id: studyPlanId,
-      });
-      if (error) throw error;
-      return data as number | null;
+      const data = await apiClient<{ termId?: number } | number | null>(
+        `/terms/suggested?studyPlanId=${studyPlanId}`,
+      );
+      if (typeof data === "number") return data;
+      if (data && typeof data === "object" && "termId" in data && typeof data.termId === "number") {
+        return data.termId;
+      }
+      return null;
     },
     enabled: enabled && !!studyPlanId,
     staleTime: 60 * 60 * 1000, // 1 hour
@@ -565,7 +606,7 @@ export function useStudentCourseStatuses(userId: string | null, studyPlanId: num
   return useQuery({
     queryKey: ["studentCourseStatuses", userId, studyPlanId],
     queryFn: async () => {
-      let statusMap = new Map<number, CourseEffectiveStatus>();
+      const statusMap = new Map<number, CourseEffectiveStatus>();
 
       if (!userId || !studyPlanId) {
         const localChanges = getLocalCourseStatusChanges();
@@ -592,45 +633,58 @@ export function useStudentCourseStatuses(userId: string | null, studyPlanId: num
         return statusMap;
       }
 
-      const sb = getSupabaseBrowserClient();
-
-      const { data, error } = await sb.rpc("get_user_course_effective_status_details", {
-        p_user_id: userId,
-        p_study_plan_id: studyPlanId,
-      });
-
-      if (error) throw error;
-
-      for (const record of (data ?? []) as Array<{
-        course_id: number;
+      type RawStatus = {
+        course_id?: number;
+        courseId?: number;
         status: string;
-        grade: number | null;
-        recorded_at: string | null;
-        origin_course_id: number | null;
-        origin_course_code: string | null;
-        origin_course_name: string | null;
-        origin_study_plan_id: number | null;
-        origin_attempt_id: number | null;
-        origin_attempt_number: number | null;
-        origin_academic_term_id: number | null;
-        origin_academic_term_name: string | null;
-        origin_type: string | null;
-      }>) {
-        statusMap.set(record.course_id, {
+        grade?: number | null;
+        recorded_at?: string | null;
+        recordedAt?: string | null;
+        origin_course_id?: number | null;
+        originCourseId?: number | null;
+        origin_course_code?: string | null;
+        originCourseCode?: string | null;
+        origin_course_name?: string | null;
+        originCourseName?: string | null;
+        origin_study_plan_id?: number | null;
+        originStudyPlanId?: number | null;
+        origin_attempt_id?: number | null;
+        originAttemptId?: number | null;
+        origin_attempt_number?: number | null;
+        originAttemptNumber?: number | null;
+        origin_academic_term_id?: number | null;
+        originAcademicTermId?: number | null;
+        origin_academic_term_name?: string | null;
+        originAcademicTermName?: string | null;
+        origin_type?: string | null;
+        originType?: string | null;
+      };
+
+      const data = await apiClient<RawStatus[]>(`/students/me/statuses?studyPlanId=${studyPlanId}`);
+
+      for (const record of data ?? []) {
+        const courseId = record.courseId ?? record.course_id;
+        if (!courseId) continue;
+        const grade = record.grade ?? null;
+        const recordedAt = record.recordedAt ?? record.recorded_at ?? null;
+        statusMap.set(courseId, {
           status: record.status.toLowerCase() as CourseStatus,
-          grade: record.grade,
-          recordedAt: record.recorded_at,
-          originCourseId: record.origin_course_id,
-          originCourseCode: record.origin_course_code,
-          originCourseName: record.origin_course_name,
-          originStudyPlanId: record.origin_study_plan_id,
-          originAttemptId: record.origin_attempt_id,
-          originAttemptNumber: record.origin_attempt_number,
-          originGrade: record.grade,
-          originRecordedAt: record.recorded_at,
-          originAcademicTermId: record.origin_academic_term_id,
-          originAcademicTermName: record.origin_academic_term_name,
-          originType: record.origin_type as CourseEffectiveStatus["originType"],
+          grade,
+          recordedAt,
+          originCourseId: record.originCourseId ?? record.origin_course_id ?? null,
+          originCourseCode: record.originCourseCode ?? record.origin_course_code ?? null,
+          originCourseName: record.originCourseName ?? record.origin_course_name ?? null,
+          originStudyPlanId: record.originStudyPlanId ?? record.origin_study_plan_id ?? null,
+          originAttemptId: record.originAttemptId ?? record.origin_attempt_id ?? null,
+          originAttemptNumber: record.originAttemptNumber ?? record.origin_attempt_number ?? null,
+          originGrade: grade,
+          originRecordedAt: recordedAt,
+          originAcademicTermId:
+            record.originAcademicTermId ?? record.origin_academic_term_id ?? null,
+          originAcademicTermName:
+            record.originAcademicTermName ?? record.origin_academic_term_name ?? null,
+          originType: (record.originType ??
+            record.origin_type) as CourseEffectiveStatus["originType"],
         });
       }
 
@@ -676,19 +730,17 @@ export function useCreateCourseAttempt() {
       academicTermId?: number | null;
       equivalentCourseId?: number | null;
     }) => {
-      const sb = getSupabaseBrowserClient();
-
-      const { error } = await sb.rpc("insert_student_course_attempt", {
-        p_user_id: params.userId,
-        p_study_plan_id: params.studyPlanId,
-        p_course_id: params.courseId,
-        p_status: params.status.toUpperCase(),
-        p_grade: params.grade,
-        p_academic_term_id: params.academicTermId ?? null,
-        p_equivalent_course_id: params.equivalentCourseId ?? null,
+      await apiClient("/students/me/attempts", {
+        method: "POST",
+        body: JSON.stringify({
+          studyPlanId: params.studyPlanId,
+          courseId: params.courseId,
+          status: params.status.toUpperCase(),
+          grade: params.grade,
+          academicTermId: params.academicTermId ?? null,
+          equivalentCourseId: params.equivalentCourseId ?? null,
+        }),
       });
-
-      if (error) throw error;
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
@@ -719,17 +771,15 @@ export function useUpdateCourseAttempt() {
       status?: string;
       equivalentCourseId?: number | null;
     }) => {
-      const sb = getSupabaseBrowserClient();
-
-      const { error } = await sb.rpc("update_student_course_attempt", {
-        p_attempt_id: params.attemptId,
-        p_academic_term_id: params.academicTermId,
-        p_grade: params.grade,
-        p_status: params.status ?? null,
-        p_equivalent_course_id: params.equivalentCourseId ?? null,
+      await apiClient(`/students/me/attempts/${params.attemptId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          academicTermId: params.academicTermId,
+          grade: params.grade,
+          status: params.status ? params.status.toUpperCase() : undefined,
+          equivalentCourseId: params.equivalentCourseId ?? null,
+        }),
       });
-
-      if (error) throw error;
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
@@ -756,43 +806,51 @@ export function useCourseAttempts(
     queryFn: async () => {
       if (!userId || !studyPlanId || !courseId) return [] as CourseAttempt[];
 
-      const sb = getSupabaseBrowserClient();
-      const { data, error } = await sb.rpc("get_student_course_attempts", {
-        p_user_id: userId,
-        p_study_plan_id: studyPlanId,
-        p_course_id: courseId,
-      });
+      type RawAttempt = {
+        id: number;
+        course_id?: number;
+        courseId?: number;
+        course_code?: string | null;
+        courseCode?: string | null;
+        course_name?: string | null;
+        courseName?: string | null;
+        attempt_number?: number;
+        attemptNumber?: number;
+        status: string;
+        grade: number | null;
+        academic_term_id?: number | null;
+        academicTermId?: number | null;
+        recorded_at?: string;
+        recordedAt?: string;
+        equivalent_course_id?: number | null;
+        equivalentCourseId?: number | null;
+        equivalent_course_code?: string | null;
+        equivalentCourseCode?: string | null;
+        equivalent_course_name?: string | null;
+        equivalentCourseName?: string | null;
+      };
 
-      if (error) throw error;
+      const data = await apiClient<RawAttempt[]>(
+        `/students/me/attempts?studyPlanId=${studyPlanId}&courseId=${courseId}`,
+      );
 
       return (data ?? []).map(
-        (attempt: {
-          id: number;
-          course_id: number;
-          course_code: string | null;
-          course_name: string | null;
-          attempt_number: number;
-          status: string;
-          grade: number | null;
-          academic_term_id: number | null;
-          recorded_at: string;
-          equivalent_course_id?: number | null;
-          equivalent_course_code?: string | null;
-          equivalent_course_name?: string | null;
-        }) =>
+        (attempt) =>
           ({
             id: attempt.id,
-            courseId: attempt.course_id,
-            courseCode: attempt.course_code,
-            courseName: attempt.course_name,
-            attemptNumber: attempt.attempt_number,
+            courseId: (attempt.courseId ?? attempt.course_id)!,
+            courseCode: attempt.courseCode ?? attempt.course_code ?? null,
+            courseName: attempt.courseName ?? attempt.course_name ?? null,
+            attemptNumber: attempt.attemptNumber ?? attempt.attempt_number ?? 1,
             status: attempt.status.toLowerCase() as CourseAttempt["status"],
             grade: attempt.grade,
-            academicTermId: attempt.academic_term_id,
-            recordedAt: attempt.recorded_at,
-            equivalentCourseId: attempt.equivalent_course_id ?? null,
-            equivalentCourseCode: attempt.equivalent_course_code ?? null,
-            equivalentCourseName: attempt.equivalent_course_name ?? null,
+            academicTermId: attempt.academicTermId ?? attempt.academic_term_id ?? null,
+            recordedAt: (attempt.recordedAt ?? attempt.recorded_at)!,
+            equivalentCourseId: attempt.equivalentCourseId ?? attempt.equivalent_course_id ?? null,
+            equivalentCourseCode:
+              attempt.equivalentCourseCode ?? attempt.equivalent_course_code ?? null,
+            equivalentCourseName:
+              attempt.equivalentCourseName ?? attempt.equivalent_course_name ?? null,
           }) satisfies CourseAttempt,
       );
     },
@@ -806,12 +864,10 @@ export function useCoursesByIds(courseIds: number[] | null) {
     queryKey: ["coursesByIds", courseIds],
     queryFn: async () => {
       if (!courseIds || courseIds.length === 0) return [];
-
-      const sb = getSupabaseBrowserClient();
-
-      const { data, error } = await sb.from("course").select("id, code, name").in("id", courseIds);
-
-      if (error) throw error;
+      const idsParam = courseIds.join(",");
+      const data = await apiClient<Array<{ id: number; code: string; name: string }>>(
+        `/courses?ids=${idsParam}`,
+      );
       return data ?? [];
     },
     enabled: !!courseIds && courseIds.length > 0,
@@ -830,39 +886,54 @@ export function useCourseDetailRelatedCourses(
     queryFn: async () => {
       if (!studyPlanId || !courseId) return { data: [], totalCount: 0, isPlaceholder: false };
 
-      const sb = getSupabaseBrowserClient();
-      const { data, error } = await sb.rpc("get_course_detail_related_courses", {
-        p_study_plan_id: studyPlanId,
-        p_course_id: courseId,
-        p_limit: limit,
-        p_offset: page * limit,
-      });
+      const q = new URLSearchParams();
+      q.set("studyPlanId", String(studyPlanId));
+      q.set("offset", String(page * limit));
+      q.set("limit", String(limit));
 
-      if (error) throw error;
+      type RawRelated = {
+        course_id?: number;
+        courseId?: number;
+        course_code?: string | null;
+        courseCode?: string | null;
+        course_name?: string | null;
+        courseName?: string | null;
+        course_credits?: number | null;
+        courseCredits?: number | null;
+        course_weekly_hours?: number | null;
+        courseWeeklyHours?: number | null;
+        relation_kind?: "base" | "equivalent";
+        relationKind?: "base" | "equivalent";
+        is_placeholder?: boolean;
+        isPlaceholder?: boolean;
+        has_offerings?: boolean | null;
+        hasOfferings?: boolean | null;
+        total_equivalents?: number | null;
+        totalEquivalents?: number | null;
+      };
 
-      const relatedCourses: CourseDetailRelatedCourse[] = (data ?? []).map(
-        (item: {
-          course_id: number;
-          course_code: string | null;
-          course_name: string | null;
-          course_credits: number | null;
-          course_weekly_hours: number | null;
-          relation_kind: "base" | "equivalent";
-          is_placeholder: boolean;
-          has_offerings: boolean | null;
-          total_equivalents: number | null;
-        }) => ({
-          id: item.course_id,
-          code: item.course_code ?? String(item.course_id),
-          name: item.course_name ?? "",
-          credits: item.course_credits,
-          weeklyHours: item.course_weekly_hours,
-          relationKind: item.relation_kind,
-          isPlaceholder: item.is_placeholder,
-          hasOfferings: item.has_offerings ?? false,
-          totalEquivalents: item.total_equivalents ?? 0,
-        }),
+      const data = await apiClient<RawRelated[]>(
+        `/courses/${courseId}/equivalents?${q.toString()}`,
       );
+
+      const relatedCourses: CourseDetailRelatedCourse[] = (data ?? []).map((item) => {
+        const id = (item.courseId ?? item.course_id)!;
+        const code = item.courseCode ?? item.course_code ?? String(id);
+        const name = item.courseName ?? item.course_name ?? "";
+        return {
+          id,
+          code,
+          name,
+          credits: item.courseCredits ?? item.course_credits ?? null,
+          weeklyHours: item.courseWeeklyHours ?? item.course_weekly_hours ?? null,
+          relationKind: (item.relationKind ?? item.relation_kind ?? "base") as
+            | "base"
+            | "equivalent",
+          isPlaceholder: item.isPlaceholder ?? item.is_placeholder ?? false,
+          hasOfferings: item.hasOfferings ?? item.has_offerings ?? false,
+          totalEquivalents: item.totalEquivalents ?? item.total_equivalents ?? 0,
+        };
+      });
 
       return {
         data: relatedCourses,
@@ -886,37 +957,45 @@ export function useCourseRecentProfessors(
     queryFn: async () => {
       if (!courseId) return [] as CourseRecentProfessor[];
 
-      const sb = getSupabaseBrowserClient();
-      const { data, error } = await sb.rpc("get_course_recent_professors", {
-        p_course_id: courseId,
-        p_campus_id: campusId,
-        p_academic_unit_id: academicUnitId,
-        p_year_window: 2,
-        p_academic_term_id: academicTermId,
-      });
+      const q = new URLSearchParams();
+      if (campusId) q.set("campusId", String(campusId));
+      if (academicUnitId) q.set("academicUnitId", String(academicUnitId));
+      if (academicTermId) q.set("academicTermId", String(academicTermId));
 
-      if (error) throw error;
+      type RawRecentProf = {
+        professor_id?: number;
+        professorId?: number;
+        professor_name?: string;
+        professorName?: string;
+        last_taught_term_id?: number;
+        lastTaughtTermId?: number;
+        last_taught_term_name?: string;
+        lastTaughtTermName?: string;
+        last_taught_year?: number;
+        lastTaughtYear?: number;
+        last_taught_period_number?: number;
+        lastTaughtPeriodNumber?: number;
+        groups_in_last_term_count?: number;
+        groupsInLastTermCount?: number;
+        terms_taught_count?: number;
+        termsTaughtCount?: number;
+      };
+
+      const data = await apiClient<RawRecentProf[]>(
+        `/courses/${courseId}/professors?${q.toString()}`,
+      );
 
       return (data ?? []).map(
-        (row: {
-          professor_id: number;
-          professor_name: string;
-          last_taught_term_id: number;
-          last_taught_term_name: string;
-          last_taught_year: number;
-          last_taught_period_number: number;
-          groups_in_last_term_count: number;
-          terms_taught_count: number;
-        }) =>
+        (row) =>
           ({
-            professorId: row.professor_id,
-            professorName: row.professor_name,
-            lastTaughtTermId: row.last_taught_term_id,
-            lastTaughtTermName: row.last_taught_term_name,
-            lastTaughtYear: row.last_taught_year,
-            lastTaughtPeriodNumber: row.last_taught_period_number,
-            groupsInLastTermCount: row.groups_in_last_term_count,
-            termsTaughtCount: row.terms_taught_count,
+            professorId: (row.professorId ?? row.professor_id)!,
+            professorName: (row.professorName ?? row.professor_name)!,
+            lastTaughtTermId: (row.lastTaughtTermId ?? row.last_taught_term_id)!,
+            lastTaughtTermName: (row.lastTaughtTermName ?? row.last_taught_term_name)!,
+            lastTaughtYear: (row.lastTaughtYear ?? row.last_taught_year)!,
+            lastTaughtPeriodNumber: (row.lastTaughtPeriodNumber ?? row.last_taught_period_number)!,
+            groupsInLastTermCount: (row.groupsInLastTermCount ?? row.groups_in_last_term_count)!,
+            termsTaughtCount: (row.termsTaughtCount ?? row.terms_taught_count)!,
           }) satisfies CourseRecentProfessor,
       );
     },
@@ -944,54 +1023,65 @@ export function useCourseLatestTermGroups(
     queryFn: async () => {
       if (!courseId) return [] as CourseLatestTermGroup[];
 
-      const sb = getSupabaseBrowserClient();
-      const { data, error } = await sb.rpc("get_course_latest_term_groups", {
-        p_course_id: courseId,
-        p_campus_id: campusId,
-        p_academic_unit_id: academicUnitId,
-        p_academic_term_id: academicTermId,
-        p_study_plan_id: studyPlanId,
-      });
+      const q = new URLSearchParams();
+      if (campusId) q.set("campusId", String(campusId));
+      if (academicUnitId) q.set("academicUnitId", String(academicUnitId));
+      if (academicTermId) q.set("academicTermId", String(academicTermId));
+      if (studyPlanId) q.set("studyPlanId", String(studyPlanId));
 
-      if (error) throw error;
+      type RawGroup = {
+        academic_term_id?: number;
+        academicTermId?: number;
+        term_display_name?: string;
+        termDisplayName?: string;
+        term_year?: number;
+        termYear?: number;
+        term_period_number?: number;
+        termPeriodNumber?: number;
+        source_course_id?: number;
+        sourceCourseId?: number;
+        source_course_code?: string;
+        sourceCourseCode?: string;
+        source_course_name?: string;
+        sourceCourseName?: string;
+        group_id?: number;
+        groupId?: number;
+        group_code?: string;
+        groupCode?: string;
+        group_type?: string;
+        groupType?: string;
+        capacity?: number;
+        campus_id?: number | null;
+        campusId?: number | null;
+        campus_name?: string | null;
+        campusName?: string | null;
+        professors?: Array<{ id: number; name: string }> | null;
+        meetings?: Array<{
+          weekday: number;
+          starts_at: string;
+          ends_at: string;
+          classroom: string | null;
+        }> | null;
+      };
+
+      const data = await apiClient<RawGroup[]>(`/courses/${courseId}/groups?${q.toString()}`);
 
       return (data ?? []).map(
-        (row: {
-          academic_term_id: number;
-          term_display_name: string;
-          term_year: number;
-          term_period_number: number;
-          source_course_id: number;
-          source_course_code: string;
-          source_course_name: string;
-          group_id: number;
-          group_code: string;
-          group_type: string;
-          capacity: number;
-          campus_id: number | null;
-          campus_name: string | null;
-          professors: Array<{ id: number; name: string }> | null;
-          meetings: Array<{
-            weekday: number;
-            starts_at: string;
-            ends_at: string;
-            classroom: string | null;
-          }> | null;
-        }) =>
+        (row) =>
           ({
-            academicTermId: row.academic_term_id,
-            termDisplayName: row.term_display_name,
-            termYear: row.term_year,
-            termPeriodNumber: row.term_period_number,
-            sourceCourseId: row.source_course_id,
-            sourceCourseCode: row.source_course_code,
-            sourceCourseName: row.source_course_name,
-            groupId: row.group_id,
-            groupCode: row.group_code,
-            groupType: row.group_type,
-            capacity: row.capacity,
-            campusId: row.campus_id,
-            campusName: row.campus_name,
+            academicTermId: (row.academicTermId ?? row.academic_term_id)!,
+            termDisplayName: (row.termDisplayName ?? row.term_display_name)!,
+            termYear: (row.termYear ?? row.term_year)!,
+            termPeriodNumber: (row.termPeriodNumber ?? row.term_period_number)!,
+            sourceCourseId: (row.sourceCourseId ?? row.source_course_id)!,
+            sourceCourseCode: (row.sourceCourseCode ?? row.source_course_code)!,
+            sourceCourseName: (row.sourceCourseName ?? row.source_course_name)!,
+            groupId: (row.groupId ?? row.group_id)!,
+            groupCode: (row.groupCode ?? row.group_code)!,
+            groupType: (row.groupType ?? row.group_type)!,
+            capacity: row.capacity ?? 0,
+            campusId: row.campusId ?? row.campus_id ?? null,
+            campusName: row.campusName ?? row.campus_name ?? null,
             professors: row.professors ?? [],
             meetings: row.meetings ?? [],
           }) satisfies CourseLatestTermGroup,
@@ -1009,20 +1099,13 @@ export function useDashboardStats(userId: string | null, studyPlanId: number | n
     queryFn: async () => {
       if (!userId || !studyPlanId) return null;
 
-      const sb = getSupabaseBrowserClient();
-
-      const { data, error } = await sb.rpc("get_user_dashboard_stats", {
-        p_user_id: userId,
-        p_study_plan_id: studyPlanId,
-      });
-
-      if (error) throw error;
-
-      return data as {
+      const data = await apiClient<{
         stats: DashboardStats;
         semesters: SemesterProgress[];
         nextCourses: NextCourse[];
-      } | null;
+      } | null>(`/students/me/stats?studyPlanId=${studyPlanId}`);
+
+      return data ?? null;
     },
     enabled: !!userId && !!studyPlanId,
     staleTime: 30 * 1000,
@@ -1034,13 +1117,9 @@ export function useDeleteCourseAttempt() {
 
   return useMutation({
     mutationFn: async (params: { userId: string; studyPlanId: number; attemptId: number }) => {
-      const sb = getSupabaseBrowserClient();
-
-      const { error } = await sb.rpc("delete_student_course_attempt", {
-        p_attempt_id: params.attemptId,
+      await apiClient(`/students/me/attempts/${params.attemptId}`, {
+        method: "DELETE",
       });
-
-      if (error) throw error;
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({

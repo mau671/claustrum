@@ -501,14 +501,10 @@ function GoogleOAuthButton() {
 const MAGIC_LINK_EMAIL_KEY = "claustrum.auth.magic_link_email";
 const VERIFY_EMAIL_KEY = "claustrum.auth.verify_email";
 
-import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
-
 async function invalidateAuthFlowQueries(
   queryClient: ReturnType<typeof useQueryClient>,
   userId?: string,
 ) {
-  resetSupabaseAuthTokenState();
-
   await queryClient.invalidateQueries({ queryKey: ["appState"] });
   queryClient.removeQueries({ queryKey: ["authUser"] }); // fallback for any old queries
 

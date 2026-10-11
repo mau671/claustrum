@@ -53,13 +53,21 @@ export const Route = createFileRoute("/curriculum/")({
     career: search.career,
     plan: search.plan,
   }),
-  loader: ({ context: { queryClient }, deps }) => {
-    void queryClient.ensureQueryData(universitiesQueryOptions());
-
+  loader: async ({ context: { queryClient }, deps }) => {
     const u = deps.university ?? CURRICULUM_DEFAULT_UNIVERSITY_ID;
-    if (u) void queryClient.ensureQueryData(campusesQueryOptions(u));
-    if (deps.campus) void queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus));
-    if (deps.career) void queryClient.ensureQueryData(studyPlansQueryOptions(deps.career));
-    if (deps.plan) void queryClient.ensureQueryData(studyPlanDetailQueryOptions(deps.plan));
+    const promises: Promise<unknown>[] = [queryClient.ensureQueryData(universitiesQueryOptions())];
+
+    if (u) promises.push(queryClient.ensureQueryData(campusesQueryOptions(u)));
+    if (deps.campus) {
+      promises.push(queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus)));
+    }
+    if (deps.career) {
+      promises.push(queryClient.ensureQueryData(studyPlansQueryOptions(deps.career)));
+    }
+    if (deps.plan) {
+      promises.push(queryClient.ensureQueryData(studyPlanDetailQueryOptions(deps.plan)));
+    }
+
+    await Promise.all(promises);
   },
 });

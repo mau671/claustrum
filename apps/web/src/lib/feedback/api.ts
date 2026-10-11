@@ -1,38 +1,10 @@
-import { authClient } from "@/lib/auth/client";
-import { getApiBaseUrl } from "@/lib/env/public";
+import { apiClient } from "@/lib/api/client";
 
 export interface SubmitFeedbackPayload {
   type: "bug" | "feature" | "other";
   content: string;
   turnstileToken: string;
   isAnonymous?: boolean;
-}
-
-export async function submitFeedback(payload: SubmitFeedbackPayload): Promise<void> {
-  const apiBaseUrl = getApiBaseUrl();
-  if (!apiBaseUrl) {
-    throw new Error("API Worker URL no configurado");
-  }
-
-  const { data: tokenData } = await authClient.token();
-  const accessToken = tokenData?.token;
-
-  const headers = new Headers();
-  headers.set("Content-Type", "application/json");
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
-  }
-
-  const response = await fetch(`${apiBaseUrl}/feedback`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({ error: "Error desconocido" }));
-    throw new Error(body.error ?? `Error ${response.status}`);
-  }
 }
 
 export interface FeedbackRow {
@@ -45,42 +17,45 @@ export interface FeedbackRow {
   admin_notes?: string | null;
 }
 
+export async function submitFeedback(payload: SubmitFeedbackPayload): Promise<void> {
+  await apiClient("/feedback", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function getFeedbackList(limit: number, offset: number): Promise<FeedbackRow[]> {
-  const { getSupabaseBrowserClient } = await import("@/lib/supabase/browser-client");
-  const supabase = getSupabaseBrowserClient();
-
-  const { data, error } = await supabase
-    .from("user_feedback")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  if (error) throw error;
-
-  return data as FeedbackRow[];
+  const data = await apiClient<FeedbackRow[]>(`/feedback?limit=${limit}&offset=${offset}`);
+  return data ?? [];
 }
 
 export async function getUnreviewedFeedbackCount(): Promise<{ total_count: number }[]> {
-  const { getSupabaseBrowserClient } = await import("@/lib/supabase/browser-client");
-  const supabase = getSupabaseBrowserClient();
+  try {
+    const data = await apiClient<
+      | {
+          pendingFeedback?: number;
+          feedback?: number;
+          total_count?: number;
+          count?: number;
+        }
+      | Array<{ total_count: number }>
+    >("/moderation/counts");
 
-  const { count, error } = await supabase
-    .from("user_feedback")
-    .select("*", { count: "exact", head: true })
-    .eq("is_reviewed", false);
-
-  if (error) throw error;
-
-  return [{ total_count: count ?? 0 }];
+    if (Array.isArray(data)) {
+      return data;
+    }
+    const count = data?.pendingFeedback ?? data?.feedback ?? data?.total_count ?? data?.count ?? 0;
+    return [{ total_count: count }];
+  } catch {
+    return [{ total_count: 0 }];
+  }
 }
 
 export async function markFeedbackAsReviewed(id: number): Promise<void> {
-  const { getSupabaseBrowserClient } = await import("@/lib/supabase/browser-client");
-  const supabase = getSupabaseBrowserClient();
-
-  const { error } = await supabase.from("user_feedback").update({ is_reviewed: true }).eq("id", id);
-
-  if (error) throw error;
+  await apiClient(`/feedback/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ isReviewed: true }),
+  });
 }
 
 export async function replyToFeedback(
@@ -88,14 +63,11 @@ export async function replyToFeedback(
   adminNotes: string,
   replyMessage: string,
 ): Promise<void> {
-  const { getSupabaseBrowserClient } = await import("@/lib/supabase/browser-client");
-  const supabase = getSupabaseBrowserClient();
-
-  const { error } = await supabase.rpc("reply_to_feedback", {
-    p_feedback_id: feedbackId,
-    p_admin_notes: adminNotes,
-    p_reply_message: replyMessage,
+  await apiClient(`/feedback/${feedbackId}/replies`, {
+    method: "POST",
+    body: JSON.stringify({
+      message: replyMessage,
+      notes: adminNotes,
+    }),
   });
-
-  if (error) throw error;
 }

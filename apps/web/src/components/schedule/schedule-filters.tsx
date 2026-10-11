@@ -26,6 +26,7 @@ import {
   ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -89,7 +90,7 @@ export function ScheduleFilters({
   onCareerChange,
   onPlanChange,
   onTermChange,
-  isLoadingUniversities,
+  isLoadingUniversities: _isLoadingUniversities,
   isLoadingCampuses = false,
   isLoadingCareers,
   isLoadingPlans,
@@ -108,17 +109,11 @@ export function ScheduleFilters({
   const shouldShowUniversityFilter = universities.length > 1;
   const canSelectCampus = shouldShowUniversityFilter ? !!selectedUniversityId : hasUniversities;
 
-  const isUniversityFilterReady = shouldShowUniversityFilter && !isLoadingUniversities;
-  const isCampusFilterReady = canSelectCampus && !isLoadingCampuses;
-  const isCareerFilterReady = !!selectedCampusId && !isLoadingCareers;
-  const isPlanFilterReady = !!selectedCareerId && !isLoadingPlans;
-  const isTermFilterReady = !!selectedPlanId && !isLoadingTerms;
-
-  const showUniversityFilter = isUniversityFilterReady;
-  const showCampusFilter = isCampusFilterReady;
-  const showCareerFilter = isCareerFilterReady;
-  const showPlanFilter = isPlanFilterReady;
-  const showTermFilter = isTermFilterReady;
+  const showUniversityFilter = shouldShowUniversityFilter;
+  const showCampusFilter = canSelectCampus || !!selectedCampusId;
+  const showCareerFilter = !!selectedCampusId;
+  const showPlanFilter = !!selectedCareerId;
+  const showTermFilter = !!selectedPlanId;
   const showSwitches = !!selectedTermId;
 
   const [skipUniversityAnimation, setSkipUniversityAnimation] = useState(
@@ -197,6 +192,7 @@ export function ScheduleFilters({
             : normalizeText(item.name)
         }
         skipAnimation={skipCampusAnimation}
+        isLoading={isLoadingCampuses}
       />
 
       <FilterCombobox
@@ -212,6 +208,7 @@ export function ScheduleFilters({
             : normalizeText(item.name)
         }
         skipAnimation={skipGroupsAnimation}
+        isLoading={isLoadingCareers}
       />
 
       <FilterCombobox
@@ -227,6 +224,7 @@ export function ScheduleFilters({
             : normalizeText(item.name)
         }
         skipAnimation={skipGroupsAnimation}
+        isLoading={isLoadingPlans}
       />
 
       {showTermFilter && (
@@ -242,7 +240,18 @@ export function ScheduleFilters({
               disabled
               className="text-muted-foreground h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
             >
-              <span className="block min-w-0 flex-1 truncate text-left">Sin oferta disponible</span>
+              <span className="block min-w-0 flex-1 truncate text-left">
+                {isLoadingTerms ? "Cargando período..." : "Sin oferta disponible"}
+              </span>
+              {isLoadingTerms ? (
+                <Spinner className="text-muted-foreground size-3.5 shrink-0" />
+              ) : (
+                <HugeiconsIcon
+                  icon={UnfoldMoreIcon}
+                  size={14}
+                  className="-me-1! shrink-0 opacity-60"
+                />
+              )}
             </Button>
           ) : (
             <Combobox

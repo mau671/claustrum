@@ -5,9 +5,7 @@ import type {
   UploadEvaluationPayload,
 } from "@/lib/evaluations/types";
 
-import { authClient } from "@/lib/auth/client";
-import { getApiBaseUrl } from "@/lib/env/public";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { apiClient, getApiV1Url } from "@/lib/api/client";
 
 async function sha256File(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
@@ -18,15 +16,13 @@ async function sha256File(file: File): Promise<string> {
 
 export async function getCourseEvaluations(
   courseId: number,
-  studyPlanId: number | null,
+  studyPlanId?: number | null,
 ): Promise<EvaluationRow[]> {
-  const supabase = getSupabaseBrowserClient();
-  const { data, error } = await supabase.rpc("get_course_evaluations", {
-    p_course_id: courseId,
-    p_study_plan_id: studyPlanId,
-  });
-  if (error) throw error;
-  return (data ?? []) as EvaluationRow[];
+  const query = studyPlanId
+    ? `/evaluations?courseId=${courseId}&studyPlanId=${studyPlanId}`
+    : `/evaluations?courseId=${courseId}`;
+  const data = await apiClient<EvaluationRow[]>(query);
+  return data ?? [];
 }
 
 export async function getEvaluationModerationQueue(
@@ -34,22 +30,13 @@ export async function getEvaluationModerationQueue(
   limit: number,
   offset: number,
 ): Promise<EvaluationModerationRow[]> {
-  const supabase = getSupabaseBrowserClient();
-  const { data, error } = await supabase.rpc("get_evaluation_moderation_queue", {
-    p_status: status,
-    p_limit: limit,
-    p_offset: offset,
-  });
-  if (error) throw error;
-  return (data ?? []) as EvaluationModerationRow[];
+  const data = await apiClient<EvaluationModerationRow[]>(
+    `/moderation/evaluations?status=${status}&limit=${limit}&offset=${offset}`,
+  );
+  return data ?? [];
 }
 
 export async function uploadEvaluation(payload: UploadEvaluationPayload): Promise<void> {
-  const apiBaseUrl = getApiBaseUrl();
-  if (!apiBaseUrl) {
-    throw new Error("API Worker URL no configurado");
-  }
-
   const [fileSha256, answersFileSha256] = await Promise.all([
     sha256File(payload.evaluationFile),
     payload.answersFile ? sha256File(payload.answersFile) : Promise.resolve(""),
@@ -57,6 +44,9 @@ export async function uploadEvaluation(payload: UploadEvaluationPayload): Promis
 
   const formData = new FormData();
   formData.append("evaluationFile", payload.evaluationFile);
+  if (payload.courseId) {
+    formData.append("courseId", String(payload.courseId));
+  }
   if (payload.answersFile) {
     formData.append("answersFile", payload.answersFile);
   }
@@ -82,40 +72,21 @@ export async function uploadEvaluation(payload: UploadEvaluationPayload): Promis
     formData.append("answersFileSha256", answersFileSha256);
   }
 
-  const response = await fetch(`${apiBaseUrl}/courses/${payload.courseId}/evaluations`, {
+  await apiClient("/evaluations", {
     method: "POST",
     body: formData,
   });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({ error: "Error desconocido" }));
-    throw new Error(body.error ?? `Error ${response.status}`);
-  }
 }
 
 export async function getEvaluationDocument(
   evaluationId: number,
 ): Promise<{ blob: Blob; fileName: string }> {
-  const apiBaseUrl = getApiBaseUrl();
-  if (!apiBaseUrl) {
-    throw new Error("API Worker URL no configurado");
-  }
-
-  const { data: tokenData } = await authClient.token();
-  const accessToken = tokenData?.token;
-
-  const headers = new Headers();
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
-  }
-
-  const response = await fetch(`${apiBaseUrl}/evaluations/${evaluationId}/file`, {
-    headers,
-  });
+  const url = getApiV1Url(`/evaluations/${evaluationId}/file`);
+  const response = await fetch(url, { credentials: "include" });
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({ error: "Error desconocido" }));
-    throw new Error(body.error ?? `Error ${response.status}`);
+    throw new Error(body.error ?? body.message ?? `Error ${response.status}`);
   }
 
   const blob = await response.blob();
@@ -133,26 +104,12 @@ export async function getEvaluationDocument(
 export async function getEvaluationAnswersDocument(
   evaluationId: number,
 ): Promise<{ blob: Blob; fileName: string }> {
-  const apiBaseUrl = getApiBaseUrl();
-  if (!apiBaseUrl) {
-    throw new Error("API Worker URL no configurado");
-  }
-
-  const { data: tokenData } = await authClient.token();
-  const accessToken = tokenData?.token;
-
-  const headers = new Headers();
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
-  }
-
-  const response = await fetch(`${apiBaseUrl}/evaluations/${evaluationId}/answers-file`, {
-    headers,
-  });
+  const url = getApiV1Url(`/evaluations/${evaluationId}/answers`);
+  const response = await fetch(url, { credentials: "include" });
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({ error: "Error desconocido" }));
-    throw new Error(body.error ?? `Error ${response.status}`);
+    throw new Error(body.error ?? body.message ?? `Error ${response.status}`);
   }
 
   const blob = await response.blob();
@@ -172,12 +129,11 @@ export async function moderateEvaluation(
   status: "approved" | "rejected",
   note: string,
 ): Promise<void> {
-  const supabase = getSupabaseBrowserClient();
-  const { error } = await supabase.rpc("moderate_evaluation", {
-    p_evaluation_id: evaluationId,
-    p_new_status: status,
-    p_moderation_note: note.trim() === "" ? null : note.trim(),
+  await apiClient(`/evaluations/${evaluationId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      status,
+      note: note.trim() === "" ? null : note.trim(),
+    }),
   });
-
-  if (error) throw error;
 }

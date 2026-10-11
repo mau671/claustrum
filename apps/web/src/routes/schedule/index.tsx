@@ -80,31 +80,43 @@ export const Route = createFileRoute("/schedule/")({
     otherCampuses: search.otherCampuses,
     showAll: search.showAll,
   }),
-  loader: ({ context: { queryClient }, deps }) => {
-    // Warm up metadata and queries in background without stalling router transition
-    void queryClient.ensureQueryData(universitiesQueryOptions());
-
+  loader: async ({ context: { queryClient }, deps }) => {
     const u = deps.university ?? SCHEDULE_DEFAULT_UNIVERSITY_ID;
-    if (u) void queryClient.ensureQueryData(campusesQueryOptions(u));
-    if (deps.campus) void queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus));
-    if (deps.career) void queryClient.ensureQueryData(studyPlansQueryOptions(deps.career));
-    if (deps.campus)
-      void queryClient.ensureQueryData(academicTermsQueryOptions(deps.campus, deps.plan ?? null));
+    const promises: Promise<unknown>[] = [queryClient.ensureQueryData(universitiesQueryOptions())];
+
+    if (u) {
+      promises.push(queryClient.ensureQueryData(campusesQueryOptions(u)));
+    }
+    if (deps.campus) {
+      promises.push(queryClient.ensureQueryData(academicUnitsQueryOptions(deps.campus)));
+    }
+    if (deps.career) {
+      promises.push(queryClient.ensureQueryData(studyPlansQueryOptions(deps.career)));
+    }
+    if (deps.campus) {
+      promises.push(
+        queryClient.ensureQueryData(academicTermsQueryOptions(deps.campus, deps.plan ?? null)),
+      );
+    }
 
     if (deps.campus && deps.term) {
       const appState = queryClient.getQueryData(appStateQueryOptions().queryKey);
       const userId = appState?.user?.id ?? null;
-      void queryClient.ensureQueryData(
-        scheduleCoursesQueryOptions({
-          termId: deps.term,
-          campusId: deps.campus,
-          careerId: deps.career ?? null,
-          planId: deps.plan ?? null,
-          includeOtherCampuses: deps.otherCampuses ?? false,
-          showAllCourses: deps.showAll ?? false,
-          userId,
-        }),
+      promises.push(
+        queryClient.ensureQueryData(
+          scheduleCoursesQueryOptions({
+            termId: deps.term,
+            campusId: deps.campus,
+            careerId: deps.career ?? null,
+            planId: deps.plan ?? null,
+            includeOtherCampuses: deps.otherCampuses ?? false,
+            showAllCourses: deps.showAll ?? false,
+            userId,
+          }),
+        ),
       );
     }
+
+    await Promise.all(promises);
   },
 });

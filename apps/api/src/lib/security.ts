@@ -33,10 +33,27 @@ export async function verifyAuth(
 export async function isAdmin(userId: string, env: Env): Promise<boolean> {
   const supabase = getSupabaseAdmin(env);
   const { data, error } = await supabase
-    .from("user_role")
+    .schema("better_auth")
+    .from("user")
     .select("id")
-    .eq("user_id", userId)
+    .eq("id", userId)
     .eq("role", "admin")
+    .eq("banned", false)
+    .maybeSingle();
+
+  if (error) return false;
+  return !!data;
+}
+
+export async function canModerate(userId: string, env: Env): Promise<boolean> {
+  const supabase = getSupabaseAdmin(env);
+  const { data, error } = await supabase
+    .schema("better_auth")
+    .from("user")
+    .select("id")
+    .eq("id", userId)
+    .in("role", ["admin", "moderator"])
+    .eq("banned", false)
     .maybeSingle();
 
   if (error) return false;

@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { Env } from "../types";
 
 import { fail, ok } from "../lib/http";
-import { isAdmin, verifyAuth, verifyTurnstileToken } from "../lib/security";
+import { canModerate, verifyAuth, verifyTurnstileToken } from "../lib/security";
 import { getSupabaseAdmin } from "../lib/supabase";
 
 const evaluationsRoutes = new Hono<{ Bindings: Env }>();
@@ -226,7 +226,7 @@ evaluationsRoutes.get("/evaluations/:evaluationId/file", async (c) => {
     }
     const { userId } = authResult;
 
-    const admin = await isAdmin(userId, c.env);
+    const admin = await canModerate(userId, c.env);
     if (!admin) return fail(403, "No tienes acceso a esta evaluacion", request, c.env);
   }
 
@@ -279,7 +279,7 @@ evaluationsRoutes.get("/evaluations/:evaluationId/answers-file", async (c) => {
     }
     const { userId } = authResult;
 
-    const admin = await isAdmin(userId, c.env);
+    const admin = await canModerate(userId, c.env);
     if (!admin) return fail(403, "No tienes acceso a esta evaluacion", request, c.env);
   }
 

@@ -119,6 +119,9 @@ function ReviewsPage() {
       selectedReview={selectedReview}
       onSelect={handleSelect}
       page={queryPage}
+      pageSize={PAGE_SIZE}
+      totalCount={reviewTotal}
+      totalPages={Math.max(1, Math.ceil(reviewTotal / PAGE_SIZE))}
       hasMore={reviewHasMore}
       isLoading={reviewsQuery.isLoading}
       isFetching={reviewsQuery.isFetching}

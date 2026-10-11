@@ -1,9 +1,10 @@
 import { Alert02Icon, BubbleChatIcon, Comment01Icon, File01Icon } from "@hugeicons/core-free-icons";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useModerationCounts } from "@/lib/hooks/use-moderation";
 import { useAuthUser } from "@/lib/hooks/use-queries";
 import { useCanModerate } from "@/lib/hooks/use-roles";
@@ -72,37 +73,54 @@ export function ModerationLayout() {
     },
   ];
 
+  const navRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+
+  useEffect(() => {
+    const activeItem = navItems.find((item) => location.pathname.startsWith(item.path));
+    if (activeItem) {
+      const el = navRefs.current[activeItem.path];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      }
+    }
+  }, [location.pathname]);
+
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-6 px-4 py-6 lg:px-6">
       <div className="w-full">
-        <nav className="border-border/60 bg-muted/40 flex w-fit scrollbar-none items-center gap-1.5 overflow-x-auto rounded-xl border p-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.path);
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors",
-                  isActive
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
-                )}
-              >
-                <Icon icon={item.icon} size={16} className="size-4 shrink-0" />
-                <span>{item.label}</span>
-                {item.count > 0 && (
-                  <Badge
-                    variant={isActive ? "default" : "secondary"}
-                    className="h-5 min-w-5 rounded-full px-1.5 text-[10px] leading-none font-semibold"
-                  >
-                    {item.count > 99 ? "99+" : item.count}
-                  </Badge>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+        <ScrollArea scrollFade className="w-full">
+          <nav className="border-border/60 bg-muted/40 flex w-max min-w-full items-center gap-1.5 rounded-xl border p-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname.startsWith(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  ref={(node) => {
+                    navRefs.current[item.path] = node;
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                    isActive
+                      ? "bg-background text-foreground shadow-xs"
+                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+                  )}
+                >
+                  <Icon icon={item.icon} size={16} className="size-4 shrink-0" />
+                  <span>{item.label}</span>
+                  {item.count > 0 && (
+                    <Badge
+                      variant={isActive ? "default" : "secondary"}
+                      className="h-5 min-w-5 rounded-full px-1.5 text-[10px] leading-none font-semibold"
+                    >
+                      {item.count > 99 ? "99+" : item.count}
+                    </Badge>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </ScrollArea>
       </div>
 
       <Outlet />

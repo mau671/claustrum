@@ -6,8 +6,14 @@ import {
   ChevronRightIcon,
   Clock01Icon,
 } from "@hugeicons/core-free-icons";
-import { useEffect, useState } from "react";
-import { lazy, Suspense } from "react";
+import {
+  createColumnHelper,
+  flexRender,
+  rowPaginationFeature,
+  tableFeatures,
+  useTable,
+} from "@tanstack/react-table";
+import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 import type { EvaluationModerationRow } from "@/lib/evaluations/types";
 import type {
@@ -18,10 +24,17 @@ import type {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardPanel } from "@/components/ui/card";
-import { Frame, FrameHeader } from "@/components/ui/frame";
+import { Card, CardPanel } from "@/components/ui/card";
+import { Frame, FrameFooter, FrameHeader } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -146,33 +159,7 @@ export function ReviewReportSection({
           selectedReport && "hidden lg:flex",
         )}
       >
-        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={page === 0 || isFetching}
-              onClick={() => onPageChange(Math.max(page - 1, 0))}
-              aria-label="Página anterior"
-            >
-              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-            </Button>
-            <span className="text-sm font-medium">
-              Página {(page + 1).toString().padStart(2, "0")}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={!hasMore || isFetching}
-              onClick={() => onPageChange(page + 1)}
-              aria-label="Página siguiente"
-            >
-              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-            </Button>
-          </CardHeader>
-
+        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
               <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 p-6 text-sm">
@@ -212,6 +199,16 @@ export function ReviewReportSection({
             )}
           </div>
         </Card>
+
+        <FrameFooter className="p-1.5 pt-2">
+          <ModerationPagination
+            page={page}
+            totalPages={hasMore ? page + 2 : page + 1}
+            hasMore={hasMore}
+            isFetching={isFetching}
+            onPageChange={onPageChange}
+          />
+        </FrameFooter>
       </Frame>
 
       {selectedReport && (
@@ -301,16 +298,172 @@ export function ReviewReportSection({
   );
 }
 
+const reviewQueueFeatures = tableFeatures({
+  rowPaginationFeature,
+});
+
+const reviewQueueColumnHelper = createColumnHelper<
+  typeof reviewQueueFeatures,
+  ProfessorReviewModerationRow
+>();
+
+function ReviewStatusTabs({
+  statusFilter,
+  onStatusChange,
+}: {
+  statusFilter: ProfessorReviewStatusFilter;
+  onStatusChange: (status: ProfessorReviewStatusFilter) => void;
+}) {
+  const tabs: { value: ProfessorReviewStatusFilter; label: string }[] = [
+    { value: "pending", label: "Pendientes" },
+    { value: "approved", label: "Aprobadas" },
+    { value: "rejected", label: "Rechazadas" },
+    { value: "all", label: "Todas" },
+  ];
+
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    const activeEl = tabRefs.current[statusFilter];
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
+  }, [statusFilter]);
+
+  return (
+    <ScrollArea scrollFade className="w-full">
+      <div className="border-border/60 bg-muted/40 flex w-max min-w-full items-center gap-1 rounded-lg border p-1 text-xs">
+        {tabs.map((tab) => {
+          const isSelected = statusFilter === tab.value;
+          return (
+            <button
+              key={tab.value}
+              ref={(node) => {
+                tabRefs.current[tab.value] = node;
+              }}
+              type="button"
+              onClick={() => onStatusChange(tab.value)}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
+                isSelected
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+              )}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+    </ScrollArea>
+  );
+}
+
+export function ModerationPagination({
+  page,
+  totalPages,
+  hasMore,
+  isFetching,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
+  isFetching: boolean;
+  onPageChange: (newPage: number) => void;
+}) {
+  const currentPage = page + 1;
+  const paginationItems = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, "ellipsis", totalPages] as const;
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, "ellipsis", totalPages - 2, totalPages - 1, totalPages] as const;
+    }
+    return [1, "ellipsis", currentPage, "ellipsis", totalPages] as const;
+  }, [currentPage, totalPages]);
+
+  return (
+    <Pagination className="mx-auto w-full justify-center">
+      <PaginationContent className="flex flex-row items-center justify-center gap-1">
+        <PaginationItem>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-foreground size-8"
+            disabled={page === 0 || isFetching}
+            onClick={() => onPageChange(Math.max(page - 1, 0))}
+            aria-label="Página anterior"
+          >
+            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
+          </Button>
+        </PaginationItem>
+
+        {paginationItems.map((item, index) => {
+          if (item === "ellipsis") {
+            return (
+              <PaginationItem key={`ellipsis-${index}`}>
+                <PaginationEllipsis className="text-muted-foreground flex size-8 items-center justify-center" />
+              </PaginationItem>
+            );
+          }
+
+          const pageNumber = item as number;
+          const isCurrent = currentPage === pageNumber;
+
+          return (
+            <PaginationItem key={pageNumber}>
+              <Button
+                variant={isCurrent ? "outline" : "ghost"}
+                size="icon"
+                className={cn(
+                  "size-8 text-xs font-medium tabular-nums",
+                  isCurrent &&
+                    "border-border/80 bg-background text-foreground font-semibold shadow-xs",
+                )}
+                onClick={() => onPageChange(pageNumber - 1)}
+                aria-label={`Página ${pageNumber}`}
+                aria-current={isCurrent ? "page" : undefined}
+              >
+                {pageNumber}
+              </Button>
+            </PaginationItem>
+          );
+        })}
+
+        <PaginationItem>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-foreground size-8"
+            disabled={!hasMore || isFetching}
+            onClick={() => onPageChange(page + 1)}
+            aria-label="Página siguiente"
+          >
+            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
+          </Button>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+}
+
 export function ReviewSection({
   rows,
   selectedReview,
   onSelect,
   page,
+  pageSize = 20,
+  totalCount,
+  totalPages,
   hasMore,
   isLoading,
   isFetching,
   onPageChange,
-  statusFilter = "all",
+  statusFilter = "pending",
   onStatusChange,
   moderationNote,
   onNoteChange,
@@ -322,6 +475,9 @@ export function ReviewSection({
   selectedReview: ProfessorReviewModerationRow | null;
   onSelect: (id: number | null) => void;
   page: number;
+  pageSize?: number;
+  totalCount?: number;
+  totalPages?: number;
   hasMore: boolean;
   isLoading: boolean;
   isFetching: boolean;
@@ -364,6 +520,60 @@ export function ReviewSection({
     }
   };
 
+  const columns = useMemo(
+    () => [
+      reviewQueueColumnHelper.display({
+        id: "reviewItem",
+        cell: ({ row }) => (
+          <CardPanel
+            render={<button type="button" />}
+            onClick={() => onSelect(row.original.review_id)}
+            className={cn(
+              "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
+              selectedReview?.review_id === row.original.review_id
+                ? "bg-accent/80 text-accent-foreground"
+                : "hover:bg-muted/50 text-foreground",
+            )}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate font-medium">{row.original.professor_name}</span>
+              {getStatusBadge(row.original.status)}
+            </div>
+            <div className="text-muted-foreground mt-1 flex flex-col text-xs">
+              {row.original.courses.map((course) => (
+                <span key={course.id} className="truncate">
+                  {course.code}: {course.name}
+                </span>
+              ))}
+            </div>
+            <span className="text-muted-foreground mt-1 line-clamp-2 text-xs">
+              {row.original.comment}
+            </span>
+          </CardPanel>
+        ),
+      }),
+    ],
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+    [onSelect, selectedReview?.review_id],
+  );
+
+  const table = useTable({
+    features: reviewQueueFeatures,
+    data: rows,
+    columns,
+    manualPagination: true,
+    pageCount: totalPages ?? (hasMore ? page + 2 : page + 1),
+    rowCount: totalCount ?? rows.length,
+    state: {
+      pagination: {
+        pageIndex: page,
+        pageSize,
+      },
+    },
+  });
+
+  const calculatedTotalPages = totalPages ?? Math.max(1, hasMore ? page + 2 : page + 1);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
       <Frame
@@ -373,66 +583,19 @@ export function ReviewSection({
         )}
       >
         {onStatusChange && (
-          <FrameHeader className="p-2">
-            <div className="border-border/60 bg-muted/40 flex w-full scrollbar-none items-center gap-1 overflow-x-auto rounded-lg border p-1 text-xs">
-              {[
-                { value: "pending", label: "Pendientes" },
-                { value: "approved", label: "Aprobadas" },
-                { value: "rejected", label: "Rechazadas" },
-                { value: "all", label: "Todas" },
-              ].map((tab) => (
-                <button
-                  key={tab.value}
-                  type="button"
-                  onClick={() => onStatusChange(tab.value as ProfessorReviewStatusFilter)}
-                  className={cn(
-                    "flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
-                    statusFilter === tab.value
-                      ? "bg-background text-foreground font-semibold shadow-xs"
-                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+          <FrameHeader className="border-b p-2">
+            <ReviewStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
           </FrameHeader>
         )}
 
-        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={page === 0 || isFetching}
-              onClick={() => onPageChange(Math.max(page - 1, 0))}
-              aria-label="Página anterior"
-            >
-              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-            </Button>
-            <span className="text-sm font-medium">
-              Página {(page + 1).toString().padStart(2, "0")}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={!hasMore || isFetching}
-              onClick={() => onPageChange(page + 1)}
-              aria-label="Página siguiente"
-            >
-              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-            </Button>
-          </CardHeader>
-
+        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
               <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
                 <Spinner className="size-4" />
                 <span>Cargando reseñas…</span>
               </div>
-            ) : rows.length === 0 ? (
+            ) : table.getRowModel().rows.length === 0 ? (
               <p className="text-muted-foreground p-6 text-center text-sm">
                 {statusFilter === "pending"
                   ? "No hay reseñas pendientes."
@@ -443,37 +606,28 @@ export function ReviewSection({
                       : "No hay reseñas en el historial."}
               </p>
             ) : (
-              rows.map((review) => (
-                <CardPanel
-                  key={review.review_id}
-                  render={<button type="button" />}
-                  onClick={() => onSelect(review.review_id)}
-                  className={cn(
-                    "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
-                    selectedReview?.review_id === review.review_id
-                      ? "bg-accent/80 text-accent-foreground"
-                      : "hover:bg-muted/50 text-foreground",
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate font-medium">{review.professor_name}</span>
-                    {getStatusBadge(review.status)}
-                  </div>
-                  <div className="text-muted-foreground mt-1 flex flex-col text-xs">
-                    {review.courses.map((course) => (
-                      <span key={course.id} className="truncate">
-                        {course.code}: {course.name}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-muted-foreground mt-1 line-clamp-2 text-xs">
-                    {review.comment}
-                  </span>
-                </CardPanel>
+              table.getRowModel().rows.map((row) => (
+                <Fragment key={row.id}>
+                  {row.getAllCells().map((cell) => (
+                    <Fragment key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </Fragment>
+                  ))}
+                </Fragment>
               ))
             )}
           </div>
         </Card>
+
+        <FrameFooter className="p-1.5 pt-2">
+          <ModerationPagination
+            page={page}
+            totalPages={calculatedTotalPages}
+            hasMore={hasMore}
+            isFetching={isFetching}
+            onPageChange={onPageChange}
+          />
+        </FrameFooter>
       </Frame>
 
       {selectedReview && (
@@ -751,33 +905,7 @@ export function EvaluationSection({
           selectedEvaluation && "hidden lg:flex",
         )}
       >
-        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={page === 0 || isFetching}
-              onClick={() => onPageChange(Math.max(page - 1, 0))}
-              aria-label="Página anterior"
-            >
-              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-            </Button>
-            <span className="text-sm font-medium">
-              Página {(page + 1).toString().padStart(2, "0")}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={!hasMore || isFetching}
-              onClick={() => onPageChange(page + 1)}
-              aria-label="Página siguiente"
-            >
-              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-            </Button>
-          </CardHeader>
-
+        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
               <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
@@ -834,6 +962,16 @@ export function EvaluationSection({
             )}
           </div>
         </Card>
+
+        <FrameFooter className="p-1.5 pt-2">
+          <ModerationPagination
+            page={page}
+            totalPages={hasMore ? page + 2 : page + 1}
+            hasMore={hasMore}
+            isFetching={isFetching}
+            onPageChange={onPageChange}
+          />
+        </FrameFooter>
       </Frame>
 
       {selectedEvaluation && (

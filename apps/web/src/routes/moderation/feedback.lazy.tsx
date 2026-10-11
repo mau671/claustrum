@@ -1,17 +1,12 @@
-import {
-  CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  FloppyDiskIcon,
-} from "@hugeicons/core-free-icons";
+import { CheckIcon, FloppyDiskIcon } from "@hugeicons/core-free-icons";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
 import type { FeedbackRow } from "@/lib/feedback/api";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardPanel } from "@/components/ui/card";
-import { Frame } from "@/components/ui/frame";
+import { Card, CardPanel } from "@/components/ui/card";
+import { Frame, FrameFooter } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -22,6 +17,8 @@ import {
   useReplyToFeedback,
 } from "@/lib/feedback/hooks";
 import { cn } from "@/lib/utils";
+
+import { ModerationPagination } from "./-moderation-components";
 
 const PAGE_SIZE = 20;
 
@@ -121,30 +118,7 @@ function FeedbackModerationPage() {
           selectedFeedback ? "hidden lg:flex" : "flex",
         )}
       >
-        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={queryPage === 0 || feedbackQuery.isFetching}
-              onClick={() => handlePageChange(Math.max(1, page - 1))}
-              aria-label="Página anterior"
-            >
-              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-            </Button>
-            <span className="text-sm font-medium">Página {page.toString().padStart(2, "0")}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={!hasMore || feedbackQuery.isFetching}
-              onClick={() => handlePageChange(page + 1)}
-              aria-label="Página siguiente"
-            >
-              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-            </Button>
-          </CardHeader>
+        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {feedbackRows.map((fb) => (
               <CardPanel
@@ -183,6 +157,16 @@ function FeedbackModerationPage() {
             ))}
           </div>
         </Card>
+
+        <FrameFooter className="p-1.5 pt-2">
+          <ModerationPagination
+            page={queryPage}
+            totalPages={hasMore ? queryPage + 2 : queryPage + 1}
+            hasMore={hasMore}
+            isFetching={feedbackQuery.isFetching}
+            onPageChange={(p) => handlePageChange(p + 1)}
+          />
+        </FrameFooter>
       </Frame>
 
       {/* Right Detail Pane */}

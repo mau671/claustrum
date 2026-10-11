@@ -24,7 +24,7 @@ function ReviewsPage() {
   const queryPage = Math.max(page - 1, 0);
   const selectedReviewId = search.reviewId ?? null;
   const statusFilter: ProfessorReviewStatusFilter =
-    (search.status as ProfessorReviewStatusFilter) ?? "all";
+    (search.status as ProfessorReviewStatusFilter) ?? "pending";
 
   const [moderationNote, setModerationNote] = useState<Record<number, string>>({});
 
@@ -71,7 +71,7 @@ function ReviewsPage() {
       from: "/moderation/reviews",
       search: (prev) => ({
         ...prev,
-        status: newStatus === "all" ? undefined : newStatus,
+        status: newStatus === "pending" ? undefined : newStatus,
         page: undefined,
         reviewId: undefined,
       }),

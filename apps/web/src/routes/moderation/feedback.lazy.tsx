@@ -3,7 +3,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   FloppyDiskIcon,
-  Loading02Icon,
 } from "@hugeicons/core-free-icons";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -11,8 +10,11 @@ import { useEffect, useMemo, useState } from "react";
 import type { FeedbackRow } from "@/lib/feedback/api";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardPanel } from "@/components/ui/card";
+import { Frame } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useFeedbackList,
@@ -96,11 +98,7 @@ function FeedbackModerationPage() {
   if (feedbackQuery.isLoading) {
     return (
       <div className="flex h-full items-center justify-center p-6">
-        <Icon
-          icon={Loading02Icon}
-          size={32}
-          className="text-muted-foreground size-8 animate-spin"
-        />
+        <Spinner className="text-muted-foreground size-8" />
       </div>
     );
   }
@@ -117,38 +115,41 @@ function FeedbackModerationPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <div
+      <Frame
         className={cn(
-          "bg-card text-card-foreground flex min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-xl border shadow-xs lg:w-72 xl:w-80",
+          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
           selectedFeedback ? "hidden lg:flex" : "flex",
         )}
       >
-        <div className="flex items-center justify-between border-b p-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            disabled={queryPage === 0 || feedbackQuery.isFetching}
-            onClick={() => handlePageChange(Math.max(1, page - 1))}
-          >
-            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-          </Button>
-          <span className="text-sm font-medium">Página {page.toString().padStart(2, "0")}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            disabled={!hasMore || feedbackQuery.isFetching}
-            onClick={() => handlePageChange(page + 1)}
-          >
-            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-          </Button>
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
-          <div className="flex flex-col gap-1">
+        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={queryPage === 0 || feedbackQuery.isFetching}
+              onClick={() => handlePageChange(Math.max(1, page - 1))}
+              aria-label="Página anterior"
+            >
+              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
+            </Button>
+            <span className="text-sm font-medium">Página {page.toString().padStart(2, "0")}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={!hasMore || feedbackQuery.isFetching}
+              onClick={() => handlePageChange(page + 1)}
+              aria-label="Página siguiente"
+            >
+              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
+            </Button>
+          </CardHeader>
+          <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {feedbackRows.map((fb) => (
-              <button
+              <CardPanel
                 key={fb.id}
+                render={<button type="button" />}
                 onClick={() => {
                   void navigate({
                     from: "/moderation/feedback",
@@ -157,10 +158,10 @@ function FeedbackModerationPage() {
                   });
                 }}
                 className={cn(
-                  "relative flex w-full flex-col rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
+                  "focus-visible:bg-accent relative flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
                   selectedFeedbackId === fb.id
-                    ? "border-foreground/30 bg-accent"
-                    : "hover:bg-muted border-transparent",
+                    ? "bg-accent/80 text-accent-foreground"
+                    : "hover:bg-muted/50 text-foreground",
                   !fb.is_reviewed && selectedFeedbackId !== fb.id && "bg-muted/30",
                 )}
               >
@@ -178,11 +179,11 @@ function FeedbackModerationPage() {
                 <span className="text-muted-foreground mt-0.5 line-clamp-2 pr-4 text-xs">
                   {fb.content}
                 </span>
-              </button>
+              </CardPanel>
             ))}
           </div>
-        </div>
-      </div>
+        </Card>
+      </Frame>
 
       {/* Right Detail Pane */}
       {selectedFeedback && (
@@ -304,7 +305,7 @@ function FeedbackModerationPage() {
                     className="w-full sm:w-auto"
                   >
                     {replyToFeedback.isPending ? (
-                      <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
+                      <Spinner className="mr-2 size-4" />
                     ) : (
                       <Icon icon={FloppyDiskIcon} size={16} className="mr-2 size-4" />
                     )}
@@ -323,9 +324,7 @@ function FeedbackModerationPage() {
                     disabled={replyToFeedback.isPending || !selectedFeedback.user_id}
                     className="w-full sm:w-auto"
                   >
-                    {replyToFeedback.isPending ? (
-                      <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-                    ) : null}
+                    {replyToFeedback.isPending ? <Spinner className="mr-2 size-4" /> : null}
                     Enviar respuesta al usuario
                   </Button>
                 </div>

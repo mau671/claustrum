@@ -5,7 +5,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   Clock01Icon,
-  Loading02Icon,
 } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 import { lazy, Suspense } from "react";
@@ -19,8 +18,11 @@ import type {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardPanel } from "@/components/ui/card";
+import { Frame, FrameHeader } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -138,61 +140,60 @@ export function ReviewReportSection({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <div
+      <Frame
         className={cn(
-          "bg-card flex min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-xl border shadow-xs lg:w-72 xl:w-80",
+          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
           selectedReport && "hidden lg:flex",
         )}
       >
-        <div className="flex items-center justify-between border-b p-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            disabled={page === 0 || isFetching}
-            onClick={() => onPageChange(Math.max(page - 1, 0))}
-          >
-            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-          </Button>
-          <span className="text-sm font-medium">
-            Página {(page + 1).toString().padStart(2, "0")}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            disabled={!hasMore || isFetching}
-            onClick={() => onPageChange(page + 1)}
-          >
-            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-          </Button>
-        </div>
+        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={page === 0 || isFetching}
+              onClick={() => onPageChange(Math.max(page - 1, 0))}
+              aria-label="Página anterior"
+            >
+              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
+            </Button>
+            <span className="text-sm font-medium">
+              Página {(page + 1).toString().padStart(2, "0")}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={!hasMore || isFetching}
+              onClick={() => onPageChange(page + 1)}
+              aria-label="Página siguiente"
+            >
+              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
+            </Button>
+          </CardHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
-          {isLoading ? (
-            <div className="flex flex-1 items-center justify-center p-4">
-              <Icon
-                icon={Loading02Icon}
-                size={20}
-                className="text-muted-foreground size-5 animate-spin"
-              />
-            </div>
-          ) : rows.length === 0 ? (
-            <p className="text-muted-foreground p-4 text-center text-sm">
-              No hay reportes pendientes.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-1">
-              {rows.map((report) => (
-                <button
+          <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
+            {isLoading ? (
+              <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 p-6 text-sm">
+                <Spinner className="size-4" />
+                <span>Cargando reportes…</span>
+              </div>
+            ) : rows.length === 0 ? (
+              <p className="text-muted-foreground p-6 text-center text-sm">
+                No hay reportes pendientes.
+              </p>
+            ) : (
+              rows.map((report) => (
+                <CardPanel
                   key={report.report_id}
-                  type="button"
+                  render={<button type="button" />}
                   onClick={() => onSelect(report.report_id)}
                   className={cn(
-                    "flex w-full flex-col rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
+                    "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
                     selectedReport?.report_id === report.report_id
-                      ? "border-foreground/30 bg-accent"
-                      : "hover:bg-muted border-transparent",
+                      ? "bg-accent/80 text-accent-foreground"
+                      : "hover:bg-muted/50 text-foreground",
                   )}
                 >
                   <span className="truncate font-medium">
@@ -206,12 +207,12 @@ export function ReviewReportSection({
                   <span className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
                     {report.reason}
                   </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                </CardPanel>
+              ))
+            )}
+          </div>
+        </Card>
+      </Frame>
 
       {selectedReport && (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:max-h-full lg:overflow-y-auto">
@@ -365,20 +366,48 @@ export function ReviewSection({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <div
+      <Frame
         className={cn(
-          "bg-card text-card-foreground flex min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-xl border shadow-xs lg:w-72 xl:w-80",
+          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
           selectedReview && "hidden lg:flex",
         )}
       >
-        <div className="flex flex-col border-b">
-          <div className="flex items-center justify-between p-2">
+        {onStatusChange && (
+          <FrameHeader className="p-2">
+            <div className="border-border/60 bg-muted/40 flex w-full scrollbar-none items-center gap-1 overflow-x-auto rounded-lg border p-1 text-xs">
+              {[
+                { value: "pending", label: "Pendientes" },
+                { value: "approved", label: "Aprobadas" },
+                { value: "rejected", label: "Rechazadas" },
+                { value: "all", label: "Todas" },
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => onStatusChange(tab.value as ProfessorReviewStatusFilter)}
+                  className={cn(
+                    "flex-1 rounded-md px-2.5 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
+                    statusFilter === tab.value
+                      ? "bg-background text-foreground font-semibold shadow-xs"
+                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </FrameHeader>
+        )}
+
+        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
             <Button
               variant="ghost"
               size="icon"
               className="size-8"
               disabled={page === 0 || isFetching}
               onClick={() => onPageChange(Math.max(page - 1, 0))}
+              aria-label="Página anterior"
             >
               <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
             </Button>
@@ -391,84 +420,61 @@ export function ReviewSection({
               className="size-8"
               disabled={!hasMore || isFetching}
               onClick={() => onPageChange(page + 1)}
+              aria-label="Página siguiente"
             >
               <Icon icon={ChevronRightIcon} size={16} className="size-4" />
             </Button>
-          </div>
+          </CardHeader>
 
-          {onStatusChange && (
-            <div className="bg-muted/20 flex items-center justify-between gap-1 overflow-x-auto border-t p-1 text-xs">
-              {[
-                { value: "all", label: "Todas" },
-                { value: "pending", label: "Pendientes" },
-                { value: "approved", label: "Aprobadas" },
-                { value: "rejected", label: "Rechazadas" },
-              ].map((tab) => (
-                <button
-                  key={tab.value}
-                  type="button"
-                  onClick={() => onStatusChange(tab.value as ProfessorReviewStatusFilter)}
-                  className={cn(
-                    "flex-1 rounded-md px-2 py-1 text-center text-xs font-medium whitespace-nowrap transition-colors",
-                    statusFilter === tab.value
-                      ? "bg-background text-foreground border shadow-xs"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
-          {isLoading ? (
-            <p className="text-muted-foreground p-3 text-center text-sm">Cargando reseñas…</p>
-          ) : rows.length === 0 ? (
-            <p className="text-muted-foreground p-3 text-center text-sm">
-              {statusFilter === "pending"
-                ? "No hay reseñas pendientes."
-                : statusFilter === "approved"
-                  ? "No hay reseñas aprobadas."
-                  : statusFilter === "rejected"
-                    ? "No hay reseñas rechazadas."
-                    : "No hay reseñas en el historial."}
-            </p>
-          ) : (
-            <div className="flex flex-col gap-1">
-              {rows.map((review) => (
-                <button
+          <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
+            {isLoading ? (
+              <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
+                <Spinner className="size-4" />
+                <span>Cargando reseñas…</span>
+              </div>
+            ) : rows.length === 0 ? (
+              <p className="text-muted-foreground p-6 text-center text-sm">
+                {statusFilter === "pending"
+                  ? "No hay reseñas pendientes."
+                  : statusFilter === "approved"
+                    ? "No hay reseñas aprobadas."
+                    : statusFilter === "rejected"
+                      ? "No hay reseñas rechazadas."
+                      : "No hay reseñas en el historial."}
+              </p>
+            ) : (
+              rows.map((review) => (
+                <CardPanel
                   key={review.review_id}
-                  type="button"
+                  render={<button type="button" />}
                   onClick={() => onSelect(review.review_id)}
                   className={cn(
-                    "flex w-full flex-col rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
+                    "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
                     selectedReview?.review_id === review.review_id
-                      ? "border-foreground/30 bg-accent"
-                      : "hover:bg-muted border-transparent",
+                      ? "bg-accent/80 text-accent-foreground"
+                      : "hover:bg-muted/50 text-foreground",
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate font-medium">{review.professor_name}</span>
                     {getStatusBadge(review.status)}
                   </div>
-                  <div className="text-muted-foreground mt-1 flex flex-col text-sm">
+                  <div className="text-muted-foreground mt-1 flex flex-col text-xs">
                     {review.courses.map((course) => (
                       <span key={course.id} className="truncate">
                         {course.code}: {course.name}
                       </span>
                     ))}
                   </div>
-                  <span className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
+                  <span className="text-muted-foreground mt-1 line-clamp-2 text-xs">
                     {review.comment}
                   </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                </CardPanel>
+              ))
+            )}
+          </div>
+        </Card>
+      </Frame>
 
       {selectedReview && (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:max-h-full lg:overflow-y-auto">
@@ -672,11 +678,7 @@ function EvaluationPdfViewer({
 
       {fileLoading && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <Icon
-            icon={Loading02Icon}
-            size={32}
-            className="text-muted-foreground size-8 animate-spin"
-          />
+          <Spinner className="text-muted-foreground size-8" />
           <p className="text-muted-foreground text-sm">Cargando documento…</p>
         </div>
       )}
@@ -691,11 +693,7 @@ function EvaluationPdfViewer({
         <Suspense
           fallback={
             <div className="flex flex-1 flex-col items-center justify-center gap-4">
-              <Icon
-                icon={Loading02Icon}
-                size={32}
-                className="text-muted-foreground size-8 animate-spin"
-              />
+              <Spinner className="text-muted-foreground size-8" />
               <p className="text-muted-foreground text-sm">Cargando visor…</p>
             </div>
           }
@@ -747,55 +745,60 @@ export function EvaluationSection({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <div
+      <Frame
         className={cn(
-          "bg-card text-card-foreground flex min-h-0 w-full shrink-0 flex-col overflow-hidden rounded-xl border shadow-xs lg:w-72 xl:w-80",
+          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
           selectedEvaluation && "hidden lg:flex",
         )}
       >
-        <div className="flex items-center justify-between border-b p-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            disabled={page === 0 || isFetching}
-            onClick={() => onPageChange(Math.max(page - 1, 0))}
-          >
-            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-          </Button>
-          <span className="text-sm font-medium">
-            Página {(page + 1).toString().padStart(2, "0")}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            disabled={!hasMore || isFetching}
-            onClick={() => onPageChange(page + 1)}
-          >
-            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-          </Button>
-        </div>
+        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between border-b p-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={page === 0 || isFetching}
+              onClick={() => onPageChange(Math.max(page - 1, 0))}
+              aria-label="Página anterior"
+            >
+              <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
+            </Button>
+            <span className="text-sm font-medium">
+              Página {(page + 1).toString().padStart(2, "0")}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              disabled={!hasMore || isFetching}
+              onClick={() => onPageChange(page + 1)}
+              aria-label="Página siguiente"
+            >
+              <Icon icon={ChevronRightIcon} size={16} className="size-4" />
+            </Button>
+          </CardHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-2">
-          {isLoading ? (
-            <p className="text-muted-foreground p-3 text-center text-sm">Cargando evaluaciones…</p>
-          ) : rows.length === 0 ? (
-            <p className="text-muted-foreground p-3 text-center text-sm">
-              No hay evaluaciones pendientes.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-1">
-              {rows.map((evaluation) => (
-                <button
+          <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
+            {isLoading ? (
+              <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
+                <Spinner className="size-4" />
+                <span>Cargando evaluaciones…</span>
+              </div>
+            ) : rows.length === 0 ? (
+              <p className="text-muted-foreground p-6 text-center text-sm">
+                No hay evaluaciones pendientes.
+              </p>
+            ) : (
+              rows.map((evaluation) => (
+                <CardPanel
                   key={evaluation.id}
-                  type="button"
+                  render={<button type="button" />}
                   onClick={() => onSelect(evaluation.id)}
                   className={cn(
-                    "flex w-full flex-col rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
+                    "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
                     selectedEvaluation?.id === evaluation.id
-                      ? "border-foreground/30 bg-accent"
-                      : "hover:bg-muted border-transparent",
+                      ? "bg-accent/80 text-accent-foreground"
+                      : "hover:bg-muted/50 text-foreground",
                   )}
                 >
                   <span className="truncate font-medium">
@@ -826,12 +829,12 @@ export function EvaluationSection({
                       </span>
                     </div>
                   </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                </CardPanel>
+              ))
+            )}
+          </div>
+        </Card>
+      </Frame>
 
       {selectedEvaluation && (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:flex-row">

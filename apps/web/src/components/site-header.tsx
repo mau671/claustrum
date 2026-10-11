@@ -10,6 +10,7 @@ import {
   Settings01Icon,
   Shield01Icon,
   Sun03Icon,
+  TickDouble01Icon,
   UserIcon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
@@ -20,6 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
+import { Card, CardPanel } from "@/components/ui/card";
 import {
   CommandDialog,
   CommandEmpty,
@@ -29,12 +31,18 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { FrameHeader, FrameTitle } from "@/components/ui/frame";
 import { MorphIcon } from "@/components/ui/icon";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { useModerationCounts } from "@/lib/hooks/use-moderation";
-import { useNotifications, useMarkNotificationAsRead } from "@/lib/hooks/use-notifications";
+import {
+  useNotifications,
+  useMarkNotificationAsRead,
+  useMarkAllNotificationsAsRead,
+} from "@/lib/hooks/use-notifications";
 import { useIsAdmin, useProfessorById } from "@/lib/hooks/use-professor-reviews";
 import { useAuthUser, useStudyPlanDetail, useCoursesByIds } from "@/lib/hooks/use-queries";
 import { cn } from "@/lib/utils";
@@ -79,6 +87,7 @@ const SHOW_HEADER_SEARCH = false;
 
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -95,6 +104,7 @@ export function SiteHeader() {
 
   const notificationsQuery = useNotifications(authUser?.id ?? null);
   const markAsRead = useMarkNotificationAsRead();
+  const markAllAsRead = useMarkAllNotificationsAsRead();
   const unreadCount = notificationsQuery.data?.filter((n) => !n.is_read).length ?? 0;
 
   const professorId = getNumericPathSegment(pathname, "/professors/");
@@ -137,6 +147,10 @@ export function SiteHeader() {
 
     return null;
   }, [courseId, coursesQuery.data, planDetailQuery.data]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
@@ -285,49 +299,113 @@ export function SiteHeader() {
                 <span className="bg-destructive ring-background absolute top-1 right-1 flex size-2 rounded-full ring-2" />
               )}
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-0">
-              <div className="flex items-center justify-between border-b px-4 py-3">
-                <h4 className="text-sm font-semibold">Notificaciones</h4>
-                {unreadCount > 0 && (
-                  <span className="text-muted-foreground text-xs">{unreadCount} sin leer</span>
-                )}
-              </div>
-              <ScrollArea className="max-h-[300px]">
-                {notificationsQuery.isLoading ? (
-                  <div className="text-muted-foreground p-4 text-center text-sm">Cargando...</div>
-                ) : notificationsQuery.data?.length === 0 ? (
-                  <div className="text-muted-foreground p-4 text-center text-sm">
-                    No tienes notificaciones.
-                  </div>
-                ) : (
-                  <div className="flex flex-col">
-                    {notificationsQuery.data?.map((n) => (
-                      <button
-                        key={n.id}
-                        type="button"
-                        className={cn(
-                          "hover:bg-muted/50 focus-visible:bg-muted/50 flex cursor-pointer flex-col gap-1 border-b px-4 py-3 text-left text-sm transition-colors focus-visible:outline-none",
-                          !n.is_read && "bg-muted/30",
-                        )}
-                        onClick={() => {
-                          if (!n.is_read) markAsRead.mutate(n.id);
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="font-medium">{n.title}</span>
-                          {!n.is_read && (
-                            <span className="mt-1 flex size-2 shrink-0 rounded-full bg-blue-500" />
-                          )}
-                        </div>
-                        <span className="text-muted-foreground text-xs">{n.message}</span>
-                        <span className="text-muted-foreground text-[10px]">
-                          {new Date(n.created_at).toLocaleString()}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
+            <PopoverContent
+              align="end"
+              side="bottom"
+              sideOffset={8}
+              className="border-border bg-muted/90 dark:bg-muted/50 w-88 rounded-2xl border p-1 shadow-xl backdrop-blur-xl before:hidden sm:w-96"
+              viewportClassName="p-0 overflow-visible not-data-transitioning:overflow-visible"
+            >
+              <FrameHeader className="flex flex-row items-center justify-between gap-2 px-3.5 py-2.5">
+                <div className="flex items-center gap-2">
+                  <FrameTitle className="text-sm font-semibold">Notificaciones</FrameTitle>
+                  {unreadCount > 0 && (
+                    <span className="bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[11px] font-medium">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (authUser?.id && unreadCount > 0) {
+                      markAllAsRead.mutate(authUser.id);
+                    }
+                  }}
+                  disabled={unreadCount === 0 || markAllAsRead.isPending}
+                  className="text-muted-foreground hover:text-foreground !h-7 gap-1.5 px-2 text-xs font-medium"
+                >
+                  <HugeiconsIcon icon={TickDouble01Icon} size={15} className="size-3.5" />
+                  <span>Marcar todos como leído</span>
+                </Button>
+              </FrameHeader>
+
+              <Card className="border-border/60 bg-background overflow-hidden rounded-xl border shadow-xs">
+                <CardPanel className="p-0">
+                  <ScrollArea className="max-h-[360px]">
+                    {notificationsQuery.isLoading ? (
+                      <div className="text-muted-foreground p-6 text-center text-sm">
+                        Cargando...
+                      </div>
+                    ) : notificationsQuery.data?.length === 0 ? (
+                      <div className="text-muted-foreground p-6 text-center text-sm">
+                        No tienes notificaciones.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col">
+                        {notificationsQuery.data?.map((n, idx) => (
+                          <div key={n.id} className="w-full">
+                            {idx > 0 && <Separator className="w-full" />}
+                            <button
+                              type="button"
+                              className={cn(
+                                "hover:bg-muted/50 focus-visible:bg-muted/50 flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors focus-visible:outline-none",
+                                !n.is_read && "bg-muted/25",
+                              )}
+                              onClick={() => {
+                                if (!n.is_read) markAsRead.mutate(n.id);
+                              }}
+                            >
+                              {/* Icono a la izquierda */}
+                              <div
+                                className={cn(
+                                  "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
+                                  !n.is_read
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-muted text-muted-foreground",
+                                )}
+                              >
+                                <HugeiconsIcon
+                                  icon={Notification03Icon}
+                                  size={16}
+                                  className="size-4"
+                                />
+                              </div>
+
+                              {/* Título y descripción a la derecha */}
+                              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span
+                                    className={cn(
+                                      "truncate text-sm tracking-tight",
+                                      !n.is_read
+                                        ? "text-foreground font-semibold"
+                                        : "text-foreground/80 font-medium",
+                                    )}
+                                  >
+                                    {n.title}
+                                  </span>
+                                  {!n.is_read && (
+                                    <span className="bg-primary size-2 shrink-0 rounded-full" />
+                                  )}
+                                </div>
+                                <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
+                                  {n.message}
+                                </p>
+                                <span className="text-muted-foreground/75 mt-0.5 text-[10px]">
+                                  {new Date(n.created_at).toLocaleString()}
+                                </span>
+                              </div>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardPanel>
+              </Card>
             </PopoverContent>
           </Popover>
           <Button
@@ -338,10 +416,14 @@ export function SiteHeader() {
             title="Alternar tema"
             className="rounded-full"
           >
-            <MorphIcon
-              icon={theme === "dark" ? Moon02Icon : Sun03Icon}
-              size={theme === "dark" ? 20 : 22}
-            />
+            {mounted ? (
+              <MorphIcon
+                icon={theme === "dark" ? Moon02Icon : Sun03Icon}
+                size={theme === "dark" ? 20 : 22}
+              />
+            ) : (
+              <span className="size-5" aria-hidden="true" />
+            )}
           </Button>
           <Button
             variant="ghost"

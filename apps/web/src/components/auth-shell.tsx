@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import { Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
 import { useTheme } from "@/components/theme-provider";
@@ -8,6 +7,11 @@ import { MorphIcon } from "@/components/ui/icon";
 
 export function AuthShell({ children }: { children: ReactNode }) {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="bg-background text-foreground relative h-screen overflow-hidden">
@@ -19,10 +23,14 @@ export function AuthShell({ children }: { children: ReactNode }) {
         className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring absolute top-6 right-6 z-50 rounded-full p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
         aria-label="Cambiar tema"
       >
-        <MorphIcon
-          icon={theme === "dark" ? Sun03Icon : Moon02Icon}
-          size={theme === "dark" ? 22 : 20}
-        />
+        {mounted ? (
+          <MorphIcon
+            icon={theme === "dark" ? Sun03Icon : Moon02Icon}
+            size={theme === "dark" ? 22 : 20}
+          />
+        ) : (
+          <span className="block size-5" aria-hidden="true" />
+        )}
       </button>
 
       <div className="relative grid h-screen w-full grid-cols-1 lg:grid-cols-[1fr_minmax(440px,560px)]">

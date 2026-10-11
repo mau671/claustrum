@@ -26,6 +26,7 @@ export function PopoverTrigger({
 export function PopoverPopup({
   children,
   className,
+  viewportClassName,
   side = "bottom",
   align = "center",
   sideOffset = 4,
@@ -42,6 +43,7 @@ export function PopoverPopup({
   alignOffset?: PopoverPrimitive.Positioner.Props["alignOffset"];
   tooltipStyle?: boolean;
   anchor?: PopoverPrimitive.Positioner.Props["anchor"];
+  viewportClassName?: string;
 }): React.ReactElement {
   return (
     <PopoverPrimitive.Portal {...portalProps}>
@@ -70,6 +72,7 @@ export function PopoverPopup({
               tooltipStyle
                 ? "py-1 [--viewport-inline-padding:--spacing(2)]"
                 : "not-data-transitioning:overflow-y-auto",
+              viewportClassName,
             )}
             data-slot="popover-viewport"
           >

@@ -151,17 +151,13 @@ function ScoreNumberField({
     <div className="flex w-full flex-col gap-2">
       {optional ? (
         <div className="inline-flex w-full items-center justify-between gap-2">
-          <Label htmlFor={id} className="text-xs font-medium whitespace-nowrap">
-            {label}
-          </Label>
+          <Label htmlFor={id}>{label}</Label>
           <Label className="text-muted-foreground font-normal" render={<span />}>
             Opcional
           </Label>
         </div>
       ) : (
-        <Label htmlFor={id} className="text-xs font-medium whitespace-nowrap">
-          {label}
-        </Label>
+        <Label htmlFor={id}>{label}</Label>
       )}
       <NumberField
         id={id}
@@ -534,7 +530,7 @@ export function ReviewComposer({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label className="text-xs font-medium">Asistencia obligatoria</Label>
+          <Label>Asistencia obligatoria</Label>
           <div className="flex h-9 items-center">
             <RadioGroup
               value={attendanceRequired ? "yes" : "no"}

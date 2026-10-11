@@ -312,9 +312,7 @@ export function ProfessorsReviewsPage() {
   });
   const filterMinAverage = (
     <div className="flex w-full flex-col gap-2">
-      <Label htmlFor="min-average-score" className="text-xs font-medium whitespace-nowrap">
-        Promedio mínimo
-      </Label>
+      <Label htmlFor="min-average-score">Promedio mínimo</Label>
       <NumberField
         id="min-average-score"
         min={0}
@@ -339,9 +337,7 @@ export function ProfessorsReviewsPage() {
 
   const filterMinReviews = (
     <div className="flex w-full flex-col gap-2">
-      <Label htmlFor="min-review-count" className="text-xs font-medium whitespace-nowrap">
-        Mínimo de reseñas
-      </Label>
+      <Label htmlFor="min-review-count">Mínimo de reseñas</Label>
       <NumberField
         id="min-review-count"
         min={0}
@@ -366,9 +362,7 @@ export function ProfessorsReviewsPage() {
 
   const filterSchool = (
     <div className="flex w-full flex-col gap-2">
-      <Label htmlFor="school-filter" className="text-xs font-medium whitespace-nowrap">
-        Escuela
-      </Label>
+      <Label htmlFor="school-filter">Escuela</Label>
       <FilterCombobox
         label="escuela"
         value={academicUnitIdInput?.toString() || ""}
@@ -404,9 +398,7 @@ export function ProfessorsReviewsPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <div className="flex flex-1 items-end gap-2">
             <div className="flex flex-1 flex-col gap-2">
-              <Label htmlFor="professor-search" className="text-xs font-medium whitespace-nowrap">
-                Nombre
-              </Label>
+              <Label htmlFor="professor-search">Nombre</Label>
               <Input
                 id="professor-search"
                 className="h-9 w-full sm:h-9"

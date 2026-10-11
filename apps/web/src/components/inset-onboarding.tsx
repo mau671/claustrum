@@ -1,7 +1,7 @@
 import { Loading02Icon, Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -15,9 +15,9 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from "@/components/ui/combobox";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { Stepper, type StepperStep } from "@/components/ui/stepper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth/client";
 import {
@@ -54,10 +54,6 @@ export function InsetOnboardingPage() {
   const campuses = useCampuses(defaultUniversity?.id ?? null);
   const academicUnits = useAcademicUnits(campusId ? Number(campusId) : null);
   const studyPlans = useStudyPlans(academicUnitId ? Number(academicUnitId) : null);
-
-  const campusTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const academicUnitTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const studyPlanTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const skipForNow = () => {
     void (async () => {
@@ -142,6 +138,308 @@ export function InsetOnboardingPage() {
   const showAcademicUnitError = showStepError && step === 2 && !academicUnitId;
   const showStudyPlanError = showStepError && step === 3 && !studyPlanId;
 
+  const selectedCampus = useMemo(
+    () => (campuses.data ?? []).find((c) => String(c.id) === campusId) ?? null,
+    [campuses.data, campusId],
+  );
+  const selectedAcademicUnit = useMemo(
+    () => (academicUnits.data ?? []).find((a) => String(a.id) === academicUnitId) ?? null,
+    [academicUnits.data, academicUnitId],
+  );
+  const selectedStudyPlan = useMemo(
+    () => (studyPlans.data ?? []).find((p) => String(p.id) === studyPlanId) ?? null,
+    [studyPlans.data, studyPlanId],
+  );
+
+  const onboardingSteps: StepperStep[] = useMemo(
+    () => [
+      {
+        id: "campus",
+        label: "Sede",
+        summary: selectedCampus
+          ? selectedCampus.code
+            ? `${selectedCampus.code}: ${selectedCampus.name}`
+            : selectedCampus.name
+          : undefined,
+        error: showCampusError ? (currentStepError ?? undefined) : undefined,
+        content: (
+          <Combobox
+            items={campuses.data ?? []}
+            value={selectedCampus}
+            onValueChange={(item) => {
+              const value = item ? String(item.id) : "";
+              setCampusId(value);
+              setAcademicUnitId("");
+              setStudyPlanId("");
+              setShowStepError(false);
+              if (value) {
+                setStep(2);
+              }
+            }}
+            itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+          >
+            <ComboboxTrigger
+              render={
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "!h-10 w-full justify-between text-sm font-normal",
+                    showCampusError &&
+                      "border-destructive text-destructive ring-destructive/40 ring-1",
+                  )}
+                />
+              }
+            >
+              <span
+                className={cn(
+                  "block min-w-0 flex-1 truncate text-left",
+                  !campusId && "text-muted-foreground",
+                )}
+              >
+                {selectedCampus
+                  ? selectedCampus.code
+                    ? `${selectedCampus.code}: ${selectedCampus.name}`
+                    : selectedCampus.name
+                  : "Selecciona una sede"}
+              </span>
+              <Icon
+                icon={UnfoldMoreIcon}
+                size={14}
+                className="-me-1! size-3.5 shrink-0 opacity-60"
+              />
+            </ComboboxTrigger>
+            <ComboboxContent
+              aria-label="Sede"
+              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
+            >
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar sede..."
+                  showTrigger={false}
+                  startAddon={<Icon icon={Search01Icon} size={16} />}
+                />
+              </div>
+              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
+              <ComboboxList className="max-h-56 scrollbar-none">
+                {(item) => (
+                  <ComboboxItem key={item.id} value={item}>
+                    <span className="block w-full min-w-0 truncate">
+                      {item.code ? `${item.code}: ${item.name}` : item.name}
+                    </span>
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        ),
+      },
+      {
+        id: "career",
+        label: "Carrera",
+        summary: selectedAcademicUnit
+          ? selectedAcademicUnit.code
+            ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}`
+            : selectedAcademicUnit.name
+          : undefined,
+        error: showAcademicUnitError ? (currentStepError ?? undefined) : undefined,
+        content: (
+          <Combobox
+            items={academicUnits.data ?? []}
+            value={selectedAcademicUnit}
+            onValueChange={(item) => {
+              const value = item ? String(item.id) : "";
+              setAcademicUnitId(value);
+              setStudyPlanId("");
+              setShowStepError(false);
+              if (value) {
+                setStep(3);
+              }
+            }}
+            itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+          >
+            <ComboboxTrigger
+              render={
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "!h-10 w-full justify-between text-sm font-normal",
+                    showAcademicUnitError &&
+                      "border-destructive text-destructive ring-destructive/40 ring-1",
+                  )}
+                />
+              }
+            >
+              <span
+                className={cn(
+                  "block min-w-0 flex-1 truncate text-left",
+                  !academicUnitId && "text-muted-foreground",
+                )}
+              >
+                {selectedAcademicUnit
+                  ? selectedAcademicUnit.code
+                    ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}`
+                    : selectedAcademicUnit.name
+                  : "Selecciona una carrera"}
+              </span>
+              <Icon
+                icon={UnfoldMoreIcon}
+                size={14}
+                className="-me-1! size-3.5 shrink-0 opacity-60"
+              />
+            </ComboboxTrigger>
+            <ComboboxContent
+              aria-label="Carrera"
+              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
+            >
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar carrera..."
+                  showTrigger={false}
+                  startAddon={<Icon icon={Search01Icon} size={16} />}
+                />
+              </div>
+              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
+              <ComboboxList className="max-h-56 scrollbar-none">
+                {(item) => (
+                  <ComboboxItem key={item.id} value={item}>
+                    <span className="block w-full min-w-0 truncate">
+                      {item.code ? `${item.code}: ${item.name}` : item.name}
+                    </span>
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        ),
+      },
+      {
+        id: "plan",
+        label: "Plan de estudios",
+        summary: selectedStudyPlan
+          ? selectedStudyPlan.external_plan_id
+            ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name}`
+            : selectedStudyPlan.name
+          : undefined,
+        error: showStudyPlanError ? (currentStepError ?? undefined) : undefined,
+        content: (
+          <Combobox
+            items={studyPlans.data ?? []}
+            value={selectedStudyPlan}
+            onValueChange={(item) => {
+              const value = item ? String(item.id) : "";
+              setStudyPlanId(value);
+              setShowStepError(false);
+              if (value) {
+                setStep(4);
+              }
+            }}
+            itemToStringValue={(item) =>
+              item.external_plan_id
+                ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
+                : item.name
+            }
+          >
+            <ComboboxTrigger
+              render={
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "!h-10 w-full justify-between text-sm font-normal",
+                    showStudyPlanError &&
+                      "border-destructive text-destructive ring-destructive/40 ring-1",
+                  )}
+                />
+              }
+            >
+              <span
+                className={cn(
+                  "block min-w-0 flex-1 truncate text-left",
+                  !studyPlanId && "text-muted-foreground",
+                )}
+              >
+                {selectedStudyPlan
+                  ? selectedStudyPlan.external_plan_id
+                    ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}`
+                    : selectedStudyPlan.name
+                  : "Selecciona un plan de estudios"}
+              </span>
+              <Icon
+                icon={UnfoldMoreIcon}
+                size={14}
+                className="-me-1! size-3.5 shrink-0 opacity-60"
+              />
+            </ComboboxTrigger>
+            <ComboboxContent
+              aria-label="Plan de estudios"
+              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
+            >
+              <div className="border-b p-2">
+                <ComboboxInput
+                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                  placeholder="Buscar plan..."
+                  showTrigger={false}
+                  startAddon={<Icon icon={Search01Icon} size={16} />}
+                />
+              </div>
+              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
+              <ComboboxList className="max-h-56 scrollbar-none">
+                {(item) => (
+                  <ComboboxItem key={item.id} value={item}>
+                    <span className="block w-full min-w-0 truncate">
+                      {item.external_plan_id
+                        ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
+                        : item.name}
+                    </span>
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        ),
+      },
+      {
+        id: "carnet",
+        label: "Carnet",
+        summary: carnet ? carnet : undefined,
+        content: (
+          <Input
+            value={carnet}
+            onChange={(e) => {
+              setCarnet(e.target.value.replace(/[^0-9]/g, ""));
+              setShowStepError(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                void finishOnboarding();
+              }
+            }}
+            placeholder="Ej: 2024123456 (opcional)"
+            className="!h-10 w-full text-sm font-normal"
+          />
+        ),
+      },
+    ],
+    [
+      campuses.data,
+      selectedCampus,
+      campusId,
+      showCampusError,
+      academicUnits.data,
+      selectedAcademicUnit,
+      academicUnitId,
+      showAcademicUnitError,
+      studyPlans.data,
+      selectedStudyPlan,
+      studyPlanId,
+      showStudyPlanError,
+      carnet,
+      currentStepError,
+    ],
+  );
+
   const isLoading = isAuthLoading;
   if (isLoading) {
     return (
@@ -162,23 +460,24 @@ export function InsetOnboardingPage() {
         <AuthLeftPanel />
         <div className="bg-card text-foreground relative flex h-full flex-col overflow-y-auto">
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8 lg:py-10">
-            <div className="mb-6 flex items-center justify-between gap-3 text-sm">
-              <div className="font-medium">
-                Paso {step} de {TOTAL_STEPS}
-              </div>
-              <div className="flex gap-2">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={<Button variant="ghost" size="sm" onClick={skipForNow} />}
-                  >
-                    Configurar más tarde
-                  </TooltipTrigger>
-                  <TooltipContent>Se te volverá a preguntar en 24 horas</TooltipContent>
-                </Tooltip>
-              </div>
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <h1 className="text-xl font-semibold tracking-tight md:text-2xl">Completar perfil</h1>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={skipForNow}
+                      className="text-muted-foreground hover:text-foreground shrink-0 text-xs"
+                    >
+                      Saltar
+                    </Button>
+                  }
+                />
+                <TooltipContent>Se te volverá a preguntar en 24 horas</TooltipContent>
+              </Tooltip>
             </div>
-
-            <h1 className="text-2xl font-semibold tracking-tight">Completa tu perfil académico</h1>
 
             {submitError ? (
               <Alert variant="destructive" className="mb-4">
@@ -187,277 +486,38 @@ export function InsetOnboardingPage() {
               </Alert>
             ) : null}
 
-            <div className="space-y-4">
-              {step === 1 ? (
-                <Field>
-                  <FieldLabel>Sede</FieldLabel>
-                  <Combobox
-                    items={campuses.data ?? []}
-                    value={
-                      (campuses.data ?? []).find((item) => String(item.id) === campusId) ?? null
-                    }
-                    onValueChange={(item) => {
-                      const value = item ? String(item.id) : "";
-                      setCampusId(value);
-                      setAcademicUnitId("");
-                      setStudyPlanId("");
-                      setShowStepError(false);
-                    }}
-                    itemToStringValue={(item) =>
-                      item.code ? `${item.code}: ${item.name}` : item.name
-                    }
-                  >
-                    <ComboboxTrigger
-                      ref={campusTriggerRef}
-                      render={
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-between font-normal",
-                            showCampusError && "border-destructive text-destructive",
-                          )}
-                        />
-                      }
-                    >
-                      <span
-                        className={cn(
-                          "block min-w-0 flex-1 truncate text-left",
-                          !campusId && "text-muted-foreground",
-                        )}
-                      >
-                        {(() => {
-                          const item = (campuses.data ?? []).find((c) => String(c.id) === campusId);
-                          if (!item) return "Selecciona una sede";
-                          return item.code ? `${item.code}: ${item.name}` : item.name;
-                        })()}
-                      </span>
-                      <Icon
-                        icon={UnfoldMoreIcon}
-                        size={14}
-                        className="-me-1! size-3.5 shrink-0 opacity-60"
-                      />
-                    </ComboboxTrigger>
-                    <ComboboxContent
-                      anchor={campusTriggerRef}
-                      aria-label="Sede"
-                      className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-                    >
-                      <div className="border-b p-2">
-                        <ComboboxInput
-                          className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                          placeholder="Buscar sede..."
-                          showTrigger={false}
-                          startAddon={<Icon icon={Search01Icon} size={16} />}
-                        />
-                      </div>
-                      <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                      <ComboboxList className="max-h-56 scrollbar-none">
-                        {(item) => (
-                          <ComboboxItem key={item.id} value={item}>
-                            <span className="block w-full min-w-0 truncate">
-                              {item.code ? `${item.code}: ${item.name}` : item.name}
-                            </span>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                  <FieldError>{showCampusError ? currentStepError : null}</FieldError>
-                </Field>
-              ) : null}
-
-              {step === 2 ? (
-                <Field>
-                  <FieldLabel>Carrera</FieldLabel>
-                  <Combobox
-                    items={academicUnits.data ?? []}
-                    value={
-                      (academicUnits.data ?? []).find(
-                        (item) => String(item.id) === academicUnitId,
-                      ) ?? null
-                    }
-                    onValueChange={(item) => {
-                      const value = item ? String(item.id) : "";
-                      setAcademicUnitId(value);
-                      setStudyPlanId("");
-                      setShowStepError(false);
-                    }}
-                    itemToStringValue={(item) =>
-                      item.code ? `${item.code}: ${item.name}` : item.name
-                    }
-                  >
-                    <ComboboxTrigger
-                      ref={academicUnitTriggerRef}
-                      render={
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-between font-normal",
-                            showAcademicUnitError && "border-destructive text-destructive",
-                          )}
-                        />
-                      }
-                    >
-                      <span
-                        className={cn(
-                          "block min-w-0 flex-1 truncate text-left",
-                          !academicUnitId && "text-muted-foreground",
-                        )}
-                      >
-                        {(() => {
-                          const item = (academicUnits.data ?? []).find(
-                            (c) => String(c.id) === academicUnitId,
-                          );
-                          if (!item) return "Selecciona una carrera";
-                          return item.code ? `${item.code}: ${item.name}` : item.name;
-                        })()}
-                      </span>
-                      <Icon
-                        icon={UnfoldMoreIcon}
-                        size={14}
-                        className="-me-1! size-3.5 shrink-0 opacity-60"
-                      />
-                    </ComboboxTrigger>
-                    <ComboboxContent
-                      anchor={academicUnitTriggerRef}
-                      aria-label="Carrera"
-                      className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-                    >
-                      <div className="border-b p-2">
-                        <ComboboxInput
-                          className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                          placeholder="Buscar carrera..."
-                          showTrigger={false}
-                          startAddon={<Icon icon={Search01Icon} size={16} />}
-                        />
-                      </div>
-                      <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                      <ComboboxList className="max-h-56 scrollbar-none">
-                        {(item) => (
-                          <ComboboxItem key={item.id} value={item}>
-                            <span className="block w-full min-w-0 truncate">
-                              {item.code ? `${item.code}: ${item.name}` : item.name}
-                            </span>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                  <FieldError>{showAcademicUnitError ? currentStepError : null}</FieldError>
-                </Field>
-              ) : null}
-
-              {step === 3 ? (
-                <Field>
-                  <FieldLabel>Plan de estudios</FieldLabel>
-                  <Combobox
-                    items={studyPlans.data ?? []}
-                    value={
-                      (studyPlans.data ?? []).find((item) => String(item.id) === studyPlanId) ??
-                      null
-                    }
-                    onValueChange={(item) => {
-                      setStudyPlanId(item ? String(item.id) : "");
-                      setShowStepError(false);
-                    }}
-                    itemToStringValue={(item) =>
-                      item.external_plan_id
-                        ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
-                        : item.name
-                    }
-                  >
-                    <ComboboxTrigger
-                      ref={studyPlanTriggerRef}
-                      render={
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-between font-normal",
-                            showStudyPlanError && "border-destructive text-destructive",
-                          )}
-                        />
-                      }
-                    >
-                      <span
-                        className={cn(
-                          "block min-w-0 flex-1 truncate text-left",
-                          !studyPlanId && "text-muted-foreground",
-                        )}
-                      >
-                        {(() => {
-                          const item = (studyPlans.data ?? []).find(
-                            (p) => String(p.id) === studyPlanId,
-                          );
-                          if (!item) return "Selecciona un plan de estudios";
-                          return item.external_plan_id
-                            ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
-                            : item.name;
-                        })()}
-                      </span>
-                      <Icon
-                        icon={UnfoldMoreIcon}
-                        size={14}
-                        className="-me-1! size-3.5 shrink-0 opacity-60"
-                      />
-                    </ComboboxTrigger>
-                    <ComboboxContent
-                      anchor={studyPlanTriggerRef}
-                      aria-label="Plan de estudios"
-                      className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-                    >
-                      <div className="border-b p-2">
-                        <ComboboxInput
-                          className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                          placeholder="Buscar plan..."
-                          showTrigger={false}
-                          startAddon={<Icon icon={Search01Icon} size={16} />}
-                        />
-                      </div>
-                      <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                      <ComboboxList className="max-h-56 scrollbar-none">
-                        {(item) => (
-                          <ComboboxItem key={item.id} value={item}>
-                            <span className="block w-full min-w-0 truncate">
-                              {item.external_plan_id
-                                ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
-                                : item.name}
-                            </span>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                  <FieldError>{showStudyPlanError ? currentStepError : null}</FieldError>
-                </Field>
-              ) : null}
-
-              {step === 4 ? (
-                <Field>
-                  <FieldLabel>Carnet</FieldLabel>
-                  <Input
-                    value={carnet}
-                    onChange={(e) => {
-                      setCarnet(e.target.value.replace(/[^0-9]/g, ""));
-                      setShowStepError(false);
-                    }}
-                    placeholder="Ej: 2024123456"
-                  />
-                </Field>
-              ) : null}
-            </div>
+            <Stepper
+              steps={onboardingSteps}
+              current={step - 1}
+              onStepSelect={(index) => {
+                setStep(index + 1);
+                setShowStepError(false);
+              }}
+              orientation="responsive"
+              className="my-4"
+            />
 
             <div className="mt-8 flex items-center justify-between">
-              <Button variant="outline" onClick={prevStep} disabled={step === 1 || isSaving}>
+              <Button
+                variant="outline"
+                onClick={prevStep}
+                disabled={step === 1 || isSaving}
+                className="!h-10 px-4 text-sm"
+              >
                 Anterior
               </Button>
               {step < TOTAL_STEPS ? (
-                <Button onClick={nextStep} disabled={isNextDisabled}>
+                <Button onClick={nextStep} disabled={isNextDisabled} className="!h-10 px-5 text-sm">
                   Siguiente
                 </Button>
               ) : (
-                <Button onClick={finishOnboarding} disabled={isSaving}>
+                <Button
+                  onClick={finishOnboarding}
+                  disabled={isSaving}
+                  className="!h-10 px-5 text-sm"
+                >
                   {isSaving ? (
-                    <Icon icon={Loading02Icon} size={16} className="size-4 animate-spin" />
+                    <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
                   ) : null}
                   Finalizar
                 </Button>

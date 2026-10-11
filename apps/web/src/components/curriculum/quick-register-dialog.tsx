@@ -305,7 +305,7 @@ export function QuickRegisterDialog({
   const progressForm = (
     <div className="space-y-6">
       <div>
-        <Label className="text-sm">Curso a registrar</Label>
+        <Label>Curso a registrar</Label>
         <Combobox
           items={attemptCourseOptions}
           value={selectedAttemptCourse}
@@ -360,7 +360,7 @@ export function QuickRegisterDialog({
       </div>
 
       <div>
-        <Label className="text-sm">Periodo</Label>
+        <Label>Periodo</Label>
         <Combobox
           items={academicTermGroups}
           value={selectedQuickTerm}
@@ -424,7 +424,7 @@ export function QuickRegisterDialog({
       </div>
 
       <div>
-        <Label className="text-sm">Estado</Label>
+        <Label>Estado</Label>
         <RadioGroup
           className="mt-3 grid grid-cols-2 gap-2"
           value={progressStatus}
@@ -461,7 +461,7 @@ export function QuickRegisterDialog({
       </div>
 
       <div>
-        <Label className="text-sm">Nota</Label>
+        <Label>Nota</Label>
         <div className="mt-2 flex items-center gap-2">
           <Button
             type="button"

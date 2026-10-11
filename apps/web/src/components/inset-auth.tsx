@@ -38,18 +38,10 @@ export function InsetSigninPage() {
       <MagicLinkButton email={email} />
       <OrSeparator />
       <SignInForm email={email} setEmail={setEmail} />
-      <div className="mt-5 flex flex-col gap-2 text-sm sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-        <p className="text-muted-foreground">
-          ¿No tienes cuenta?{" "}
-          <Link to="/auth/signup" className="text-foreground hover:underline">
-            Regístrate
-          </Link>
-        </p>
-        <Link
-          to="/auth/reset-password"
-          className="text-muted-foreground hover:text-foreground hover:underline"
-        >
-          ¿Olvidaste tu contraseña?
+      <div className="text-muted-foreground mt-5 text-center text-sm">
+        ¿No tienes cuenta?{" "}
+        <Link to="/auth/signup" className="text-foreground hover:underline">
+          Regístrate
         </Link>
       </div>
       <p className="text-muted-foreground mt-4 px-4 text-center text-[11px] leading-relaxed">

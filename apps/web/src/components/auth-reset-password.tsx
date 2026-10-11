@@ -1,10 +1,9 @@
-import { ArrowLeft01Icon, Loading02Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, Loading02Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { CardDescription } from "@/components/ui/card";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
@@ -134,16 +133,6 @@ export function AuthResetPasswordPage() {
   );
 }
 
-function BrandMark() {
-  return (
-    <div className="flex items-center justify-center">
-      <div className="bg-foreground flex size-8 items-center justify-center rounded-md">
-        <span className="bg-background block size-2 rounded-full" />
-      </div>
-    </div>
-  );
-}
-
 function RequestState({
   email,
   setEmail,
@@ -159,14 +148,15 @@ function RequestState({
 }) {
   return (
     <>
-      <div className="items-center text-center">
-        <BrandMark />
-        <h1 className="font-heading mt-4 text-2xl tracking-tight">Restablecer contraseña</h1>
-        <CardDescription className="text-sm">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">
+          Restablecer contraseña
+        </h1>
+        <p className="text-muted-foreground text-sm">
           Ingresa tu correo y te enviaremos un enlace para crear una nueva contraseña.
-        </CardDescription>
+        </p>
       </div>
-      <div className="mt-4">
+      <div className="mt-6">
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           {errorMessage ? (
             <Alert variant="destructive">
@@ -194,10 +184,10 @@ function RequestState({
           </Button>
         </form>
       </div>
-      <div className="mt-4 flex justify-center">
+      <div className="mt-5 text-center text-sm">
         <Link
           to="/auth/signin"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
         >
           <Icon icon={ArrowLeft01Icon} size={14} className="size-3.5" />
           Volver a iniciar sesión
@@ -210,26 +200,27 @@ function RequestState({
 function SentState({ email, onTryDifferent }: { email: string; onTryDifferent: () => void }) {
   return (
     <>
-      <div className="items-center text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-emerald-500/15">
-          <Icon icon={Tick01Icon} size={24} className="size-6 text-emerald-600" />
-        </div>
-        <h1 className="font-heading mt-4 text-2xl tracking-tight">Revisa tu correo</h1>
-        <CardDescription className="text-sm break-words">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">Revisa tu correo</h1>
+        <p className="text-muted-foreground text-sm break-words">
           Te enviamos un enlace de recuperación a{" "}
-          <strong className="text-foreground break-all">{email}</strong>
-        </CardDescription>
-      </div>
-      <div className="mt-4 flex flex-col gap-4">
-        <p className="text-muted-foreground text-center text-xs">
-          El enlace expira en 1 hora. Si no lo ves, revisa spam o promociones.
+          <strong className="text-foreground break-all">{email}</strong>.
         </p>
-        <Button variant="ghost" size="lg" onClick={onTryDifferent}>
+      </div>
+      <div className="mt-6 flex flex-col gap-4">
+        <p className="text-muted-foreground text-xs">
+          El enlace expira en 1 hora. Si no lo ves, revisa tu carpeta de spam o promociones.
+        </p>
+        <Button variant="outline" size="lg" onClick={onTryDifferent}>
           Usar otro correo
         </Button>
       </div>
-      <div className="mt-4 flex justify-center">
-        <Link to="/auth/signin" className="text-muted-foreground hover:text-foreground text-xs">
+      <div className="mt-5 text-center text-sm">
+        <Link
+          to="/auth/signin"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+        >
+          <Icon icon={ArrowLeft01Icon} size={14} className="size-3.5" />
           Volver a iniciar sesión
         </Link>
       </div>
@@ -260,14 +251,13 @@ function UpdateState({
 }) {
   return (
     <>
-      <div className="items-center text-center">
-        <BrandMark />
-        <h1 className="font-heading mt-4 text-2xl tracking-tight">Crea una nueva contraseña</h1>
-        <CardDescription className="text-sm">
-          Elige una contraseña segura para tu cuenta.
-        </CardDescription>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">
+          Crea una nueva contraseña
+        </h1>
+        <p className="text-muted-foreground text-sm">Elige una contraseña segura para tu cuenta.</p>
       </div>
-      <div className="mt-4">
+      <div className="mt-6">
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           {errorMessage ? (
             <Alert variant="destructive">

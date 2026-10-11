@@ -1,4 +1,4 @@
-import { HelpCircleIcon, Loading02Icon } from "@hugeicons/core-free-icons";
+import { HelpCircleIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useRef, useState } from "react";
@@ -6,6 +6,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import { authClient, getSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -163,9 +164,7 @@ export function AuthTwoFactorPage() {
       </fieldset>
 
       <Button type="submit" size="lg" disabled={!canVerify || isVerifying || isLoadingFactor}>
-        {isVerifying && (
-          <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-        )}
+        {isVerifying && <Spinner className="mr-2 size-4" />}
         {isLoadingFactor ? "Cargando..." : "Verificar"}
       </Button>
 

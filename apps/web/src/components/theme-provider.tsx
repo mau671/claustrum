@@ -98,11 +98,24 @@ const Theme = ({
       }
     }
 
-    const themeColor = resolved === "dark" ? "#111111" : "#ffffff";
+    const themeColor = resolved === "dark" ? "#0a0a0a" : "#ffffff";
+    d.style.backgroundColor = themeColor;
+    if (typeof document !== "undefined" && document.body) {
+      document.body.style.backgroundColor = themeColor;
+    }
+
     const themeColorMetas = document.querySelectorAll('meta[name="theme-color"]');
-    themeColorMetas.forEach((meta) => {
-      meta.setAttribute("content", themeColor);
-    });
+    if (themeColorMetas.length > 0) {
+      themeColorMetas.forEach((meta) => {
+        meta.removeAttribute("media");
+        meta.setAttribute("content", themeColor);
+      });
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = themeColor;
+      document.head.appendChild(meta);
+    }
 
     enable?.();
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- applyTheme is intentionally stable; dependencies are captured from closure to avoid unnecessary re-renders

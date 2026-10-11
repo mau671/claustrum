@@ -51,14 +51,13 @@ export const Route = createRootRouteWithContext<{
       ],
       meta: [
         { charSet: "UTF-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+        { name: "viewport", content: "width=device-width, initial-scale=1.0, viewport-fit=cover" },
         { name: "application-name", content: "Claustrum" },
         { name: "apple-mobile-web-app-title", content: "Claustrum" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
         { name: "mobile-web-app-capable", content: "yes" },
         { name: "format-detection", content: "telephone=no" },
-        { name: "theme-color", media: "(prefers-color-scheme: light)", content: "#ffffff" },
-        { name: "theme-color", media: "(prefers-color-scheme: dark)", content: "#0a0a0a" },
+        { name: "theme-color", content: "#ffffff" },
         { name: "author", content: "Mauricio González Prendas" },
       ],
     };
@@ -194,11 +193,13 @@ function RootComponent() {
               html.classList.remove("light", "dark");
               html.classList.add(resolvedTheme);
               html.style.colorScheme = resolvedTheme;
-              const backgroundColor = resolvedTheme === "dark" ? "oklch(0.145 0 0)" : "oklch(1 0 0)";
-              const fallbackThemeColor = resolvedTheme === "dark" ? "#0a0a0a" : "#ffffff";
-              html.style.backgroundColor = backgroundColor;
+              const themeColor = resolvedTheme === "dark" ? "#0a0a0a" : "#ffffff";
+              html.style.backgroundColor = themeColor;
               const themeColorMetas = document.querySelectorAll('meta[name="theme-color"]');
-              themeColorMetas.forEach((meta) => meta.setAttribute("content", fallbackThemeColor));
+              themeColorMetas.forEach((meta) => {
+                meta.removeAttribute("media");
+                meta.setAttribute("content", themeColor);
+              });
             } catch {}
           })();
         `,

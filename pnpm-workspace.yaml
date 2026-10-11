@@ -15,7 +15,3 @@ allowBuilds:
   simple-git-hooks: true
   supabase: true
   workerd: true
-
-auditConfig:
-  ignoreGhsas:
-    - GHSA-rmmr-r34h-pfm5

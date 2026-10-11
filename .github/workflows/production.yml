@@ -113,7 +113,7 @@ jobs:
         run: pnpm run build --filter=claustrum-web
 
       - name: Audit dependencies
-        run: pnpm audit --audit-level critical --ignore GHSA-pw9m-5jxm-xr6h
+        run: pnpm audit --audit-level critical
 
       - name: Deploy web
         uses: cloudflare/wrangler-action@v4

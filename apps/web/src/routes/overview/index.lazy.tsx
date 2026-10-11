@@ -1,5 +1,5 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { Suspense, lazy } from "react";
 
 import {
   EmptyDashboard,
@@ -28,9 +28,6 @@ export const Route = createLazyFileRoute("/overview/")({
 });
 
 function DashboardPage() {
-  const distributionCardRef = useRef<HTMLDivElement | null>(null);
-  const [distributionCardHeight, setDistributionCardHeight] = useState<number | null>(null);
-
   const { data: authUser, isLoading: isAuthLoading } = useAuthUser();
   const { data: userStudyPlan, isLoading: isLoadingUserPlan } = useUserStudyPlan(
     authUser?.id ?? null,
@@ -39,31 +36,6 @@ function DashboardPage() {
     userStudyPlan?.userId ?? null,
     userStudyPlan?.studyPlanId ?? null,
   );
-
-  useEffect(() => {
-    if (!distributionCardRef.current) {
-      return;
-    }
-
-    const updateHeight = () => {
-      if (!distributionCardRef.current) {
-        return;
-      }
-      setDistributionCardHeight(distributionCardRef.current.getBoundingClientRect().height);
-    };
-
-    updateHeight();
-
-    const observer = new ResizeObserver(() => {
-      updateHeight();
-    });
-
-    observer.observe(distributionCardRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [dashboardData?.stats]);
 
   const isAuthenticated = !!authUser;
   const hasProfile = !!userStudyPlan?.studyPlanId;
@@ -88,17 +60,12 @@ function DashboardPage() {
               </div>
 
               <div className="grid gap-4 px-4 md:grid-cols-2 lg:grid-cols-7 lg:px-6">
-                <div ref={distributionCardRef} className="w-full min-w-0 lg:col-span-4">
+                <div className="w-full min-w-0 lg:col-span-4">
                   <Suspense fallback={<CourseStatusChartSkeleton />}>
                     <CourseStatusChart stats={dashboardData.stats} />
                   </Suspense>
                 </div>
-                <div
-                  className="min-h-0 w-full min-w-0 lg:col-span-3 lg:[contain:size]"
-                  style={
-                    distributionCardHeight ? { height: `${distributionCardHeight}px` } : undefined
-                  }
-                >
+                <div className="h-[310px] w-full min-w-0 lg:col-span-3">
                   <NextCourses
                     courses={dashboardData.nextCourses}
                     universityId={userStudyPlan?.universityId ?? null}

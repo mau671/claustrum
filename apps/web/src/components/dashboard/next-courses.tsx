@@ -72,16 +72,18 @@ export function NextCourses({
       : null;
 
   return (
-    <Card className="flex h-full w-full flex-col gap-1 overflow-hidden">
-      <CardHeader className="shrink-0 pb-1">
+    <Card className="flex h-full w-full flex-col overflow-hidden">
+      <CardHeader className="shrink-0 pb-2">
         <CardTitle className="text-base">Próximos cursos</CardTitle>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col pt-0">
+      <CardContent className="flex min-h-0 flex-1 flex-col pt-0 pb-3">
         {courses.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No hay cursos disponibles para mostrar.</p>
+          <div className="text-muted-foreground flex flex-1 items-center justify-center p-4 text-center text-sm">
+            No hay cursos disponibles para mostrar.
+          </div>
         ) : (
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="w-0 max-w-full min-w-full space-y-2 pr-3">
+          <ScrollArea className="size-full min-h-0" scrollFade>
+            <div className="flex flex-col gap-2 pr-3 pb-1">
               {courses.map((course) => (
                 <CourseLink key={course.id} course={course} searchParams={searchParams} />
               ))}

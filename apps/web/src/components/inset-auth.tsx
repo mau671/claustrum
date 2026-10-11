@@ -1,7 +1,6 @@
 import {
   ArrowLeft01Icon,
   Cancel01Icon,
-  Loading02Icon,
   Mail01Icon,
   ShuffleIcon,
   Tick01Icon,
@@ -20,6 +19,7 @@ import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient, getSession, signIn, signUp } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
@@ -447,9 +447,19 @@ function OAuthRow() {
   );
 }
 
+function useLastUsedLoginMethod() {
+  const [lastMethod, setLastMethod] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastMethod(authClient.getLastUsedLoginMethod());
+  }, []);
+
+  return lastMethod;
+}
+
 function GoogleOAuthButton() {
   const [pending, setPending] = useState(false);
-  const lastMethod = authClient.getLastUsedLoginMethod();
+  const lastMethod = useLastUsedLoginMethod();
 
   const onGoogleSignIn = async () => {
     setPending(true);
@@ -518,35 +528,16 @@ async function getPostSignInRedirect() {
 
 function MagicLinkButton({ email = "" }: { email?: string }) {
   const navigate = useNavigate();
-  const [pending, setPending] = useState(false);
-  const lastMethod = authClient.getLastUsedLoginMethod();
+  const lastMethod = useLastUsedLoginMethod();
 
-  const onSendMagicLink = async () => {
+  const onNavigateToMagicLink = () => {
     const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      void navigate({ to: "/auth/magic-link" });
-      return;
+    if (trimmedEmail) {
+      window.sessionStorage.setItem(MAGIC_LINK_EMAIL_KEY, trimmedEmail);
+    } else {
+      window.sessionStorage.removeItem(MAGIC_LINK_EMAIL_KEY);
     }
-
-    if (!/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
-      return;
-    }
-
-    setPending(true);
-    const { error } = await signIn.magicLink({
-      email: trimmedEmail,
-      callbackURL: `${window.location.origin}/auth/signin`,
-    });
-
-    if (error) {
-      alert(normalizeAuthError(error, "login").message);
-      setPending(false);
-      return;
-    }
-
-    window.sessionStorage.setItem(MAGIC_LINK_EMAIL_KEY, trimmedEmail);
     void navigate({ to: "/auth/magic-link" });
-    setPending(false);
   };
 
   return (
@@ -555,11 +546,10 @@ function MagicLinkButton({ email = "" }: { email?: string }) {
       size="lg"
       className="relative mt-2 w-full"
       type="button"
-      disabled={pending}
-      onClick={onSendMagicLink}
+      onClick={onNavigateToMagicLink}
     >
       <Icon icon={Mail01Icon} size={16} />
-      {pending ? "Enviando enlace..." : "Continuar con enlace mágico"}
+      Continuar con enlace mágico
       {lastMethod === "magic-link" && (
         <Badge
           variant="default"
@@ -612,6 +602,7 @@ function GoogleIcon() {
 function SignInForm({ email, setEmail }: { email: string; setEmail: (value: string) => void }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const lastMethod = useLastUsedLoginMethod();
   const [password, setPassword] = useState("");
   const [reveal, setReveal] = useState(false);
   const [pending, setPending] = useState(false);
@@ -677,7 +668,7 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
           <FieldLabel htmlFor="login-email">
             Correo electrónico <span className="text-muted-foreground">*</span>
           </FieldLabel>
-          {authClient.getLastUsedLoginMethod() === "email" && (
+          {lastMethod === "email" && (
             <Badge
               variant="default"
               className="pointer-events-none h-5 px-1.5 py-0 text-[10px] font-bold shadow-sm"
@@ -735,7 +726,7 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
       </Field>
 
       <Button type="submit" size="lg" className="mt-2" disabled={pending}>
-        {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
+        {pending ? <Spinner className="size-4" /> : null}
         {pending ? "Iniciando sesión..." : "Iniciar sesión"}
       </Button>
     </form>
@@ -1090,7 +1081,7 @@ function SignUpForm() {
       </Field>
 
       <Button type="submit" size="lg" className="mt-2" disabled={pending}>
-        {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
+        {pending ? <Spinner className="size-4" /> : null}
         {pending ? "Creando cuenta..." : "Crear cuenta"}
       </Button>
     </form>

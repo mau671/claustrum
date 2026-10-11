@@ -1,4 +1,4 @@
-import { ArrowLeft01Icon, Loading02Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient } from "@/lib/auth/client";
 
@@ -179,7 +180,7 @@ function RequestState({
           </Field>
 
           <Button type="submit" size="lg" disabled={pending} className="mt-1">
-            {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
+            {pending ? <Spinner className="size-4" /> : null}
             {pending ? "Enviando..." : "Enviar enlace"}
           </Button>
         </form>
@@ -202,17 +203,16 @@ function SentState({ email, onTryDifferent }: { email: string; onTryDifferent: (
     <>
       <div className="flex flex-col gap-1.5">
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Revisa tu correo</h1>
-        <p className="text-muted-foreground text-sm break-words">
-          Te enviamos un enlace de recuperación a{" "}
-          <strong className="text-foreground break-all">{email}</strong>.
+        <p className="text-muted-foreground text-sm leading-relaxed break-words">
+          Si la dirección <strong className="text-foreground break-all">{email}</strong> está
+          registrada en Claustrum recibirás un mensaje con un enlace para restablecer tu contraseña,
+          el cual expira en 1 hora, por lo que si no encuentras el correo revisa tu carpeta de spam
+          o promociones.
         </p>
       </div>
       <div className="mt-6 flex flex-col gap-4">
-        <p className="text-muted-foreground text-xs">
-          El enlace expira en 1 hora. Si no lo ves, revisa tu carpeta de spam o promociones.
-        </p>
         <Button variant="outline" size="lg" onClick={onTryDifferent}>
-          Usar otro correo
+          Intentar con otro correo
         </Button>
       </div>
       <div className="mt-5 text-center text-sm">
@@ -301,7 +301,7 @@ function UpdateState({
           </Field>
 
           <Button type="submit" size="lg" disabled={pending || passwordMismatch} className="mt-1">
-            {pending ? <Icon icon={Loading02Icon} size={16} className="animate-spin" /> : null}
+            {pending ? <Spinner className="size-4" /> : null}
             {pending ? "Actualizando..." : "Guardar nueva contraseña"}
           </Button>
         </form>

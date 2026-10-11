@@ -1,11 +1,13 @@
-import { LinkSquare01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, LinkSquare01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { signIn } from "@/lib/auth/client";
 
@@ -36,35 +38,33 @@ function getEmailProviderUrl(email: string | null): string {
   return EMAIL_PROVIDER_URLS[domain] ?? "mailto:";
 }
 
+type Mode = "request" | "sent";
+
 export function AuthMagicLinkSentPage() {
+  const [mode, setMode] = useState<Mode>("request");
   const [email, setEmail] = useState("");
-  const [lastSentEmail, setLastSentEmail] = useState<string | null>(null);
+  const [sentEmail, setSentEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const storedEmail = window.sessionStorage.getItem(MAGIC_LINK_EMAIL_KEY);
-    if (!storedEmail) {
-      setSecondsLeft(0);
-      return;
+    if (storedEmail) {
+      setEmail(storedEmail);
     }
-
-    setEmail(storedEmail);
-    setLastSentEmail(storedEmail);
   }, []);
 
   useEffect(() => {
-    if (secondsLeft <= 0) return;
-    const t = window.setInterval(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => window.clearInterval(t);
-  }, [secondsLeft]);
+    if (mode !== "sent" || secondsLeft <= 0) return;
+    const timer = window.setInterval(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [mode, secondsLeft]);
 
-  const sendMagicLink = async (targetEmail: string, isResend = false) => {
+  const handleSendMagicLink = async (targetEmail: string, isResend = false) => {
     const trimmedEmail = targetEmail.trim();
     if (!trimmedEmail || !/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
-      setErrorMessage("Ingresa un correo válido para enviar el enlace.");
+      setErrorMessage("Ingresa un correo electrónico válido para enviar el enlace.");
       return;
     }
 
@@ -72,11 +72,10 @@ export function AuthMagicLinkSentPage() {
 
     setIsSending(true);
     setErrorMessage(null);
-    setSuccessMessage(null);
 
     const { error } = await signIn.magicLink({
       email: trimmedEmail,
-      callbackURL: `${window.location.origin}/auth/signin`,
+      callbackURL: `${window.location.origin}/`,
     });
 
     if (error) {
@@ -86,21 +85,20 @@ export function AuthMagicLinkSentPage() {
     }
 
     window.sessionStorage.setItem(MAGIC_LINK_EMAIL_KEY, trimmedEmail);
-    setLastSentEmail(trimmedEmail);
-    setEmail(trimmedEmail);
+    setSentEmail(trimmedEmail);
     setSecondsLeft(RESEND_SECONDS);
-    setSuccessMessage("Enlace enviado. Revisa tu correo.");
+    setMode("sent");
     setIsSending(false);
   };
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await sendMagicLink(email);
+    await handleSendMagicLink(email);
   };
 
   const onResend = async () => {
-    if (!lastSentEmail) return;
-    await sendMagicLink(lastSentEmail, true);
+    if (!sentEmail) return;
+    await handleSendMagicLink(sentEmail, true);
   };
 
   const formatCountdown = (s: number) => {
@@ -110,126 +108,175 @@ export function AuthMagicLinkSentPage() {
   };
 
   return (
+    <div className="w-full">
+      {mode === "request" ? (
+        <RequestState
+          email={email}
+          setEmail={setEmail}
+          isSending={isSending}
+          errorMessage={errorMessage}
+          onSubmit={onSubmit}
+        />
+      ) : (
+        <SentState
+          sentEmail={sentEmail}
+          secondsLeft={secondsLeft}
+          isSending={isSending}
+          formatCountdown={formatCountdown}
+          onResend={onResend}
+          onTryDifferent={() => {
+            setMode("request");
+            setErrorMessage(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function RequestState({
+  email,
+  setEmail,
+  isSending,
+  errorMessage,
+  onSubmit,
+}: {
+  email: string;
+  setEmail: (value: string) => void;
+  isSending: boolean;
+  errorMessage: string | null;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
     <>
-      <style>{`
-        @keyframes magic-float-a {
-          0%, 100% { transform: translate(0, 0); opacity: 0.55; }
-          50% { transform: translate(0, -6px); opacity: 0.95; }
-        }
-        @keyframes magic-float-b {
-          0%, 100% { transform: translate(0, 0); opacity: 0.45; }
-          50% { transform: translate(0, -8px); opacity: 0.85; }
-        }
-        @keyframes magic-float-c {
-          0%, 100% { transform: translate(0, 0); opacity: 0.35; }
-          50% { transform: translate(2px, -5px); opacity: 0.75; }
-        }
-        @keyframes magic-pulse-dot {
-          0%, 100% { opacity: 0.55; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-      `}</style>
-      <div className="flex flex-col items-center text-center">
-        <EnvelopeArt />
-        <h1 className="font-heading mt-3 text-3xl tracking-tight">Acceso con enlace mágico</h1>
-
-        <p className="text-muted-foreground mt-3 text-sm">
-          Te enviaremos un enlace para iniciar sesión sin contraseña.
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">
+          Acceso con enlace mágico
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Ingresa tu correo y te enviaremos un enlace para iniciar sesión sin contraseña.
         </p>
+      </div>
 
-        <form onSubmit={onSubmit} className="mt-5 w-full space-y-3 text-left">
+      <div className="mt-6">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+          {errorMessage ? (
+            <Alert variant="destructive">
+              <AlertTitle>No se pudo enviar el enlace</AlertTitle>
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <Field>
-            <FieldLabel htmlFor="magic-link-email">Correo</FieldLabel>
+            <FieldLabel htmlFor="magic-link-email">Correo electrónico</FieldLabel>
             <Input
               id="magic-link-email"
               type="email"
-              autoComplete="email"
+              required
               placeholder="nombre@ejemplo.com"
+              autoComplete="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </Field>
-          <Button type="submit" size="lg" className="w-full" disabled={isSending}>
+
+          <Button type="submit" size="lg" disabled={isSending} className="mt-1">
+            {isSending ? <Spinner className="size-4" /> : null}
             {isSending ? "Enviando enlace..." : "Enviar enlace mágico"}
           </Button>
         </form>
+      </div>
 
-        <p className="text-muted-foreground mt-4 max-w-xs text-xs leading-relaxed">
-          El enlace expira en 10 minutos.
-        </p>
-
-        {lastSentEmail ? (
-          <div className="text-foreground mt-1 font-mono text-sm">{lastSentEmail}</div>
-        ) : null}
-
-        {successMessage ? (
-          <p className="mt-3 max-w-xs text-center text-sm text-emerald-600">{successMessage}</p>
-        ) : null}
-
-        {errorMessage ? (
-          <p className="text-destructive mt-3 max-w-xs text-center text-sm">{errorMessage}</p>
-        ) : null}
-
-        <div className="mt-7 flex w-full flex-col gap-2">
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full"
-            render={
-              <a
-                href={getEmailProviderUrl(lastSentEmail)}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Abrir correo"
-              />
-            }
-          >
-            Abrir correo
-            <Icon icon={LinkSquare01Icon} size={16} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="default"
-            className="w-full"
-            type="button"
-            disabled={secondsLeft > 0 || !lastSentEmail || isSending}
-            onClick={onResend}
-          >
-            {secondsLeft > 0 ? `Reenviar en ${formatCountdown(secondsLeft)}` : "Reenviar enlace"}
-          </Button>
-        </div>
-
-        <p className="text-muted-foreground mt-6 text-xs">
-          ¿No te llegó? Revisa spam o promociones, o{" "}
-          <Link to="/auth/signin" className="underline">
-            vuelve a iniciar sesión
-          </Link>
-          .
-        </p>
+      <div className="mt-5 text-center text-sm">
+        <Link
+          to="/auth/signin"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+        >
+          <Icon icon={ArrowLeft01Icon} size={14} className="size-3.5" />
+          Volver a iniciar sesión
+        </Link>
       </div>
     </>
   );
 }
 
-function EnvelopeArt() {
+function SentState({
+  sentEmail,
+  secondsLeft,
+  isSending,
+  formatCountdown,
+  onResend,
+  onTryDifferent,
+}: {
+  sentEmail: string;
+  secondsLeft: number;
+  isSending: boolean;
+  formatCountdown: (seconds: number) => string;
+  onResend: () => Promise<void>;
+  onTryDifferent: () => void;
+}) {
   return (
-    <div className="relative flex size-24 items-center justify-center">
-      <div className="border-border bg-card text-foreground relative flex size-16 items-center justify-center rounded-2xl border shadow-sm">
-        <svg
-          viewBox="0 0 20 16"
-          aria-hidden
-          className="h-8 w-10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="1" y="2" width="18" height="12" rx="2.4" />
-          <path d="M2 4l8 5.2L18 4" />
-          <circle cx="16.2" cy="11.8" r="1.4" fill="currentColor" stroke="none" />
-        </svg>
+    <>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight">Revisa tu correo</h1>
+        <p className="text-muted-foreground text-sm leading-relaxed break-words">
+          Si la dirección <strong className="text-foreground break-all">{sentEmail}</strong> está
+          registrada en Claustrum recibirás un mensaje con un enlace para iniciar sesión, el cual
+          expira en 10 minutos, por lo que si no encuentras el correo revisa tu carpeta de spam o
+          promociones.
+        </p>
       </div>
-    </div>
+
+      <div className="mt-6 flex flex-col gap-3">
+        <Button
+          variant="default"
+          size="lg"
+          className="w-full"
+          render={
+            <a
+              href={getEmailProviderUrl(sentEmail)}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Abrir proveedor de correo"
+            />
+          }
+        >
+          Abrir correo
+          <Icon icon={LinkSquare01Icon} size={16} />
+        </Button>
+
+        <div className="flex items-center justify-between px-1 text-xs">
+          <button
+            type="button"
+            disabled={secondsLeft > 0 || isSending}
+            onClick={onResend}
+            className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {secondsLeft > 0
+              ? `Reenviar en ${formatCountdown(secondsLeft)}`
+              : isSending
+                ? "Reenviando..."
+                : "Reenviar enlace"}
+          </button>
+          <button
+            type="button"
+            onClick={onTryDifferent}
+            className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+          >
+            Cambiar correo
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6 text-center text-sm">
+        <Link
+          to="/auth/signin"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+        >
+          <Icon icon={ArrowLeft01Icon} size={14} className="size-3.5" />
+          Volver a iniciar sesión
+        </Link>
+      </div>
+    </>
   );
 }

@@ -332,7 +332,7 @@ function ReviewStatusTabs({
 
   return (
     <ScrollArea scrollFade className="w-full">
-      <div className="border-border/60 bg-muted/40 flex w-max min-w-full items-center gap-1 rounded-lg border p-1 text-xs">
+      <div className="flex w-max min-w-full items-center gap-1 px-0.5 text-xs">
         {tabs.map((tab) => {
           const isSelected = statusFilter === tab.value;
           return (
@@ -344,9 +344,9 @@ function ReviewStatusTabs({
               type="button"
               onClick={() => onStatusChange(tab.value)}
               className={cn(
-                "rounded-md px-3 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
+                "flex-1 rounded-lg px-3 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
                 isSelected
-                  ? "bg-background text-foreground shadow-xs"
+                  ? "border-border/80 bg-background text-foreground border shadow-xs"
                   : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
               )}
             >
@@ -583,7 +583,7 @@ export function ReviewSection({
         )}
       >
         {onStatusChange && (
-          <FrameHeader className="border-b p-2">
+          <FrameHeader className="p-1 pb-1.5">
             <ReviewStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
           </FrameHeader>
         )}

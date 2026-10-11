@@ -486,7 +486,7 @@ function GoogleOAuthButton() {
       <span className="truncate whitespace-nowrap">Google</span>
       {lastMethod === "google" && (
         <Badge
-          variant="secondary"
+          variant="default"
           className="pointer-events-none absolute -top-2.5 -right-2 h-5 px-1.5 py-0 text-[10px] font-bold shadow-sm"
         >
           Último usado
@@ -570,7 +570,7 @@ function MagicLinkButton({ email = "" }: { email?: string }) {
       {pending ? "Enviando enlace..." : "Continuar con enlace mágico"}
       {lastMethod === "magic-link" && (
         <Badge
-          variant="secondary"
+          variant="default"
           className="pointer-events-none absolute -top-2.5 -right-2 h-5 px-1.5 py-0 text-[10px] font-bold shadow-sm"
         >
           Último usado
@@ -687,8 +687,8 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
           </FieldLabel>
           {authClient.getLastUsedLoginMethod() === "email" && (
             <Badge
-              variant="secondary"
-              className="pointer-events-none h-5 px-1.5 py-0 text-[10px] font-bold"
+              variant="default"
+              className="pointer-events-none h-5 px-1.5 py-0 text-[10px] font-bold shadow-sm"
             >
               Último usado
             </Badge>

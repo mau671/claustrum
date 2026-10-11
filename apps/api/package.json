@@ -15,14 +15,13 @@
     "@supabase/supabase-js": "^2.90.1",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.11",
-    "hono": "^4.12.21",
+    "hono": "^4.13.13",
     "jose": "^6.2.3",
     "pg": "^8.21.0",
     "resend": "^6.12.3",
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@better-auth/cli": "^1.4.21",
     "@types/pg": "^8.20.0",
     "wrangler": "^4.148.0"
   },

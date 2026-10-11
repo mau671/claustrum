@@ -2,12 +2,14 @@ import type { Dispatch, SetStateAction } from "react";
 
 import { Flag01Icon, ThumbsDownIcon, ThumbsUpIcon } from "@hugeicons/core-free-icons";
 import {
+  columnVisibilityFeature,
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
+  rowPaginationFeature,
+  tableFeatures,
+  useTable,
 } from "@tanstack/react-table";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 
 import type {
   ProfessorReviewPublicRow,
@@ -239,7 +241,12 @@ function ReviewActions({
   );
 }
 
-const columnHelper = createColumnHelper<ProfessorReviewPublicRow>();
+const reviewsTableFeatures = tableFeatures({
+  columnVisibilityFeature,
+  rowPaginationFeature,
+});
+
+const columnHelper = createColumnHelper<typeof reviewsTableFeatures, ProfessorReviewPublicRow>();
 
 function getColumns(
   onReaction: (review: ProfessorReviewPublicRow, reaction: ReactionValue) => void,
@@ -402,10 +409,15 @@ export function ProfessorReviewsList({
     }
   }
 
-  const table = useReactTable({
+  const columns = useMemo(
+    () => getColumns(handleReaction, openReportDialog, readOnly, disableReactions),
+    [disableReactions, readOnly],
+  );
+
+  const table = useTable({
+    features: reviewsTableFeatures,
     data: reviewRows,
-    columns: getColumns(handleReaction, openReportDialog, readOnly, disableReactions),
-    getCoreRowModel: getCoreRowModel(),
+    columns,
     manualPagination: true,
     pageCount: totalPages,
     state: {

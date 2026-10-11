@@ -11,61 +11,56 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as IndexRouteImport } from './routes/_index'
-import { Route as SettingsRouteRouteImport } from './routes/settings/route'
-import { Route as ModerationRouteRouteImport } from './routes/moderation/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
-import { Route as SettingsIndexRouteImport } from './routes/settings/index'
-import { Route as ScheduleIndexRouteImport } from './routes/schedule/index'
-import { Route as ProfessorsIndexRouteImport } from './routes/professors/index'
-import { Route as PoliciesIndexRouteImport } from './routes/policies/index'
-import { Route as OverviewIndexRouteImport } from './routes/overview/index'
-import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
-import { Route as ModerationIndexRouteImport } from './routes/moderation/index'
-import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as ModerationRouteRouteImport } from './routes/moderation/route'
+import { Route as SettingsRouteRouteImport } from './routes/settings/route'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CurriculumIndexRouteImport } from './routes/curriculum/index'
-import { Route as ProfessorsProfessorIdRouteImport } from './routes/professors/$professorId'
-import { Route as OgScheduleRouteImport } from './routes/og/schedule'
-import { Route as OgProfessorsRouteImport } from './routes/og/professors'
-import { Route as OgCurriculumRouteImport } from './routes/og/curriculum'
-import { Route as ModerationReviewsRouteImport } from './routes/moderation/reviews'
-import { Route as ModerationReportsRouteImport } from './routes/moderation/reports'
-import { Route as ModerationFeedbackRouteImport } from './routes/moderation/feedback'
-import { Route as ModerationEvaluationsRouteImport } from './routes/moderation/evaluations'
-import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as CurriculumCourseIdRouteImport } from './routes/curriculum/$courseId'
-import { Route as EvaluationsViewEvaluationSlugRouteImport } from './routes/evaluations/view/$evaluationSlug'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
+import { Route as ModerationIndexRouteImport } from './routes/moderation/index'
+import { Route as ModerationEvaluationsRouteImport } from './routes/moderation/evaluations'
+import { Route as ModerationFeedbackRouteImport } from './routes/moderation/feedback'
+import { Route as ModerationReportsRouteImport } from './routes/moderation/reports'
+import { Route as ModerationReviewsRouteImport } from './routes/moderation/reviews'
+import { Route as OgCurriculumRouteImport } from './routes/og/curriculum'
+import { Route as OgProfessorsRouteImport } from './routes/og/professors'
+import { Route as OgScheduleRouteImport } from './routes/og/schedule'
+import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
+import { Route as OverviewIndexRouteImport } from './routes/overview/index'
+import { Route as PoliciesIndexRouteImport } from './routes/policies/index'
+import { Route as ProfessorsIndexRouteImport } from './routes/professors/index'
+import { Route as ProfessorsProfessorIdRouteImport } from './routes/professors/$professorId'
+import { Route as ScheduleIndexRouteImport } from './routes/schedule/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as CurriculumPlanIdCourseIdRouteImport } from './routes/curriculum/$planId/$courseId'
+import { Route as EvaluationsViewEvaluationSlugRouteImport } from './routes/evaluations/view/$evaluationSlug'
 
-const SettingsSecurityLazyRouteImport = createFileRoute('/settings/security')()
-const SettingsProfileLazyRouteImport = createFileRoute('/settings/profile')()
 const SettingsAppearanceLazyRouteImport = createFileRoute(
   '/settings/appearance',
 )()
-const AuthVerifyEmailIndexLazyRouteImport = createFileRoute(
-  '/auth/verify-email/',
-)()
-const AuthSignupIndexLazyRouteImport = createFileRoute('/auth/signup/')()
-const AuthSigninIndexLazyRouteImport = createFileRoute('/auth/signin/')()
+const SettingsProfileLazyRouteImport = createFileRoute('/settings/profile')()
+const SettingsSecurityLazyRouteImport = createFileRoute('/settings/security')()
+const Auth2faIndexLazyRouteImport = createFileRoute('/auth/2fa/')()
+const AuthMagicLinkIndexLazyRouteImport = createFileRoute('/auth/magic-link/')()
 const AuthResetPasswordIndexLazyRouteImport = createFileRoute(
   '/auth/reset-password/',
 )()
-const AuthMagicLinkIndexLazyRouteImport = createFileRoute('/auth/magic-link/')()
-const Auth2faIndexLazyRouteImport = createFileRoute('/auth/2fa/')()
+const AuthSigninIndexLazyRouteImport = createFileRoute('/auth/signin/')()
+const AuthSignupIndexLazyRouteImport = createFileRoute('/auth/signup/')()
+const AuthVerifyEmailIndexLazyRouteImport = createFileRoute(
+  '/auth/verify-email/',
+)()
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/_index',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/_index.lazy').then((d) => d.Route))
-const SettingsRouteRoute = SettingsRouteRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModerationRouteRoute = ModerationRouteRouteImport.update({
@@ -73,61 +68,14 @@ const ModerationRouteRoute = ModerationRouteRouteImport.update({
   path: '/moderation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRouteRoute = AuthRouteRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const SettingsRouteRoute = SettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsIndexRoute = SettingsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SettingsRouteRoute,
-} as any).lazy(() =>
-  import('./routes/settings/index.lazy').then((d) => d.Route),
-)
-const ScheduleIndexRoute = ScheduleIndexRouteImport.update({
-  id: '/schedule/',
-  path: '/schedule/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/schedule/index.lazy').then((d) => d.Route),
-)
-const ProfessorsIndexRoute = ProfessorsIndexRouteImport.update({
-  id: '/professors/',
-  path: '/professors/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/professors/index.lazy').then((d) => d.Route),
-)
-const PoliciesIndexRoute = PoliciesIndexRouteImport.update({
-  id: '/policies/',
-  path: '/policies/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/policies/index.lazy').then((d) => d.Route),
-)
-const OverviewIndexRoute = OverviewIndexRouteImport.update({
-  id: '/overview/',
-  path: '/overview/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/overview/index.lazy').then((d) => d.Route),
-)
-const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
-  id: '/onboarding/',
-  path: '/onboarding/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/onboarding/index.lazy').then((d) => d.Route),
-)
-const ModerationIndexRoute = ModerationIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ModerationRouteRoute,
-} as any)
-const DocsIndexRoute = DocsIndexRouteImport.update({
-  id: '/docs/',
-  path: '/docs/',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CurriculumIndexRoute = CurriculumIndexRouteImport.update({
@@ -137,62 +85,32 @@ const CurriculumIndexRoute = CurriculumIndexRouteImport.update({
 } as any).lazy(() =>
   import('./routes/curriculum/index.lazy').then((d) => d.Route),
 )
-const SettingsSecurityLazyRoute = SettingsSecurityLazyRouteImport.update({
-  id: '/security',
-  path: '/security',
-  getParentRoute: () => SettingsRouteRoute,
-} as any).lazy(() =>
-  import('./routes/settings/security.lazy').then((d) => d.Route),
-)
-const SettingsProfileLazyRoute = SettingsProfileLazyRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => SettingsRouteRoute,
-} as any).lazy(() =>
-  import('./routes/settings/profile.lazy').then((d) => d.Route),
-)
-const SettingsAppearanceLazyRoute = SettingsAppearanceLazyRouteImport.update({
-  id: '/appearance',
-  path: '/appearance',
-  getParentRoute: () => SettingsRouteRoute,
-} as any).lazy(() =>
-  import('./routes/settings/appearance.lazy').then((d) => d.Route),
-)
-const ProfessorsProfessorIdRoute = ProfessorsProfessorIdRouteImport.update({
-  id: '/professors/$professorId',
-  path: '/professors/$professorId',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/professors/$professorId.lazy').then((d) => d.Route),
-)
-const OgScheduleRoute = OgScheduleRouteImport.update({
-  id: '/og/schedule',
-  path: '/og/schedule',
+const CurriculumCourseIdRoute = CurriculumCourseIdRouteImport.update({
+  id: '/curriculum/$courseId',
+  path: '/curriculum/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OgProfessorsRoute = OgProfessorsRouteImport.update({
-  id: '/og/professors',
-  path: '/og/professors',
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OgCurriculumRoute = OgCurriculumRouteImport.update({
-  id: '/og/curriculum',
-  path: '/og/curriculum',
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ModerationReviewsRoute = ModerationReviewsRouteImport.update({
-  id: '/reviews',
-  path: '/reviews',
+const ModerationIndexRoute = ModerationIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ModerationRouteRoute,
+} as any)
+const ModerationEvaluationsRoute = ModerationEvaluationsRouteImport.update({
+  id: '/evaluations',
+  path: '/evaluations',
   getParentRoute: () => ModerationRouteRoute,
 } as any).lazy(() =>
-  import('./routes/moderation/reviews.lazy').then((d) => d.Route),
-)
-const ModerationReportsRoute = ModerationReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => ModerationRouteRoute,
-} as any).lazy(() =>
-  import('./routes/moderation/reports.lazy').then((d) => d.Route),
+  import('./routes/moderation/evaluations.lazy').then((d) => d.Route),
 )
 const ModerationFeedbackRoute = ModerationFeedbackRouteImport.update({
   id: '/feedback',
@@ -201,44 +119,118 @@ const ModerationFeedbackRoute = ModerationFeedbackRouteImport.update({
 } as any).lazy(() =>
   import('./routes/moderation/feedback.lazy').then((d) => d.Route),
 )
-const ModerationEvaluationsRoute = ModerationEvaluationsRouteImport.update({
-  id: '/evaluations',
-  path: '/evaluations',
+const ModerationReportsRoute = ModerationReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => ModerationRouteRoute,
 } as any).lazy(() =>
-  import('./routes/moderation/evaluations.lazy').then((d) => d.Route),
+  import('./routes/moderation/reports.lazy').then((d) => d.Route),
 )
-const DocsSplatRoute = DocsSplatRouteImport.update({
-  id: '/docs/$',
-  path: '/docs/$',
+const ModerationReviewsRoute = ModerationReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => ModerationRouteRoute,
+} as any).lazy(() =>
+  import('./routes/moderation/reviews.lazy').then((d) => d.Route),
+)
+const OgCurriculumRoute = OgCurriculumRouteImport.update({
+  id: '/og/curriculum',
+  path: '/og/curriculum',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CurriculumCourseIdRoute = CurriculumCourseIdRouteImport.update({
-  id: '/curriculum/$courseId',
-  path: '/curriculum/$courseId',
+const OgProfessorsRoute = OgProfessorsRouteImport.update({
+  id: '/og/professors',
+  path: '/og/professors',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthVerifyEmailIndexLazyRoute =
-  AuthVerifyEmailIndexLazyRouteImport.update({
-    id: '/verify-email/',
-    path: '/verify-email/',
-    getParentRoute: () => AuthRouteRoute,
-  } as any).lazy(() =>
-    import('./routes/auth/verify-email/index.lazy').then((d) => d.Route),
-  )
-const AuthSignupIndexLazyRoute = AuthSignupIndexLazyRouteImport.update({
-  id: '/signup/',
-  path: '/signup/',
-  getParentRoute: () => AuthRouteRoute,
+const OgScheduleRoute = OgScheduleRouteImport.update({
+  id: '/og/schedule',
+  path: '/og/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
+  id: '/onboarding/',
+  path: '/onboarding/',
+  getParentRoute: () => rootRouteImport,
 } as any).lazy(() =>
-  import('./routes/auth/signup/index.lazy').then((d) => d.Route),
+  import('./routes/onboarding/index.lazy').then((d) => d.Route),
 )
-const AuthSigninIndexLazyRoute = AuthSigninIndexLazyRouteImport.update({
-  id: '/signin/',
-  path: '/signin/',
+const OverviewIndexRoute = OverviewIndexRouteImport.update({
+  id: '/overview/',
+  path: '/overview/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/overview/index.lazy').then((d) => d.Route),
+)
+const PoliciesIndexRoute = PoliciesIndexRouteImport.update({
+  id: '/policies/',
+  path: '/policies/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/policies/index.lazy').then((d) => d.Route),
+)
+const ProfessorsIndexRoute = ProfessorsIndexRouteImport.update({
+  id: '/professors/',
+  path: '/professors/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/professors/index.lazy').then((d) => d.Route),
+)
+const ProfessorsProfessorIdRoute = ProfessorsProfessorIdRouteImport.update({
+  id: '/professors/$professorId',
+  path: '/professors/$professorId',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/professors/$professorId.lazy').then((d) => d.Route),
+)
+const ScheduleIndexRoute = ScheduleIndexRouteImport.update({
+  id: '/schedule/',
+  path: '/schedule/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/schedule/index.lazy').then((d) => d.Route),
+)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRouteRoute,
+} as any).lazy(() =>
+  import('./routes/settings/index.lazy').then((d) => d.Route),
+)
+const SettingsAppearanceLazyRoute = SettingsAppearanceLazyRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
+  getParentRoute: () => SettingsRouteRoute,
+} as any).lazy(() =>
+  import('./routes/settings/appearance.lazy').then((d) => d.Route),
+)
+const SettingsProfileLazyRoute = SettingsProfileLazyRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SettingsRouteRoute,
+} as any).lazy(() =>
+  import('./routes/settings/profile.lazy').then((d) => d.Route),
+)
+const SettingsSecurityLazyRoute = SettingsSecurityLazyRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => SettingsRouteRoute,
+} as any).lazy(() =>
+  import('./routes/settings/security.lazy').then((d) => d.Route),
+)
+const Auth2faIndexLazyRoute = Auth2faIndexLazyRouteImport.update({
+  id: '/2fa/',
+  path: '/2fa/',
   getParentRoute: () => AuthRouteRoute,
 } as any).lazy(() =>
-  import('./routes/auth/signin/index.lazy').then((d) => d.Route),
+  import('./routes/auth/2fa/index.lazy').then((d) => d.Route),
+)
+const AuthMagicLinkIndexLazyRoute = AuthMagicLinkIndexLazyRouteImport.update({
+  id: '/magic-link/',
+  path: '/magic-link/',
+  getParentRoute: () => AuthRouteRoute,
+} as any).lazy(() =>
+  import('./routes/auth/magic-link/index.lazy').then((d) => d.Route),
 )
 const AuthResetPasswordIndexLazyRoute =
   AuthResetPasswordIndexLazyRouteImport.update({
@@ -248,20 +240,36 @@ const AuthResetPasswordIndexLazyRoute =
   } as any).lazy(() =>
     import('./routes/auth/reset-password/index.lazy').then((d) => d.Route),
   )
-const AuthMagicLinkIndexLazyRoute = AuthMagicLinkIndexLazyRouteImport.update({
-  id: '/magic-link/',
-  path: '/magic-link/',
+const AuthSigninIndexLazyRoute = AuthSigninIndexLazyRouteImport.update({
+  id: '/signin/',
+  path: '/signin/',
   getParentRoute: () => AuthRouteRoute,
 } as any).lazy(() =>
-  import('./routes/auth/magic-link/index.lazy').then((d) => d.Route),
+  import('./routes/auth/signin/index.lazy').then((d) => d.Route),
 )
-const Auth2faIndexLazyRoute = Auth2faIndexLazyRouteImport.update({
-  id: '/2fa/',
-  path: '/2fa/',
+const AuthSignupIndexLazyRoute = AuthSignupIndexLazyRouteImport.update({
+  id: '/signup/',
+  path: '/signup/',
   getParentRoute: () => AuthRouteRoute,
 } as any).lazy(() =>
-  import('./routes/auth/2fa/index.lazy').then((d) => d.Route),
+  import('./routes/auth/signup/index.lazy').then((d) => d.Route),
 )
+const AuthVerifyEmailIndexLazyRoute =
+  AuthVerifyEmailIndexLazyRouteImport.update({
+    id: '/verify-email/',
+    path: '/verify-email/',
+    getParentRoute: () => AuthRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/auth/verify-email/index.lazy').then((d) => d.Route),
+  )
+const CurriculumPlanIdCourseIdRoute =
+  CurriculumPlanIdCourseIdRouteImport.update({
+    id: '/curriculum/$planId/$courseId',
+    path: '/curriculum/$planId/$courseId',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/curriculum/$planId/$courseId.lazy').then((d) => d.Route),
+  )
 const EvaluationsViewEvaluationSlugRoute =
   EvaluationsViewEvaluationSlugRouteImport.update({
     id: '/evaluations/view/$evaluationSlug',
@@ -271,14 +279,6 @@ const EvaluationsViewEvaluationSlugRoute =
     import('./routes/evaluations/view/$evaluationSlug.lazy').then(
       (d) => d.Route,
     ),
-  )
-const CurriculumPlanIdCourseIdRoute =
-  CurriculumPlanIdCourseIdRouteImport.update({
-    id: '/curriculum/$planId/$courseId',
-    path: '/curriculum/$planId/$courseId',
-    getParentRoute: () => rootRouteImport,
-  } as any).lazy(() =>
-    import('./routes/curriculum/$planId/$courseId.lazy').then((d) => d.Route),
   )
 
 export interface FileRoutesByFullPath {
@@ -528,32 +528,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_index': {
       id: '/_index'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/moderation': {
-      id: '/moderation'
-      path: '/moderation'
-      fullPath: '/moderation'
-      preLoaderRoute: typeof ModerationRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -563,60 +542,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings/': {
-      id: '/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof SettingsIndexRouteImport
-      parentRoute: typeof SettingsRouteRoute
-    }
-    '/schedule/': {
-      id: '/schedule/'
-      path: '/schedule'
-      fullPath: '/schedule/'
-      preLoaderRoute: typeof ScheduleIndexRouteImport
+    '/moderation': {
+      id: '/moderation'
+      path: '/moderation'
+      fullPath: '/moderation'
+      preLoaderRoute: typeof ModerationRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/professors/': {
-      id: '/professors/'
-      path: '/professors'
-      fullPath: '/professors/'
-      preLoaderRoute: typeof ProfessorsIndexRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/policies/': {
-      id: '/policies/'
-      path: '/policies'
-      fullPath: '/policies/'
-      preLoaderRoute: typeof PoliciesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview/': {
-      id: '/overview/'
-      path: '/overview'
-      fullPath: '/overview/'
-      preLoaderRoute: typeof OverviewIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/': {
-      id: '/onboarding/'
-      path: '/onboarding'
-      fullPath: '/onboarding/'
-      preLoaderRoute: typeof OnboardingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/moderation/': {
-      id: '/moderation/'
-      path: '/'
-      fullPath: '/moderation/'
-      preLoaderRoute: typeof ModerationIndexRouteImport
-      parentRoute: typeof ModerationRouteRoute
-    }
-    '/docs/': {
-      id: '/docs/'
-      path: '/docs'
-      fullPath: '/docs/'
-      preLoaderRoute: typeof DocsIndexRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/curriculum/': {
@@ -626,74 +570,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CurriculumIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings/security': {
-      id: '/settings/security'
-      path: '/security'
-      fullPath: '/settings/security'
-      preLoaderRoute: typeof SettingsSecurityLazyRouteImport
-      parentRoute: typeof SettingsRouteRoute
-    }
-    '/settings/profile': {
-      id: '/settings/profile'
-      path: '/profile'
-      fullPath: '/settings/profile'
-      preLoaderRoute: typeof SettingsProfileLazyRouteImport
-      parentRoute: typeof SettingsRouteRoute
-    }
-    '/settings/appearance': {
-      id: '/settings/appearance'
-      path: '/appearance'
-      fullPath: '/settings/appearance'
-      preLoaderRoute: typeof SettingsAppearanceLazyRouteImport
-      parentRoute: typeof SettingsRouteRoute
-    }
-    '/professors/$professorId': {
-      id: '/professors/$professorId'
-      path: '/professors/$professorId'
-      fullPath: '/professors/$professorId'
-      preLoaderRoute: typeof ProfessorsProfessorIdRouteImport
+    '/curriculum/$courseId': {
+      id: '/curriculum/$courseId'
+      path: '/curriculum/$courseId'
+      fullPath: '/curriculum/$courseId'
+      preLoaderRoute: typeof CurriculumCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/og/schedule': {
-      id: '/og/schedule'
-      path: '/og/schedule'
-      fullPath: '/og/schedule'
-      preLoaderRoute: typeof OgScheduleRouteImport
+    '/docs/': {
+      id: '/docs/'
+      path: '/docs'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/og/professors': {
-      id: '/og/professors'
-      path: '/og/professors'
-      fullPath: '/og/professors'
-      preLoaderRoute: typeof OgProfessorsRouteImport
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/docs/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/og/curriculum': {
-      id: '/og/curriculum'
-      path: '/og/curriculum'
-      fullPath: '/og/curriculum'
-      preLoaderRoute: typeof OgCurriculumRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/moderation/reviews': {
-      id: '/moderation/reviews'
-      path: '/reviews'
-      fullPath: '/moderation/reviews'
-      preLoaderRoute: typeof ModerationReviewsRouteImport
-      parentRoute: typeof ModerationRouteRoute
-    }
-    '/moderation/reports': {
-      id: '/moderation/reports'
-      path: '/reports'
-      fullPath: '/moderation/reports'
-      preLoaderRoute: typeof ModerationReportsRouteImport
-      parentRoute: typeof ModerationRouteRoute
-    }
-    '/moderation/feedback': {
-      id: '/moderation/feedback'
-      path: '/feedback'
-      fullPath: '/moderation/feedback'
-      preLoaderRoute: typeof ModerationFeedbackRouteImport
+    '/moderation/': {
+      id: '/moderation/'
+      path: '/'
+      fullPath: '/moderation/'
+      preLoaderRoute: typeof ModerationIndexRouteImport
       parentRoute: typeof ModerationRouteRoute
     }
     '/moderation/evaluations': {
@@ -703,46 +605,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModerationEvaluationsRouteImport
       parentRoute: typeof ModerationRouteRoute
     }
-    '/docs/$': {
-      id: '/docs/$'
-      path: '/docs/$'
-      fullPath: '/docs/$'
-      preLoaderRoute: typeof DocsSplatRouteImport
+    '/moderation/feedback': {
+      id: '/moderation/feedback'
+      path: '/feedback'
+      fullPath: '/moderation/feedback'
+      preLoaderRoute: typeof ModerationFeedbackRouteImport
+      parentRoute: typeof ModerationRouteRoute
+    }
+    '/moderation/reports': {
+      id: '/moderation/reports'
+      path: '/reports'
+      fullPath: '/moderation/reports'
+      preLoaderRoute: typeof ModerationReportsRouteImport
+      parentRoute: typeof ModerationRouteRoute
+    }
+    '/moderation/reviews': {
+      id: '/moderation/reviews'
+      path: '/reviews'
+      fullPath: '/moderation/reviews'
+      preLoaderRoute: typeof ModerationReviewsRouteImport
+      parentRoute: typeof ModerationRouteRoute
+    }
+    '/og/curriculum': {
+      id: '/og/curriculum'
+      path: '/og/curriculum'
+      fullPath: '/og/curriculum'
+      preLoaderRoute: typeof OgCurriculumRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/curriculum/$courseId': {
-      id: '/curriculum/$courseId'
-      path: '/curriculum/$courseId'
-      fullPath: '/curriculum/$courseId'
-      preLoaderRoute: typeof CurriculumCourseIdRouteImport
+    '/og/professors': {
+      id: '/og/professors'
+      path: '/og/professors'
+      fullPath: '/og/professors'
+      preLoaderRoute: typeof OgProfessorsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/verify-email/': {
-      id: '/auth/verify-email/'
-      path: '/verify-email'
-      fullPath: '/auth/verify-email/'
-      preLoaderRoute: typeof AuthVerifyEmailIndexLazyRouteImport
-      parentRoute: typeof AuthRouteRoute
+    '/og/schedule': {
+      id: '/og/schedule'
+      path: '/og/schedule'
+      fullPath: '/og/schedule'
+      preLoaderRoute: typeof OgScheduleRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/auth/signup/': {
-      id: '/auth/signup/'
-      path: '/signup'
-      fullPath: '/auth/signup/'
-      preLoaderRoute: typeof AuthSignupIndexLazyRouteImport
-      parentRoute: typeof AuthRouteRoute
+    '/onboarding/': {
+      id: '/onboarding/'
+      path: '/onboarding'
+      fullPath: '/onboarding/'
+      preLoaderRoute: typeof OnboardingIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/auth/signin/': {
-      id: '/auth/signin/'
-      path: '/signin'
-      fullPath: '/auth/signin/'
-      preLoaderRoute: typeof AuthSigninIndexLazyRouteImport
-      parentRoute: typeof AuthRouteRoute
+    '/overview/': {
+      id: '/overview/'
+      path: '/overview'
+      fullPath: '/overview/'
+      preLoaderRoute: typeof OverviewIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/auth/reset-password/': {
-      id: '/auth/reset-password/'
-      path: '/reset-password'
-      fullPath: '/auth/reset-password/'
-      preLoaderRoute: typeof AuthResetPasswordIndexLazyRouteImport
+    '/policies/': {
+      id: '/policies/'
+      path: '/policies'
+      fullPath: '/policies/'
+      preLoaderRoute: typeof PoliciesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/professors/': {
+      id: '/professors/'
+      path: '/professors'
+      fullPath: '/professors/'
+      preLoaderRoute: typeof ProfessorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/professors/$professorId': {
+      id: '/professors/$professorId'
+      path: '/professors/$professorId'
+      fullPath: '/professors/$professorId'
+      preLoaderRoute: typeof ProfessorsProfessorIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule/': {
+      id: '/schedule/'
+      path: '/schedule'
+      fullPath: '/schedule/'
+      preLoaderRoute: typeof ScheduleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/appearance': {
+      id: '/settings/appearance'
+      path: '/appearance'
+      fullPath: '/settings/appearance'
+      preLoaderRoute: typeof SettingsAppearanceLazyRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileLazyRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/settings/security': {
+      id: '/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityLazyRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/auth/2fa/': {
+      id: '/auth/2fa/'
+      path: '/2fa'
+      fullPath: '/auth/2fa/'
+      preLoaderRoute: typeof Auth2faIndexLazyRouteImport
       parentRoute: typeof AuthRouteRoute
     }
     '/auth/magic-link/': {
@@ -752,25 +731,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthMagicLinkIndexLazyRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/auth/2fa/': {
-      id: '/auth/2fa/'
-      path: '/2fa'
-      fullPath: '/auth/2fa/'
-      preLoaderRoute: typeof Auth2faIndexLazyRouteImport
+    '/auth/reset-password/': {
+      id: '/auth/reset-password/'
+      path: '/reset-password'
+      fullPath: '/auth/reset-password/'
+      preLoaderRoute: typeof AuthResetPasswordIndexLazyRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/evaluations/view/$evaluationSlug': {
-      id: '/evaluations/view/$evaluationSlug'
-      path: '/evaluations/view/$evaluationSlug'
-      fullPath: '/evaluations/view/$evaluationSlug'
-      preLoaderRoute: typeof EvaluationsViewEvaluationSlugRouteImport
-      parentRoute: typeof rootRouteImport
+    '/auth/signin/': {
+      id: '/auth/signin/'
+      path: '/signin'
+      fullPath: '/auth/signin/'
+      preLoaderRoute: typeof AuthSigninIndexLazyRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/signup/': {
+      id: '/auth/signup/'
+      path: '/signup'
+      fullPath: '/auth/signup/'
+      preLoaderRoute: typeof AuthSignupIndexLazyRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/verify-email/': {
+      id: '/auth/verify-email/'
+      path: '/verify-email'
+      fullPath: '/auth/verify-email/'
+      preLoaderRoute: typeof AuthVerifyEmailIndexLazyRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/curriculum/$planId/$courseId': {
       id: '/curriculum/$planId/$courseId'
       path: '/curriculum/$planId/$courseId'
       fullPath: '/curriculum/$planId/$courseId'
       preLoaderRoute: typeof CurriculumPlanIdCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/evaluations/view/$evaluationSlug': {
+      id: '/evaluations/view/$evaluationSlug'
+      path: '/evaluations/view/$evaluationSlug'
+      fullPath: '/evaluations/view/$evaluationSlug'
+      preLoaderRoute: typeof EvaluationsViewEvaluationSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

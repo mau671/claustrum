@@ -2,7 +2,13 @@ import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon } from "@hugeicons/cor
 import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, getRouteApi } from "@tanstack/react-router";
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import {
+  columnVisibilityFeature,
+  createColumnHelper,
+  flexRender,
+  tableFeatures,
+  useTable,
+} from "@tanstack/react-table";
 import { useMemo, useState, useCallback } from "react";
 
 import type { ProfessorReviewStatsRow } from "@/lib/professor-reviews/types";
@@ -69,6 +75,15 @@ function formatScore(score: number | null): string {
 }
 
 const routeApi = getRouteApi("/professors/");
+
+const professorTableFeatures = tableFeatures({
+  columnVisibilityFeature,
+});
+
+const professorColumnHelper = createColumnHelper<
+  typeof professorTableFeatures,
+  ProfessorReviewStatsRow
+>();
 
 export function ProfessorsReviewsPage() {
   const queryClient = useQueryClient();
@@ -206,109 +221,108 @@ export function ProfessorsReviewsPage() {
 
   const isMobile = useIsMobile();
 
-  const columns = useMemo<ColumnDef<ProfessorReviewStatsRow>[]>(
-    () => [
-      {
-        accessorKey: "professor_name",
-        header: () => renderSortHeader("Nombre", "name"),
-        cell: ({ row }) => {
-          const professorId = row.original.professor_id;
+  const columns = useMemo(
+    () =>
+      professorColumnHelper.columns([
+        professorColumnHelper.accessor("professor_name", {
+          header: () => renderSortHeader("Nombre", "name"),
+          cell: ({ row }) => {
+            const professorId = row.original.professor_id;
 
-          const prefetchProfessorDetail = () => {
-            queryClient.setQueryData(["professorById", professorId], {
-              id: professorId,
-              full_name: row.original.professor_name,
-            });
-            void queryClient.prefetchQuery({
-              queryKey: ["professorById", professorId],
-              queryFn: () => getProfessorById(professorId),
-            });
-            void queryClient.prefetchQuery({
-              queryKey: ["professorReviewsPublic", professorId, 0, 10],
-              queryFn: () => getProfessorReviewsPublic(professorId, 10, 0),
-            });
-            void queryClient.prefetchQuery({
-              queryKey: ["professorReviewSummary", professorId],
-              queryFn: () => getProfessorReviewSummary(professorId),
-            });
-          };
+            const prefetchProfessorDetail = () => {
+              queryClient.setQueryData(["professorById", professorId], {
+                id: professorId,
+                full_name: row.original.professor_name,
+              });
+              void queryClient.prefetchQuery({
+                queryKey: ["professorById", professorId],
+                queryFn: () => getProfessorById(professorId),
+              });
+              void queryClient.prefetchQuery({
+                queryKey: ["professorReviewsPublic", professorId, 0, 10],
+                queryFn: () => getProfessorReviewsPublic(professorId, 10, 0),
+              });
+              void queryClient.prefetchQuery({
+                queryKey: ["professorReviewSummary", professorId],
+                queryFn: () => getProfessorReviewSummary(professorId),
+              });
+            };
 
-          return (
-            <div className="flex min-w-0 flex-col">
-              <Link
-                to="/professors/$professorId"
-                params={{ professorId }}
-                preload="intent"
-                viewTransition={{ types: ["professor-open"] }}
-                className="text-foreground inline-block max-w-full truncate py-0.5 leading-normal font-medium underline-offset-2 hover:underline"
-                style={{ viewTransitionName: getProfessorNameTransitionName(professorId) }}
-                onMouseEnter={prefetchProfessorDetail}
-                onPointerDown={prefetchProfessorDetail}
-                onTouchStart={prefetchProfessorDetail}
-                onFocus={prefetchProfessorDetail}
-              >
-                {row.original.professor_name}
-              </Link>
-              {row.original.academic_unit && (
-                <span
-                  className="text-muted-foreground truncate text-[10px] leading-tight sm:hidden"
-                  title={row.original.academic_unit}
+            return (
+              <div className="flex min-w-0 flex-col">
+                <Link
+                  to="/professors/$professorId"
+                  params={{ professorId }}
+                  preload="intent"
+                  viewTransition={{ types: ["professor-open"] }}
+                  className="text-foreground inline-block max-w-full truncate py-0.5 leading-normal font-medium underline-offset-2 hover:underline"
+                  style={{ viewTransitionName: getProfessorNameTransitionName(professorId) }}
+                  onMouseEnter={prefetchProfessorDetail}
+                  onPointerDown={prefetchProfessorDetail}
+                  onTouchStart={prefetchProfessorDetail}
+                  onFocus={prefetchProfessorDetail}
                 >
-                  {row.original.academic_unit}
-                </span>
-              )}
+                  {row.original.professor_name}
+                </Link>
+                {row.original.academic_unit && (
+                  <span
+                    className="text-muted-foreground truncate text-[10px] leading-tight sm:hidden"
+                    title={row.original.academic_unit}
+                  >
+                    {row.original.academic_unit}
+                  </span>
+                )}
+              </div>
+            );
+          },
+        }),
+        ...(isMobile
+          ? []
+          : [
+              professorColumnHelper.accessor("academic_unit", {
+                header: "Escuela",
+                cell: ({ row }) => (
+                  <span
+                    className="text-muted-foreground block truncate text-xs"
+                    title={row.original.academic_unit || undefined}
+                  >
+                    {row.original.academic_unit || "-"}
+                  </span>
+                ),
+              }),
+            ]),
+        professorColumnHelper.accessor("approved_review_count", {
+          header: () => (
+            <div className="flex justify-end text-right">
+              {renderSortHeader("Reseñas", "reviews")}
             </div>
-          );
-        },
-      },
-      ...(isMobile
-        ? []
-        : ([
-            {
-              accessorKey: "academic_unit",
-              header: "Escuela",
-              cell: ({ row }) => (
-                <span
-                  className="text-muted-foreground block truncate text-xs"
-                  title={row.original.academic_unit || undefined}
-                >
-                  {row.original.academic_unit || "-"}
-                </span>
-              ),
-            },
-          ] as ColumnDef<ProfessorReviewStatsRow>[])),
-      {
-        accessorKey: "approved_review_count",
-        header: () => (
-          <div className="flex justify-end text-right">
-            {renderSortHeader("Reseñas", "reviews")}
-          </div>
-        ),
-        cell: ({ row }) => (
-          <span className="block text-right tabular-nums">
-            {row.original.approved_review_count}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "average_overall_score",
-        header: () => (
-          <div className="flex justify-end text-right">{renderSortHeader("Promedio", "score")}</div>
-        ),
-        cell: ({ row }) => (
-          <span className="block text-right tabular-nums">
-            {formatScore(row.original.average_overall_score)}
-          </span>
-        ),
-      },
-    ],
+          ),
+          cell: ({ row }) => (
+            <span className="block text-right tabular-nums">
+              {row.original.approved_review_count}
+            </span>
+          ),
+        }),
+        professorColumnHelper.accessor("average_overall_score", {
+          header: () => (
+            <div className="flex justify-end text-right">
+              {renderSortHeader("Promedio", "score")}
+            </div>
+          ),
+          cell: ({ row }) => (
+            <span className="block text-right tabular-nums">
+              {formatScore(row.original.average_overall_score)}
+            </span>
+          ),
+        }),
+      ]),
     [queryClient, renderSortHeader, isMobile],
   );
 
-  const table = useReactTable({
+  const table = useTable({
+    features: professorTableFeatures,
     data: rows,
     columns,
-    getCoreRowModel: getCoreRowModel(),
   });
   const filterMinAverage = (
     <div className="flex w-full flex-col gap-2">

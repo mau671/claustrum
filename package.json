@@ -30,7 +30,7 @@
     "@types/node": "^25.9.1",
     "@types/pg": "^8.20.0",
     "lint-staged": "^16.4.0",
-    "oxfmt": "^0.48.0",
+    "oxfmt": "^0.72.0",
     "oxlint": "^1.66.0",
     "oxlint-tsgolint": "^0.22.1",
     "pg": "^8.21.0",

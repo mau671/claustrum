@@ -624,10 +624,7 @@ export function SecurityPage() {
   }
 
   return (
-    <SettingsPage
-      title="Seguridad"
-      description="Protege tu cuenta y prepara controles adicionales de acceso."
-    >
+    <SettingsPage>
       <SettingsSection
         title="Contraseña"
         description="Credencial principal para acceder a tu cuenta."

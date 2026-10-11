@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
 
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 interface SettingsPageProps {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   children: ReactNode;
 }
 
@@ -16,19 +15,8 @@ interface SettingsSectionProps {
   className?: string;
 }
 
-function SettingsPage({ title, description, children }: SettingsPageProps) {
-  return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-          <p className="text-muted-foreground text-sm">{description}</p>
-        </div>
-      </div>
-      <Separator />
-      <div className="divide-border divide-y">{children}</div>
-    </div>
-  );
+function SettingsPage({ children }: SettingsPageProps) {
+  return <div className="divide-border divide-y">{children}</div>;
 }
 
 function SettingsSection({ title, description, children, className }: SettingsSectionProps) {

@@ -27,7 +27,7 @@ export function AppearancePage() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <SettingsPage title="Apariencia" description="Ajusta cómo se ve Claustrum en este dispositivo.">
+    <SettingsPage>
       <SettingsSection
         title="Tema"
         description="Define la superficie visual principal de la aplicación."

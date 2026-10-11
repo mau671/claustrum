@@ -1,17 +1,10 @@
-import {
-  Loading02Icon,
-  Search01Icon,
-  UnfoldMoreIcon,
-  Upload01Icon,
-  UserIcon,
-} from "@hugeicons/core-free-icons";
+import { Loading02Icon, Search01Icon, UnfoldMoreIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -26,6 +19,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { authClient } from "@/lib/auth/client";
 import {
   useAuthUser,
@@ -312,25 +306,21 @@ function ProfilePage() {
   }
 
   return (
-    <SettingsPage
-      title="Perfil"
-      description="Gestiona tu identidad y los datos académicos que personalizan Claustrum."
-    >
+    <SettingsPage>
       <SettingsSection title="Identidad" description="Visible en tu cuenta y menú de usuario.">
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <Avatar className="size-16 rounded-full">
-              <AvatarImage src={authUser.user_metadata?.avatar_url} />
-              <AvatarFallback className="rounded-full text-lg font-medium">
-                {(nameDraft || authUser.email || "U").charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-1.5">
-              <Button disabled size="sm" variant="outline" className="w-fit">
-                <Icon icon={Upload01Icon} size={16} className="mr-2 size-4" />
-                Subir foto
-              </Button>
-              <p className="text-muted-foreground text-xs">PNG o SVG, 1024x1024 máx.</p>
+            <UserAvatar
+              id={authUser.id}
+              name={nameDraft}
+              email={authUser.email}
+              className="size-16"
+            />
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Avatar de la cuenta</p>
+              <p className="text-muted-foreground text-xs">
+                Se genera automáticamente un avatar único para tu cuenta.
+              </p>
             </div>
           </div>
           <Field>

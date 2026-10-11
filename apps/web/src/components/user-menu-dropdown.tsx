@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/icon";
-import { UserAvatar } from "@/components/ui/user-avatar";
 import { signOut } from "@/lib/auth/client";
 
 interface UserMenuDropdownProps {
@@ -58,12 +57,9 @@ export function UserMenuDropdown({
       >
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
-            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <UserAvatar id={user.id} name={user.name} email={user.email} className="size-8" />
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs">{user.email}</span>
-              </div>
+            <div className="flex flex-col gap-0.5 px-2 py-1.5 text-left text-sm">
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="text-muted-foreground truncate text-xs">{user.email}</span>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

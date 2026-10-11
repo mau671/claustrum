@@ -6,47 +6,20 @@ import {
   Home01Icon,
   Loading02Icon,
   Login01Icon,
-  MoreVerticalIcon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { createFilledIcon } from "@/components/ui/icon";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { UserMenuDropdown } from "@/components/user-menu-dropdown";
 import { useAppAuth } from "@/lib/auth/app-auth-context";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
 import { cn } from "@/lib/utils";
-
-function createFilledIcon(icon: IconSvgElement, invertKeys: string[] = []): IconSvgElement {
-  return icon.map(([tag, attrs]) => {
-    const isClosed = typeof attrs.d === "string" && attrs.d.includes("Z");
-    const isInverted = invertKeys.includes(String(attrs.key));
-    if (isInverted) {
-      return [
-        tag,
-        {
-          ...attrs,
-          stroke: "var(--background)",
-          fill: isClosed ? "var(--background)" : "none",
-        },
-      ];
-    }
-    if (isClosed) {
-      return [
-        tag,
-        {
-          ...attrs,
-          fill: "currentColor",
-        },
-      ];
-    }
-    return [tag, attrs];
-  });
-}
 
 const data = {
   navMain: [
@@ -158,12 +131,11 @@ export function AppSidebar() {
 
   const user = authUser
     ? {
+        id: authUser.id,
         name: authUser.user_metadata?.full_name ?? authUser.email ?? "Guest",
         email: authUser.email ?? "",
-        avatar: authUser.user_metadata?.avatar_url ?? "",
       }
     : null;
-  const userInitial = user?.name.charAt(0).toUpperCase() ?? "M";
 
   return (
     <aside
@@ -304,22 +276,12 @@ export function AppSidebar() {
                 className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 overflow-hidden rounded-full !p-0 text-left whitespace-nowrap"
               >
                 <span className="flex size-12 shrink-0 items-center justify-center">
-                  <Avatar className="border-muted-foreground/35 bg-background size-8 rounded-full border">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="bg-muted text-foreground text-xs font-medium">
-                      {userInitial}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar id={user.id} name={user.name} email={user.email} className="size-8" />
                 </span>
                 <span className="grid min-w-0 flex-1 opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
                   <span className="truncate text-sm font-medium">{user.name}</span>
                   <span className="text-muted-foreground truncate text-xs">{user.email}</span>
                 </span>
-                <HugeiconsIcon
-                  icon={MoreVerticalIcon}
-                  size={16}
-                  className="ml-auto shrink-0 opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out"
-                />
               </Button>
             }
             align="start"

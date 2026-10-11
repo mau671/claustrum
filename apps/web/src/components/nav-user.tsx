@@ -1,7 +1,6 @@
 import { Login01Icon, MoreVerticalIcon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icon } from "@/components/ui/icon";
 import {
   SidebarMenu,
@@ -9,15 +8,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { UserMenuDropdown } from "@/components/user-menu-dropdown";
 
 export function NavUser({
   user,
 }: {
   user?: {
+    id?: string;
     name: string;
     email: string;
-    avatar: string;
   } | null;
 }) {
   const { isMobile } = useSidebar();
@@ -49,8 +49,6 @@ export function NavUser({
     );
   }
 
-  const userInitial = user.name.charAt(0).toUpperCase();
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -61,10 +59,7 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="size-8 rounded-full">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{userInitial}</AvatarFallback>
-              </Avatar>
+              <UserAvatar id={user.id} name={user.name} email={user.email} className="size-8" />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="text-muted-foreground truncate text-xs">{user.email}</span>

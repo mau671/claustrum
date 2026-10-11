@@ -2,7 +2,6 @@ import { Logout01Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/icon";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { signOut } from "@/lib/auth/client";
 import { resetSupabaseAuthTokenState } from "@/lib/supabase/browser-client";
 
@@ -24,9 +24,9 @@ export function UserMenu({
   onOpenChange,
 }: {
   user: {
+    id?: string;
     name: string;
     email: string;
-    avatar?: string;
   };
   trigger: React.ReactNode;
   open?: boolean;
@@ -34,24 +34,22 @@ export function UserMenu({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const userInitial = user.name.charAt(0).toUpperCase();
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger render={trigger as React.ReactElement} />
       <DropdownMenuContent className="w-56" align="end" side="bottom" sideOffset={8}>
-        <DropdownMenuLabel className="p-0 font-normal">
-          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="size-8 rounded-lg">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">{userInitial}</AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name}</span>
-              <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="p-0 font-normal">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <UserAvatar id={user.id} name={user.name} email={user.email} className="size-8" />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+              </div>
             </div>
-          </div>
-        </DropdownMenuLabel>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>

@@ -78,44 +78,58 @@ export function EmptyDashboard({ isAuthenticated, hasProfile }: EmptyDashboardPr
   );
 }
 
-function RadialProgressSkeleton() {
+function GaugeSkeleton() {
   return (
-    <div className="bg-muted flex flex-col justify-center gap-4 rounded-lg p-4 md:flex-row md:items-center">
-      <div className="bg-muted-foreground/20 size-[100px] shrink-0 animate-pulse self-center rounded-full md:self-auto" />
-      <div className="flex w-full flex-col gap-1 text-center md:text-left">
-        <div className="bg-muted-foreground/20 mx-auto h-4 w-24 rounded md:mx-0" />
-        <div className="bg-muted-foreground/20 mx-auto h-7 w-16 rounded md:mx-0" />
-        <div className="bg-muted-foreground/20 mx-auto h-3 w-28 rounded md:mx-0" />
+    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border p-4">
+      <div className="bg-muted-foreground/20 size-32 rounded-full" />
+      <div className="flex flex-col items-center gap-1.5">
+        <div className="bg-muted-foreground/20 h-4 w-28 rounded" />
+        <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
       </div>
     </div>
   );
 }
 
-function MiniBarSkeleton() {
+function MetricSkeleton() {
   return (
-    <div className="bg-muted space-y-2 rounded-lg p-4">
-      <div className="bg-muted-foreground/20 h-4 w-24 rounded" />
-      <div className="bg-muted-foreground/20 h-7 w-16 rounded" />
-      <div className="bg-muted-foreground/20 h-2 w-full rounded-full" />
-      <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
+    <div className="flex flex-col gap-2 rounded-xl border p-4">
+      <div className="flex items-center justify-between">
+        <div className="bg-muted-foreground/20 h-4 w-24 rounded" />
+      </div>
+      <div className="bg-muted-foreground/20 h-7 w-20 rounded" />
+      <div className="bg-muted-foreground/20 h-3 w-28 rounded" />
     </div>
   );
 }
 
 export function CourseStatusChartSkeleton() {
   return (
-    <div className="bg-card flex h-full flex-col rounded-xl border p-3">
-      <div className="bg-muted-foreground/20 mb-3 h-5 w-40 rounded" />
-      <div className="flex-1 space-y-3">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="bg-muted-foreground/20 h-4 w-24 rounded" />
-              <div className="bg-muted-foreground/20 h-4 w-16 rounded" />
-            </div>
-            <div className="bg-muted h-2 w-full rounded-full" />
+    <div className="bg-card flex h-full flex-col rounded-xl border p-4">
+      <div className="mb-3">
+        <div className="bg-muted-foreground/20 h-5 w-40 rounded" />
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row">
+        <div className="border-muted/50 relative flex size-[180px] shrink-0 items-center justify-center rounded-full border-[20px]">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="bg-muted-foreground/20 h-3 w-12 rounded" />
+            <div className="bg-muted-foreground/20 h-6 w-10 rounded" />
+            <div className="bg-muted-foreground/20 h-2.5 w-16 rounded" />
           </div>
-        ))}
+        </div>
+        <div className="flex w-full flex-1 flex-col gap-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex items-center justify-between gap-3 px-2 py-1.5">
+              <div className="flex items-center gap-2">
+                <div className="bg-muted-foreground/20 size-2.5 rounded-full" />
+                <div className="bg-muted-foreground/20 h-3.5 w-20 rounded" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-muted-foreground/20 h-3.5 w-6 rounded" />
+                <div className="bg-muted-foreground/20 h-3.5 w-8 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -123,13 +137,38 @@ export function CourseStatusChartSkeleton() {
 
 export function DashboardStatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-      <RadialProgressSkeleton />
-      <RadialProgressSkeleton />
-      <MiniBarSkeleton />
-      <MiniBarSkeleton />
-      <MiniBarSkeleton />
-      <MiniBarSkeleton />
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <GaugeSkeleton />
+      <GaugeSkeleton />
+      <MetricSkeleton />
+    </div>
+  );
+}
+
+function TimelineSkeleton() {
+  return (
+    <div className="bg-card flex h-full flex-col rounded-xl border p-4">
+      <div className="mb-4">
+        <div className="bg-muted-foreground/20 h-5 w-44 rounded" />
+      </div>
+      <div className="flex flex-col">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex items-start gap-3 pb-5 last:pb-0">
+            <div className="flex shrink-0 flex-col items-center self-stretch">
+              <div className="bg-muted-foreground/20 size-7 shrink-0 rounded-full" />
+              {index < 3 ? <div className="bg-muted my-1 w-0.5 flex-1 rounded-full" /> : null}
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
+              <div className="bg-muted-foreground/20 h-4 w-32 rounded" />
+              <div className="bg-muted h-1.5 w-full rounded-full" />
+              <div className="flex items-center justify-between gap-2">
+                <div className="bg-muted-foreground/20 h-3 w-16 rounded" />
+                <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -151,11 +190,11 @@ export function DashboardSkeleton() {
 
           <div className="bg-card flex h-full flex-col rounded-xl border p-3 lg:col-span-3">
             <div className="bg-muted-foreground/20 mb-3 h-5 w-36 rounded" />
-            <div className="flex-1 space-y-2">
-              <div className="bg-muted h-12 rounded-lg" />
-              <div className="bg-muted h-12 rounded-lg" />
-              <div className="bg-muted h-12 rounded-lg" />
-              <div className="bg-muted h-12 rounded-lg" />
+            <div className="grid flex-1 grid-cols-2 content-start gap-2">
+              <div className="bg-muted h-24 rounded-lg" />
+              <div className="bg-muted h-24 rounded-lg" />
+              <div className="bg-muted h-24 rounded-lg" />
+              <div className="bg-muted h-24 rounded-lg" />
             </div>
           </div>
         </div>
@@ -163,7 +202,7 @@ export function DashboardSkeleton() {
 
       {/* Timeline */}
       <div className="mt-4 px-4 lg:px-6">
-        <div className="bg-muted h-48 rounded-lg" />
+        <TimelineSkeleton />
       </div>
     </div>
   );

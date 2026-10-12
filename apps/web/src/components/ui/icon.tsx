@@ -37,13 +37,28 @@ export const MorphIcon = React.forwardRef<unknown, MorphIconProps>(function Morp
   );
 });
 
+export type CreateFilledIconOptions = {
+  invertKeys?: string[];
+  invertColor?: string;
+  fillKeys?: string[];
+};
+
 export function createFilledIcon(
   icon: IconSvgElement,
-  invertKeys: string[] = [],
-  invertColor: string = "var(--icon-cutout, var(--background))",
+  invertKeysOrOptions: string[] | CreateFilledIconOptions = [],
+  invertColorArg: string = "var(--icon-cutout, var(--background))",
+  fillKeysArg: string[] = [],
 ): IconSvgElement {
+  const isOptions = !Array.isArray(invertKeysOrOptions);
+  const invertKeys = isOptions ? (invertKeysOrOptions.invertKeys ?? []) : invertKeysOrOptions;
+  const invertColor = isOptions
+    ? (invertKeysOrOptions.invertColor ?? "var(--icon-cutout, var(--background))")
+    : invertColorArg;
+  const fillKeys = isOptions ? (invertKeysOrOptions.fillKeys ?? []) : fillKeysArg;
+
   const mapped = icon.map(([tag, attrs]) => {
-    const isClosed = typeof attrs.d === "string" && attrs.d.includes("Z");
+    const isForceFilled = fillKeys.includes(String(attrs.key));
+    const isClosed = (typeof attrs.d === "string" && attrs.d.includes("Z")) || isForceFilled;
     const isInverted = invertKeys.includes(String(attrs.key));
     if (isInverted) {
       return {
@@ -59,8 +74,12 @@ export function createFilledIcon(
       };
     }
     if (isClosed) {
+      const d =
+        isForceFilled && typeof attrs.d === "string" && !attrs.d.includes("Z")
+          ? `${attrs.d}Z`
+          : attrs.d;
       return {
-        el: [tag, { ...attrs, fill: "currentColor" }] as IconSvgElement[number],
+        el: [tag, { ...attrs, d, fill: "currentColor" }] as IconSvgElement[number],
         isBase: true,
       };
     }

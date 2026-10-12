@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type {
   ProfessorReviewModerationRow,
-  ProfessorReviewStatusFilter,
+  ProfessorReviewStatus,
 } from "@/lib/professor-reviews/types";
 
 import { toast } from "@/components/ui/toast";
@@ -23,8 +23,7 @@ function ReviewsPage() {
   const page = search.page ?? 1;
   const queryPage = Math.max(page - 1, 0);
   const selectedReviewId = search.reviewId ?? null;
-  const statusFilter: ProfessorReviewStatusFilter =
-    (search.status as ProfessorReviewStatusFilter) ?? "pending";
+  const statusFilter: ProfessorReviewStatus = (search.status as ProfessorReviewStatus) ?? "pending";
 
   const [moderationNote, setModerationNote] = useState<Record<number, string>>({});
 
@@ -66,7 +65,7 @@ function ReviewsPage() {
     });
   };
 
-  const handleStatusChange = (newStatus: ProfessorReviewStatusFilter) => {
+  const handleStatusChange = (newStatus: ProfessorReviewStatus) => {
     void navigate({
       from: "/moderation/reviews",
       search: (prev) => ({

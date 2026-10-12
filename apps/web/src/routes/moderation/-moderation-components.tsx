@@ -13,13 +13,13 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useMemo, useState } from "react";
 
 import type { EvaluationModerationRow } from "@/lib/evaluations/types";
 import type {
   ProfessorReviewModerationRow,
   ProfessorReviewReportModerationRow,
-  ProfessorReviewStatusFilter,
+  ProfessorReviewStatus,
 } from "@/lib/professor-reviews/types";
 
 import { Badge } from "@/components/ui/badge";
@@ -177,7 +177,7 @@ export function ReviewReportSection({
                   render={<button type="button" />}
                   onClick={() => onSelect(report.report_id)}
                   className={cn(
-                    "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
+                    "focus-visible:bg-accent flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
                     selectedReport?.report_id === report.report_id
                       ? "bg-accent/80 text-accent-foreground"
                       : "hover:bg-muted/50 text-foreground",
@@ -311,43 +311,30 @@ function ReviewStatusTabs({
   statusFilter,
   onStatusChange,
 }: {
-  statusFilter: ProfessorReviewStatusFilter;
-  onStatusChange: (status: ProfessorReviewStatusFilter) => void;
+  statusFilter: ProfessorReviewStatus;
+  onStatusChange: (status: ProfessorReviewStatus) => void;
 }) {
-  const tabs: { value: ProfessorReviewStatusFilter; label: string }[] = [
+  const tabs: { value: ProfessorReviewStatus; label: string }[] = [
     { value: "pending", label: "Pendientes" },
     { value: "approved", label: "Aprobadas" },
     { value: "rejected", label: "Rechazadas" },
-    { value: "all", label: "Todas" },
   ];
 
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-
-  useEffect(() => {
-    const activeEl = tabRefs.current[statusFilter];
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
-    }
-  }, [statusFilter]);
-
   return (
-    <ScrollArea scrollFade className="w-full">
+    <ScrollArea scrollFade className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden">
       <div className="flex w-max min-w-full items-center gap-1 px-0.5 text-xs">
         {tabs.map((tab) => {
           const isSelected = statusFilter === tab.value;
           return (
             <button
               key={tab.value}
-              ref={(node) => {
-                tabRefs.current[tab.value] = node;
-              }}
               type="button"
               onClick={() => onStatusChange(tab.value)}
               className={cn(
-                "flex-1 rounded-lg px-3 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
+                "flex-1 rounded-lg border px-3 py-1.5 text-center text-xs font-medium whitespace-nowrap transition-colors",
                 isSelected
-                  ? "border-border/80 bg-background text-foreground border shadow-xs"
-                  : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+                  ? "border-border/80 bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:bg-background/50 hover:text-foreground border-transparent",
               )}
             >
               {tab.label}
@@ -482,8 +469,8 @@ export function ReviewSection({
   isLoading: boolean;
   isFetching: boolean;
   onPageChange: (page: number) => void;
-  statusFilter?: ProfessorReviewStatusFilter;
-  onStatusChange?: (status: ProfessorReviewStatusFilter) => void;
+  statusFilter?: ProfessorReviewStatus;
+  onStatusChange?: (status: ProfessorReviewStatus) => void;
   moderationNote: Record<number, string>;
   onNoteChange: (id: number, value: string) => void;
   onApprove: (id: number) => Promise<void>;
@@ -529,7 +516,7 @@ export function ReviewSection({
             render={<button type="button" />}
             onClick={() => onSelect(row.original.review_id)}
             className={cn(
-              "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
+              "focus-visible:bg-accent flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
               selectedReview?.review_id === row.original.review_id
                 ? "bg-accent/80 text-accent-foreground"
                 : "hover:bg-muted/50 text-foreground",
@@ -537,7 +524,6 @@ export function ReviewSection({
           >
             <div className="flex items-center justify-between gap-2">
               <span className="truncate font-medium">{row.original.professor_name}</span>
-              {getStatusBadge(row.original.status)}
             </div>
             <div className="text-muted-foreground mt-1 flex flex-col text-xs">
               {row.original.courses.map((course) => (
@@ -923,7 +909,7 @@ export function EvaluationSection({
                   render={<button type="button" />}
                   onClick={() => onSelect(evaluation.id)}
                   className={cn(
-                    "focus-visible:bg-accent flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
+                    "focus-visible:bg-accent flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
                     selectedEvaluation?.id === evaluation.id
                       ? "bg-accent/80 text-accent-foreground"
                       : "hover:bg-muted/50 text-foreground",

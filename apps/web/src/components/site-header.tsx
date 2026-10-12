@@ -89,7 +89,7 @@ const SHOW_HEADER_SEARCH = false;
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isCommandOpen, setIsCommandOpen] = useState(false);
@@ -198,12 +198,34 @@ export function SiteHeader() {
       ];
     }
 
+    if (pathname.startsWith("/moderation")) {
+      const items: BreadcrumbItem[] = [{ label: "Moderación", to: "/moderation/reviews" }];
+      if (pathname.startsWith("/moderation/reviews")) {
+        const searchStatus = (search as { status?: string })?.status ?? "pending";
+        const statusMap: Record<string, string> = {
+          pending: "Pendientes",
+          approved: "Aprobadas",
+          rejected: "Rechazadas",
+        };
+        items.push({ label: "Reseñas", to: "/moderation/reviews" });
+        items.push({ label: statusMap[searchStatus] ?? "Pendientes" });
+      } else if (pathname.startsWith("/moderation/evaluations")) {
+        items.push({ label: "Evaluaciones" });
+      } else if (pathname.startsWith("/moderation/reports")) {
+        items.push({ label: "Reportes" });
+      } else if (pathname.startsWith("/moderation/feedback")) {
+        items.push({ label: "Retroalimentación" });
+      }
+      return items;
+    }
+
     return [{ label: pageTitles[pathname] ?? "" }];
   }, [
     courseLabel,
     isCourseDetail,
     isProfessorDetail,
     pathname,
+    search,
     planDetailQuery.isLoading,
     coursesQuery.isLoading,
     professorName,

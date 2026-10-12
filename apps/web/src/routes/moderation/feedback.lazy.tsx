@@ -92,24 +92,6 @@ function FeedbackModerationPage() {
     }
   };
 
-  if (feedbackQuery.isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center p-6">
-        <Spinner className="text-muted-foreground size-8" />
-      </div>
-    );
-  }
-
-  if (feedbackRows.length === 0) {
-    return (
-      <div className="flex h-full items-center justify-center p-6 text-center">
-        <div>
-          <p className="text-muted-foreground">No hay retroalimentación para mostrar</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
       <Frame
@@ -120,41 +102,52 @@ function FeedbackModerationPage() {
       >
         <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
-            {feedbackRows.map((fb) => (
-              <CardPanel
-                key={fb.id}
-                render={<button type="button" />}
-                onClick={() => {
-                  void navigate({
-                    from: "/moderation/feedback",
-                    search: (prev: any) => ({ ...prev, feedbackId: fb.id }),
-                    replace: true,
-                  });
-                }}
-                className={cn(
-                  "focus-visible:bg-accent relative flex w-full cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
-                  selectedFeedbackId === fb.id
-                    ? "bg-accent/80 text-accent-foreground"
-                    : "hover:bg-muted/50 text-foreground",
-                  !fb.is_reviewed && selectedFeedbackId !== fb.id && "bg-muted/30",
-                )}
-              >
-                {!fb.is_reviewed && (
-                  <span className="absolute top-3 right-3 size-2 rounded-full bg-blue-500" />
-                )}
-                <div className="flex w-full items-center justify-between gap-2 pr-4">
-                  <span className={cn("truncate font-medium", getTypeColor(fb.type))}>
-                    {getTypeLabel(fb.type)}
+            {feedbackQuery.isLoading ? (
+              <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 p-6 text-sm">
+                <Spinner className="size-4" />
+                <span>Cargando retroalimentación…</span>
+              </div>
+            ) : feedbackRows.length === 0 ? (
+              <p className="text-muted-foreground p-6 text-center text-sm">
+                No hay retroalimentación pendiente.
+              </p>
+            ) : (
+              feedbackRows.map((fb) => (
+                <CardPanel
+                  key={fb.id}
+                  render={<button type="button" />}
+                  onClick={() => {
+                    void navigate({
+                      from: "/moderation/feedback",
+                      search: (prev: any) => ({ ...prev, feedbackId: fb.id }),
+                      replace: true,
+                    });
+                  }}
+                  className={cn(
+                    "focus-visible:bg-accent relative flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
+                    selectedFeedbackId === fb.id
+                      ? "bg-accent/80 text-accent-foreground"
+                      : "hover:bg-muted/50 text-foreground",
+                    !fb.is_reviewed && selectedFeedbackId !== fb.id && "bg-muted/30",
+                  )}
+                >
+                  {!fb.is_reviewed && (
+                    <span className="absolute top-3 right-3 size-2 rounded-full bg-blue-500" />
+                  )}
+                  <div className="flex w-full items-center justify-between gap-2 pr-4">
+                    <span className={cn("truncate font-medium", getTypeColor(fb.type))}>
+                      {getTypeLabel(fb.type)}
+                    </span>
+                    <span className="text-muted-foreground shrink-0 text-xs">
+                      {new Date(fb.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground mt-0.5 line-clamp-2 pr-4 text-xs">
+                    {fb.content}
                   </span>
-                  <span className="text-muted-foreground shrink-0 text-xs">
-                    {new Date(fb.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <span className="text-muted-foreground mt-0.5 line-clamp-2 pr-4 text-xs">
-                  {fb.content}
-                </span>
-              </CardPanel>
-            ))}
+                </CardPanel>
+              ))
+            )}
           </div>
         </Card>
 

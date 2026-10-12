@@ -38,7 +38,7 @@
     "supabase": "^2.120.0",
     "tsx": "^4.22.3",
     "turbo": "^2.11.7",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"

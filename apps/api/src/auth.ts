@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { magicLink, twoFactor, jwt, openAPI, lastLoginMethod, admin } from "better-auth/plugins";
 import { importJWK, SignJWT, type JWK, type JWTPayload } from "jose";
 import { Pool } from "pg";
@@ -7,6 +8,7 @@ import { Resend } from "resend";
 
 import { renderAuthEmailTemplate } from "./email-templates";
 import { ac, roles } from "./lib/auth/permissions";
+import { isDisposableEmail, normalizeEmail } from "./lib/email-validation";
 
 export interface AuthEnv {
   DATABASE_URL: string;
@@ -94,6 +96,31 @@ export function createAuth(env: AuthEnv, pool: Pool): ReturnType<typeof betterAu
     secret: env.BETTER_AUTH_SECRET,
     database: pool,
     trustedOrigins: getTrustedOrigins(env),
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.body && typeof ctx.body === "object" && "email" in ctx.body) {
+          if (typeof ctx.body.email === "string") {
+            ctx.body.email = normalizeEmail(ctx.body.email);
+          }
+        }
+
+        if (ctx.path === "/sign-up/email") {
+          const email = typeof ctx.body?.email === "string" ? ctx.body.email : "";
+          if (isDisposableEmail(email)) {
+            throw new APIError("BAD_REQUEST", {
+              message: "No se permiten correos electrónicos temporales o desechables.",
+            });
+          }
+
+          const name = typeof ctx.body?.name === "string" ? ctx.body.name.trim() : "";
+          if (!name || name.length < 2) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Debes ingresar tu nombre completo (mínimo 2 caracteres).",
+            });
+          }
+        }
+      }),
+    },
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,

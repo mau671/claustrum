@@ -8,6 +8,16 @@ import { withDb } from "../../lib/db";
 
 const app = new Hono<HonoEnv>();
 
+const booleanQueryParam = (defaultValue: boolean) =>
+  z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((val) => {
+      if (val === undefined || val === "") return defaultValue;
+      if (typeof val === "boolean") return val;
+      return val.toLowerCase() === "true" || val === "1";
+    });
+
 // GET /professors
 const searchProfessorsQuerySchema = z.object({
   query: z.string().optional(),
@@ -15,11 +25,11 @@ const searchProfessorsQuerySchema = z.object({
   minAverageScore: z.coerce.number().optional(),
   minReviewCount: z.coerce.number().default(0),
   academicUnitId: z.coerce.number().optional(),
-  onlyWithApprovedReviews: z.coerce.boolean().default(false),
+  onlyWithApprovedReviews: booleanQueryParam(false),
   sortBy: z
     .enum(["reviews", "score", "ease", "quality", "clarity", "name", "date"])
     .default("reviews"),
-  sortDesc: z.coerce.boolean().default(true),
+  sortDesc: booleanQueryParam(true),
   limit: z.coerce.number().default(25),
   offset: z.coerce.number().default(0),
 });

@@ -1,6 +1,7 @@
 import {
   ArrowLeft01Icon,
   Cancel01Icon,
+  InformationCircleIcon,
   Mail01Icon,
   ShuffleIcon,
   Tick01Icon,
@@ -22,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient, getSession, signIn, signUp } from "@/lib/auth/client";
+import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
@@ -621,18 +623,19 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
-    if (!email.trim() || !password) return;
+    const normalizedEmail = normalizeEmail(email);
+    if (!normalizedEmail || !password) return;
     setPending(true);
 
     const { data, error } = await signIn.email({
-      email: email.trim(),
+      email: normalizedEmail,
       password,
     });
 
     if (error) {
       const normalizedError = normalizeAuthError(error, "login");
       if (normalizedError.type === "email_unconfirmed") {
-        window.sessionStorage.setItem(VERIFY_EMAIL_KEY, email.trim());
+        window.sessionStorage.setItem(VERIFY_EMAIL_KEY, normalizedEmail);
         void navigate({ to: "/auth/verify-email", replace: true });
         return;
       }
@@ -777,6 +780,7 @@ function SignUpForm() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+  const [suggestedEmail, setSuggestedEmail] = useState<string | null>(null);
 
   const passwordStrength = useMemo(
     () =>
@@ -808,22 +812,41 @@ function SignUpForm() {
     return undefined;
   }, [navigate, queryClient]);
 
+  const onEmailBlur = () => {
+    const trimmed = email.trim();
+    if (trimmed && /^\S+@\S+\.\S+$/.test(trimmed)) {
+      if (isDisposableEmail(trimmed)) {
+        setEmailError("No se permiten correos electrónicos temporales o desechables.");
+        setSuggestedEmail(null);
+        return;
+      }
+      const suggestion = suggestEmailCorrection(trimmed);
+      setSuggestedEmail(suggestion);
+    } else {
+      setSuggestedEmail(null);
+    }
+  };
+
   const validateFields = () => {
     let hasError = false;
 
-    if (!name.trim()) {
-      setNameError("Ingresa tu nombre completo.");
+    const trimmedName = name.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setNameError("Ingresa tu nombre completo (mínimo 2 caracteres).");
       hasError = true;
     } else {
       setNameError(null);
     }
 
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
+    const normalizedEmail = normalizeEmail(email);
+    if (!normalizedEmail) {
       setEmailError("Ingresa tu correo electrónico.");
       hasError = true;
-    } else if (!/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
+    } else if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
       setEmailError("Ingresa un correo electrónico válido.");
+      hasError = true;
+    } else if (isDisposableEmail(normalizedEmail)) {
+      setEmailError("No se permiten correos electrónicos temporales o desechables.");
       hasError = true;
     } else {
       setEmailError(null);
@@ -859,10 +882,13 @@ function SignUpForm() {
     if (!validateFields()) return;
     setPending(true);
 
+    const normalizedEmail = normalizeEmail(email);
+    const trimmedName = name.trim();
+
     const { data, error } = await signUp.email({
-      email,
+      email: normalizedEmail,
       password,
-      name,
+      name: trimmedName,
       callbackURL: `${window.location.origin}/auth/verify-email`,
     });
 
@@ -873,7 +899,7 @@ function SignUpForm() {
     }
 
     if (data?.user.id) await invalidateAuthFlowQueries(queryClient, data.user.id);
-    window.sessionStorage.setItem(VERIFY_EMAIL_KEY, email.trim());
+    window.sessionStorage.setItem(VERIFY_EMAIL_KEY, normalizedEmail);
     void navigate({ to: "/auth/verify-email", replace: true });
     setPending(false);
   };
@@ -917,12 +943,35 @@ function SignUpForm() {
           placeholder="nombre@ejemplo.com"
           value={email}
           aria-invalid={emailError ? true : undefined}
+          onBlur={onEmailBlur}
           onChange={(e) => {
             setEmail(e.target.value);
             setEmailError(null);
+            setSuggestedEmail(null);
             setFormError(null);
           }}
         />
+        {suggestedEmail ? (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-800 dark:text-amber-200">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <Icon icon={InformationCircleIcon} size={14} className="shrink-0" />
+              <span className="truncate">
+                ¿Quisiste escribir <strong>{suggestedEmail}</strong>?
+              </span>
+            </div>
+            <button
+              type="button"
+              className="shrink-0 cursor-pointer font-semibold underline hover:text-amber-950 dark:hover:text-amber-50"
+              onClick={() => {
+                setEmail(suggestedEmail);
+                setSuggestedEmail(null);
+                setEmailError(null);
+              }}
+            >
+              Corregir
+            </button>
+          </div>
+        ) : null}
         <FieldError>{emailError}</FieldError>
       </Field>
 

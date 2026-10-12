@@ -1,4 +1,8 @@
-import { ArrowLeft01Icon, LinkSquare01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowLeft01Icon,
+  InformationCircleIcon,
+  LinkSquare01Icon,
+} from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useState } from "react";
 
@@ -10,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { signIn } from "@/lib/auth/client";
+import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
 
 const RESEND_SECONDS = 30;
 const MAGIC_LINK_EMAIL_KEY = "claustrum.auth.magic_link_email";
@@ -62,9 +67,14 @@ export function AuthMagicLinkSentPage() {
   }, [mode, secondsLeft]);
 
   const handleSendMagicLink = async (targetEmail: string, isResend = false) => {
-    const trimmedEmail = targetEmail.trim();
+    const trimmedEmail = normalizeEmail(targetEmail);
     if (!trimmedEmail || !/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
       setErrorMessage("Ingresa un correo electrónico válido para enviar el enlace.");
+      return;
+    }
+
+    if (isDisposableEmail(trimmedEmail)) {
+      setErrorMessage("No se permiten correos electrónicos temporales o desechables.");
       return;
     }
 
@@ -147,6 +157,18 @@ function RequestState({
   errorMessage: string | null;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
+  const [suggestedEmail, setSuggestedEmail] = useState<string | null>(null);
+
+  const onEmailBlur = () => {
+    const trimmed = email.trim();
+    if (trimmed && /^\S+@\S+\.\S+$/.test(trimmed)) {
+      const suggestion = suggestEmailCorrection(trimmed);
+      setSuggestedEmail(suggestion);
+    } else {
+      setSuggestedEmail(null);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col gap-1.5">
@@ -176,8 +198,32 @@ function RequestState({
               placeholder="nombre@ejemplo.com"
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onBlur={onEmailBlur}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setSuggestedEmail(null);
+              }}
             />
+            {suggestedEmail ? (
+              <div className="flex items-center justify-between gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-800 dark:text-amber-200">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <Icon icon={InformationCircleIcon} size={14} className="shrink-0" />
+                  <span className="truncate">
+                    ¿Quisiste escribir <strong>{suggestedEmail}</strong>?
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="shrink-0 cursor-pointer font-semibold underline hover:text-amber-950 dark:hover:text-amber-50"
+                  onClick={() => {
+                    setEmail(suggestedEmail);
+                    setSuggestedEmail(null);
+                  }}
+                >
+                  Corregir
+                </button>
+              </div>
+            ) : null}
           </Field>
 
           <Button type="submit" size="lg" disabled={isSending} className="mt-1">

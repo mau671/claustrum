@@ -10,21 +10,22 @@ export function Logo({
   return (
     <svg viewBox="0 0 256 256" aria-hidden="true" className={className}>
       <path
-        d="M190 48H78C61.431 48 48 61.431 48 78v100c0 16.569 13.431 30 30 30h112"
+        d="M 220.73 23.51 H 74.45 C 52.81 23.51 35.27 41.05 35.27 62.69 v 130.61 c 0 21.64 17.54 39.18 39.18 39.18 h 146.29"
         fill="none"
         stroke={main}
-        strokeWidth="20"
+        strokeWidth="26"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <rect
-        x="84"
-        y="84"
-        width="88"
-        height="88"
-        rx="18"
+        x="82.3"
+        y="70.5"
+        width="115"
+        height="115"
+        rx="23.5"
         fill="none"
         stroke={accent}
-        strokeWidth="14"
+        strokeWidth="18"
       />
     </svg>
   );

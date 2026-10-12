@@ -179,4 +179,99 @@ app.get("/professors/:id/terms", zValidator("param", professorIdParamSchema), as
   });
 });
 
+// GET /professors/:id/history
+app.get("/professors/:id/history", zValidator("param", professorIdParamSchema), async (c) => {
+  const { id } = c.req.valid("param");
+
+  return withDb(c, async (pool) => {
+    const res = await pool.query(
+      `SELECT
+         at.id AS term_id,
+         at.year,
+         at.period_number,
+         at.display_name AS term_display_name,
+         am.name AS modality_name,
+         c.id AS course_id,
+         c.code AS course_code,
+         c.name AS course_name,
+         cog.id AS group_id,
+         cog.group_code
+       FROM public.course_offering_group_professor cogp
+       JOIN public.course_offering_group cog ON cog.id = cogp.course_offering_group_id
+       JOIN public.course_offering co ON co.id = cog.course_offering_id
+       JOIN public.course c ON c.id = co.course_id
+       JOIN public.academic_term at ON at.id = co.academic_term_id
+       LEFT JOIN public.academic_modality am ON am.id = at.academic_modality_id
+       WHERE cogp.professor_id::text = $1
+         AND co.is_active = TRUE
+         AND (cog.is_active IS NULL OR cog.is_active = TRUE)
+       ORDER BY at.year DESC, at.period_number DESC, at.id DESC, c.code ASC, cog.group_code ASC`,
+      [id],
+    );
+
+    const termMap = new Map<
+      number,
+      {
+        term_id: number;
+        year: number;
+        period_number: number;
+        term_display_name: string;
+        modality_name: string | null;
+        courses: Map<
+          number,
+          {
+            id: number;
+            code: string;
+            name: string;
+            groups: string[];
+          }
+        >;
+      }
+    >();
+
+    for (const r of res.rows) {
+      const termId = Number(r.term_id);
+      let termEntry = termMap.get(termId);
+      if (!termEntry) {
+        termEntry = {
+          term_id: termId,
+          year: Number(r.year),
+          period_number: Number(r.period_number),
+          term_display_name: r.term_display_name,
+          modality_name: r.modality_name ?? null,
+          courses: new Map(),
+        };
+        termMap.set(termId, termEntry);
+      }
+
+      const courseId = Number(r.course_id);
+      let courseEntry = termEntry.courses.get(courseId);
+      if (!courseEntry) {
+        courseEntry = {
+          id: courseId,
+          code: r.course_code,
+          name: r.course_name,
+          groups: [],
+        };
+        termEntry.courses.set(courseId, courseEntry);
+      }
+
+      if (r.group_code && !courseEntry.groups.includes(r.group_code)) {
+        courseEntry.groups.push(r.group_code);
+      }
+    }
+
+    const result = Array.from(termMap.values()).map((term) => ({
+      term_id: term.term_id,
+      year: term.year,
+      period_number: term.period_number,
+      term_display_name: term.term_display_name,
+      modality_name: term.modality_name,
+      courses: Array.from(term.courses.values()),
+    }));
+
+    return c.json(result);
+  });
+});
+
 export default app;

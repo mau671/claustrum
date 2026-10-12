@@ -14,6 +14,7 @@ import { useMemo, useState, useCallback } from "react";
 import type { ProfessorReviewStatsRow } from "@/lib/professor-reviews/types";
 
 import { FilterCombobox, normalizeText } from "@/components/filters/shared-filters";
+import { NumberedPagination } from "@/components/numbered-pagination";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Frame, FrameFooter } from "@/components/ui/frame";
@@ -27,20 +28,6 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
@@ -61,13 +48,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getProfessorNameTransitionName } from "@/lib/utils/view-transition";
 
-const DEFAULT_PAGE_SIZE = 25;
-
-const PAGE_SIZE_OPTIONS = [
-  { value: "25", label: "25 filas" },
-  { value: "50", label: "50 filas" },
-  { value: "100", label: "100 filas" },
-] as const;
+const PAGE_SIZE = 25;
 
 function formatScore(score: number | null): string {
   if (score === null) return "-";
@@ -181,7 +162,6 @@ export function ProfessorsReviewsPage() {
     [handleSort, sortBy, sortDesc],
   );
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const page = search.page ? search.page - 1 : 0;
   const setPage = (updater: number | ((prev: number) => number)) => {
     const newPage = typeof updater === "function" ? updater(page) : updater;
@@ -208,16 +188,14 @@ export function ProfessorsReviewsPage() {
     onlyWithApprovedReviews: false,
     sortBy: activeSortBy,
     sortDesc,
-    limit: pageSize,
-    offset: page * pageSize,
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
   });
 
   const rows = query.data ?? [];
   const totalCount = rows[0]?.total_count ?? 0;
-  const totalPages = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize);
+  const totalPages = totalCount === 0 ? 1 : Math.ceil(totalCount / PAGE_SIZE);
   const hasMore = page + 1 < totalPages;
-  const firstRow = rows.length === 0 ? 0 : page * pageSize + 1;
-  const lastRow = page * pageSize + rows.length;
 
   const isMobile = useIsMobile();
 
@@ -528,71 +506,14 @@ export function ProfessorsReviewsPage() {
             )}
           </TableBody>
         </Table>
-        <FrameFooter className="p-2 sm:px-4 sm:py-3">
-          <div className="flex w-full items-center justify-between gap-2">
-            <span className="text-muted-foreground text-xs">
-              {rows.length === 0
-                ? "Sin resultados"
-                : `Mostrando ${firstRow}-${lastRow} de ${totalCount}`}{" "}
-              · Página {page + 1} de {totalPages}
-              {query.isFetching ? (
-                <span className="ml-1 animate-pulse">(Actualizando…)</span>
-              ) : null}
-            </span>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Pagination className="w-auto">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        setPage((value) => Math.max(value - 1, 0));
-                      }}
-                      aria-disabled={page === 0 || query.isFetching}
-                      className={cn(
-                        page === 0 || query.isFetching ? "pointer-events-none opacity-50" : "",
-                      )}
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        setPage((value) => value + 1);
-                      }}
-                      aria-disabled={!hasMore || query.isFetching}
-                      className={cn(
-                        !hasMore || query.isFetching ? "pointer-events-none opacity-50" : "",
-                      )}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-              <div className="w-24 shrink-0">
-                <Select
-                  items={PAGE_SIZE_OPTIONS}
-                  value={String(pageSize)}
-                  onValueChange={(value) => {
-                    setPage(0);
-                    setPageSize(Number(value));
-                  }}
-                >
-                  <SelectTrigger size="sm" className="h-8 w-full min-w-0 gap-1 px-2.5 text-xs">
-                    <SelectValue placeholder="Filas" />
-                  </SelectTrigger>
-                  <SelectContent align="end" sideOffset={4}>
-                    {PAGE_SIZE_OPTIONS.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+        <FrameFooter className="p-1.5 pt-2">
+          <NumberedPagination
+            page={page}
+            totalPages={totalPages}
+            hasMore={hasMore}
+            isFetching={query.isFetching}
+            onPageChange={setPage}
+          />
         </FrameFooter>
       </Frame>
     </div>

@@ -144,6 +144,22 @@ export type ProfessorReviewTermOption = {
   ends_on: string | null;
 };
 
+export type ProfessorTeachingHistoryCourse = {
+  id: number;
+  code: string;
+  name: string;
+  groups: string[];
+};
+
+export type ProfessorTeachingHistoryTerm = {
+  term_id: number;
+  year: number;
+  period_number: number;
+  term_display_name: string;
+  modality_name: string | null;
+  courses: ProfessorTeachingHistoryCourse[];
+};
+
 export type ProfessorReviewSummary = {
   professor_id: string;
   approved_review_count: number;

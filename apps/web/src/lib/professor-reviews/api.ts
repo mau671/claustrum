@@ -10,6 +10,7 @@ import type {
   ProfessorReviewTagCount,
   ProfessorReviewStatsRow,
   ProfessorReviewStatusFilter,
+  ProfessorTeachingHistoryTerm,
   SearchProfessorReviewStatsParams,
   SubmitProfessorReviewPayload,
   SubmitProfessorReviewReportPayload,
@@ -154,6 +155,15 @@ export async function getProfessorOfferingTerms(
 ): Promise<ProfessorReviewTermOption[]> {
   const data = await apiClient<ProfessorReviewTermOption[]>(
     `/professors/${encodeURIComponent(professorId)}/terms`,
+  );
+  return data ?? [];
+}
+
+export async function getProfessorTeachingHistory(
+  professorId: string,
+): Promise<ProfessorTeachingHistoryTerm[]> {
+  const data = await apiClient<ProfessorTeachingHistoryTerm[]>(
+    `/professors/${encodeURIComponent(professorId)}/history`,
   );
   return data ?? [];
 }

@@ -16,6 +16,7 @@ import type {
   ProfessorReviewReportReason,
 } from "@/lib/professor-reviews/types";
 
+import { NumberedPagination } from "@/components/numbered-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,13 +28,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -71,12 +65,6 @@ const REPORT_REASONS: Array<{ value: ProfessorReviewReportReason; label: string 
   { value: "falso_enganoso", label: "Contenido falso o engañoso" },
   { value: "otro", label: "Otro" },
 ];
-
-const PAGE_SIZE_OPTIONS = [
-  { value: "10", label: "10 filas" },
-  { value: "25", label: "25 filas" },
-  { value: "50", label: "50 filas" },
-] as const;
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -314,14 +302,14 @@ type ProfessorReviewsListProps = {
   isLoading: boolean;
   isFetching: boolean;
   page: number;
-  pageSize: number;
-  totalCount: number;
+  totalCount?: number;
   totalPages: number;
   hasMore: boolean;
-  firstRow: number;
-  lastRow: number;
-  onPageChange: Dispatch<SetStateAction<number>>;
-  onPageSizeChange: Dispatch<SetStateAction<number>>;
+  onPageChange: Dispatch<SetStateAction<number>> | ((page: number) => void);
+  pageSize?: number;
+  firstRow?: number;
+  lastRow?: number;
+  onPageSizeChange?: Dispatch<SetStateAction<number>> | ((size: number) => void);
   showPagination?: boolean;
   frameless?: boolean;
   readOnly?: boolean;
@@ -332,14 +320,11 @@ export function ProfessorReviewsList({
   isLoading,
   isFetching,
   page,
-  pageSize,
-  totalCount,
+  pageSize = 10,
+  totalCount: _totalCount,
   totalPages,
   hasMore,
-  firstRow,
-  lastRow,
   onPageChange,
-  onPageSizeChange,
   showPagination = true,
   frameless = false,
   readOnly = false,
@@ -555,62 +540,14 @@ export function ProfessorReviewsList({
       )}
 
       {showPagination && (
-        <div className="flex items-center justify-between gap-4 px-2 sm:px-4">
-          <span className="text-muted-foreground text-xs">
-            {reviewRows.length === 0
-              ? "Sin resultados"
-              : `Mostrando ${firstRow}-${lastRow} de ${totalCount}`}{" "}
-            · Página {page + 1} de {totalPages}
-          </span>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Pagination className="w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      onPageChange((value) => Math.max(value - 1, 0));
-                    }}
-                    aria-disabled={page === 0 || isFetching}
-                    className={page === 0 || isFetching ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      onPageChange((value) => value + 1);
-                    }}
-                    aria-disabled={!hasMore || isFetching}
-                    className={!hasMore || isFetching ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-            <div className="w-24 shrink-0">
-              <Select
-                items={PAGE_SIZE_OPTIONS}
-                value={String(pageSize)}
-                onValueChange={(value) => {
-                  onPageChange(0);
-                  onPageSizeChange(Number(value));
-                }}
-              >
-                <SelectTrigger size="sm" className="h-8 w-full min-w-0 gap-1 px-2.5 text-xs">
-                  <SelectValue placeholder="Filas" />
-                </SelectTrigger>
-                <SelectContent align="end" sideOffset={4}>
-                  {PAGE_SIZE_OPTIONS.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <div className="flex justify-center p-2 sm:px-4 sm:py-3">
+          <NumberedPagination
+            page={page}
+            totalPages={totalPages}
+            hasMore={hasMore}
+            isFetching={isFetching}
+            onPageChange={onPageChange}
+          />
         </div>
       )}
 

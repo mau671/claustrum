@@ -1,8 +1,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useRouter, getRouteApi } from "@tanstack/react-router";
 const routeApi = getRouteApi("/professors/$professorId");
-import { Add01Icon, ArrowLeft02Icon, PencilLineIcon } from "@hugeicons/core-free-icons";
-import { lazy, Suspense, useState } from "react";
+import {
+  Add01Icon,
+  ArrowLeft02Icon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PencilLineIcon,
+} from "@hugeicons/core-free-icons";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { z } from "zod";
 
 import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types";
@@ -10,18 +16,22 @@ import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Icon, MorphIcon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatTermNameWithoutYear } from "@/lib/academic-terms";
 import { getTurnstileSiteKey } from "@/lib/env/public";
 import {
   useProfessorById,
   useProfessorReviewsPublic,
   useProfessorReviewSummary,
+  useProfessorTeachingHistory,
   useSubmitProfessorReview,
 } from "@/lib/hooks/use-professor-reviews";
 import { REVIEW_TAG_OPTIONS, type ReviewTag } from "@/lib/professor-reviews/types";
+import { cn } from "@/lib/utils";
 import { getProfessorNameTransitionName } from "@/lib/utils/view-transition";
 
 const ReviewComposer = lazy(() =>
@@ -53,11 +63,199 @@ const reviewFormSchema = z.object({
   turnstileToken: z.string().min(1),
 });
 
-const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE = 10;
 
 function metricLabel(value: number | null, suffix = "") {
   if (value === null) return "-";
   return `${value.toFixed(2)}${suffix}`;
+}
+
+function formatGroupCode(group: string): string {
+  const clean = group.trim();
+  const num = parseInt(clean, 10);
+  if (!isNaN(num) && clean.length <= 2) {
+    return `GR ${String(num).padStart(2, "0")}`;
+  }
+  return `GR ${clean}`;
+}
+
+function sortTermsAlphabetical<T extends { term_display_name: string }>(terms: T[]): T[] {
+  return [...terms].sort((a, b) => {
+    const nameA = formatTermNameWithoutYear(a.term_display_name).toUpperCase();
+    const nameB = formatTermNameWithoutYear(b.term_display_name).toUpperCase();
+    return nameA.localeCompare(nameB, "es", { numeric: true, sensitivity: "base" });
+  });
+}
+
+function ProfessorTeachingHistoryCard({ professorId }: { professorId: string | null }) {
+  const historyQuery = useProfessorTeachingHistory(professorId);
+  const history = historyQuery.data ?? [];
+  const [isOpen, setIsOpen] = useState(false);
+
+  const years = useMemo(() => {
+    const set = new Set<number>();
+    for (const t of history) {
+      set.add(t.year);
+    }
+    return Array.from(set).sort((a, b) => b - a);
+  }, [history]);
+
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const activeYear = selectedYear ?? years[0] ?? null;
+
+  const termsForActiveYear = useMemo(() => {
+    if (activeYear === null) return [];
+    return sortTermsAlphabetical(history.filter((t) => t.year === activeYear));
+  }, [history, activeYear]);
+
+  const [selectedTermId, setSelectedTermId] = useState<number | null>(null);
+
+  const activeTerm = useMemo(() => {
+    if (termsForActiveYear.length === 0) return null;
+    if (selectedTermId !== null) {
+      const found = termsForActiveYear.find((t) => t.term_id === selectedTermId);
+      if (found) return found;
+    }
+    return termsForActiveYear[0] ?? null;
+  }, [termsForActiveYear, selectedTermId]);
+
+  if (historyQuery.isLoading) {
+    return (
+      <Card className="overflow-hidden">
+        <div className="border-border/60 flex items-center justify-between px-5 py-3">
+          <h3 className="text-foreground text-base leading-none font-semibold">
+            Cursos impartidos
+          </h3>
+        </div>
+        <div className="text-muted-foreground p-5 text-sm">Cargando historial de cursos…</div>
+      </Card>
+    );
+  }
+
+  if (history.length === 0) {
+    return (
+      <Card className="overflow-hidden">
+        <div className="border-border/60 flex items-center justify-between px-5 py-3">
+          <h3 className="text-foreground text-base leading-none font-semibold">
+            Cursos impartidos
+          </h3>
+        </div>
+        <div className="text-muted-foreground p-5 text-sm">
+          No hay registros de cursos o grupos impartidos para este profesor.
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="overflow-hidden">
+        <CollapsibleTrigger
+          className={cn(
+            "border-border/60 hover:bg-muted/20 flex w-full cursor-pointer items-center justify-between px-5 py-3 text-left transition-colors",
+            isOpen && "border-b",
+          )}
+        >
+          <h3 className="text-foreground text-base leading-none font-semibold">
+            Cursos impartidos
+          </h3>
+          <span className="text-muted-foreground flex size-6 items-center justify-center">
+            <MorphIcon icon={isOpen ? ChevronUpIcon : ChevronDownIcon} size={16} />
+          </span>
+        </CollapsibleTrigger>
+
+        <CollapsiblePanel>
+          {/* Barra horizontal de Años */}
+          <div className="border-border/50 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto border-b px-3.5 py-2 sm:px-5 [&::-webkit-scrollbar]:hidden">
+            {years.map((year) => {
+              const isSelected = year === activeYear;
+              return (
+                <button
+                  key={year}
+                  type="button"
+                  onClick={() => {
+                    setSelectedYear(year);
+                    const termsInYear = sortTermsAlphabetical(
+                      history.filter((t) => t.year === year),
+                    );
+                    setSelectedTermId(termsInYear[0]?.term_id ?? null);
+                  }}
+                  className={cn(
+                    "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium tabular-nums transition-colors sm:text-sm",
+                    isSelected
+                      ? "bg-muted text-foreground shadow-2xs"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                  )}
+                >
+                  {year}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Barra horizontal de Periodos del año seleccionado */}
+          <div className="border-border/50 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto border-b px-3.5 py-2 sm:px-5 [&::-webkit-scrollbar]:hidden">
+            {termsForActiveYear.map((term) => {
+              const isSelected = term.term_id === activeTerm?.term_id;
+              const periodName = formatTermNameWithoutYear(term.term_display_name).toUpperCase();
+
+              return (
+                <button
+                  key={term.term_id}
+                  type="button"
+                  onClick={() => setSelectedTermId(term.term_id)}
+                  className={cn(
+                    "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm",
+                    isSelected
+                      ? "bg-muted text-foreground shadow-2xs"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                  )}
+                >
+                  {periodName}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Cursos y Grupos del periodo activo */}
+          <div className="max-h-80 overflow-y-auto px-3.5 py-2 sm:max-h-96 sm:px-5">
+            {activeTerm && activeTerm.courses.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {activeTerm.courses.map((course) => (
+                  <div
+                    key={course.id}
+                    className="flex flex-col justify-between gap-1.5 sm:flex-row sm:items-center"
+                  >
+                    <div className="min-w-0 flex-1 leading-snug break-words">
+                      <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+                        {course.code}:
+                      </span>
+                      <span className="text-foreground text-sm font-medium">{course.name}</span>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+                      {course.groups.map((group) => (
+                        <Badge
+                          key={group}
+                          variant="secondary"
+                          className="px-1.5 py-0.5 text-xs font-normal tabular-nums"
+                        >
+                          {formatGroupCode(group)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-muted-foreground py-4 text-center text-sm">
+                No hay cursos registrados para este periodo.
+              </div>
+            )}
+          </div>
+        </CollapsiblePanel>
+      </Card>
+    </Collapsible>
+  );
 }
 
 export function ProfessorDetailPage() {
@@ -80,7 +278,6 @@ export function ProfessorDetailPage() {
       replace: true,
     });
   };
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   const [selectedCourses, setSelectedCourses] = useState<ProfessorReviewCourseOption[]>([]);
@@ -108,17 +305,15 @@ export function ProfessorDetailPage() {
 
   const professorQuery = useProfessorById(professorIdText);
   const summaryQuery = useProfessorReviewSummary(professorIdText);
-  const reviewsQuery = useProfessorReviewsPublic(professorIdText, page, pageSize);
+  const reviewsQuery = useProfessorReviewsPublic(professorIdText, page, PAGE_SIZE);
   const submitMutation = useSubmitProfessorReview();
   const headingProfessorName =
     professorQuery.data?.full_name ?? cachedProfessor?.full_name ?? "Profesor";
 
   const reviewRows = reviewsQuery.data ?? [];
   const totalCount = reviewRows[0]?.total_count ?? 0;
-  const totalPages = totalCount === 0 ? 1 : Math.ceil(totalCount / pageSize);
+  const totalPages = totalCount === 0 ? 1 : Math.ceil(totalCount / PAGE_SIZE);
   const hasMore = page + 1 < totalPages;
-  const firstRow = reviewRows.length === 0 ? 0 : page * pageSize + 1;
-  const lastRow = page * pageSize + reviewRows.length;
 
   const summary = summaryQuery.data;
   const isInvalidProfessorId = parsedProfessorId === null;
@@ -268,7 +463,7 @@ export function ProfessorDetailPage() {
                     <Badge key={tag.tag} variant="secondary" className="gap-1.5 px-1.5">
                       <span>{tag.tag}</span>
                       <Separator orientation="vertical" className="h-3" />
-                      <span className="tabular-nums">{tag.count}</span>
+                      <span className="text-muted-foreground tabular-nums">{tag.count}</span>
                     </Badge>
                   ))}
                 </div>
@@ -282,20 +477,18 @@ export function ProfessorDetailPage() {
         </CardContent>
       </Card>
 
+      <ProfessorTeachingHistoryCard professorId={professorIdText} />
+
       <Suspense fallback={<div className="bg-muted/20 h-[260px] w-full rounded-lg border" />}>
         <ProfessorReviewsList
           reviewRows={reviewRows}
           isLoading={reviewsQuery.isLoading}
           isFetching={reviewsQuery.isFetching}
           page={page}
-          pageSize={pageSize}
           totalCount={totalCount}
           totalPages={totalPages}
           hasMore={hasMore}
-          firstRow={firstRow}
-          lastRow={lastRow}
           onPageChange={setPage}
-          onPageSizeChange={setPageSize}
         />
       </Suspense>
 

@@ -14,6 +14,7 @@ import {
   getCurrentUserIsAdmin,
   getProfessorOfferingTerms,
   getProfessorReviewCourses,
+  getProfessorTeachingHistory,
   getProfessorById,
   getProfessorReviewReportsForModeration,
   getProfessorReviewSummary,
@@ -156,6 +157,16 @@ export function useProfessorOfferingTerms(professorId: string | null) {
   return useQuery({
     queryKey: ["professorOfferingTerms", professorId],
     queryFn: () => getProfessorOfferingTerms(professorId!),
+    enabled: professorId !== null,
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  });
+}
+
+export function useProfessorTeachingHistory(professorId: string | null) {
+  return useQuery({
+    queryKey: ["professorTeachingHistory", professorId],
+    queryFn: () => getProfessorTeachingHistory(professorId!),
     enabled: professorId !== null,
     placeholderData: keepPreviousData,
     staleTime: 60_000,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 import type {
   CatalogUniversity,
@@ -35,6 +35,7 @@ interface CurriculumFiltersProps {
   canUseProfileDefaults?: boolean;
   isUsingProfileDefaults?: boolean;
   onUseProfileDefaults?: () => void;
+  actions?: ReactNode;
   isVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
   className?: string;
@@ -59,6 +60,7 @@ export function CurriculumFilters({
   isLoadingPlans,
   isVisible = true,
   onVisibleChange,
+  actions,
   className,
 }: CurriculumFiltersProps) {
   const [skipAnimation, setSkipAnimation] = useState(
@@ -90,6 +92,7 @@ export function CurriculumFilters({
     <FiltersPanel
       isExpanded={isVisible}
       onExpandedChange={onVisibleChange ?? (() => {})}
+      actions={actions}
       variant="plain"
       className={cn("w-full", className)}
     >

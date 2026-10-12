@@ -1,6 +1,6 @@
 import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type {
   CatalogUniversity,
@@ -65,6 +65,7 @@ interface ScheduleFiltersProps {
   onShowOtherCampusesChange?: (checked: boolean) => void;
   isVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
+  actions?: ReactNode;
   className?: string;
 }
 
@@ -103,6 +104,7 @@ export function ScheduleFilters({
   onShowOtherCampusesChange,
   isVisible = true,
   onVisibleChange,
+  actions,
   className,
 }: ScheduleFiltersProps) {
   const hasUniversities = universities.length > 0;
@@ -166,6 +168,7 @@ export function ScheduleFilters({
     <FiltersPanel
       isExpanded={isVisible}
       onExpandedChange={onVisibleChange ?? (() => {})}
+      actions={actions}
       variant="plain"
       className={cn("w-full", className)}
     >

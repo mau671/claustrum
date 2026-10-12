@@ -1267,74 +1267,74 @@ export function SchedulePage() {
             </header>
 
             <div className="px-4 lg:px-6">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                <div className="min-w-0 flex-1">
-                  <ScheduleFilters
-                    universities={universities ?? []}
-                    campuses={mainCampuses}
-                    careers={careers}
-                    plans={plans}
-                    terms={terms}
-                    selectedUniversityId={selectedUniversityId}
-                    selectedCampusId={selectedCampusId}
-                    selectedCareerId={selectedCareerId}
-                    selectedPlanId={selectedPlanId}
-                    selectedTermId={selectedTermId}
-                    onUniversityChange={handleUniversityChange}
-                    onCampusChange={handleCampusChange}
-                    onCareerChange={handleCareerChange}
-                    onPlanChange={handlePlanChange}
-                    onTermChange={handleTermChange}
-                    isLoadingUniversities={isLoadingUniversities}
-                    isLoadingCampuses={campusesQuery.isFetching && campusesQuery.data?.length === 0}
-                    isLoadingCareers={careersQuery.isFetching && careersQuery.data?.length === 0}
-                    isLoadingPlans={isLoadingPlansForFilters}
-                    isLoadingTerms={termsQuery.isFetching && termsQuery.data?.length === 0}
-                    showAll={effectiveShowAllCourses}
-                    onShowAllChange={handleShowAllChange}
-                    showAllDisabled={!isAuthenticated}
-                    showAllDisabledTooltip="Inicia sesión para habilitar este filtro"
-                    showOtherCampuses={showOtherCampuses}
-                    onShowOtherCampusesChange={handleOtherCampusesChange}
-                    isVisible={filtersOpen}
-                    onVisibleChange={handleFiltersChange}
-                  />
-                </div>
-                {isAuthenticated && userStudyPlan && (
-                  <Button
-                    type="button"
-                    variant={isProfileActive ? "secondary" : "outline"}
-                    size="sm"
-                    onClick={handleUseProfileDefaults}
-                    disabled={isProfileActive}
-                    className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                  >
-                    <HugeiconsIcon icon={UserIcon} size={14} />
-                    {isProfileActive ? "Perfil activo" : "Usar mi perfil"}
-                  </Button>
-                )}
-                {!isAuthenticated && (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant={isProfileActive ? "secondary" : "outline"}
-                          size="sm"
-                          onClick={handleSaveLocalPlan}
-                          onPointerDown={(e) => e.preventDefault()}
-                          disabled={isProfileActive}
-                          className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                        />
-                      }
-                    >
-                      <HugeiconsIcon icon={FloppyDiskIcon} size={14} />
-                      {isProfileActive ? "Guardado" : "Guardar"}
-                    </TooltipTrigger>
-                    <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
+              <ScheduleFilters
+                universities={universities ?? []}
+                campuses={mainCampuses}
+                careers={careers}
+                plans={plans}
+                terms={terms}
+                selectedUniversityId={selectedUniversityId}
+                selectedCampusId={selectedCampusId}
+                selectedCareerId={selectedCareerId}
+                selectedPlanId={selectedPlanId}
+                selectedTermId={selectedTermId}
+                onUniversityChange={handleUniversityChange}
+                onCampusChange={handleCampusChange}
+                onCareerChange={handleCareerChange}
+                onPlanChange={handlePlanChange}
+                onTermChange={handleTermChange}
+                isLoadingUniversities={isLoadingUniversities}
+                isLoadingCampuses={campusesQuery.isFetching && campusesQuery.data?.length === 0}
+                isLoadingCareers={careersQuery.isFetching && careersQuery.data?.length === 0}
+                isLoadingPlans={isLoadingPlansForFilters}
+                isLoadingTerms={termsQuery.isFetching && termsQuery.data?.length === 0}
+                showAll={effectiveShowAllCourses}
+                onShowAllChange={handleShowAllChange}
+                showAllDisabled={!isAuthenticated}
+                showAllDisabledTooltip="Inicia sesión para habilitar este filtro"
+                showOtherCampuses={showOtherCampuses}
+                onShowOtherCampusesChange={handleOtherCampusesChange}
+                isVisible={filtersOpen}
+                onVisibleChange={handleFiltersChange}
+                actions={
+                  <>
+                    {isAuthenticated && userStudyPlan && (
+                      <Button
+                        type="button"
+                        variant={isProfileActive ? "secondary" : "outline"}
+                        size="sm"
+                        onClick={handleUseProfileDefaults}
+                        disabled={isProfileActive}
+                        className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                      >
+                        <HugeiconsIcon icon={UserIcon} size={14} />
+                        {isProfileActive ? "Perfil activo" : "Usar mi perfil"}
+                      </Button>
+                    )}
+                    {!isAuthenticated && (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant={isProfileActive ? "secondary" : "outline"}
+                              size="sm"
+                              onClick={handleSaveLocalPlan}
+                              onPointerDown={(e) => e.preventDefault()}
+                              disabled={isProfileActive}
+                              className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                            />
+                          }
+                        >
+                          <HugeiconsIcon icon={FloppyDiskIcon} size={14} />
+                          {isProfileActive ? "Guardado" : "Guardar"}
+                        </TooltipTrigger>
+                        <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </>
+                }
+              />
             </div>
 
             {!hasRequiredScheduleFilters && !coursesQuery.isLoading && !isPendingFilters && (

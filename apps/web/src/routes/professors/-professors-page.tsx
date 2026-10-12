@@ -1,4 +1,4 @@
-import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, ChevronDownIcon, ChevronUpIcon } from "@hugeicons/core-free-icons";
 import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, getRouteApi } from "@tanstack/react-router";
@@ -17,7 +17,7 @@ import { FilterCombobox, normalizeText } from "@/components/filters/shared-filte
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Frame, FrameFooter } from "@/components/ui/frame";
-import { Icon } from "@/components/ui/icon";
+import { Icon, MorphIcon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -439,11 +439,7 @@ export function ProfessorsReviewsPage() {
               }
               className="lg:hidden"
             >
-              {filtersExpanded ? (
-                <Icon icon={ChevronDownIcon} size={16} className="size-4" />
-              ) : (
-                <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-              )}
+              <MorphIcon icon={filtersExpanded ? Cancel01Icon : ChevronDownIcon} size={16} />
             </CollapsibleTrigger>
           </div>
 

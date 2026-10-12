@@ -421,69 +421,69 @@ export function CurriculumPage() {
           </header>
 
           <div className="px-4 lg:px-6">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <div className="min-w-0 flex-1">
-                <CurriculumFilters
-                  universities={universities ?? []}
-                  campuses={mainCampuses}
-                  careerPrograms={academicUnits}
-                  plans={plans}
-                  selectedUniversityId={selectedUniversityId}
-                  selectedCampusId={selectedCampusId}
-                  selectedCareerProgramId={selectedAcademicUnitId}
-                  selectedPlanId={selectedPlanId}
-                  onUniversityChange={handleUniversityChange}
-                  onCampusChange={handleCampusChange}
-                  onCareerProgramChange={handleAcademicUnitChange}
-                  onPlanChange={handlePlanChange}
-                  isLoadingUniversities={isLoadingUniversities}
-                  isLoadingCampuses={campusesQuery.isFetching && campusesQuery.data?.length === 0}
-                  isLoadingCareerPrograms={
-                    academicUnitsQuery.isFetching && academicUnitsQuery.data?.length === 0
-                  }
-                  isLoadingPlans={isLoadingPlansForFilters}
-                  canUseProfileDefaults={!!authUser && !!userStudyPlan}
-                  isUsingProfileDefaults={isUsingProfileDefaults}
-                  onUseProfileDefaults={handleUseProfileDefaults}
-                  isVisible={filtersOpen}
-                  onVisibleChange={handleFiltersChange}
-                />
-              </div>
-              {!!authUser && !!userStudyPlan && (
-                <Button
-                  type="button"
-                  variant={isUsingProfileDefaults ? "secondary" : "outline"}
-                  size="sm"
-                  onClick={handleUseProfileDefaults}
-                  disabled={isUsingProfileDefaults}
-                  className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                >
-                  <Icon icon={UserIcon} className="size-3.5" />
-                  {isUsingProfileDefaults ? "Perfil activo" : "Usar mi perfil"}
-                </Button>
-              )}
-              {!authUser && (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        type="button"
-                        variant={isUsingProfileDefaults ? "secondary" : "outline"}
-                        size="sm"
-                        onClick={handleSaveLocalPlan}
-                        onPointerDown={(e) => e.preventDefault()}
-                        disabled={isUsingProfileDefaults}
-                        className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                      />
-                    }
-                  >
-                    <Icon icon={FloppyDiskIcon} className="size-3.5" />
-                    {isUsingProfileDefaults ? "Guardado" : "Guardar"}
-                  </TooltipTrigger>
-                  <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
+            <CurriculumFilters
+              universities={universities ?? []}
+              campuses={mainCampuses}
+              careerPrograms={academicUnits}
+              plans={plans}
+              selectedUniversityId={selectedUniversityId}
+              selectedCampusId={selectedCampusId}
+              selectedCareerProgramId={selectedAcademicUnitId}
+              selectedPlanId={selectedPlanId}
+              onUniversityChange={handleUniversityChange}
+              onCampusChange={handleCampusChange}
+              onCareerProgramChange={handleAcademicUnitChange}
+              onPlanChange={handlePlanChange}
+              isLoadingUniversities={isLoadingUniversities}
+              isLoadingCampuses={campusesQuery.isFetching && campusesQuery.data?.length === 0}
+              isLoadingCareerPrograms={
+                academicUnitsQuery.isFetching && academicUnitsQuery.data?.length === 0
+              }
+              isLoadingPlans={isLoadingPlansForFilters}
+              canUseProfileDefaults={!!authUser && !!userStudyPlan}
+              isUsingProfileDefaults={isUsingProfileDefaults}
+              onUseProfileDefaults={handleUseProfileDefaults}
+              isVisible={filtersOpen}
+              onVisibleChange={handleFiltersChange}
+              actions={
+                <>
+                  {!!authUser && !!userStudyPlan && (
+                    <Button
+                      type="button"
+                      variant={isUsingProfileDefaults ? "secondary" : "outline"}
+                      size="sm"
+                      onClick={handleUseProfileDefaults}
+                      disabled={isUsingProfileDefaults}
+                      className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                    >
+                      <Icon icon={UserIcon} className="size-3.5" />
+                      {isUsingProfileDefaults ? "Perfil activo" : "Usar mi perfil"}
+                    </Button>
+                  )}
+                  {!authUser && (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant={isUsingProfileDefaults ? "secondary" : "outline"}
+                            size="sm"
+                            onClick={handleSaveLocalPlan}
+                            onPointerDown={(e) => e.preventDefault()}
+                            disabled={isUsingProfileDefaults}
+                            className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
+                          />
+                        }
+                      >
+                        <Icon icon={FloppyDiskIcon} className="size-3.5" />
+                        {isUsingProfileDefaults ? "Guardado" : "Guardar"}
+                      </TooltipTrigger>
+                      <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
+                    </Tooltip>
+                  )}
+                </>
+              }
+            />
           </div>
 
           {planDetailQuery.isError && (

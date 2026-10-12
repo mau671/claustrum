@@ -660,7 +660,7 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
         </Alert>
       ) : null}
       <Field>
-        <div className="flex items-center justify-between">
+        <div className="flex w-full items-center justify-between gap-2">
           <FieldLabel htmlFor="login-email">
             Correo electrónico <span className="text-muted-foreground">*</span>
           </FieldLabel>

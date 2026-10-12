@@ -16,6 +16,10 @@ export interface StepperStep {
   label: string;
   /** Optional summary of chosen value when step is completed. */
   summary?: string;
+  /** Optional always-visible hint under the label (vertical orientation). */
+  description?: string;
+  /** Optional rich detail rendered under the label in vertical orientation (e.g. a progress bar). */
+  details?: React.ReactNode;
   /** Optional error message when validation fails. */
   error?: string;
   /** Content/field rendered inside this step (combobox, input, etc.). */
@@ -498,7 +502,11 @@ export function Stepper({
                   <p className="text-destructive animate-in fade-in-50 mt-1.5 text-xs font-medium duration-150">
                     {step.error}
                   </p>
+                ) : step.description ? (
+                  <p className="text-muted-foreground mt-0.5 text-xs">{step.description}</p>
                 ) : null}
+
+                {step.details ? <div className="mt-1.5">{step.details}</div> : null}
               </div>
             </li>
           );

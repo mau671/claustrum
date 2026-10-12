@@ -89,7 +89,7 @@ function sortTermsAlphabetical<T extends { term_display_name: string }>(terms: T
 
 function ProfessorTeachingHistoryCard({ professorId }: { professorId: string | null }) {
   const historyQuery = useProfessorTeachingHistory(professorId);
-  const history = historyQuery.data ?? [];
+  const history = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
   const [isOpen, setIsOpen] = useState(false);
 
   const years = useMemo(() => {

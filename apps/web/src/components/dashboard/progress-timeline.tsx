@@ -1,83 +1,91 @@
+/* oxlint-disable prefer-tag-over-role -- role="progressbar" on a div is intentional: a native <progress> element cannot be themed per semester status */
 "use client";
 
-import { CheckmarkCircle02Icon, CircleDashedIcon, CircleIcon } from "@hugeicons/core-free-icons";
+import { useMemo } from "react";
 
 import type { SemesterProgress } from "@/lib/types";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { Stepper, type StepperStep } from "@/components/ui/stepper";
+import { cn } from "@/lib/utils";
 
 interface ProgressTimelineProps {
   semesters: SemesterProgress[];
 }
 
 export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
+  const steps: StepperStep[] = useMemo(
+    () =>
+      semesters.map((semester) => {
+        // The API returns null for aggregates over empty sets (semester without courses).
+        const completedCourses =
+          typeof semester.completedCourses === "number" ? semester.completedCourses : 0;
+        const completedCredits =
+          typeof semester.completedCredits === "number" ? semester.completedCredits : 0;
+        const percentage =
+          semester.totalCourses > 0 ? (completedCourses / semester.totalCourses) * 100 : 0;
+
+        return {
+          id: String(semester.levelNumber),
+          label: semester.levelLabel,
+          details: (
+            <div className="flex flex-col gap-1.5">
+              <div
+                className="bg-muted h-1.5 overflow-hidden rounded-full"
+                role="progressbar"
+                aria-label={`${semester.levelLabel}: ${completedCourses} de ${semester.totalCourses} cursos`}
+                aria-valuemin={0}
+                aria-valuemax={semester.totalCourses}
+                aria-valuenow={completedCourses}
+              >
+                <div
+                  className={cn(
+                    "h-full rounded-full",
+                    semester.status === "completed" && "bg-status-success",
+                    semester.status === "in_progress" && "bg-status-info",
+                    semester.status === "pending" && "bg-status-neutral/40",
+                  )}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-medium tabular-nums">
+                  {completedCourses}/{semester.totalCourses} cursos
+                </span>
+                <span className="text-muted-foreground tabular-nums">
+                  {completedCredits}/{semester.credits} créditos
+                </span>
+              </div>
+            </div>
+          ),
+        };
+      }),
+    [semesters],
+  );
+
+  const activeIndex = useMemo(() => {
+    const firstPending = semesters.findIndex((semester) => semester.status !== "completed");
+    return firstPending === -1 ? semesters.length : firstPending;
+  }, [semesters]);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Progreso por semestre</CardTitle>
+        <CardTitle className="text-base font-semibold">Progreso por semestre</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="relative">
-          {semesters.map((semester, index) => (
-            <div key={semester.levelNumber} className="flex items-start pb-6 last:pb-0">
-              <div className="relative mr-4 flex flex-col items-center">
-                <div
-                  className={`relative z-10 flex size-8 items-center justify-center rounded-full ${
-                    semester.status === "completed"
-                      ? "bg-emerald-500 text-white"
-                      : semester.status === "in_progress"
-                        ? "bg-blue-500 text-white"
-                        : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {semester.status === "completed" ? (
-                    <Icon icon={CheckmarkCircle02Icon} className="size-5" />
-                  ) : semester.status === "in_progress" ? (
-                    <Icon icon={CircleDashedIcon} className="size-5 animate-pulse" />
-                  ) : (
-                    <Icon icon={CircleIcon} className="size-5" />
-                  )}
-                </div>
-                {index < semesters.length - 1 && (
-                  <div
-                    className={`absolute top-8 bottom-0 w-0.5 -translate-y-1/2 ${
-                      semester.status === "completed" ? "bg-emerald-500" : "bg-muted"
-                    }`}
-                    style={{ height: "calc(100% + 1.5rem)" }}
-                  />
-                )}
-              </div>
-              <div className="flex-1 pt-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{semester.levelLabel}</span>
-                  <span className="text-muted-foreground text-sm">
-                    {semester.completedCourses}/{semester.totalCourses} cursos
-                  </span>
-                </div>
-                <div className="bg-muted mt-2 h-2 overflow-hidden rounded-full">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      semester.status === "completed"
-                        ? "bg-emerald-500"
-                        : semester.status === "in_progress"
-                          ? "bg-blue-500"
-                          : "bg-muted-foreground/30"
-                    }`}
-                    style={{
-                      width: `${semester.totalCourses > 0 ? (semester.completedCourses / semester.totalCourses) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-                <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
-                  <span>
-                    {semester.completedCredits}/{semester.credits} créditos
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {semesters.length === 0 ? (
+          <p className="text-muted-foreground py-4 text-center text-sm">
+            No hay semestres para mostrar.
+          </p>
+        ) : (
+          <Stepper
+            steps={steps}
+            current={activeIndex}
+            orientation="vertical"
+            label="Progreso por semestre"
+          />
+        )}
       </CardContent>
     </Card>
   );

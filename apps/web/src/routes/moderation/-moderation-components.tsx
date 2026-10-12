@@ -1,11 +1,4 @@
-import {
-  Calendar03Icon,
-  Cancel01Icon,
-  CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  Clock01Icon,
-} from "@hugeicons/core-free-icons";
+import { Cancel01Icon, CheckIcon } from "@hugeicons/core-free-icons";
 import {
   createColumnHelper,
   flexRender,
@@ -22,18 +15,13 @@ import type {
   ProfessorReviewStatus,
 } from "@/lib/professor-reviews/types";
 
+import { NumberedPagination } from "@/components/numbered-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardPanel } from "@/components/ui/card";
-import { Frame, FrameFooter, FrameHeader } from "@/components/ui/frame";
+import { Frame, FrameFooter, FrameHeader, FrameTitle } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-} from "@/components/ui/pagination";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,66 +46,82 @@ function formatScore(value: number | null): string {
   return value === null ? "-" : value.toFixed(1);
 }
 
-function formatDateTime(dateString: string | null | undefined): string {
-  if (!dateString) return "—";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
 function ReviewCourses({ review }: { review: ProfessorReviewModerationRow }) {
+  if (!review.courses || review.courses.length === 0) return null;
+
   return (
-    <div className="space-y-1">
-      {review.courses.map((course) => (
-        <p
-          key={`${review.review_id}-${course.id}`}
-          className="text-muted-foreground text-sm break-words"
-        >
-          {course.code}: {course.name}
-        </p>
-      ))}
+    <div className="space-y-1.5">
+      <h4 className="text-foreground text-sm font-medium">
+        {review.courses.length > 1 ? "Cursos asociados" : "Curso asociado"}
+      </h4>
+      <div className="space-y-1">
+        {review.courses.map((course) => (
+          <div
+            key={`${review.review_id}-${course.id}`}
+            className="text-foreground text-sm leading-snug font-medium break-words"
+          >
+            <span className="text-muted-foreground mr-1.5 text-xs font-normal">{course.code}:</span>
+            <span>{course.name}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 function ReviewScoreSummary({ review }: { review: ProfessorReviewModerationRow }) {
-  const scores = [
-    { label: "Facilidad", value: formatScore(review.ease_score) },
+  const ratings = [
     { label: "Calidad", value: formatScore(review.quality_score) },
+    { label: "Facilidad", value: formatScore(review.ease_score) },
     ...(review.clarity_score !== null
       ? [{ label: "Claridad", value: formatScore(review.clarity_score) }]
       : []),
     ...(review.fairness_score !== null
       ? [{ label: "Justicia", value: formatScore(review.fairness_score) }]
       : []),
-    ...(review.attendance_required !== null
-      ? [
-          {
-            label: "Asistencia",
-            value: review.attendance_required ? "Obligatoria" : "No obligatoria",
-          },
-        ]
-      : []),
-    ...(review.grade_received !== null ? [{ label: "Nota", value: review.grade_received }] : []),
-    ...(review.engagement_level !== null
-      ? [{ label: "Interés", value: review.engagement_level }]
-      : []),
   ];
 
+  const hasAttendance = review.attendance_required !== null;
+  const hasGrade = Boolean(review.grade_received && String(review.grade_received).trim() !== "");
+  const hasEngagement = Boolean(
+    review.engagement_level && String(review.engagement_level).trim() !== "",
+  );
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {scores.map((s, i) => (
-        <div
-          key={i}
-          className="bg-muted text-muted-foreground flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs"
-        >
-          <span className="font-medium">{s.label}:</span>
-          <span>{s.value}</span>
+    <div className="space-y-3">
+      {/* Grid de métricas numéricas */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {ratings.map((r) => (
+          <div
+            key={r.label}
+            className="border-border/60 bg-muted/25 flex flex-col rounded-lg border p-2.5"
+          >
+            <span className="text-muted-foreground text-[11px] font-medium">{r.label}</span>
+            <span className="text-foreground text-base font-bold tabular-nums">{r.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Contexto académico (asistencia, nota obtenida, interés) */}
+      {(hasAttendance || hasGrade || hasEngagement) && (
+        <div className="text-muted-foreground border-border/40 bg-muted/15 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border px-3 py-2 text-xs">
+          {hasAttendance && (
+            <span>
+              <strong>Asistencia:</strong> {review.attendance_required ? "Obligatoria" : "Opcional"}
+            </span>
+          )}
+          {hasGrade && (
+            <span>
+              <strong>Nota obtenida:</strong> {review.grade_received}
+            </span>
+          )}
+          {hasEngagement && (
+            <span>
+              <strong>Interés:</strong> {review.engagement_level}
+            </span>
+          )}
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -152,14 +156,9 @@ export function ReviewReportSection({
   isPending: boolean;
 }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <Frame
-        className={cn(
-          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
-          selectedReport && "hidden lg:flex",
-        )}
-      >
-        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
+    <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
+      <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
+        <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
               <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 p-6 text-sm">
@@ -217,87 +216,80 @@ export function ReviewReportSection({
       </Frame>
 
       {selectedReport && (
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:max-h-full lg:overflow-y-auto">
-          <div className="flex flex-col gap-2 sm:hidden">
-            <h2 className="text-sm font-semibold">Reporte</h2>
-            <Button variant="ghost" size="sm" onClick={() => onSelect(null)} className="w-fit">
-              Volver
-            </Button>
-          </div>
-
-          <div className="bg-card text-card-foreground flex flex-col overflow-hidden rounded-xl border shadow-xs">
-            <div className="flex flex-col gap-3 p-5 md:p-6">
-              <div className="space-y-1">
-                <h3 className="text-xl leading-none font-semibold tracking-tight">
-                  {selectedReport.course_code}: {selectedReport.course_name}
-                </h3>
-              </div>
-
-              <div className="relative mt-2">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="border-border/50 w-full border-t" />
-                </div>
-              </div>
-
-              <div className="text-muted-foreground flex flex-col gap-1.5 text-xs">
+        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0 lg:overflow-y-auto">
+          <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
+            <FrameTitle className="text-lg leading-tight font-semibold sm:text-xl">
+              {selectedReport.course_code}: {selectedReport.course_name}
+            </FrameTitle>
+            <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+              <span>
+                <strong>Profesor:</strong> {selectedReport.professor_name}
+              </span>
+              <span>
+                <strong>Motivo:</strong> {selectedReport.reason}
+              </span>
+              {selectedReport.description && (
                 <span>
-                  <strong>Profesor:</strong> {selectedReport.professor_name}
+                  <strong>Detalles:</strong> {selectedReport.description}
                 </span>
-                <span>
-                  <strong>Motivo:</strong> {selectedReport.reason}
-                </span>
-                {selectedReport.description && (
-                  <span>
-                    <strong>Detalles adicionales:</strong> {selectedReport.description}
-                  </span>
-                )}
-              </div>
+              )}
+            </div>
+          </FrameHeader>
 
-              <div className="mt-2 space-y-1.5">
-                <h4 className="text-sm font-medium">Comentario reportado</h4>
-                <div className="bg-muted/50 rounded-md border p-3 text-sm">
+          <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
+            <CardPanel className="flex flex-col gap-3.5 p-4 sm:p-5">
+              <div className="space-y-1.5">
+                <h4 className="text-muted-foreground text-xs font-semibold">
+                  Comentario reportado
+                </h4>
+                <div className="bg-muted/50 rounded-lg border p-3 text-sm">
                   {selectedReport.comment}
                 </div>
               </div>
-            </div>
 
-            <div className="bg-muted/30 flex flex-col gap-3 border-t p-4 md:p-5">
-              <div className="flex flex-col gap-1.5">
-                <Label
-                  htmlFor={`note-report-${selectedReport.report_id}`}
-                  className="text-sm font-medium"
-                >
-                  Nota de resolución
-                </Label>
+              <div className="flex flex-col gap-1.5 pt-1">
+                <div className="inline-flex w-full items-center justify-between gap-2">
+                  <Label
+                    htmlFor={`note-report-${selectedReport.report_id}`}
+                    className="text-sm font-medium"
+                  >
+                    Nota de resolución
+                  </Label>
+                  <Label className="text-muted-foreground text-sm font-normal" render={<span />}>
+                    Opcional
+                  </Label>
+                </div>
                 <Textarea
                   id={`note-report-${selectedReport.report_id}`}
                   value={moderationNote[selectedReport.report_id] ?? ""}
                   onChange={(e) => onNoteChange(selectedReport.report_id, e.target.value)}
-                  className="bg-background h-20 min-h-0 resize-none text-sm shadow-none"
+                  className="bg-background h-20 min-h-0 resize-none text-xs shadow-none sm:text-sm"
                   placeholder="Escribe una nota opcional para explicar el contexto de la decisión"
                 />
               </div>
+            </CardPanel>
+          </Card>
 
-              <div className="flex gap-3">
-                <Button
-                  className="flex-1"
-                  onClick={() => void onResolve(selectedReport.report_id)}
-                  disabled={isPending}
-                >
-                  <Icon icon={CheckIcon} size={16} className="mr-2 size-4" /> Resolver
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => void onDismiss(selectedReport.report_id)}
-                  disabled={isPending}
-                >
-                  <Icon icon={Cancel01Icon} size={16} className="mr-2 size-4" /> Descartar
-                </Button>
-              </div>
+          <FrameFooter className="p-2 sm:p-2.5">
+            <div className="flex w-full gap-2.5">
+              <Button
+                className="flex-1"
+                onClick={() => void onResolve(selectedReport.report_id)}
+                disabled={isPending}
+              >
+                <Icon icon={CheckIcon} size={16} className="mr-1.5 size-4" /> Resolver
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={() => void onDismiss(selectedReport.report_id)}
+                disabled={isPending}
+              >
+                <Icon icon={Cancel01Icon} size={16} className="mr-1.5 size-4" /> Descartar
+              </Button>
             </div>
-          </div>
-        </div>
+          </FrameFooter>
+        </Frame>
       )}
     </div>
   );
@@ -364,82 +356,14 @@ export function ModerationPagination({
   isFetching: boolean;
   onPageChange: (newPage: number) => void;
 }) {
-  const currentPage = page + 1;
-  const paginationItems = useMemo(() => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    if (currentPage <= 3) {
-      return [1, 2, 3, "ellipsis", totalPages] as const;
-    }
-    if (currentPage >= totalPages - 2) {
-      return [1, "ellipsis", totalPages - 2, totalPages - 1, totalPages] as const;
-    }
-    return [1, "ellipsis", currentPage, "ellipsis", totalPages] as const;
-  }, [currentPage, totalPages]);
-
   return (
-    <Pagination className="mx-auto w-full justify-center">
-      <PaginationContent className="flex flex-row items-center justify-center gap-1">
-        <PaginationItem>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground size-8"
-            disabled={page === 0 || isFetching}
-            onClick={() => onPageChange(Math.max(page - 1, 0))}
-            aria-label="Página anterior"
-          >
-            <Icon icon={ChevronLeftIcon} size={16} className="size-4" />
-          </Button>
-        </PaginationItem>
-
-        {paginationItems.map((item, index) => {
-          if (item === "ellipsis") {
-            return (
-              <PaginationItem key={`ellipsis-${index}`}>
-                <PaginationEllipsis className="text-muted-foreground flex size-8 items-center justify-center" />
-              </PaginationItem>
-            );
-          }
-
-          const pageNumber = item as number;
-          const isCurrent = currentPage === pageNumber;
-
-          return (
-            <PaginationItem key={pageNumber}>
-              <Button
-                variant={isCurrent ? "outline" : "ghost"}
-                size="icon"
-                className={cn(
-                  "size-8 text-xs font-medium tabular-nums",
-                  isCurrent &&
-                    "border-border/80 bg-background text-foreground font-semibold shadow-xs",
-                )}
-                onClick={() => onPageChange(pageNumber - 1)}
-                aria-label={`Página ${pageNumber}`}
-                aria-current={isCurrent ? "page" : undefined}
-              >
-                {pageNumber}
-              </Button>
-            </PaginationItem>
-          );
-        })}
-
-        <PaginationItem>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground size-8"
-            disabled={!hasMore || isFetching}
-            onClick={() => onPageChange(page + 1)}
-            aria-label="Página siguiente"
-          >
-            <Icon icon={ChevronRightIcon} size={16} className="size-4" />
-          </Button>
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+    <NumberedPagination
+      page={page}
+      totalPages={totalPages}
+      hasMore={hasMore}
+      isFetching={isFetching}
+      onPageChange={onPageChange}
+    />
   );
 }
 
@@ -482,36 +406,6 @@ export function ReviewSection({
   onReject: (id: number) => Promise<void>;
   isPending: boolean;
 }) {
-  const getStatusBadge = (status: "pending" | "approved" | "rejected") => {
-    switch (status) {
-      case "approved":
-        return (
-          <Badge
-            variant="outline"
-            className="shrink-0 border-emerald-500/50 bg-emerald-500/10 px-1.5 py-0 text-[10px] font-medium text-emerald-700 dark:text-emerald-400"
-          >
-            Aprobada
-          </Badge>
-        );
-      case "rejected":
-        return (
-          <Badge variant="destructive" className="shrink-0 px-1.5 py-0 text-[10px] font-medium">
-            Rechazada
-          </Badge>
-        );
-      case "pending":
-      default:
-        return (
-          <Badge
-            variant="secondary"
-            className="shrink-0 border-amber-500/50 bg-amber-500/10 px-1.5 py-0 text-[10px] font-medium text-amber-700 dark:text-amber-400"
-          >
-            Pendiente
-          </Badge>
-        );
-    }
-  };
-
   const columns = useMemo(
     () => [
       reviewQueueColumnHelper.display({
@@ -568,20 +462,15 @@ export function ReviewSection({
   const calculatedTotalPages = totalPages ?? Math.max(1, hasMore ? page + 2 : page + 1);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <Frame
-        className={cn(
-          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
-          selectedReview && "hidden lg:flex",
-        )}
-      >
+    <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
+      <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
         {onStatusChange && (
           <FrameHeader className="p-1 pb-1.5">
             <ReviewStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
           </FrameHeader>
         )}
 
-        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
+        <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
               <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
@@ -624,119 +513,97 @@ export function ReviewSection({
       </Frame>
 
       {selectedReview && (
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:max-h-full lg:overflow-y-auto">
-          <div className="flex items-start justify-between gap-2 sm:hidden">
-            <h2 className="text-sm font-semibold">Revisión</h2>
-            <Button variant="ghost" size="sm" onClick={() => onSelect(null)}>
-              Volver
-            </Button>
-          </div>
+        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0 lg:overflow-y-auto">
+          <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
+            <FrameTitle className="text-lg leading-tight font-semibold sm:text-xl">
+              {selectedReview.professor_name}
+            </FrameTitle>
+          </FrameHeader>
 
-          <div className="bg-card text-card-foreground flex flex-col overflow-hidden rounded-xl border shadow-xs">
-            <div className="flex flex-col gap-3 p-5 md:p-6">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <h3 className="text-xl leading-none font-semibold tracking-tight">
-                    {selectedReview.professor_name}
-                  </h3>
-                  <div className="pt-2">
-                    <ReviewCourses review={selectedReview} />
-                  </div>
-                </div>
-                {getStatusBadge(selectedReview.status)}
+          <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
+            <CardPanel className="flex flex-col gap-4 p-4 sm:p-5">
+              {/* Cursos asociados */}
+              <ReviewCourses review={selectedReview} />
+
+              {/* Comentario del estudiante */}
+              <div className="space-y-1.5">
+                <h4 className="text-foreground text-sm font-medium">Comentario</h4>
+                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed whitespace-pre-wrap">
+                  {selectedReview.comment}
+                </blockquote>
               </div>
 
-              {/* Date and time details adapted to user's browser timezone */}
-              <div className="bg-muted/40 border-border/60 text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border px-3 py-2 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <Icon icon={Calendar03Icon} size={14} className="size-3.5" />
-                  <span>
-                    Enviada:{" "}
-                    <strong className="text-foreground font-medium">
-                      {formatDateTime(selectedReview.created_at)}
-                    </strong>
-                  </span>
-                </div>
-                {selectedReview.reviewed_at && (
-                  <div className="flex items-center gap-1.5">
-                    <Icon icon={Clock01Icon} size={14} className="size-3.5" />
-                    <span>
-                      Moderada:{" "}
-                      <strong className="text-foreground font-medium">
-                        {formatDateTime(selectedReview.reviewed_at)}
-                      </strong>
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative mt-1">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="border-border/50 w-full border-t" />
-                </div>
-              </div>
-
-              <blockquote className="border-primary/50 text-muted-foreground my-2 border-l-2 pl-4 italic">
-                "{selectedReview.comment}"
-              </blockquote>
-
+              {/* Métricas y contexto académico */}
               <ReviewScoreSummary review={selectedReview} />
 
+              {/* Etiquetas */}
               {selectedReview.tags && selectedReview.tags.length > 0 && (
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  {selectedReview.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="font-normal">
-                      {tag}
-                    </Badge>
-                  ))}
+                <div className="space-y-1.5">
+                  <h4 className="text-foreground text-sm font-medium">Etiquetas</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedReview.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="rounded-md px-2 py-0.5 text-xs font-normal"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
 
+              {/* Nota previa de moderación */}
               {selectedReview.moderation_note && (
-                <div className="text-muted-foreground bg-muted/60 mt-2 rounded-md border p-2.5 text-xs">
-                  <strong className="text-foreground">Nota previa:</strong>{" "}
-                  {selectedReview.moderation_note}
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-900 dark:text-amber-200">
+                  <strong>Nota previa de moderación:</strong> {selectedReview.moderation_note}
                 </div>
               )}
-            </div>
 
-            <div className="bg-muted/30 flex flex-col gap-3 border-t p-4 md:p-5">
-              <div className="flex flex-col gap-1.5">
-                <Label
-                  htmlFor={`note-review-${selectedReview.review_id}`}
-                  className="text-sm font-medium"
-                >
-                  Nota de moderación
-                </Label>
+              <div className="flex flex-col gap-1.5 pt-1">
+                <div className="inline-flex w-full items-center justify-between gap-2">
+                  <Label
+                    htmlFor={`note-review-${selectedReview.review_id}`}
+                    className="text-sm font-medium"
+                  >
+                    Nota de moderación
+                  </Label>
+                  <Label className="text-muted-foreground text-sm font-normal" render={<span />}>
+                    Opcional
+                  </Label>
+                </div>
                 <Textarea
                   id={`note-review-${selectedReview.review_id}`}
                   value={moderationNote[selectedReview.review_id] ?? ""}
                   onChange={(e) => onNoteChange(selectedReview.review_id, e.target.value)}
-                  className="bg-background h-20 min-h-0 resize-none text-sm shadow-none"
+                  className="bg-background h-20 min-h-0 resize-none text-xs shadow-none sm:text-sm"
                   placeholder="Escribe una nota opcional para explicar el motivo del rechazo o aprobación"
                 />
               </div>
+            </CardPanel>
+          </Card>
 
-              <div className="flex gap-3">
-                <Button
-                  className="flex-1"
-                  onClick={() => void onApprove(selectedReview.review_id)}
-                  disabled={isPending}
-                >
-                  <Icon icon={CheckIcon} size={16} className="mr-2 size-4" /> Aprobar
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => void onReject(selectedReview.review_id)}
-                  disabled={isPending}
-                >
-                  <Icon icon={Cancel01Icon} size={16} className="mr-2 size-4" /> Rechazar
-                </Button>
-              </div>
+          <FrameFooter className="p-2 sm:p-2.5">
+            <div className="flex w-full gap-2.5">
+              <Button
+                className="flex-1"
+                onClick={() => void onApprove(selectedReview.review_id)}
+                disabled={isPending}
+              >
+                <Icon icon={CheckIcon} size={16} className="mr-1.5 size-4" /> Aprobar
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={() => void onReject(selectedReview.review_id)}
+                disabled={isPending}
+              >
+                <Icon icon={Cancel01Icon} size={16} className="mr-1.5 size-4" /> Rechazar
+              </Button>
             </div>
-          </div>
-        </div>
+          </FrameFooter>
+        </Frame>
       )}
     </div>
   );
@@ -891,14 +758,9 @@ export function EvaluationSection({
   isPending: boolean;
 }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <Frame
-        className={cn(
-          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
-          selectedEvaluation && "hidden lg:flex",
-        )}
-      >
-        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
+    <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
+      <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
+        <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
               <div className="text-muted-foreground flex items-center justify-center gap-2 p-6 text-sm">
@@ -973,29 +835,13 @@ export function EvaluationSection({
       </Frame>
 
       {selectedEvaluation && (
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:flex-row">
-          <div className="flex flex-col gap-2 sm:hidden">
-            <h2 className="text-sm font-semibold">Revisión</h2>
-            <Button variant="ghost" size="sm" onClick={() => onSelect(null)} className="w-fit">
-              Volver
-            </Button>
-          </div>
-
-          <div className="bg-card text-card-foreground flex min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto rounded-xl border shadow-xs lg:w-80">
-            <div className="flex flex-col gap-3 p-5 md:p-6">
-              <div className="space-y-1">
-                <h3 className="text-xl leading-none font-semibold tracking-tight">
-                  {selectedEvaluation.course_code}: {selectedEvaluation.course_name}
-                </h3>
-              </div>
-
-              <div className="relative mt-2">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="border-border/50 w-full border-t" />
-                </div>
-              </div>
-
-              <div className="text-muted-foreground flex flex-col gap-1.5 text-xs">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
+          <Frame className="min-w-0 shrink-0 flex-col lg:w-80">
+            <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
+              <FrameTitle className="text-lg leading-tight font-semibold sm:text-xl">
+                {selectedEvaluation.course_code}: {selectedEvaluation.course_name}
+              </FrameTitle>
+              <div className="text-muted-foreground mt-2 flex flex-col gap-1 text-xs">
                 <span>
                   <strong>Tipo:</strong>{" "}
                   {formatEvaluationTypeLabel(
@@ -1005,67 +851,79 @@ export function EvaluationSection({
                   )}
                 </span>
                 <span>
+                  <strong>Profesor:</strong> {selectedEvaluation.professor_name ?? "—"}
+                </span>
+                <span>
                   <strong>Período:</strong>{" "}
                   {selectedEvaluation.term_display_name
                     ? selectedEvaluation.term_display_name.replace(" - ", ": ")
                     : "—"}
                 </span>
-                <span>
-                  <strong>Profesor:</strong> {selectedEvaluation.professor_name ?? "—"}
-                </span>
-                <span>
-                  <strong>Tamaño:</strong> {formatFileSize(selectedEvaluation.file_size)}
-                </span>
-                <span>
-                  <strong>Cátedra:</strong> {selectedEvaluation.is_catedra ? "Sí" : "No"}
-                </span>
-                <span>
-                  <strong>Respuestas:</strong>{" "}
-                  {selectedEvaluation.has_separate_answers
-                    ? "Archivo aparte"
-                    : selectedEvaluation.includes_answers
-                      ? "Incluidas"
-                      : "No"}
-                </span>
               </div>
-            </div>
+            </FrameHeader>
 
-            <div className="bg-muted/30 mt-auto flex flex-col gap-3 border-t p-4 md:p-5">
-              <div className="flex flex-col gap-1.5">
-                <Label
-                  htmlFor={`note-eval-${selectedEvaluation.id}`}
-                  className="text-sm font-medium"
-                >
-                  Nota de moderación
-                </Label>
-                <Textarea
-                  id={`note-eval-${selectedEvaluation.id}`}
-                  value={moderationNote[selectedEvaluation.id] ?? ""}
-                  onChange={(e) => onNoteChange(selectedEvaluation.id, e.target.value)}
-                  className="bg-background h-20 min-h-0 resize-none text-sm shadow-none"
-                  placeholder="Escribe una nota opcional para explicar el motivo del rechazo"
-                />
-              </div>
+            <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
+              <CardPanel className="flex flex-col gap-3.5 p-4 sm:p-5">
+                <div className="text-muted-foreground grid grid-cols-2 gap-2 text-xs">
+                  <span>
+                    <strong>Tamaño:</strong> {formatFileSize(selectedEvaluation.file_size)}
+                  </span>
+                  <span>
+                    <strong>Cátedra:</strong> {selectedEvaluation.is_catedra ? "Sí" : "No"}
+                  </span>
+                  <span className="col-span-2">
+                    <strong>Respuestas:</strong>{" "}
+                    {selectedEvaluation.has_separate_answers
+                      ? "Archivo aparte"
+                      : selectedEvaluation.includes_answers
+                        ? "Incluidas"
+                        : "No"}
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5 pt-1">
+                  <div className="inline-flex w-full items-center justify-between gap-2">
+                    <Label
+                      htmlFor={`note-eval-${selectedEvaluation.id}`}
+                      className="text-sm font-medium"
+                    >
+                      Nota de moderación
+                    </Label>
+                    <Label className="text-muted-foreground text-sm font-normal" render={<span />}>
+                      Opcional
+                    </Label>
+                  </div>
+                  <Textarea
+                    id={`note-eval-${selectedEvaluation.id}`}
+                    value={moderationNote[selectedEvaluation.id] ?? ""}
+                    onChange={(e) => onNoteChange(selectedEvaluation.id, e.target.value)}
+                    className="bg-background h-20 min-h-0 resize-none text-xs shadow-none sm:text-sm"
+                    placeholder="Escribe una nota opcional para explicar el motivo del rechazo"
+                  />
+                </div>
+              </CardPanel>
+            </Card>
+
+            <FrameFooter className="p-2 sm:p-2.5">
+              <div className="flex w-full gap-2.5">
                 <Button
-                  className="w-full"
+                  className="flex-1"
                   onClick={() => void onApprove(selectedEvaluation.id)}
                   disabled={isPending}
                 >
-                  <Icon icon={CheckIcon} size={16} className="mr-2 size-4" /> Aprobar
+                  <Icon icon={CheckIcon} size={16} className="mr-1.5 size-4" /> Aprobar
                 </Button>
                 <Button
                   variant="destructive"
-                  className="w-full"
+                  className="flex-1"
                   onClick={() => void onReject(selectedEvaluation.id)}
                   disabled={isPending}
                 >
-                  <Icon icon={Cancel01Icon} size={16} className="mr-2 size-4" /> Rechazar
+                  <Icon icon={Cancel01Icon} size={16} className="mr-1.5 size-4" /> Rechazar
                 </Button>
               </div>
-            </div>
-          </div>
+            </FrameFooter>
+          </Frame>
 
           <EvaluationPdfViewer
             key={selectedEvaluation.id}

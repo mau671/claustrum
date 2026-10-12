@@ -6,7 +6,7 @@ import type { FeedbackRow } from "@/lib/feedback/api";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardPanel } from "@/components/ui/card";
-import { Frame, FrameFooter } from "@/components/ui/frame";
+import { Frame, FrameFooter, FrameHeader, FrameTitle } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -93,14 +93,9 @@ function FeedbackModerationPage() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
-      <Frame
-        className={cn(
-          "min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96",
-          selectedFeedback ? "hidden lg:flex" : "flex",
-        )}
-      >
-        <Card className="bg-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5">
+    <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
+      <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
+        <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {feedbackQuery.isLoading ? (
               <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2 p-6 text-sm">
@@ -166,151 +161,129 @@ function FeedbackModerationPage() {
 
       {/* Right Detail Pane */}
       {selectedFeedback && (
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:max-h-full lg:overflow-y-auto">
-          <div className="flex items-start justify-between gap-2 sm:hidden">
-            <h2 className="text-sm font-semibold">Retroalimentación</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                void navigate({
-                  from: "/moderation/feedback",
-                  search: (prev: any) => ({ ...prev, feedbackId: undefined }),
-                  replace: true,
-                });
-              }}
-            >
-              Volver
-            </Button>
-          </div>
-
-          <div className="bg-card text-card-foreground flex flex-col overflow-hidden rounded-xl border shadow-xs">
-            <div className="flex flex-col gap-6 p-5 md:p-6">
-              {/* Header */}
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3
-                      className={cn(
-                        "text-xl leading-none font-semibold tracking-tight",
-                        getTypeColor(selectedFeedback.type),
-                      )}
-                    >
-                      {getTypeLabel(selectedFeedback.type)}
-                    </h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    {new Date(selectedFeedback.created_at).toLocaleString()}
-                  </p>
-                </div>
-
-                {!selectedFeedback.is_reviewed && (
-                  <Button
-                    size="sm"
-                    onClick={() => markAsReviewed.mutate(selectedFeedback.id)}
-                    disabled={markAsReviewed.isPending}
-                    className="shrink-0"
-                  >
-                    <Icon icon={CheckIcon} size={16} className="mr-2 size-4" />
-                    Marcar como revisado
-                  </Button>
-                )}
+        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0 lg:overflow-y-auto">
+          <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+              <div className="space-y-1">
+                <FrameTitle
+                  className={cn(
+                    "text-lg leading-tight font-semibold sm:text-xl",
+                    getTypeColor(selectedFeedback.type),
+                  )}
+                >
+                  {getTypeLabel(selectedFeedback.type)}
+                </FrameTitle>
+                <p className="text-muted-foreground text-xs">
+                  {new Date(selectedFeedback.created_at).toLocaleString()}
+                </p>
               </div>
 
-              {/* Original Content */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Comentario original</h4>
-                <div className="bg-muted/30 rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
+              {!selectedFeedback.is_reviewed && (
+                <Button
+                  size="sm"
+                  onClick={() => markAsReviewed.mutate(selectedFeedback.id)}
+                  disabled={markAsReviewed.isPending}
+                  className="shrink-0"
+                >
+                  <Icon icon={CheckIcon} size={16} className="mr-1.5 size-4" />
+                  Marcar como revisado
+                </Button>
+              )}
+            </div>
+          </FrameHeader>
+
+          <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
+            <CardPanel className="flex flex-col gap-4 p-4 sm:p-5">
+              <div className="space-y-1.5">
+                <h4 className="text-muted-foreground text-xs font-semibold">Comentario original</h4>
+                <div className="bg-muted/30 rounded-lg border p-3.5 text-sm leading-relaxed whitespace-pre-wrap">
                   {selectedFeedback.content}
                 </div>
               </div>
 
-              <div className="relative mt-2">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="border-border/50 w-full border-t" />
+              <div className="space-y-1.5 pt-1">
+                <div className="inline-flex w-full items-center justify-between gap-2">
+                  <Label htmlFor="admin-notes" className="text-sm font-medium">
+                    Notas internas
+                  </Label>
+                  <Label className="text-muted-foreground text-sm font-normal" render={<span />}>
+                    Opcional
+                  </Label>
                 </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-card text-muted-foreground px-2 text-[10px] tracking-widest uppercase">
-                    Resolución
-                  </span>
-                </div>
+                <Textarea
+                  id="admin-notes"
+                  placeholder="Escribe notas sobre cómo se resolvió este caso..."
+                  value={adminNotes[selectedFeedback.id] ?? selectedFeedback.admin_notes ?? ""}
+                  onChange={(e) =>
+                    setAdminNotes({ ...adminNotes, [selectedFeedback.id]: e.target.value })
+                  }
+                  className="bg-background min-h-[70px] text-xs sm:text-sm"
+                />
               </div>
 
-              {/* Resolution Form */}
-              <div className="flex flex-col gap-5">
-                <div className="space-y-2">
-                  <Label htmlFor="admin-notes">Notas internas</Label>
-                  <Textarea
-                    id="admin-notes"
-                    placeholder="Escribe notas sobre cómo se resolvió este caso..."
-                    value={adminNotes[selectedFeedback.id] ?? selectedFeedback.admin_notes ?? ""}
-                    onChange={(e) =>
-                      setAdminNotes({ ...adminNotes, [selectedFeedback.id]: e.target.value })
-                    }
-                    className="bg-background min-h-[80px]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reply-message">Respuesta al usuario</Label>
-                  <Textarea
-                    id="reply-message"
-                    placeholder={
-                      selectedFeedback.user_id
-                        ? "Escribe un mensaje para enviarle al usuario..."
-                        : "El usuario envió esto de forma anónima o no había iniciado sesión."
-                    }
-                    value={replyMessage[selectedFeedback.id] ?? ""}
-                    onChange={(e) =>
-                      setReplyMessage({ ...replyMessage, [selectedFeedback.id]: e.target.value })
-                    }
-                    disabled={!selectedFeedback.user_id}
-                    className="bg-background min-h-[80px]"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      replyToFeedback.mutate({
-                        id: selectedFeedback.id,
-                        adminNotes:
-                          adminNotes[selectedFeedback.id] ?? selectedFeedback.admin_notes ?? "",
-                        replyMessage: "",
-                      });
-                    }}
-                    disabled={replyToFeedback.isPending}
-                    className="w-full sm:w-auto"
-                  >
-                    {replyToFeedback.isPending ? (
-                      <Spinner className="mr-2 size-4" />
-                    ) : (
-                      <Icon icon={FloppyDiskIcon} size={16} className="mr-2 size-4" />
-                    )}
-                    Guardar
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      replyToFeedback.mutate({
-                        id: selectedFeedback.id,
-                        adminNotes:
-                          adminNotes[selectedFeedback.id] ?? selectedFeedback.admin_notes ?? "",
-                        replyMessage: replyMessage[selectedFeedback.id] ?? "",
-                      });
-                    }}
-                    disabled={replyToFeedback.isPending || !selectedFeedback.user_id}
-                    className="w-full sm:w-auto"
-                  >
-                    {replyToFeedback.isPending ? <Spinner className="mr-2 size-4" /> : null}
-                    Enviar respuesta al usuario
-                  </Button>
-                </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="reply-message" className="text-sm font-medium">
+                  Respuesta al usuario
+                </Label>
+                <Textarea
+                  id="reply-message"
+                  placeholder={
+                    selectedFeedback.user_id
+                      ? "Escribe un mensaje para enviarle al usuario..."
+                      : "El usuario envió esto de forma anónima o no había iniciado sesión."
+                  }
+                  value={replyMessage[selectedFeedback.id] ?? ""}
+                  onChange={(e) =>
+                    setReplyMessage({ ...replyMessage, [selectedFeedback.id]: e.target.value })
+                  }
+                  disabled={!selectedFeedback.user_id}
+                  className="bg-background min-h-[70px] text-xs sm:text-sm"
+                />
               </div>
+            </CardPanel>
+          </Card>
+
+          <FrameFooter className="p-2 sm:p-2.5">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  replyToFeedback.mutate({
+                    id: selectedFeedback.id,
+                    adminNotes:
+                      adminNotes[selectedFeedback.id] ?? selectedFeedback.admin_notes ?? "",
+                    replyMessage: "",
+                  });
+                }}
+                disabled={replyToFeedback.isPending}
+                className="w-full sm:w-auto"
+              >
+                {replyToFeedback.isPending ? (
+                  <Spinner className="mr-1.5 size-4" />
+                ) : (
+                  <Icon icon={FloppyDiskIcon} size={16} className="mr-1.5 size-4" />
+                )}
+                Guardar notas
+              </Button>
+
+              <Button
+                onClick={() => {
+                  replyToFeedback.mutate({
+                    id: selectedFeedback.id,
+                    adminNotes:
+                      adminNotes[selectedFeedback.id] ?? selectedFeedback.admin_notes ?? "",
+                    replyMessage: replyMessage[selectedFeedback.id] ?? "",
+                  });
+                }}
+                disabled={replyToFeedback.isPending || !selectedFeedback.user_id}
+                className="w-full sm:w-auto"
+              >
+                {replyToFeedback.isPending ? <Spinner className="mr-1.5 size-4" /> : null}
+                Enviar respuesta al usuario
+              </Button>
             </div>
-          </div>
-        </div>
+          </FrameFooter>
+        </Frame>
       )}
     </div>
   );

@@ -23,10 +23,13 @@ export function ScrollArea({
   overscrollContain?: boolean;
 }): React.ReactElement {
   return (
-    <ScrollAreaPrimitive.Root className={cn("size-full min-h-0", className)} {...props}>
+    <ScrollAreaPrimitive.Root
+      className={cn("size-full min-h-0 max-w-full min-w-0", className)}
+      {...props}
+    >
       <ScrollAreaPrimitive.Viewport
         className={cn(
-          "focus-visible:ring-ring focus-visible:ring-offset-background h-full rounded-[inherit] transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+          "focus-visible:ring-ring focus-visible:ring-offset-background h-full w-full max-w-full min-w-0 rounded-[inherit] transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
           overscrollContain &&
             "data-has-overflow-x:overscroll-x-contain data-has-overflow-y:overscroll-y-contain",
           scrollFade &&
@@ -36,7 +39,7 @@ export function ScrollArea({
         data-slot="scroll-area-viewport"
       >
         <ScrollAreaPrimitive.Content
-          className={cn(fill && "size-full")}
+          className={cn(fill && "size-full", "max-w-full min-w-0")}
           data-slot="scroll-area-content"
           style={clampContentMinWidth ? { minWidth: 0 } : undefined}
         >

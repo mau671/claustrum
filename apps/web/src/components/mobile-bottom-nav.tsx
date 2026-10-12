@@ -6,7 +6,11 @@ import {
   Home01Icon,
   Login01Icon,
   Logout01Icon,
+  Moon02Icon,
+  Notification03Icon,
   Settings01Icon,
+  Shield01Icon,
+  Sun03Icon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -16,6 +20,8 @@ import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
+import { NotificationsDialog } from "@/components/notifications-dialog";
+import { useTheme } from "@/components/theme-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,11 +32,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createFilledIcon, Icon } from "@/components/ui/icon";
+import { createFilledIcon, Icon, MorphIcon } from "@/components/ui/icon";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAppAuth } from "@/lib/auth/app-auth-context";
 import { signOut } from "@/lib/auth/client";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
+import { useModerationCounts } from "@/lib/hooks/use-moderation";
+import { useNotifications } from "@/lib/hooks/use-notifications";
+import { useCanModerate } from "@/lib/hooks/use-roles";
 import { cn } from "@/lib/utils";
 
 const mainNavItems = [
@@ -86,7 +95,31 @@ export function MobileBottomNav() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+  };
+
+  const canModerate = useCanModerate();
+  const { data: moderationCounts } = useModerationCounts(!!authUser && canModerate);
+  const totalPending = canModerate
+    ? (moderationCounts?.pendingReviews ?? 0) +
+      (moderationCounts?.pendingEvaluations ?? 0) +
+      (moderationCounts?.pendingReviewReports ?? 0) +
+      (moderationCounts?.pendingFeedback ?? 0)
+    : 0;
+
+  const notificationsQuery = useNotifications(authUser?.id ?? null);
+  const unreadCount = notificationsQuery.data?.filter((n) => !n.is_read).length ?? 0;
 
   const targetPath = useRouterState({
     select: (state) => state.location.pathname,
@@ -109,13 +142,16 @@ export function MobileBottomNav() {
   const transition = shouldReduceMotion ? instantTransition : springTransition;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex items-center justify-center gap-2.5 px-3 md:hidden">
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex items-center justify-center gap-2.5 px-3 md:hidden"
+      style={{ viewTransitionName: "mobile-bottom-nav" }}
+    >
       <LayoutGroup id="mobile-nav">
         <nav
           className={cn(
             "pointer-events-auto flex items-center gap-1 rounded-full p-1.5",
-            "border-border/80 bg-background/85 text-muted-foreground border shadow-xl shadow-black/10 backdrop-blur-xl",
-            "dark:border-border/60 dark:bg-card/90 dark:text-muted-foreground dark:shadow-black/40",
+            "border-border/80 bg-background/95 text-muted-foreground border shadow-xl shadow-black/10 backdrop-blur-xl",
+            "dark:border-border/60 dark:bg-card/95 dark:text-muted-foreground dark:shadow-black/40",
           )}
           aria-label="Navegación principal"
         >
@@ -200,8 +236,8 @@ export function MobileBottomNav() {
         <div
           className={cn(
             "pointer-events-auto flex items-center rounded-full p-1.5",
-            "border-border/80 bg-background/85 text-muted-foreground border shadow-xl shadow-black/10 backdrop-blur-xl",
-            "dark:border-border/60 dark:bg-card/90 dark:text-muted-foreground dark:shadow-black/40",
+            "border-border/80 bg-background/95 text-muted-foreground border shadow-xl shadow-black/10 backdrop-blur-xl",
+            "dark:border-border/60 dark:bg-card/95 dark:text-muted-foreground dark:shadow-black/40",
           )}
         >
           <motion.div
@@ -264,7 +300,7 @@ export function MobileBottomNav() {
                   side="top"
                   align="end"
                   sideOffset={14}
-                  className="mb-1 w-60 rounded-2xl p-1.5 shadow-2xl"
+                  className="mb-1 w-64 rounded-2xl p-1.5 shadow-2xl"
                 >
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="p-0 font-normal">
@@ -284,17 +320,71 @@ export function MobileBottomNav() {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={() => setIsNotificationsOpen(true)}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Icon icon={Notification03Icon} size={16} className="size-4" />
+                        <span>Notificaciones</span>
+                      </div>
+                      {unreadCount > 0 && (
+                        <span className="bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[11px] font-semibold">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      )}
+                    </DropdownMenuItem>
+
+                    {canModerate && (
+                      <DropdownMenuLinkItem render={<Link to="/moderation" />}>
+                        <div className="flex w-full items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Icon icon={Shield01Icon} size={16} className="size-4" />
+                            <span>Moderación</span>
+                          </div>
+                          {totalPending > 0 && (
+                            <span className="bg-primary text-primary-foreground flex size-4 items-center justify-center rounded-full text-[9px] font-bold">
+                              {totalPending > 9 ? "9+" : totalPending}
+                            </span>
+                          )}
+                        </div>
+                      </DropdownMenuLinkItem>
+                    )}
+
                     <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>
                       <Icon icon={Settings01Icon} size={16} className="size-4" />
                       Configuración
                     </DropdownMenuLinkItem>
+
                     <DropdownMenuLinkItem render={<Link to="/policies" />}>
                       <Icon icon={File01Icon} size={16} className="size-4" />
                       Reglamento y políticas
                     </DropdownMenuLinkItem>
+
                     <DropdownMenuItem onClick={() => setIsFeedbackOpen(true)}>
                       <Icon icon={BubbleChatUserIcon} size={16} className="size-4" />
                       Retroalimentación
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      closeOnClick={false}
+                      onClick={toggleTheme}
+                      className="cursor-pointer"
+                    >
+                      {mounted ? (
+                        <MorphIcon
+                          icon={theme === "dark" ? Moon02Icon : Sun03Icon}
+                          size={16}
+                          className="size-4 shrink-0"
+                        />
+                      ) : (
+                        <span className="size-4 shrink-0" />
+                      )}
+                      <span>Cambiar tema</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
 
@@ -344,6 +434,11 @@ export function MobileBottomNav() {
       </LayoutGroup>
 
       <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
+      <NotificationsDialog
+        userId={authUser?.id}
+        open={isNotificationsOpen}
+        onOpenChange={setIsNotificationsOpen}
+      />
     </div>
   );
 }

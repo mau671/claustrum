@@ -558,3 +558,13 @@ pre {
 .dark {
   --destructive-foreground: var(--color-red-400);
 }
+
+/* Prevent mobile bottom navigation from fading or flashing transparent during view transitions */
+::view-transition-group(mobile-bottom-nav) {
+  z-index: 1000;
+  animation: none;
+}
+::view-transition-old(mobile-bottom-nav),
+::view-transition-new(mobile-bottom-nav) {
+  animation: none;
+}

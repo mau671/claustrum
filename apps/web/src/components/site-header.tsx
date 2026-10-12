@@ -247,7 +247,10 @@ export function SiteHeader() {
             const isLast = index === breadcrumbItems.length - 1;
 
             return (
-              <div key={item.to ?? item.label} className="flex min-w-0 items-center gap-2">
+              <div
+                key={`${item.to ?? item.label}-${index}`}
+                className="flex min-w-0 items-center gap-2"
+              >
                 {index > 0 ? (
                   <HugeiconsIcon
                     icon={ArrowRight01Icon}

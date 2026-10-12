@@ -1,20 +1,22 @@
 "use client";
 
-import { Link01Icon, LockIcon, LockOpenIcon } from "@hugeicons/core-free-icons";
+import { Link01Icon, LockKeyholeIcon, LockKeyholeOpenIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "@tanstack/react-router";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { flushSync } from "react-dom";
 
 import type { StudyPlanDetail, CourseEffectiveStatus } from "@/lib/types";
 
+import { Card, CardPanel } from "@/components/ui/card";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Frame, FrameFooter, FrameHeader } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useStudentCourseStatuses } from "@/lib/hooks/use-queries";
 import { useCurriculumViewModel } from "@/lib/hooks/useCurriculumViewModel";
 import { cn } from "@/lib/utils";
@@ -86,43 +88,122 @@ function CurriculumGrid({
     setQuickRegisterCourseId(courseId);
   }, []);
 
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
+  const isSyncingScroll = useRef(false);
+
+  const handleContentScroll = useCallback(() => {
+    if (isSyncingScroll.current) return;
+    if (!contentScrollRef.current || !headerScrollRef.current) return;
+
+    isSyncingScroll.current = true;
+    headerScrollRef.current.scrollLeft = contentScrollRef.current.scrollLeft;
+    requestAnimationFrame(() => {
+      isSyncingScroll.current = false;
+    });
+  }, []);
+
+  const handleHeaderScroll = useCallback(() => {
+    if (isSyncingScroll.current) return;
+    if (!contentScrollRef.current || !headerScrollRef.current) return;
+
+    isSyncingScroll.current = true;
+    contentScrollRef.current.scrollLeft = headerScrollRef.current.scrollLeft;
+    requestAnimationFrame(() => {
+      isSyncingScroll.current = false;
+    });
+  }, []);
+
+  useEffect(() => {
+    const headerEl = headerScrollRef.current;
+    if (!headerEl) return;
+
+    const handleHeaderWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) return;
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaY !== 0) {
+        e.preventDefault();
+        if (contentScrollRef.current) {
+          contentScrollRef.current.scrollLeft += e.deltaY;
+        }
+      }
+    };
+
+    headerEl.addEventListener("wheel", handleHeaderWheel, { passive: false });
+    return () => {
+      headerEl.removeEventListener("wheel", handleHeaderWheel);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (headerScrollRef.current && contentScrollRef.current) {
+      headerScrollRef.current.scrollLeft = contentScrollRef.current.scrollLeft;
+    }
+  }, [zoom]);
+
   return (
-    <div className="flex h-full min-w-0 flex-col">
-      <div
-        className={cn(
-          "relative z-0 min-h-0 flex-1",
-          readOnly ? "overflow-hidden" : "overflow-x-auto overflow-y-auto",
-        )}
-      >
-        <div className="w-max min-w-full px-4" style={{ zoom }}>
-          <div className="flex gap-4 py-4">
-            {semesters.map((semester) => (
-              <div key={semester.levelNumber} className="w-48 flex-shrink-0">
-                <div className="border-border mb-4 border-b pb-2">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <h2 className="text-foreground decoration-foreground/70 inline-block cursor-pointer text-lg font-semibold underline-offset-4 transition hover:underline">
-                          {semester.levelLabel}
-                        </h2>
-                      }
-                    />
-                    <TooltipContent side="top" align="start">
-                      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-                        <span className="font-semibold">Cursos</span>
-                        <span className="text-right">{semester.courses.length}</span>
-                        <span className="font-semibold">Creditos</span>
-                        <span className="text-right">
-                          {semester.courses.reduce((acc, course) => acc + (course.credits ?? 0), 0)}
-                        </span>
-                        <span className="font-semibold">Horas</span>
-                        <span className="text-right">
-                          {semester.courses.reduce((acc, course) => acc + (course.hours ?? 0), 0)}
-                        </span>
+    <Frame className="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <FrameHeader className="shrink-0 p-0">
+        <div
+          ref={headerScrollRef}
+          className="w-full scrollbar-none overflow-x-auto [&::-webkit-scrollbar]:hidden"
+          onScroll={handleHeaderScroll}
+        >
+          <div className="flex w-max min-w-full gap-4 px-4 py-3" style={{ zoom }}>
+            {semesters.map((semester) => {
+              const totalCredits = semester.courses.reduce(
+                (acc, course) => acc + (course.credits ?? 0),
+                0,
+              );
+              const totalHours = semester.courses.reduce(
+                (acc, course) => acc + (course.hours ?? 0),
+                0,
+              );
+
+              return (
+                <div
+                  key={semester.levelNumber}
+                  className="flex w-48 shrink-0 items-center justify-center text-center"
+                >
+                  <Popover>
+                    <PopoverTrigger className="text-foreground decoration-foreground/70 inline-flex cursor-pointer items-center justify-center text-center text-base font-semibold underline-offset-4 transition hover:underline focus-visible:outline-none">
+                      {semester.levelLabel}
+                    </PopoverTrigger>
+                    <PopoverContent
+                      side="bottom"
+                      align="center"
+                      sideOffset={6}
+                      className="w-auto min-w-36"
+                      viewportClassName="p-2.5"
+                    >
+                      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+                        <span className="text-muted-foreground">Cursos</span>
+                        <span className="text-right font-medium">{semester.courses.length}</span>
+                        <span className="text-muted-foreground">Créditos</span>
+                        <span className="text-right font-medium">{totalCredits}</span>
+                        <span className="text-muted-foreground">Horas</span>
+                        <span className="text-right font-medium">{totalHours}</span>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
+                    </PopoverContent>
+                  </Popover>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      </FrameHeader>
+
+      <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
+        <CardPanel
+          ref={contentScrollRef}
+          className={cn(
+            "h-full min-h-0 flex-1 p-0",
+            readOnly ? "overflow-hidden" : "overflow-x-auto overflow-y-auto",
+          )}
+          onScroll={handleContentScroll}
+        >
+          <div className="flex w-max min-w-full gap-4 p-4" style={{ zoom }}>
+            {semesters.map((semester) => (
+              <div key={semester.levelNumber} className="w-48 shrink-0">
                 <div className="space-y-4">
                   {semester.courses.map((course) => (
                     <ContextMenu key={course.id}>
@@ -161,67 +242,67 @@ function CurriculumGrid({
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        </CardPanel>
+      </Card>
 
       {!readOnly && (
-        <div className="border-border shrink-0 border-t px-4 pt-1 pb-2">
-          <div className="flex flex-row gap-8">
-            <div>
-              <h3 className="text-foreground mb-3 text-sm font-semibold">Leyenda de estados</h3>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded border-2 border-emerald-500/30 bg-emerald-500/20" />
-                  <span className="text-muted-foreground text-sm">Aprobado</span>
+        <FrameFooter className="shrink-0 px-4 py-2.5 sm:px-5">
+          <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              <span className="text-muted-foreground text-xs font-semibold">Estados:</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="size-3.5 rounded border-2 border-emerald-500/30 bg-emerald-500/20" />
+                  <span className="text-muted-foreground text-xs">Aprobado</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded border-2 border-blue-500/30 bg-blue-500/20" />
-                  <span className="text-muted-foreground text-sm">En curso</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="size-3.5 rounded border-2 border-blue-500/30 bg-blue-500/20" />
+                  <span className="text-muted-foreground text-xs">En curso</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded border-2 border-purple-500/30 bg-purple-500/20" />
-                  <span className="text-muted-foreground text-sm">Disponible</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="size-3.5 rounded border-2 border-purple-500/30 bg-purple-500/20" />
+                  <span className="text-muted-foreground text-xs">Disponible</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-muted border-border size-6 rounded border-2" />
-                  <span className="text-muted-foreground text-sm">No cursado</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="bg-muted border-border size-3.5 rounded border-2" />
+                  <span className="text-muted-foreground text-xs">No cursado</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded border-2 border-red-500/30 bg-red-500/20" />
-                  <span className="text-muted-foreground text-sm">Reprobado</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="size-3.5 rounded border-2 border-red-500/30 bg-red-500/20" />
+                  <span className="text-muted-foreground text-xs">Reprobado</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="size-6 rounded border-2 border-amber-500/30 bg-amber-500/20" />
-                  <span className="text-muted-foreground text-sm">Retirado</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="size-3.5 rounded border-2 border-amber-500/30 bg-amber-500/20" />
+                  <span className="text-muted-foreground text-xs">Retirado</span>
                 </div>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-foreground mb-3 text-sm font-semibold">Relaciones</h3>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="bg-background flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-amber-500 text-amber-600 shadow-sm">
-                    <Icon icon={LockIcon} className="size-3 shrink-0" />
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              <span className="text-muted-foreground text-xs font-semibold">Relaciones:</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="bg-background flex size-4 shrink-0 items-center justify-center rounded-full border border-amber-500 text-amber-600 shadow-xs">
+                    <Icon icon={LockKeyholeIcon} className="size-2.5 shrink-0" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Requisito</span>
+                  <span className="text-muted-foreground text-xs">Requisito</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-background flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 shadow-sm">
-                    <Icon icon={Link01Icon} className="size-3 shrink-0" />
+                <div className="flex items-center gap-1.5">
+                  <div className="bg-background flex size-4 shrink-0 items-center justify-center rounded-full border border-blue-500 text-blue-600 shadow-xs">
+                    <Icon icon={Link01Icon} className="size-2.5 shrink-0" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Correquisito</span>
+                  <span className="text-muted-foreground text-xs">Correquisito</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-background flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-emerald-500 text-emerald-600 shadow-sm">
-                    <Icon icon={LockOpenIcon} className="size-3 shrink-0" />
+                <div className="flex items-center gap-1.5">
+                  <div className="bg-background flex size-4 shrink-0 items-center justify-center rounded-full border border-emerald-500 text-emerald-600 shadow-xs">
+                    <Icon icon={LockKeyholeOpenIcon} className="size-2.5 shrink-0" />
                   </div>
-                  <span className="text-muted-foreground text-sm">Desbloquea</span>
+                  <span className="text-muted-foreground text-xs">Desbloquea</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </FrameFooter>
       )}
       <QuickRegisterDialog
         course={quickRegisterCourseId ? (courseById.get(quickRegisterCourseId) ?? null) : null}
@@ -232,7 +313,7 @@ function CurriculumGrid({
           if (!open) setQuickRegisterCourseId(null);
         }}
       />
-    </div>
+    </Frame>
   );
 }
 

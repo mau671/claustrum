@@ -511,9 +511,7 @@ export function CurriculumPage() {
 
           {selectedPlanId && planDetailQuery.isSuccess && planDetailQuery.data && (
             <div className="min-h-0 flex-1 px-4 lg:px-6">
-              <Card className="h-full min-h-0 overflow-hidden py-0">
-                <MemoizedCurriculumBoard planDetail={planDetailQuery.data} />
-              </Card>
+              <MemoizedCurriculumBoard planDetail={planDetailQuery.data} />
             </div>
           )}
 

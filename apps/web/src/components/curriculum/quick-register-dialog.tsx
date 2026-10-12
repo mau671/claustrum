@@ -1,11 +1,6 @@
-import {
-  MinusSignIcon,
-  PlusSignIcon,
-  Search01Icon,
-  UnfoldMoreIcon,
-} from "@hugeicons/core-free-icons";
+import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useId } from "react";
 
 import type { Course, CourseStatus } from "@/lib/types";
 
@@ -31,18 +26,25 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerPopup,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from "@/components/ui/drawer";
+import { Icon } from "@/components/ui/icon";
+import { Label } from "@/components/ui/label";
+import {
+  NumberField,
+  NumberFieldDecrement,
+  NumberFieldGroup,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -112,6 +114,7 @@ export function QuickRegisterDialog({
   const comboboxPortalContainerRef = useRef<HTMLDivElement>(null);
   const attemptCourseTriggerRef = useRef<HTMLButtonElement>(null);
   const progressTermTriggerRef = useRef<HTMLButtonElement>(null);
+  const gradeId = useId();
 
   const [gradeInput, setGradeInput] = useState("");
   const [academicTermId, setAcademicTermId] = useState<string>("");
@@ -269,27 +272,6 @@ export function QuickRegisterDialog({
     }
   };
 
-  const handleGradeInputChange = (value: string) => {
-    if (value === "") {
-      setGradeInput("");
-      return;
-    }
-    if (!/^\d{0,3}(\.\d{0,2})?$/.test(value)) return;
-    const parsed = Number(value);
-    if (Number.isNaN(parsed)) return;
-    setGradeInput(String(Math.min(100, Math.max(0, parsed))));
-  };
-
-  const handleGradeStep = (delta: number) => {
-    const current = gradeInput.trim() === "" ? 0 : Number(gradeInput);
-    if (Number.isNaN(current)) {
-      setGradeInput("0");
-      return;
-    }
-    const next = Math.min(100, Math.max(0, Math.round((current + delta) * 100) / 100));
-    setGradeInput(String(next));
-  };
-
   const requiresProgressGrade = progressStatus === "approved" || progressStatus === "failed";
   const canSaveProgress = !!selectedAttemptCourse;
 
@@ -303,8 +285,8 @@ export function QuickRegisterDialog({
   if (!course) return null;
 
   const progressForm = (
-    <div className="space-y-6">
-      <div>
+    <div className="w-full max-w-full min-w-0 space-y-6">
+      <div className="w-full max-w-full min-w-0">
         <Label>Curso a registrar</Label>
         <Combobox
           items={attemptCourseOptions}
@@ -314,10 +296,11 @@ export function QuickRegisterDialog({
         >
           <ComboboxTrigger
             ref={attemptCourseTriggerRef}
+            className="w-full max-w-full min-w-0"
             render={
               <Button
                 variant="outline"
-                className="mt-2 w-full justify-between font-normal"
+                className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
                 disabled={!isPlaceholderCourse || attemptCourseOptions.length === 0}
               />
             }
@@ -359,7 +342,7 @@ export function QuickRegisterDialog({
         </Combobox>
       </div>
 
-      <div>
+      <div className="w-full max-w-full min-w-0">
         <Label>Periodo</Label>
         <Combobox
           items={academicTermGroups}
@@ -369,8 +352,12 @@ export function QuickRegisterDialog({
         >
           <ComboboxTrigger
             ref={progressTermTriggerRef}
+            className="w-full max-w-full min-w-0"
             render={
-              <Button variant="outline" className="mt-2 w-full justify-between font-normal" />
+              <Button
+                variant="outline"
+                className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
+              />
             }
           >
             <span
@@ -450,69 +437,61 @@ export function QuickRegisterDialog({
                 )}
               >
                 <RadioGroupItem id={`quick-status-${option.value}`} value={option.value} />
-                <div className="flex items-center gap-1.5">
-                  <span className={`size-2 rounded-full ${cfg.dot}`} />
-                  <span className="text-sm font-medium">{option.label}</span>
-                </div>
+                <span className="text-sm font-medium">{option.label}</span>
               </label>
             );
           })}
         </RadioGroup>
       </div>
 
-      <div>
-        <Label>Nota</Label>
-        <div className="mt-2 flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleGradeStep(-1)}
-            aria-label="Disminuir nota"
-            disabled={!requiresProgressGrade}
-          >
-            <Icon icon={MinusSignIcon} className="size-4" />
-          </Button>
-          <Input
-            className="text-center"
-            type="text"
-            inputMode="decimal"
-            value={gradeInput}
-            onChange={(event) => handleGradeInputChange(event.target.value)}
-            placeholder={requiresProgressGrade ? "0-100 (Opcional)" : "No aplica"}
-            disabled={!requiresProgressGrade}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleGradeStep(1)}
-            aria-label="Aumentar nota"
-            disabled={!requiresProgressGrade}
-          >
-            <Icon icon={PlusSignIcon} className="size-4" />
-          </Button>
+      <div className="flex flex-col gap-2">
+        <div className="inline-flex w-full items-center justify-between gap-2">
+          <Label htmlFor={gradeId}>Nota obtenida</Label>
+          {requiresProgressGrade && (
+            <Label className="text-muted-foreground font-normal" render={<span />}>
+              Opcional
+            </Label>
+          )}
         </div>
+        <NumberField
+          id={gradeId}
+          min={0}
+          max={100}
+          step={1}
+          value={gradeInput.trim() === "" ? null : Number(gradeInput)}
+          onValueChange={(val) =>
+            setGradeInput(val === null || Number.isNaN(val) ? "" : String(val))
+          }
+          disabled={!requiresProgressGrade}
+        >
+          <NumberFieldGroup className="h-9 w-full sm:h-9">
+            <NumberFieldDecrement aria-label="Disminuir nota" />
+            <NumberFieldInput placeholder={requiresProgressGrade ? "0 a 100" : "No aplica"} />
+            <NumberFieldIncrement aria-label="Aumentar nota" />
+          </NumberFieldGroup>
+        </NumberField>
       </div>
     </div>
   );
 
   if (isMobile) {
     return (
-      <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="bottom"
-          className="grid max-h-[86vh] grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0"
+      <Drawer open={isOpen} onOpenChange={onOpenChange}>
+        <DrawerPopup
+          showBar
+          className="grid max-h-[90dvh] w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
         >
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
-          <SheetHeader className="px-4 pt-4 pb-2">
-            <SheetTitle>Registrar progreso: {course.name}</SheetTitle>
-            <SheetDescription>
+          <DrawerHeader className="px-4 pt-4 pb-2">
+            <DrawerTitle>Registrar progreso</DrawerTitle>
+            <DrawerDescription>
               Guarda el estado de este curso para el periodo seleccionado.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="min-h-0 overflow-y-auto px-4 pb-4">{progressForm}</div>
-          <SheetFooter className="border-t px-4 pt-3 pb-4">
+            </DrawerDescription>
+          </DrawerHeader>
+          <ScrollArea className="min-h-0 w-full max-w-full min-w-0">
+            <div className="w-full max-w-full min-w-0 space-y-6 px-4 pb-4">{progressForm}</div>
+          </ScrollArea>
+          <DrawerFooter className="border-t px-4 pt-3 pb-4">
             <Button
               type="button"
               onClick={handleCreateAttempt}
@@ -521,23 +500,25 @@ export function QuickRegisterDialog({
             >
               {isSaving ? "Guardando..." : "Guardar progreso"}
             </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+          </DrawerFooter>
+        </DrawerPopup>
+      </Drawer>
     );
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-hidden sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-lg">
         <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
         <DialogHeader>
-          <DialogTitle>Registrar progreso: {course.name}</DialogTitle>
+          <DialogTitle>Registrar progreso</DialogTitle>
           <DialogDescription>
             Guarda el estado de este curso para el periodo seleccionado.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 px-1 pb-1">{progressForm}</div>
+        <ScrollArea className="min-h-0">
+          <div className="space-y-6 px-1 pb-1">{progressForm}</div>
+        </ScrollArea>
         <DialogFooter>
           <Button
             type="button"

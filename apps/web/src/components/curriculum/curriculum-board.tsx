@@ -150,41 +150,41 @@ function CurriculumBoard({
   const canZoomOut = zoom <= ZOOM_MIN;
 
   return (
-    <div ref={boardRef} className="relative flex h-full flex-col">
+    <div ref={boardRef} className="relative flex h-full min-h-0 flex-1 flex-col">
       {!readOnly && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 flex items-center gap-1 rounded-full border px-2 py-1.5 shadow-sm backdrop-blur">
+        <div className="absolute top-2 right-3 z-20 hidden md:block">
+          <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 flex items-center gap-1 rounded-full border px-2 py-1 shadow-xs backdrop-blur">
             <button
               onClick={handleZoomOut}
               disabled={canZoomOut}
-              className="hover:bg-muted rounded-full p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              className="hover:bg-muted rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Alejar"
             >
-              <Icon icon={ZoomOutIcon} className="size-4" />
+              <Icon icon={ZoomOutIcon} className="size-3.5" />
             </button>
 
-            <span className="min-w-[3.5rem] cursor-default px-2 py-1 text-center text-xs font-medium">
+            <span className="min-w-[3rem] cursor-default px-1.5 py-0.5 text-center text-xs font-medium">
               {Math.round(zoom * 100)}%
             </span>
 
             <button
               onClick={handleZoomIn}
               disabled={canZoomIn}
-              className="hover:bg-muted rounded-full p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              className="hover:bg-muted rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Acercar"
             >
-              <Icon icon={ZoomInIcon} className="size-4" />
+              <Icon icon={ZoomInIcon} className="size-3.5" />
             </button>
 
-            <div className="bg-border mx-0.5 h-4 w-px" />
+            <div className="bg-border mx-0.5 h-3.5 w-px" />
 
             <button
               onClick={handleReset}
               disabled={zoom === ZOOM_DEFAULT}
-              className="hover:bg-muted rounded-full p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              className="hover:bg-muted rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Restablecer tamaño"
             >
-              <Icon icon={RotateCcwIcon} className="size-4" />
+              <Icon icon={RotateCcwIcon} className="size-3.5" />
             </button>
           </div>
         </div>

@@ -19,7 +19,7 @@ import {
   ChevronsUpDownIcon,
   SearchIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 
 import type {
   AcademicTerm,
@@ -81,6 +81,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  NumberField,
+  NumberFieldDecrement,
+  NumberFieldGroup,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -595,6 +602,7 @@ export function CourseDetails({
   initialOpenProgressSheet,
 }: CourseDetailsProps) {
   const isMobile = useIsMobile();
+  const gradeId = useId();
   const queryClient = useQueryClient();
   const [gradeInput, setGradeInput] = useState("");
   const [academicTermId, setAcademicTermId] = useState<string>("");
@@ -880,27 +888,6 @@ export function CourseDetails({
     if (isPlaceholderCourse) setAttemptCourseId(course.id);
   };
 
-  const handleGradeInputChange = (value: string) => {
-    if (value === "") {
-      setGradeInput("");
-      return;
-    }
-    if (!/^\d{0,3}(\.\d{0,2})?$/.test(value)) return;
-    const parsed = Number(value);
-    if (Number.isNaN(parsed)) return;
-    setGradeInput(String(Math.min(100, Math.max(0, parsed))));
-  };
-
-  const handleGradeStep = (delta: number) => {
-    const current = gradeInput.trim() === "" ? 0 : Number(gradeInput);
-    if (Number.isNaN(current)) {
-      setGradeInput("0");
-      return;
-    }
-    const next = Math.min(100, Math.max(0, Math.round((current + delta) * 100) / 100));
-    setGradeInput(String(next));
-  };
-
   const handleEditGradeInputChange = (value: string) => {
     if (value === "") {
       setEditGradeInput("");
@@ -1029,8 +1016,8 @@ export function CourseDetails({
   }, [requiresProgressGrade]);
 
   const progressForm = (
-    <div className="space-y-6">
-      <div>
+    <div className="w-full max-w-full min-w-0 space-y-6">
+      <div className="w-full max-w-full min-w-0">
         <Label className="text-sm">Curso a registrar</Label>
         <Combobox
           items={attemptCourseOptions}
@@ -1040,10 +1027,11 @@ export function CourseDetails({
         >
           <ComboboxTrigger
             ref={attemptCourseTriggerRef}
+            className="w-full max-w-full min-w-0"
             render={
               <Button
                 variant="outline"
-                className="mt-2 w-full justify-between font-normal"
+                className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
                 disabled={!isPlaceholderCourse || attemptCourseOptions.length === 0}
               />
             }
@@ -1085,7 +1073,7 @@ export function CourseDetails({
         </Combobox>
       </div>
 
-      <div>
+      <div className="w-full max-w-full min-w-0">
         <Label className="text-sm">Periodo</Label>
         <Combobox
           items={academicTermGroups}
@@ -1095,8 +1083,12 @@ export function CourseDetails({
         >
           <ComboboxTrigger
             ref={progressTermTriggerRef}
+            className="w-full max-w-full min-w-0"
             render={
-              <Button variant="outline" className="mt-2 w-full justify-between font-normal" />
+              <Button
+                variant="outline"
+                className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
+              />
             }
           >
             <span
@@ -1176,49 +1168,39 @@ export function CourseDetails({
                 )}
               >
                 <RadioGroupItem id={`progress-status-${option.value}`} value={option.value} />
-                <div className="flex items-center gap-1.5">
-                  <span className={`size-2 rounded-full ${cfg.dot}`} />
-                  <span className="text-sm font-medium">{option.label}</span>
-                </div>
+                <span className="text-sm font-medium">{option.label}</span>
               </label>
             );
           })}
         </RadioGroup>
       </div>
 
-      <div>
-        <Label className="text-sm">Nota</Label>
-        <div className="mt-2 flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleGradeStep(-1)}
-            aria-label="Disminuir nota"
-            disabled={!requiresProgressGrade}
-          >
-            <Minus className="size-4" />
-          </Button>
-          <Input
-            className="text-center"
-            type="text"
-            inputMode="decimal"
-            value={gradeInput}
-            onChange={(event) => handleGradeInputChange(event.target.value)}
-            placeholder={requiresProgressGrade ? "0-100 (Opcional)" : "No aplica"}
-            disabled={!requiresProgressGrade}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleGradeStep(1)}
-            aria-label="Aumentar nota"
-            disabled={!requiresProgressGrade}
-          >
-            <Plus className="size-4" />
-          </Button>
+      <div className="flex flex-col gap-2">
+        <div className="inline-flex w-full items-center justify-between gap-2">
+          <Label htmlFor={gradeId}>Nota obtenida</Label>
+          {requiresProgressGrade && (
+            <Label className="text-muted-foreground font-normal" render={<span />}>
+              Opcional
+            </Label>
+          )}
         </div>
+        <NumberField
+          id={gradeId}
+          min={0}
+          max={100}
+          step={1}
+          value={gradeInput.trim() === "" ? null : Number(gradeInput)}
+          onValueChange={(val) =>
+            setGradeInput(val === null || Number.isNaN(val) ? "" : String(val))
+          }
+          disabled={!requiresProgressGrade}
+        >
+          <NumberFieldGroup className="h-9 w-full sm:h-9">
+            <NumberFieldDecrement aria-label="Disminuir nota" />
+            <NumberFieldInput placeholder={requiresProgressGrade ? "0 a 100" : "No aplica"} />
+            <NumberFieldIncrement aria-label="Aumentar nota" />
+          </NumberFieldGroup>
+        </NumberField>
       </div>
     </div>
   );
@@ -1359,21 +1341,6 @@ export function CourseDetails({
           </AlertDialog>
         );
 
-        const progressFooterActions = (
-          <>
-            <Button type="button" variant="ghost" onClick={handleRequestCloseProgress}>
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveProgress}
-              disabled={isSaving || !canSaveProgress}
-            >
-              {isSaving ? "Guardando..." : "Guardar progreso"}
-            </Button>
-          </>
-        );
-
         if (isMobile) {
           return (
             <Drawer
@@ -1385,7 +1352,10 @@ export function CourseDetails({
             >
               <DrawerPopup
                 showBar
-                className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+                className={cn(
+                  "grid max-h-[90dvh] w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden transition-opacity",
+                  confirmProgressOpen && "pointer-events-none invisible opacity-0",
+                )}
               >
                 <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
                 <DrawerHeader className="px-4 pt-4 pb-2">
@@ -1394,10 +1364,21 @@ export function CourseDetails({
                     Guarda el estado de este curso para el periodo seleccionado.
                   </DrawerDescription>
                 </DrawerHeader>
-                <ScrollArea className="min-h-0">
-                  <div className="space-y-6 px-4 pb-4">{progressForm}</div>
+                <ScrollArea className="min-h-0 w-full max-w-full min-w-0">
+                  <div className="w-full max-w-full min-w-0 space-y-6 px-4 pb-4">
+                    {progressForm}
+                  </div>
                 </ScrollArea>
-                <DrawerFooter>{progressFooterActions}</DrawerFooter>
+                <DrawerFooter className="border-t px-4 pt-3 pb-4">
+                  <Button
+                    type="button"
+                    onClick={handleSaveProgress}
+                    disabled={isSaving || !canSaveProgress}
+                    className="w-full"
+                  >
+                    {isSaving ? "Guardando..." : "Guardar progreso"}
+                  </Button>
+                </DrawerFooter>
               </DrawerPopup>
               {confirmProgressDialog}
             </Drawer>
@@ -1413,7 +1394,10 @@ export function CourseDetails({
             }}
           >
             <DialogContent
-              className="max-h-[90vh] max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+              className={cn(
+                "max-h-[90vh] max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden transition-opacity",
+                confirmProgressOpen && "pointer-events-none invisible opacity-0",
+              )}
               initialFocus={false}
             >
               <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
@@ -1426,7 +1410,15 @@ export function CourseDetails({
               <ScrollArea className="min-h-0">
                 <div className="space-y-6 px-6 pb-6">{progressForm}</div>
               </ScrollArea>
-              <DialogFooter>{progressFooterActions}</DialogFooter>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  onClick={handleSaveProgress}
+                  disabled={isSaving || !canSaveProgress}
+                >
+                  {isSaving ? "Guardando..." : "Guardar progreso"}
+                </Button>
+              </DialogFooter>
             </DialogContent>
             {confirmProgressDialog}
           </Dialog>

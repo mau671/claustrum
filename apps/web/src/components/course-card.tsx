@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { Link01Icon, LockIcon, LockOpenIcon } from "@hugeicons/core-free-icons";
+import { Link01Icon, LockKeyholeIcon, LockKeyholeOpenIcon } from "@hugeicons/core-free-icons";
 
 import type { Course, CourseStatus } from "@/lib/types";
 
@@ -58,7 +58,7 @@ const relationConfig: Record<string, { ringClass: string; icon: React.ReactNode;
   {
     prerequisite: {
       ringClass: "ring-2 ring-amber-500 shadow-md",
-      icon: <Icon icon={LockIcon} className="size-3 text-amber-600" />,
+      icon: <Icon icon={LockKeyholeIcon} className="size-3 text-amber-600" />,
       label: "Requisito",
     },
     corequisite: {
@@ -68,7 +68,7 @@ const relationConfig: Record<string, { ringClass: string; icon: React.ReactNode;
     },
     postrequisite: {
       ringClass: "ring-2 ring-emerald-500 shadow-md",
-      icon: <Icon icon={LockOpenIcon} className="size-3 text-emerald-600" />,
+      icon: <Icon icon={LockKeyholeOpenIcon} className="size-3 text-emerald-600" />,
       label: "Desbloquea",
     },
   };

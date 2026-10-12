@@ -1,6 +1,6 @@
 "use client";
 
-import { Link01Icon, LockIcon, LockOpenIcon } from "@hugeicons/core-free-icons";
+import { Link01Icon, LockKeyholeIcon, LockKeyholeOpenIcon } from "@hugeicons/core-free-icons";
 import {
   BaseEdge,
   ReactFlow,
@@ -96,7 +96,7 @@ const RELATION_LABELS: Record<RelationType, string> = {
 const RELATION_LEGEND = [
   {
     relation: "prerequisite",
-    icon: LockIcon,
+    icon: LockKeyholeIcon,
     className: "border-amber-500 text-amber-600",
   },
   {
@@ -106,12 +106,12 @@ const RELATION_LEGEND = [
   },
   {
     relation: "postrequisite",
-    icon: LockOpenIcon,
+    icon: LockKeyholeOpenIcon,
     className: "border-emerald-500 text-emerald-600",
   },
 ] satisfies Array<{
   relation: RelationType;
-  icon: typeof LockIcon;
+  icon: typeof LockKeyholeIcon;
   className: string;
 }>;
 

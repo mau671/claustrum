@@ -1,3 +1,8 @@
+import { createIsomorphicFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+// @ts-ignore
+import { env } from "cloudflare:workers";
+
 import { getApiBaseUrl } from "@/lib/env/public";
 
 export class ApiError extends Error {
@@ -20,6 +25,48 @@ export function getApiV1Url(endpoint: string): string {
   return `${base}/v1${path}`;
 }
 
+const performFetch = createIsomorphicFn()
+  .server(async (url: string, init: RequestInit): Promise<Response> => {
+    const headers = new Headers(init.headers);
+    let req: Request | undefined;
+    try {
+      req = getRequest();
+      if (req) {
+        const cookie = req.headers.get("cookie");
+        const authorization = req.headers.get("authorization");
+        if (cookie && !headers.has("cookie")) headers.set("cookie", cookie);
+        if (authorization && !headers.has("authorization")) {
+          headers.set("authorization", authorization);
+        }
+      }
+    } catch {
+      // ignore if outside request context
+    }
+
+    const requestInit: RequestInit = {
+      ...init,
+      headers,
+    };
+
+    if (env?.API) {
+      const fetchReq = new Request(url, requestInit);
+      if (req) {
+        const incomingUrl = new URL(req.url);
+        const targetUrl = new URL(fetchReq.url);
+        targetUrl.protocol = incomingUrl.protocol;
+        targetUrl.hostname = incomingUrl.hostname;
+        targetUrl.port = incomingUrl.port;
+        return await env.API.fetch(new Request(targetUrl, fetchReq));
+      }
+      return await env.API.fetch(fetchReq);
+    }
+
+    return await fetch(url, requestInit);
+  })
+  .client(async (url: string, init: RequestInit): Promise<Response> => {
+    return await fetch(url, init);
+  });
+
 export async function apiClient<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = getApiV1Url(endpoint);
 
@@ -34,7 +81,7 @@ export async function apiClient<T>(endpoint: string, options?: RequestInit): Pro
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(url, {
+  const response = await performFetch(url, {
     credentials: "include",
     ...options,
     headers,

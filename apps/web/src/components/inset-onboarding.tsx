@@ -1,7 +1,7 @@
 import { Loading02Icon, Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -81,7 +81,7 @@ export function InsetOnboardingPage() {
     setStep((prev) => Math.max(1, prev - 1));
   };
 
-  const finishOnboarding = async () => {
+  const finishOnboarding = useCallback(async () => {
     if (!authUser) return;
     if (!campusId || !academicUnitId || !studyPlanId) {
       setShowStepError(true);
@@ -121,7 +121,7 @@ export function InsetOnboardingPage() {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [academicUnitId, authUser, campusId, carnet, navigate, queryClient, studyPlanId]);
 
   const isNextDisabled =
     (step === 1 && !campusId) || (step === 2 && !academicUnitId) || (step === 3 && !studyPlanId);
@@ -443,6 +443,7 @@ export function InsetOnboardingPage() {
       showStudyPlanError,
       carnet,
       currentStepError,
+      finishOnboarding,
     ],
   );
 

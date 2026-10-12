@@ -174,7 +174,12 @@ export function ReviewReportSection({
               rows.map((report) => (
                 <CardPanel
                   key={report.report_id}
-                  render={<button type="button" />}
+                  render={
+                    <button
+                      type="button"
+                      aria-label={`Ver reporte de ${report.course_code}: ${report.professor_name}`}
+                    />
+                  }
                   onClick={() => onSelect(report.report_id)}
                   className={cn(
                     "focus-visible:bg-accent flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
@@ -513,7 +518,9 @@ export function ReviewSection({
         id: "reviewItem",
         cell: ({ row }) => (
           <CardPanel
-            render={<button type="button" />}
+            render={
+              <button type="button" aria-label={`Ver reseña de ${row.original.professor_name}`} />
+            }
             onClick={() => onSelect(row.original.review_id)}
             className={cn(
               "focus-visible:bg-accent flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",
@@ -906,7 +913,12 @@ export function EvaluationSection({
               rows.map((evaluation) => (
                 <CardPanel
                   key={evaluation.id}
-                  render={<button type="button" />}
+                  render={
+                    <button
+                      type="button"
+                      aria-label={`Ver evaluación de ${evaluation.course_code}`}
+                    />
+                  }
                   onClick={() => onSelect(evaluation.id)}
                   className={cn(
                     "focus-visible:bg-accent flex w-full flex-none cursor-pointer flex-col p-3.5 text-left transition-colors outline-none",

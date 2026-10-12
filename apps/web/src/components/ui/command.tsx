@@ -125,6 +125,7 @@ export function Command({
   );
 }
 
+/* oxlint-disable no-autofocus */
 export function CommandInput({
   className,
   placeholder,

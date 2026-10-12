@@ -4,6 +4,7 @@ import { Loader2Icon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/* oxlint-disable prefer-tag-over-role */
 export function Spinner({
   className,
   ...props

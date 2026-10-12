@@ -115,7 +115,9 @@ function FeedbackModerationPage() {
               feedbackRows.map((fb) => (
                 <CardPanel
                   key={fb.id}
-                  render={<button type="button" />}
+                  render={
+                    <button type="button" aria-label={`Ver feedback de ${getTypeLabel(fb.type)}`} />
+                  }
                   onClick={() => {
                     void navigate({
                       from: "/moderation/feedback",

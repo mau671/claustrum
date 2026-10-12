@@ -9,7 +9,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 
 import type {
   ProfessorReviewPublicRow,
@@ -356,30 +356,36 @@ export function ProfessorReviewsList({
 
   const disableReactions = readOnly || !session?.session;
 
-  function handleReaction(review: ProfessorReviewPublicRow, reaction: ReactionValue) {
-    if (disableReactions) return;
+  const handleReaction = useCallback(
+    (review: ProfessorReviewPublicRow, reaction: ReactionValue) => {
+      if (disableReactions) return;
 
-    reactionMutation.mutate(
-      {
-        reviewId: review.review_id,
-        reaction: review.my_reaction === reaction ? null : reaction,
-      },
-      {
-        onError: (error) => {
-          toast.error(error instanceof Error ? error.message : "No se pudo guardar tu reacción");
+      reactionMutation.mutate(
+        {
+          reviewId: review.review_id,
+          reaction: review.my_reaction === reaction ? null : reaction,
         },
-      },
-    );
-  }
+        {
+          onError: (error) => {
+            toast.error(error instanceof Error ? error.message : "No se pudo guardar tu reacción");
+          },
+        },
+      );
+    },
+    [disableReactions, reactionMutation],
+  );
 
-  function openReportDialog(review: ProfessorReviewPublicRow) {
-    if (readOnly) return;
+  const openReportDialog = useCallback(
+    (review: ProfessorReviewPublicRow) => {
+      if (readOnly) return;
 
-    setReviewToReport(review);
-    setReportReason("spam");
-    setReportDescription("");
-    setTurnstileToken(null);
-  }
+      setReviewToReport(review);
+      setReportReason("spam");
+      setReportDescription("");
+      setTurnstileToken(null);
+    },
+    [readOnly],
+  );
 
   async function submitReport() {
     if (!reviewToReport) return;
@@ -411,7 +417,7 @@ export function ProfessorReviewsList({
 
   const columns = useMemo(
     () => getColumns(handleReaction, openReportDialog, readOnly, disableReactions),
-    [disableReactions, readOnly],
+    [disableReactions, handleReaction, openReportDialog, readOnly],
   );
 
   const table = useTable({

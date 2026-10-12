@@ -1,5 +1,7 @@
 "use client";
 
+/* oxlint-disable prefer-tag-over-role, no-static-element-interactions */
+
 import type * as React from "react";
 
 import { cva, type VariantProps } from "class-variance-authority";

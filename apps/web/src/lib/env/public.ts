@@ -34,8 +34,16 @@ export function getPublicEnv(): z.infer<typeof publicEnvSchema> {
 }
 
 export function getTurnstileSiteKey(): string | null {
-  const env = getPublicEnv();
-  return env.VITE_TURNSTILE_SITE_KEY ?? null;
+  try {
+    const env = getPublicEnv();
+    if (env.VITE_TURNSTILE_SITE_KEY) return env.VITE_TURNSTILE_SITE_KEY;
+  } catch {
+    // fallback if import.meta.env validation fails
+  }
+  if (typeof process !== "undefined" && process.env?.VITE_TURNSTILE_SITE_KEY) {
+    return process.env.VITE_TURNSTILE_SITE_KEY;
+  }
+  return null;
 }
 
 export function getApiBaseUrl(): string | null {

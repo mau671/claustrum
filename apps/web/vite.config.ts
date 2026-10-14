@@ -6,6 +6,7 @@ import mdx from "fumadocs-mdx/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  envDir: "../../",
   define: {
     "import.meta.url": JSON.stringify("file:///worker.js"),
   },

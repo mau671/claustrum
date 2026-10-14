@@ -35,26 +35,24 @@ function main(): void {
   let databaseUrl = process.env.DATABASE_URL;
 
   if (isProd) {
-    const prodEnvPath = fs.existsSync(path.resolve(process.cwd(), ".env.prod"))
-      ? path.resolve(process.cwd(), ".env.prod")
-      : path.resolve(process.cwd(), ".env.production.local");
+    const prodEnvPath = path.resolve(process.cwd(), ".env.prod");
     const prodEnv = parseEnvFile(prodEnvPath);
     databaseUrl = databaseUrl || prodEnv.DATABASE_URL;
     if (!databaseUrl) {
-      console.error("❌ Error: No DATABASE_URL found for production. Check .env.prod");
+      console.error("❌ Error: No DATABASE_URL found in .env.prod");
       process.exit(1);
     }
-    console.log("🚀 Launching Drizzle Studio for PRODUCTION database...");
+    console.log("🚀 Launching Drizzle Studio for PRODUCTION database (.env.prod)...");
   } else {
-    const devEnvPath = fs.existsSync(path.resolve(process.cwd(), ".env.dev"))
-      ? path.resolve(process.cwd(), ".env.dev")
-      : path.resolve(process.cwd(), ".env.local");
+    const devEnvPath = path.resolve(process.cwd(), ".env.dev");
     const devEnv = parseEnvFile(devEnvPath);
     databaseUrl =
       databaseUrl ||
       devEnv.DATABASE_URL ||
       "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
-    console.log("💻 Launching Drizzle Studio for LOCAL database (127.0.0.1:54322)...");
+    console.log(
+      "💻 Launching Drizzle Studio for LOCAL database (127.0.0.1:54322 from .env.dev)...",
+    );
   }
 
   const forwardedArgs = args.filter((arg) => arg !== "--prod" && arg !== "--");

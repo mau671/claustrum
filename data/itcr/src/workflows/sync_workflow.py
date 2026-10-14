@@ -2132,7 +2132,7 @@ def sync_cmd(
         None, "--db-url", help="Destination Postgres URL (required for target=db-url)"
     ),
     env_file: Path = typer.Option(
-        Path("../../.env.prod") if Path("../../.env.prod").exists() else Path("../../.env.production.local"),
+        Path("../../.env.prod"),
         "--env-file",
         help="Env file used when target=remote (default: ../../.env.prod)",
     ),

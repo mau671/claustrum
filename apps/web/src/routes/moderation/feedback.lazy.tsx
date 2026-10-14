@@ -95,6 +95,12 @@ function FeedbackModerationPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
+        <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+          <FrameTitle className="text-muted-foreground text-sm font-semibold">
+            Retroalimentación
+          </FrameTitle>
+        </FrameHeader>
+
         <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {feedbackQuery.isLoading ? (
@@ -148,7 +154,7 @@ function FeedbackModerationPage() {
           </div>
         </Card>
 
-        <FrameFooter className="p-1.5 pt-2">
+        <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
           <ModerationPagination
             page={queryPage}
             totalPages={hasMore ? queryPage + 2 : queryPage + 1}
@@ -161,31 +167,30 @@ function FeedbackModerationPage() {
 
       {/* Right Detail Pane */}
       {selectedFeedback && (
-        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0 lg:overflow-y-auto">
-          <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-              <div className="space-y-1">
-                <FrameTitle
-                  className={cn(
-                    "text-lg leading-tight font-semibold sm:text-xl",
-                    getTypeColor(selectedFeedback.type),
-                  )}
-                >
-                  {getTypeLabel(selectedFeedback.type)}
-                </FrameTitle>
-                <p className="text-muted-foreground text-xs">
-                  {new Date(selectedFeedback.created_at).toLocaleString()}
-                </p>
-              </div>
+        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0">
+          <FrameHeader className="flex h-11 shrink-0 items-center justify-between px-4 py-2 sm:h-12 sm:px-5">
+            <FrameTitle
+              className={cn(
+                "truncate text-base font-semibold sm:text-lg",
+                getTypeColor(selectedFeedback.type),
+              )}
+            >
+              {getTypeLabel(selectedFeedback.type)}
+            </FrameTitle>
+
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="text-muted-foreground text-xs">
+                {new Date(selectedFeedback.created_at).toLocaleString()}
+              </span>
 
               {!selectedFeedback.is_reviewed && (
                 <Button
                   size="sm"
                   onClick={() => markAsReviewed.mutate(selectedFeedback.id)}
                   disabled={markAsReviewed.isPending}
-                  className="shrink-0"
+                  className="h-8 shrink-0 px-2.5 text-xs"
                 >
-                  <Icon icon={CheckIcon} size={16} className="mr-1.5 size-4" />
+                  <Icon icon={CheckIcon} size={14} className="mr-1 size-3.5" />
                   Marcar como revisado
                 </Button>
               )}
@@ -193,12 +198,12 @@ function FeedbackModerationPage() {
           </FrameHeader>
 
           <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
-            <CardPanel className="flex flex-col gap-4 p-4 sm:p-5">
+            <CardPanel className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-5">
               <div className="space-y-1.5">
-                <h4 className="text-muted-foreground text-xs font-semibold">Comentario original</h4>
-                <div className="bg-muted/30 rounded-lg border p-3.5 text-sm leading-relaxed whitespace-pre-wrap">
+                <h4 className="text-foreground text-sm font-medium">Comentario</h4>
+                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed whitespace-pre-wrap">
                   {selectedFeedback.content}
-                </div>
+                </blockquote>
               </div>
 
               <div className="space-y-1.5 pt-1">
@@ -243,7 +248,7 @@ function FeedbackModerationPage() {
             </CardPanel>
           </Card>
 
-          <FrameFooter className="p-2 sm:p-2.5">
+          <FrameFooter className="flex h-12 shrink-0 items-center justify-end p-2 sm:h-13 sm:p-2.5">
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <Button
                 variant="outline"

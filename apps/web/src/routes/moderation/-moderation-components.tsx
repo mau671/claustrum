@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { Fragment, lazy, Suspense, useEffect, useMemo, useState } from "react";
 
-import type { EvaluationModerationRow } from "@/lib/evaluations/types";
+import type { EvaluationModerationRow, EvaluationStatus } from "@/lib/evaluations/types";
 import type {
   ProfessorReviewModerationRow,
   ProfessorReviewReportModerationRow,
@@ -88,36 +88,38 @@ function ReviewScoreSummary({ review }: { review: ProfessorReviewModerationRow }
   );
 
   return (
-    <div className="space-y-3">
-      {/* Grid de métricas numéricas */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="space-y-2">
+      {/* Calidad, Facilidad, Claridad, Justicia como texto simple */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
         {ratings.map((r) => (
-          <div
-            key={r.label}
-            className="border-border/60 bg-muted/25 flex flex-col rounded-lg border p-2.5"
-          >
-            <span className="text-muted-foreground text-[11px] font-medium">{r.label}</span>
-            <span className="text-foreground text-base font-bold tabular-nums">{r.value}</span>
-          </div>
+          <span key={r.label} className="text-foreground">
+            <span className="text-muted-foreground">{r.label}: </span>
+            <span className="font-semibold tabular-nums">{r.value}</span>
+          </span>
         ))}
       </div>
 
-      {/* Contexto académico (asistencia, nota obtenida, interés) */}
+      {/* Asistencia, Nota obtenida, Interés como valores normales sin card */}
       {(hasAttendance || hasGrade || hasEngagement) && (
-        <div className="text-muted-foreground border-border/40 bg-muted/15 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border px-3 py-2 text-xs">
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
           {hasAttendance && (
             <span>
-              <strong>Asistencia:</strong> {review.attendance_required ? "Obligatoria" : "Opcional"}
+              <span>Asistencia: </span>
+              <span className="text-foreground font-medium">
+                {review.attendance_required ? "Obligatoria" : "Opcional"}
+              </span>
             </span>
           )}
           {hasGrade && (
             <span>
-              <strong>Nota obtenida:</strong> {review.grade_received}
+              <span>Nota obtenida: </span>
+              <span className="text-foreground font-medium">{review.grade_received}</span>
             </span>
           )}
           {hasEngagement && (
             <span>
-              <strong>Interés:</strong> {review.engagement_level}
+              <span>Interés: </span>
+              <span className="text-foreground font-medium">{review.engagement_level}</span>
             </span>
           )}
         </div>
@@ -158,6 +160,12 @@ export function ReviewReportSection({
   return (
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
+        <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+          <FrameTitle className="text-muted-foreground text-sm font-semibold">
+            Reportes pendientes
+          </FrameTitle>
+        </FrameHeader>
+
         <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
@@ -204,7 +212,7 @@ export function ReviewReportSection({
           </div>
         </Card>
 
-        <FrameFooter className="p-1.5 pt-2">
+        <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
           <ModerationPagination
             page={page}
             totalPages={hasMore ? page + 2 : page + 1}
@@ -216,35 +224,37 @@ export function ReviewReportSection({
       </Frame>
 
       {selectedReport && (
-        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0 lg:overflow-y-auto">
-          <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
-            <FrameTitle className="text-lg leading-tight font-semibold sm:text-xl">
+        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0">
+          <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+            <FrameTitle className="truncate text-base font-semibold sm:text-lg">
               {selectedReport.course_code}: {selectedReport.course_name}
             </FrameTitle>
-            <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
-              <span>
-                <strong>Profesor:</strong> {selectedReport.professor_name}
-              </span>
-              <span>
-                <strong>Motivo:</strong> {selectedReport.reason}
-              </span>
-              {selectedReport.description && (
-                <span>
-                  <strong>Detalles:</strong> {selectedReport.description}
-                </span>
-              )}
-            </div>
           </FrameHeader>
 
           <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
-            <CardPanel className="flex flex-col gap-3.5 p-4 sm:p-5">
+            <CardPanel className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto p-4 sm:p-5">
+              <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+                <span>
+                  <strong className="text-foreground font-medium">Profesor:</strong>{" "}
+                  {selectedReport.professor_name}
+                </span>
+                <span>
+                  <strong className="text-foreground font-medium">Motivo:</strong>{" "}
+                  {selectedReport.reason}
+                </span>
+                {selectedReport.description && (
+                  <span>
+                    <strong className="text-foreground font-medium">Detalles:</strong>{" "}
+                    {selectedReport.description}
+                  </span>
+                )}
+              </div>
+
               <div className="space-y-1.5">
-                <h4 className="text-muted-foreground text-xs font-semibold">
-                  Comentario reportado
-                </h4>
-                <div className="bg-muted/50 rounded-lg border p-3 text-sm">
+                <h4 className="text-foreground text-sm font-medium">Comentario reportado</h4>
+                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed whitespace-pre-wrap">
                   {selectedReport.comment}
-                </div>
+                </blockquote>
               </div>
 
               <div className="flex flex-col gap-1.5 pt-1">
@@ -270,7 +280,7 @@ export function ReviewReportSection({
             </CardPanel>
           </Card>
 
-          <FrameFooter className="p-2 sm:p-2.5">
+          <FrameFooter className="flex h-12 shrink-0 items-center p-2 sm:h-13 sm:p-2.5">
             <div className="flex w-full gap-2.5">
               <Button
                 className="flex-1"
@@ -304,17 +314,17 @@ const reviewQueueColumnHelper = createColumnHelper<
   ProfessorReviewModerationRow
 >();
 
-function ReviewStatusTabs({
+export function ModerationStatusTabs<T extends string>({
   statusFilter,
   onStatusChange,
 }: {
-  statusFilter: ProfessorReviewStatus;
-  onStatusChange: (status: ProfessorReviewStatus) => void;
+  statusFilter: T;
+  onStatusChange: (status: T) => void;
 }) {
-  const tabs: { value: ProfessorReviewStatus; label: string }[] = [
-    { value: "pending", label: "Pendientes" },
-    { value: "approved", label: "Aprobadas" },
-    { value: "rejected", label: "Rechazadas" },
+  const tabs: { value: T; label: string }[] = [
+    { value: "pending" as T, label: "Pendientes" },
+    { value: "approved" as T, label: "Aprobadas" },
+    { value: "rejected" as T, label: "Rechazadas" },
   ];
 
   return (
@@ -465,8 +475,8 @@ export function ReviewSection({
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
         {onStatusChange && (
-          <FrameHeader className="p-1 pb-1.5">
-            <ReviewStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
+          <FrameHeader className="flex h-11 shrink-0 items-center p-1 sm:h-12">
+            <ModerationStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
           </FrameHeader>
         )}
 
@@ -501,7 +511,7 @@ export function ReviewSection({
           </div>
         </Card>
 
-        <FrameFooter className="p-1.5 pt-2">
+        <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
           <ModerationPagination
             page={page}
             totalPages={calculatedTotalPages}
@@ -513,15 +523,15 @@ export function ReviewSection({
       </Frame>
 
       {selectedReview && (
-        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0 lg:overflow-y-auto">
-          <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
-            <FrameTitle className="text-lg leading-tight font-semibold sm:text-xl">
+        <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0">
+          <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+            <FrameTitle className="truncate text-base font-semibold sm:text-lg">
               {selectedReview.professor_name}
             </FrameTitle>
           </FrameHeader>
 
           <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
-            <CardPanel className="flex flex-col gap-4 p-4 sm:p-5">
+            <CardPanel className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-5">
               {/* Cursos asociados */}
               <ReviewCourses review={selectedReview} />
 
@@ -584,7 +594,7 @@ export function ReviewSection({
             </CardPanel>
           </Card>
 
-          <FrameFooter className="p-2 sm:p-2.5">
+          <FrameFooter className="flex h-12 shrink-0 items-center p-2 sm:h-13 sm:p-2.5">
             <div className="flex w-full gap-2.5">
               <Button
                 className="flex-1"
@@ -733,10 +743,15 @@ export function EvaluationSection({
   selectedEvaluation,
   onSelect,
   page,
+  pageSize: _pageSize = 20,
+  totalCount: _totalCount,
+  totalPages,
   hasMore,
   isLoading,
   isFetching,
   onPageChange,
+  statusFilter = "pending",
+  onStatusChange,
   moderationNote,
   onNoteChange,
   onApprove,
@@ -747,19 +762,32 @@ export function EvaluationSection({
   selectedEvaluation: EvaluationModerationRow | null;
   onSelect: (id: number | null) => void;
   page: number;
+  pageSize?: number;
+  totalCount?: number;
+  totalPages?: number;
   hasMore: boolean;
   isLoading: boolean;
   isFetching: boolean;
   onPageChange: (page: number) => void;
+  statusFilter?: EvaluationStatus;
+  onStatusChange?: (status: EvaluationStatus) => void;
   moderationNote: Record<number, string>;
   onNoteChange: (id: number, value: string) => void;
   onApprove: (id: number) => Promise<void>;
   onReject: (id: number) => Promise<void>;
   isPending: boolean;
 }) {
+  const calculatedTotalPages = totalPages ?? Math.max(1, hasMore ? page + 2 : page + 1);
+
   return (
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
+        {onStatusChange && (
+          <FrameHeader className="flex h-11 shrink-0 items-center p-1 sm:h-12">
+            <ModerationStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
+          </FrameHeader>
+        )}
+
         <Card className="bg-card flex max-h-[340px] min-h-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs/5 lg:max-h-none">
           <div className="divide-border/60 flex min-h-0 flex-1 flex-col divide-y overflow-y-auto">
             {isLoading ? (
@@ -769,7 +797,11 @@ export function EvaluationSection({
               </div>
             ) : rows.length === 0 ? (
               <p className="text-muted-foreground p-6 text-center text-sm">
-                No hay evaluaciones pendientes.
+                {statusFilter === "pending"
+                  ? "No hay evaluaciones pendientes."
+                  : statusFilter === "approved"
+                    ? "No hay evaluaciones aprobadas."
+                    : "No hay evaluaciones rechazadas."}
               </p>
             ) : (
               rows.map((evaluation) => (
@@ -823,10 +855,10 @@ export function EvaluationSection({
           </div>
         </Card>
 
-        <FrameFooter className="p-1.5 pt-2">
+        <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
           <ModerationPagination
             page={page}
-            totalPages={hasMore ? page + 2 : page + 1}
+            totalPages={calculatedTotalPages}
             hasMore={hasMore}
             isFetching={isFetching}
             onPageChange={onPageChange}
@@ -837,42 +869,43 @@ export function EvaluationSection({
       {selectedEvaluation && (
         <div className="flex min-w-0 flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
           <Frame className="min-w-0 shrink-0 flex-col lg:w-80">
-            <FrameHeader className="p-3.5 pb-2 sm:p-5 sm:pb-3">
-              <FrameTitle className="text-lg leading-tight font-semibold sm:text-xl">
+            <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+              <FrameTitle className="truncate text-base font-semibold sm:text-lg">
                 {selectedEvaluation.course_code}: {selectedEvaluation.course_name}
               </FrameTitle>
-              <div className="text-muted-foreground mt-2 flex flex-col gap-1 text-xs">
-                <span>
-                  <strong>Tipo:</strong>{" "}
-                  {formatEvaluationTypeLabel(
-                    selectedEvaluation.evaluation_type,
-                    selectedEvaluation.evaluation_number,
-                    selectedEvaluation.custom_name,
-                  )}
-                </span>
-                <span>
-                  <strong>Profesor:</strong> {selectedEvaluation.professor_name ?? "—"}
-                </span>
-                <span>
-                  <strong>Período:</strong>{" "}
-                  {selectedEvaluation.term_display_name
-                    ? selectedEvaluation.term_display_name.replace(" - ", ": ")
-                    : "—"}
-                </span>
-              </div>
             </FrameHeader>
 
             <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
-              <CardPanel className="flex flex-col gap-3.5 p-4 sm:p-5">
+              <CardPanel className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto p-4 sm:p-5">
                 <div className="text-muted-foreground grid grid-cols-2 gap-2 text-xs">
-                  <span>
-                    <strong>Tamaño:</strong> {formatFileSize(selectedEvaluation.file_size)}
+                  <span className="col-span-2">
+                    <strong className="text-foreground font-medium">Tipo:</strong>{" "}
+                    {formatEvaluationTypeLabel(
+                      selectedEvaluation.evaluation_type,
+                      selectedEvaluation.evaluation_number,
+                      selectedEvaluation.custom_name,
+                    )}
                   </span>
                   <span>
-                    <strong>Cátedra:</strong> {selectedEvaluation.is_catedra ? "Sí" : "No"}
+                    <strong className="text-foreground font-medium">Profesor:</strong>{" "}
+                    {selectedEvaluation.professor_name ?? "—"}
+                  </span>
+                  <span>
+                    <strong className="text-foreground font-medium">Período:</strong>{" "}
+                    {selectedEvaluation.term_display_name
+                      ? selectedEvaluation.term_display_name.replace(" - ", ": ")
+                      : "—"}
+                  </span>
+                  <span>
+                    <strong className="text-foreground font-medium">Tamaño:</strong>{" "}
+                    {formatFileSize(selectedEvaluation.file_size)}
+                  </span>
+                  <span>
+                    <strong className="text-foreground font-medium">Cátedra:</strong>{" "}
+                    {selectedEvaluation.is_catedra ? "Sí" : "No"}
                   </span>
                   <span className="col-span-2">
-                    <strong>Respuestas:</strong>{" "}
+                    <strong className="text-foreground font-medium">Respuestas:</strong>{" "}
                     {selectedEvaluation.has_separate_answers
                       ? "Archivo aparte"
                       : selectedEvaluation.includes_answers
@@ -880,6 +913,12 @@ export function EvaluationSection({
                         : "No"}
                   </span>
                 </div>
+
+                {selectedEvaluation.moderation_note && (
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-900 dark:text-amber-200">
+                    <strong>Nota previa de moderación:</strong> {selectedEvaluation.moderation_note}
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-1.5 pt-1">
                   <div className="inline-flex w-full items-center justify-between gap-2">
@@ -898,13 +937,13 @@ export function EvaluationSection({
                     value={moderationNote[selectedEvaluation.id] ?? ""}
                     onChange={(e) => onNoteChange(selectedEvaluation.id, e.target.value)}
                     className="bg-background h-20 min-h-0 resize-none text-xs shadow-none sm:text-sm"
-                    placeholder="Escribe una nota opcional para explicar el motivo del rechazo"
+                    placeholder="Escribe una nota opcional para explicar el motivo del rechazo o aprobación"
                   />
                 </div>
               </CardPanel>
             </Card>
 
-            <FrameFooter className="p-2 sm:p-2.5">
+            <FrameFooter className="flex h-12 shrink-0 items-center p-2 sm:h-13 sm:p-2.5">
               <div className="flex w-full gap-2.5">
                 <Button
                   className="flex-1"

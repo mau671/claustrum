@@ -14,20 +14,23 @@ export default function CalendarBodyDayMargin({ className }: { className?: strin
   const { hourHeight, cornerAction } = useCalendarContext();
 
   return (
-    <div className={cn("bg-background sticky left-0 z-10 flex w-12 flex-col", className)}>
-      <div className="sticky top-0 left-0 z-20 flex h-[33px] items-start justify-stretch p-0">
-        <div className="bg-background flex h-6 w-full items-center justify-center">
-          {cornerAction}
-        </div>
+    <div className={cn("bg-background sticky left-0 z-20 flex w-12 flex-col", className)}>
+      <div className="bg-background border-border/50 sticky top-0 left-0 z-30 flex h-[33px] w-full items-center justify-center border-b p-0">
+        <div className="flex h-full w-full items-center justify-center">{cornerAction}</div>
       </div>
-      <div className="bg-background sticky left-0 z-10 flex w-12 flex-col">
+      <div className="bg-background flex w-12 flex-col">
         {hours.map((hour) => (
           <div
             key={hour}
             className="relative transition-[height] duration-200 first:mt-0"
             style={{ height: `${hourHeight}px` }}
           >
-            <span className="text-muted-foreground absolute -top-2.5 left-2 text-xs">
+            <span
+              className={cn(
+                "text-muted-foreground absolute left-2 text-xs",
+                hour === START_HOUR ? "top-0.5" : "-top-2.5",
+              )}
+            >
               {format(new Date(2000, 0, 1, hour, 0, 0, 0), "h a", { locale: es })}
             </span>
           </div>

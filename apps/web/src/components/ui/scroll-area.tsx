@@ -32,8 +32,7 @@ export function ScrollArea({
           "focus-visible:ring-ring focus-visible:ring-offset-background h-full w-full max-w-full min-w-0 rounded-[inherit] transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
           overscrollContain &&
             "data-has-overflow-x:overscroll-x-contain data-has-overflow-y:overscroll-y-contain",
-          scrollFade &&
-            "mask-t-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-y-start)))] mask-r-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-x-end)))] mask-b-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-y-end)))] mask-l-from-[calc(100%-min(var(--fade-size),var(--scroll-area-overflow-x-start)))] [--fade-size:1.5rem]",
+          scrollFade && "scroll-fade",
           scrollbarGutter && "data-has-overflow-x:pb-2.5 data-has-overflow-y:pe-2.5",
         )}
         data-slot="scroll-area-viewport"

@@ -438,7 +438,10 @@ export default function CourseList({
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div ref={scrollAreaRootRef} className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full w-full [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full">
+        <ScrollArea
+          scrollFade
+          className="h-full w-full [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
+        >
           <div className={cn("w-full", viewMode === "card" ? "space-y-3 p-1 pt-2" : "")}>
             {viewMode === "table" ? (
               <div className="bg-card/40 flex flex-col overflow-hidden rounded-xl border">
@@ -530,7 +533,7 @@ const CourseCard = memo(function CourseCard({
         </Badge>
       </FrameHeader>
 
-      <div className="w-full max-w-full [scrollbar-width:none] scrollbar-none overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      <div className="w-full max-w-full [scrollbar-width:none] scrollbar-none overflow-x-auto rounded-b-[calc(var(--radius-2xl)-0.375rem)] [&::-webkit-scrollbar]:hidden">
         <div className="flex snap-x snap-mandatory items-stretch gap-1.5">
           {groupViews.map((groupView) => {
             const isSelected = selectedGroupIds.has(groupView.groupId);
@@ -548,7 +551,7 @@ const CourseCard = memo(function CourseCard({
                       data-selected={isSelected}
                       data-disabled={disabled}
                       className={cn(
-                        "bg-card relative flex w-auto min-w-fit shrink-0 cursor-pointer snap-start flex-col rounded-xl border text-left transition-colors duration-200 before:rounded-[inherit]",
+                        "bg-card relative flex w-auto min-w-fit shrink-0 cursor-pointer snap-start flex-col rounded-[calc(var(--radius-2xl)-0.375rem)] border text-left transition-colors duration-200 before:rounded-[inherit]",
                         disabled && "cursor-not-allowed opacity-50",
                         !disabled && !isSelected && "hover:bg-muted/40 border-border/80",
                         isSelected && colorStyles.bg,

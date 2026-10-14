@@ -70,14 +70,6 @@ export default Alchemy.Stack(
                 pattern: `${appDomain}/api/*`,
                 zoneName,
               },
-              {
-                pattern: `${appDomain}/docs*`,
-                zoneName,
-              },
-              {
-                pattern: `${appDomain}/openapi.json`,
-                zoneName,
-              },
             ]
           : undefined,
       env: {

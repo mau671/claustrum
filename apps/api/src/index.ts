@@ -174,12 +174,8 @@ export default {
       });
     }
 
-    // Effect HttpApi endpoints (/api/v1/*, /docs, /openapi.json)
-    if (
-      url.pathname.startsWith("/api/v1") ||
-      url.pathname.startsWith("/docs") ||
-      url.pathname === "/openapi.json"
-    ) {
+    // Effect HttpApi endpoints (/api/v1/*)
+    if (url.pathname.startsWith("/api/v1")) {
       const client = new Client({
         connectionString: env.HYPERDRIVE ? env.HYPERDRIVE.connectionString : env.DATABASE_URL,
       });
@@ -237,10 +233,10 @@ export default {
       );
 
       const apiLayer = HttpApiBuilder.layer(ClaustrumApi, {
-        openapiPath: "/openapi.json",
+        openapiPath: "/api/v1/openapi.json",
       }).pipe(
         Layer.provide(handlersLayer),
-        Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/docs" })),
+        Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/api/v1/docs" })),
         Layer.provide(databaseLayer),
         Layer.provide(storageLayer),
         Layer.provide(envLayer),

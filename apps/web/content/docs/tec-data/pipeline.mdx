@@ -83,9 +83,9 @@ solo se desactivan tablas incluidas en el scope de la corrida.
 ## Sync unificado
 
 ```bash title="Sync local/remoto"
-uv run tec-data sync --target local --years 2026
-uv run tec-data sync --target remote --years 2026 --env-file ../../.env.production.local
-uv run tec-data sync --target db-url --db-url "postgresql://..." --years 2026
+uv run itcr sync --target local --years 2026
+uv run itcr sync --target remote --years 2026 --env-file ../../.env.prod
+uv run itcr sync --target db-url --db-url "postgresql://..." --years 2026
 ```
 
 `sync` es el flujo operativo principal. Ejecuta el pipeline, remapea IDs contra

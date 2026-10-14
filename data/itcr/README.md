@@ -252,8 +252,11 @@ profesores y oferta), usa el comando unificado `sync`:
 # Local (usa postgres local)
 uv run itcr sync --target local --years 2026
 
-# Remoto (lee .env.production.local)
-uv run itcr sync --target remote --years 2026 --env-file ../../.env.production.local
+# Remoto (lee .env.prod por defecto)
+uv run itcr sync --target remote --years 2026
+
+# O especificando archivo explícito
+uv run itcr sync --target remote --years 2026 --env-file ../../.env.prod
 
 # DB URL explícita
 uv run itcr sync --target db-url --db-url "postgresql://..." --years 2026

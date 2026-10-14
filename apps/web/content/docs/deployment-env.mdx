@@ -28,14 +28,14 @@ El Worker necesita secretos de servidor:
 | `BETTER_AUTH_SECRET`   | Firma/seguridad de Better Auth.           |
 | `BETTER_AUTH_URL`      | URL base pública de auth.                 |
 
-El repositorio incluye `.env.example`, `.env.production.local.example` y
+El repositorio incluye `.env.dev.example`, `.env.prod.example` y
 `apps/api/.dev.vars.example` como plantillas.
 
 ## Flujo local mínimo
 
 ```bash title="Preparar entorno local"
 pnpm install
-cp .env.example .env.local
+cp .env.dev.example .env.dev
 pnpm run db:start
 pnpm run db:migrate
 ```
@@ -116,13 +116,13 @@ Para producción, usa el archivo de entorno correspondiente:
 
 ```bash
 cd data/itcr
-uv run tec-data sync --target remote --years 2026 --env-file ../../.env.production.local
+uv run itcr sync --target remote --years 2026 --env-file ../../.env.prod
 ```
 
 Para inspeccionar sin aplicar:
 
 ```bash
-uv run tec-data sync --target remote --years 2026 --env-file ../../.env.production.local --no-apply --keep-sql
+uv run itcr sync --target remote --years 2026 --env-file ../../.env.prod --no-apply --keep-sql
 ```
 
 ## Reglas operativas

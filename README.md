@@ -118,14 +118,17 @@ pnpm install
 
 ### 2. Configurar variables de entorno
 
-Copia las plantillas correspondientes para el frontend y el worker:
+Copia las plantillas correspondientes para desarrollo local y producción:
 
 ```bash
-# Variables del cliente web
-cp apps/web/.env.example apps/web/.env.local
+# Variables locales (base de datos local, Better Auth, Turnstile)
+cp .env.dev.example .env.dev
 
-# Variables del API worker
+# Variables locales del API worker
 cp apps/api/.dev.vars.example apps/api/.dev.vars
+
+# Variables de producción (para migraciones y seeds remotos con --prod)
+cp .env.prod.example .env.prod
 ```
 
 ### 3. Iniciar la base de datos local

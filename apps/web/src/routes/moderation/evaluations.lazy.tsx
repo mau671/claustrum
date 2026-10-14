@@ -1,7 +1,7 @@
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
-import type { EvaluationModerationRow } from "@/lib/evaluations/types";
+import type { EvaluationModerationRow, EvaluationStatus } from "@/lib/evaluations/types";
 
 import { toast } from "@/components/ui/toast";
 import { useEvaluationModerationQueue, useModerateEvaluation } from "@/lib/hooks/use-evaluations";
@@ -20,10 +20,11 @@ function EvaluationsPage() {
   const page = search.page ?? 1;
   const queryPage = Math.max(page - 1, 0);
   const selectedEvaluationId = search.evaluationId ?? null;
+  const statusFilter: EvaluationStatus = (search.status as EvaluationStatus) ?? "pending";
 
   const [moderationNote, setModerationNote] = useState<Record<number, string>>({});
 
-  const evaluationsQuery = useEvaluationModerationQueue("pending", queryPage, PAGE_SIZE, true);
+  const evaluationsQuery = useEvaluationModerationQueue(statusFilter, queryPage, PAGE_SIZE, true);
   const moderateEvaluationMutation = useModerateEvaluation();
 
   const evaluationRows = useMemo(
@@ -60,6 +61,18 @@ function EvaluationsPage() {
       search: (prev) => ({
         ...prev,
         page: newPage === 0 ? undefined : newPage + 1,
+        evaluationId: undefined,
+      }),
+    });
+  };
+
+  const handleStatusChange = (newStatus: EvaluationStatus) => {
+    void navigate({
+      from: "/moderation/evaluations",
+      search: (prev) => ({
+        ...prev,
+        status: newStatus === "pending" ? undefined : newStatus,
+        page: undefined,
         evaluationId: undefined,
       }),
     });
@@ -106,10 +119,15 @@ function EvaluationsPage() {
       selectedEvaluation={selectedEvaluation}
       onSelect={handleSelect}
       page={queryPage}
+      pageSize={PAGE_SIZE}
+      totalCount={evaluationTotal}
+      totalPages={Math.max(1, Math.ceil(evaluationTotal / PAGE_SIZE))}
       hasMore={evaluationHasMore}
       isLoading={evaluationsQuery.isLoading}
       isFetching={evaluationsQuery.isFetching}
       onPageChange={handlePageChange}
+      statusFilter={statusFilter}
+      onStatusChange={handleStatusChange}
       moderationNote={moderationNote}
       onNoteChange={(id, value) => setModerationNote((prev) => ({ ...prev, [id]: value }))}
       onApprove={handleApproveEvaluation}

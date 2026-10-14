@@ -4,6 +4,7 @@ import { z } from "zod";
 const searchSchema = z.object({
   page: z.number().catch(1).optional(),
   evaluationId: z.number().optional(),
+  status: z.enum(["pending", "approved", "rejected"]).catch("pending").optional(),
 });
 
 export const Route = createFileRoute("/moderation/evaluations")({

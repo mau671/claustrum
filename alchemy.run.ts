@@ -14,8 +14,12 @@ export default Alchemy.Stack(
     const { stage } = yield* Alchemy.Stack;
     const isProd = stage === "prod";
 
-    const appDomain = process.env.APP_DOMAIN;
-    const zoneName = process.env.ZONE_NAME;
+    const appDomain = yield* Config.String("APP_DOMAIN").pipe(
+      Config.withDefault(process.env.APP_DOMAIN ?? "claustrum.maugp.com"),
+    );
+    const zoneName = yield* Config.String("ZONE_NAME").pipe(
+      Config.withDefault(process.env.ZONE_NAME ?? "maugp.com"),
+    );
 
     const evaluationsBucket = yield* Cloudflare.R2.Bucket("claustrum-evaluations");
 
@@ -66,6 +70,14 @@ export default Alchemy.Stack(
                 pattern: `${appDomain}/api/*`,
                 zoneName,
               },
+              {
+                pattern: `${appDomain}/docs*`,
+                zoneName,
+              },
+              {
+                pattern: `${appDomain}/openapi.json`,
+                zoneName,
+              },
             ]
           : undefined,
       env: {
@@ -86,7 +98,6 @@ export default Alchemy.Stack(
     const webWorker = yield* Cloudflare.Worker("claustrum-web", {
       name: isProd ? "claustrum-web" : undefined,
       adopt: true,
-      domain: isProd && appDomain ? appDomain : undefined,
       main: "./apps/web/dist/server/server.js",
       bundle: false,
       assets: "./apps/web/dist/client",

@@ -87,9 +87,9 @@ export const UserAdminItem = Schema.Struct({
   role: Schema.NullOr(Schema.String),
   banned: Schema.NullOr(Schema.Boolean),
   banReason: Schema.NullOr(Schema.String),
-  banExpires: Schema.NullOr(Schema.Unknown),
-  createdAt: Schema.Unknown,
-  updatedAt: Schema.Unknown,
+  banExpires: Schema.NullOr(Schema.String),
+  createdAt: Schema.String,
+  updatedAt: Schema.String,
 });
 export type UserAdminItem = typeof UserAdminItem.Type;
 

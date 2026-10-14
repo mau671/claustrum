@@ -14,6 +14,7 @@ import {
   InternalServerError,
   NotFoundError,
 } from "../domain/Users";
+import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
 
 interface ReportDbRow {
@@ -111,7 +112,7 @@ export const ReportsHandlers = HttpApiBuilder.group(ClaustrumApi, "reports", (ha
             reason: r.reason,
             description: r.description ?? null,
             status: r.status,
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
             professor_id: String(r.professor_id),
             professor_name: r.professor_name,
             course_code: r.course_code ?? "",
@@ -179,8 +180,8 @@ export const ReportsHandlers = HttpApiBuilder.group(ClaustrumApi, "reports", (ha
             description: r.description ?? null,
             status: r.status,
             resolution_note: r.resolution_note ?? null,
-            created_at: r.created_at,
-            resolved_at: r.resolved_at ?? null,
+            created_at: toIsoString(r.created_at) ?? "",
+            resolved_at: toIsoString(r.resolved_at),
             professor_id: String(r.professor_id),
             professor_name: r.professor_name,
             course_code: r.course_code ?? "",

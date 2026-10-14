@@ -5,6 +5,7 @@ import { HttpApiBuilder } from "effect/http-api";
 
 import { ClaustrumApi } from "../api/index";
 import { ProfessorNotFound } from "../domain/Professors";
+import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
 
 interface RawProfessorSearchRow {
@@ -88,13 +89,15 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
               [
                 searchQuery,
                 query.minAverageScore ?? null,
-                query.minReviewCount,
+                query.minReviewCount ?? 0,
                 query.academicUnitId ?? null,
-                query.onlyWithApprovedReviews,
-                query.sortBy,
-                query.sortDesc,
-                query.limit,
-                query.offset,
+                query.onlyWithApprovedReviews === "true" || query.onlyWithApprovedReviews === true,
+                query.sortBy ?? "reviews",
+                query.sortDesc === "true" ||
+                  query.sortDesc === true ||
+                  query.sortDesc === undefined,
+                query.limit ?? 25,
+                query.offset ?? 0,
               ],
             )
             .pipe(Effect.orDie);
@@ -111,7 +114,7 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
             average_clarity_score:
               r.average_clarity_score !== null ? Number(r.average_clarity_score) : null,
             courses_reviewed_count: Number(r.courses_reviewed_count),
-            last_approved_review_at: r.last_approved_review_at,
+            last_approved_review_at: toIsoString(r.last_approved_review_at),
             search_rank: r.search_rank !== null ? Number(r.search_rank) : null,
             academic_unit: r.academic_unit ?? null,
             total_count: Number(r.total_count),
@@ -211,8 +214,8 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: r.starts_on,
-            ends_on: r.ends_on,
+            starts_on: toIsoString(r.starts_on),
+            ends_on: toIsoString(r.ends_on),
           }));
         }),
 

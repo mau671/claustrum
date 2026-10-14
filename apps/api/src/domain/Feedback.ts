@@ -8,7 +8,7 @@ export const FeedbackItem = Schema.Struct({
   type: FeedbackType,
   content: Schema.String,
   is_reviewed: Schema.Boolean,
-  created_at: Schema.Unknown,
+  created_at: Schema.String,
   user_id: Schema.NullOr(Schema.String),
   admin_notes: Schema.NullOr(Schema.String),
 });
@@ -34,7 +34,7 @@ export const CreateFeedbackResponse = Schema.Struct({
     id: Schema.Number,
     type: FeedbackType,
     content: Schema.String,
-    created_at: Schema.Unknown,
+    created_at: Schema.String,
   }),
 });
 export type CreateFeedbackResponse = typeof CreateFeedbackResponse.Type;

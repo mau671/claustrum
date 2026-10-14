@@ -17,6 +17,7 @@ import {
   InternalServerError,
   NotFoundError,
 } from "../domain/Users";
+import { toIsoString } from "../lib/date";
 import { verifyTurnstileToken } from "../lib/security";
 import { Database } from "../services/Database";
 
@@ -63,7 +64,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(ClaustrumApi, "feedback", (
             type: r.type,
             content: r.content,
             is_reviewed: Boolean(r.is_reviewed),
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
             user_id: r.user_id ? String(r.user_id) : null,
             admin_notes: r.admin_notes ?? null,
           }));
@@ -140,7 +141,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(ClaustrumApi, "feedback", (
               id: Number(inserted.id),
               type: inserted.type,
               content: inserted.content,
-              created_at: inserted.created_at,
+              created_at: toIsoString(inserted.created_at) ?? "",
             },
           };
         }),
@@ -174,7 +175,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(ClaustrumApi, "feedback", (
             type: r.type,
             content: r.content,
             is_reviewed: Boolean(r.is_reviewed),
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
             user_id: r.user_id ? String(r.user_id) : null,
             admin_notes: r.admin_notes ?? null,
           };

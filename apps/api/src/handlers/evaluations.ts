@@ -25,6 +25,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../domain/Users";
+import { toIsoString } from "../lib/date";
 import { verifyTurnstileToken } from "../lib/security";
 import { Database } from "../services/Database";
 import { Storage, type StorageService } from "../services/Storage";
@@ -140,7 +141,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             file_size: Number(r.file_size),
             answers_file_key: r.answers_file_key ?? null,
             status: r.status,
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
             term_display_name: r.term_display_name ?? null,
             professor_name: r.professor_name ?? null,
           }));
@@ -407,7 +408,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             answers_file_key: r.answers_file_key ?? null,
             status: r.status,
             moderation_note: r.moderation_note ?? null,
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
           };
 
           return detail;

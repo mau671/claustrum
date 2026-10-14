@@ -12,6 +12,7 @@ import type {
 
 import { ClaustrumApi } from "../api/index";
 import { checkAuth, checkRole, CurrentUser, InternalServerError } from "../domain/Users";
+import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
 
 interface CountRow {
@@ -206,11 +207,14 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
               attendance_required:
                 r.attendance_required !== null ? Boolean(r.attendance_required) : null,
               grade_received: r.grade_received ?? null,
-              engagement_level: r.engagement_level ?? null,
+              engagement_level:
+                r.engagement_level !== null && r.engagement_level !== undefined
+                  ? Number(r.engagement_level)
+                  : null,
               tags,
               status: r.status,
-              created_at: r.created_at,
-              reviewed_at: r.reviewed_at ?? null,
+              created_at: toIsoString(r.created_at) ?? "",
+              reviewed_at: toIsoString(r.reviewed_at),
               moderation_note: r.moderation_note ?? null,
               total_count: Number(r.total_count ?? 0),
             };
@@ -290,7 +294,7 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
             answers_file_key: r.answers_file_key ?? null,
             status: r.status,
             moderation_note: r.moderation_note ?? null,
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
             total_count: Number(r.total_count ?? 0),
           }));
 

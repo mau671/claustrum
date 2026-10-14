@@ -15,6 +15,7 @@ import {
   type UserAdminItem,
   type UserProfileResponse,
 } from "../domain/Users";
+import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
 
 interface ProfileRow {
@@ -296,9 +297,9 @@ export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handle
             role: r.role ?? null,
             banned: r.banned !== null ? Boolean(r.banned) : null,
             banReason: r.banReason ?? null,
-            banExpires: r.banExpires ?? null,
-            createdAt: r.createdAt,
-            updatedAt: r.updatedAt,
+            banExpires: toIsoString(r.banExpires),
+            createdAt: toIsoString(r.createdAt) ?? "",
+            updatedAt: toIsoString(r.updatedAt) ?? "",
           }));
 
           return { users, total };
@@ -337,9 +338,9 @@ export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handle
             role: r.role ?? null,
             banned: r.banned !== null ? Boolean(r.banned) : null,
             banReason: r.banReason ?? null,
-            banExpires: r.banExpires ?? null,
-            createdAt: r.createdAt,
-            updatedAt: r.updatedAt,
+            banExpires: toIsoString(r.banExpires),
+            createdAt: toIsoString(r.createdAt) ?? "",
+            updatedAt: toIsoString(r.updatedAt) ?? "",
           };
         }),
       )

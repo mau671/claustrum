@@ -37,7 +37,7 @@ export const EvaluationItem = Schema.Struct({
   file_size: Schema.Number,
   answers_file_key: Schema.NullOr(Schema.String),
   status: Schema.String,
-  created_at: Schema.Unknown,
+  created_at: Schema.String,
   term_display_name: Schema.NullOr(Schema.String),
   professor_name: Schema.NullOr(Schema.String),
 });
@@ -63,7 +63,7 @@ export const EvaluationDetail = Schema.Struct({
   answers_file_key: Schema.NullOr(Schema.String),
   status: Schema.String,
   moderation_note: Schema.NullOr(Schema.String),
-  created_at: Schema.Unknown,
+  created_at: Schema.String,
 });
 export type EvaluationDetail = typeof EvaluationDetail.Type;
 

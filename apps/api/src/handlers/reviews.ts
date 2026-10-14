@@ -22,6 +22,7 @@ import {
   ReviewUnauthorized,
   type SuccessResponse,
 } from "../domain/Reviews";
+import { toIsoString } from "../lib/date";
 import { verifyTurnstileToken } from "../lib/security";
 import { Database } from "../services/Database";
 
@@ -103,7 +104,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
             engagement_level: r.engagement_level,
             tags: r.tags ?? [],
             status: r.status,
-            created_at: r.created_at,
+            created_at: toIsoString(r.created_at) ?? "",
             like_count: Number(r.like_count ?? 0),
             dislike_count: Number(r.dislike_count ?? 0),
             my_reaction: r.my_reaction ?? null,
@@ -243,7 +244,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
                   review: {
                     id: Number(insertedReview.id),
                     status: insertedReview.status,
-                    created_at: insertedReview.created_at,
+                    created_at: toIsoString(insertedReview.created_at) ?? "",
                   },
                 } satisfies CreateReviewResponse;
               }),
@@ -313,8 +314,8 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
             engagement_level: r.engagement_level,
             tags: r.tags ?? [],
             status: r.status,
-            created_at: r.created_at,
-            reviewed_at: r.reviewed_at ?? null,
+            created_at: toIsoString(r.created_at) ?? "",
+            reviewed_at: toIsoString(r.reviewed_at),
             moderation_note: r.moderation_note ?? null,
           } satisfies ReviewDetail;
         }),
@@ -561,7 +562,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
               id: Number(createdReport.id),
               review_id: Number(createdReport.review_id),
               status: createdReport.status,
-              created_at: createdReport.created_at,
+              created_at: toIsoString(createdReport.created_at) ?? "",
             },
           } satisfies ReviewReportResponse;
         }),

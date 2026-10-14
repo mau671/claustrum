@@ -37,7 +37,7 @@ export const ProfessorSearchResult = Schema.Struct({
   average_quality_score: Schema.NullOr(Schema.Number),
   average_clarity_score: Schema.NullOr(Schema.Number),
   courses_reviewed_count: Schema.Number,
-  last_approved_review_at: Schema.NullOr(Schema.Unknown),
+  last_approved_review_at: Schema.NullOr(Schema.String),
   search_rank: Schema.NullOr(Schema.Number),
   academic_unit: Schema.NullOr(Schema.String),
   total_count: Schema.Number,
@@ -81,8 +81,8 @@ export const ProfessorTerm = Schema.Struct({
   period_number: Schema.Number,
   external_key: Schema.String,
   display_name: Schema.String,
-  starts_on: Schema.NullOr(Schema.Unknown),
-  ends_on: Schema.NullOr(Schema.Unknown),
+  starts_on: Schema.NullOr(Schema.String),
+  ends_on: Schema.NullOr(Schema.String),
 });
 export type ProfessorTerm = typeof ProfessorTerm.Type;
 

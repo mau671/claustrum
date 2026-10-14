@@ -17,6 +17,7 @@ import {
   type StudyPlanIdQuery,
   type UpdateAttemptPayload,
 } from "../domain/Students";
+import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
 
 interface RawCourseStatusRow {
@@ -124,7 +125,7 @@ export const StudentsApiHandlers = HttpApiBuilder.group(
                 courseId: Number(r.course_id),
                 status: typeof r.status === "string" ? r.status.toLowerCase() : String(r.status),
                 grade,
-                recordedAt: r.recorded_at ?? null,
+                recordedAt: toIsoString(r.recorded_at),
                 originCourseId,
                 originCourseCode: r.origin_course_code ?? null,
                 originCourseName: r.origin_course_name ?? null,
@@ -132,12 +133,12 @@ export const StudentsApiHandlers = HttpApiBuilder.group(
                 originAttemptId,
                 originAttemptNumber,
                 originGrade,
-                originRecordedAt: r.origin_recorded_at ?? null,
+                originRecordedAt: toIsoString(r.origin_recorded_at),
                 originAcademicTermId,
                 originAcademicTermName: r.origin_academic_term_name ?? null,
                 originType: r.origin_type ?? null,
                 course_id: Number(r.course_id),
-                recorded_at: r.recorded_at ?? null,
+                recorded_at: toIsoString(r.recorded_at),
                 origin_course_id: originCourseId,
                 origin_course_code: r.origin_course_code ?? null,
                 origin_course_name: r.origin_course_name ?? null,
@@ -145,7 +146,7 @@ export const StudentsApiHandlers = HttpApiBuilder.group(
                 origin_attempt_id: originAttemptId,
                 origin_attempt_number: originAttemptNumber,
                 origin_grade: originGrade,
-                origin_recorded_at: r.origin_recorded_at ?? null,
+                origin_recorded_at: toIsoString(r.origin_recorded_at),
                 origin_academic_term_id: originAcademicTermId,
                 origin_academic_term_name: r.origin_academic_term_name ?? null,
                 origin_type: r.origin_type ?? null,
@@ -228,7 +229,7 @@ export const StudentsApiHandlers = HttpApiBuilder.group(
                 status: typeof r.status === "string" ? r.status.toLowerCase() : String(r.status),
                 grade,
                 academicTermId,
-                recordedAt: r.recorded_at ?? null,
+                recordedAt: toIsoString(r.recorded_at),
                 equivalentCourseId,
                 equivalentCourseCode: r.equivalent_course_code ?? null,
                 equivalentCourseName: r.equivalent_course_name ?? null,
@@ -237,7 +238,7 @@ export const StudentsApiHandlers = HttpApiBuilder.group(
                 course_name: r.course_name ?? null,
                 attempt_number: Number(r.attempt_number),
                 academic_term_id: academicTermId,
-                recorded_at: r.recorded_at ?? null,
+                recorded_at: toIsoString(r.recorded_at),
                 equivalent_course_id: equivalentCourseId,
                 equivalent_course_code: r.equivalent_course_code ?? null,
                 equivalent_course_name: r.equivalent_course_name ?? null,

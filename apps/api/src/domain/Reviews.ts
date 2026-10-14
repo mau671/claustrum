@@ -79,7 +79,7 @@ export const PublicReviewItem = Schema.Struct({
   engagement_level: Schema.Number,
   tags: Schema.Array(Schema.String),
   status: Schema.String,
-  created_at: Schema.Unknown,
+  created_at: Schema.String,
   like_count: Schema.Number,
   dislike_count: Schema.Number,
   my_reaction: Schema.NullOr(Schema.String),
@@ -111,7 +111,7 @@ export class CreateReviewPayload extends Schema.Class<CreateReviewPayload>("Crea
 export const CreatedReviewSummary = Schema.Struct({
   id: Schema.Number,
   status: Schema.String,
-  created_at: Schema.Unknown,
+  created_at: Schema.String,
 });
 export type CreatedReviewSummary = typeof CreatedReviewSummary.Type;
 
@@ -136,8 +136,8 @@ export const ReviewDetail = Schema.Struct({
   engagement_level: Schema.Number,
   tags: Schema.Array(Schema.String),
   status: Schema.String,
-  created_at: Schema.Unknown,
-  reviewed_at: Schema.NullOr(Schema.Unknown),
+  created_at: Schema.String,
+  reviewed_at: Schema.NullOr(Schema.String),
   moderation_note: Schema.NullOr(Schema.String),
 });
 export type ReviewDetail = typeof ReviewDetail.Type;
@@ -192,7 +192,7 @@ export const CreatedReportSummary = Schema.Struct({
   id: Schema.Number,
   review_id: Schema.Number,
   status: Schema.String,
-  created_at: Schema.Unknown,
+  created_at: Schema.String,
 });
 export type CreatedReportSummary = typeof CreatedReportSummary.Type;
 

@@ -42,7 +42,7 @@ jobs:
         run: pnpm run build
 
       - name: Deploy application stack with Alchemy
-        run: pnpm exec alchemy deploy --stage ${{ env.STAGE }}
+        run: pnpm exec alchemy deploy --stage ${{ env.STAGE }} --yes
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -84,7 +84,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Teardown preview environment with Alchemy
-        run: pnpm exec alchemy destroy --stage ${{ env.STAGE }}
+        run: pnpm exec alchemy destroy --stage ${{ env.STAGE }} --yes
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

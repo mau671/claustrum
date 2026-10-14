@@ -65,7 +65,7 @@ export class ReviewIdParam extends Schema.Class<ReviewIdParam>("ReviewIdParam")(
   id: Schema.NumberFromString,
 }) {}
 
-export class PublicReviewItem extends Schema.Class<PublicReviewItem>("PublicReviewItem")({
+export const PublicReviewItem = Schema.Struct({
   review_id: Schema.Number,
   professor_id: Schema.String,
   courses: Schema.Unknown,
@@ -84,7 +84,8 @@ export class PublicReviewItem extends Schema.Class<PublicReviewItem>("PublicRevi
   dislike_count: Schema.Number,
   my_reaction: Schema.NullOr(Schema.String),
   total_count: Schema.Number,
-}) {}
+});
+export type PublicReviewItem = typeof PublicReviewItem.Type;
 
 export class CreateReviewPayload extends Schema.Class<CreateReviewPayload>("CreateReviewPayload")({
   professorId: Schema.NonEmptyString,
@@ -107,22 +108,20 @@ export class CreateReviewPayload extends Schema.Class<CreateReviewPayload>("Crea
   turnstileToken: Schema.NonEmptyString,
 }) {}
 
-export class CreatedReviewSummary extends Schema.Class<CreatedReviewSummary>(
-  "CreatedReviewSummary",
-)({
+export const CreatedReviewSummary = Schema.Struct({
   id: Schema.Number,
   status: Schema.String,
   created_at: Schema.Unknown,
-}) {}
+});
+export type CreatedReviewSummary = typeof CreatedReviewSummary.Type;
 
-export class CreateReviewResponse extends Schema.Class<CreateReviewResponse>(
-  "CreateReviewResponse",
-)({
+export const CreateReviewResponse = Schema.Struct({
   success: Schema.Boolean,
   review: CreatedReviewSummary,
-}) {}
+});
+export type CreateReviewResponse = typeof CreateReviewResponse.Type;
 
-export class ReviewDetail extends Schema.Class<ReviewDetail>("ReviewDetail")({
+export const ReviewDetail = Schema.Struct({
   review_id: Schema.Number,
   professor_id: Schema.String,
   professor_name: Schema.String,
@@ -140,7 +139,8 @@ export class ReviewDetail extends Schema.Class<ReviewDetail>("ReviewDetail")({
   created_at: Schema.Unknown,
   reviewed_at: Schema.NullOr(Schema.Unknown),
   moderation_note: Schema.NullOr(Schema.String),
-}) {}
+});
+export type ReviewDetail = typeof ReviewDetail.Type;
 
 export class ModerateReviewPayload extends Schema.Class<ModerateReviewPayload>(
   "ModerateReviewPayload",
@@ -149,23 +149,22 @@ export class ModerateReviewPayload extends Schema.Class<ModerateReviewPayload>(
   reason: Schema.optional(Schema.NullOr(Schema.String)),
 }) {}
 
-export class ModeratedReviewSummary extends Schema.Class<ModeratedReviewSummary>(
-  "ModeratedReviewSummary",
-)({
+export const ModeratedReviewSummary = Schema.Struct({
   id: Schema.Number,
   status: Schema.String,
-}) {}
+});
+export type ModeratedReviewSummary = typeof ModeratedReviewSummary.Type;
 
-export class ModerateReviewResponse extends Schema.Class<ModerateReviewResponse>(
-  "ModerateReviewResponse",
-)({
+export const ModerateReviewResponse = Schema.Struct({
   success: Schema.Boolean,
   review: ModeratedReviewSummary,
-}) {}
+});
+export type ModerateReviewResponse = typeof ModerateReviewResponse.Type;
 
-export class SuccessResponse extends Schema.Class<SuccessResponse>("SuccessResponse")({
+export const SuccessResponse = Schema.Struct({
   success: Schema.Boolean,
-}) {}
+});
+export type SuccessResponse = typeof SuccessResponse.Type;
 
 export class ReviewReactionPayload extends Schema.Class<ReviewReactionPayload>(
   "ReviewReactionPayload",
@@ -173,14 +172,13 @@ export class ReviewReactionPayload extends Schema.Class<ReviewReactionPayload>(
   reaction: Schema.NullOr(Schema.Literals(["like", "dislike"])),
 }) {}
 
-export class ReviewReactionResponse extends Schema.Class<ReviewReactionResponse>(
-  "ReviewReactionResponse",
-)({
+export const ReviewReactionResponse = Schema.Struct({
   success: Schema.Boolean,
   reaction: Schema.NullOr(Schema.Literals(["like", "dislike"])),
   likeCount: Schema.Number,
   dislikeCount: Schema.Number,
-}) {}
+});
+export type ReviewReactionResponse = typeof ReviewReactionResponse.Type;
 
 export class ReviewReportPayload extends Schema.Class<ReviewReportPayload>("ReviewReportPayload")({
   reason: ReviewReportReason,
@@ -190,21 +188,19 @@ export class ReviewReportPayload extends Schema.Class<ReviewReportPayload>("Revi
   turnstileToken: Schema.NonEmptyString,
 }) {}
 
-export class CreatedReportSummary extends Schema.Class<CreatedReportSummary>(
-  "CreatedReportSummary",
-)({
+export const CreatedReportSummary = Schema.Struct({
   id: Schema.Number,
   review_id: Schema.Number,
   status: Schema.String,
   created_at: Schema.Unknown,
-}) {}
+});
+export type CreatedReportSummary = typeof CreatedReportSummary.Type;
 
-export class ReviewReportResponse extends Schema.Class<ReviewReportResponse>(
-  "ReviewReportResponse",
-)({
+export const ReviewReportResponse = Schema.Struct({
   success: Schema.Boolean,
   report: CreatedReportSummary,
-}) {}
+});
+export type ReviewReportResponse = typeof ReviewReportResponse.Type;
 
 export class ReviewNotFound extends Schema.TaggedError<ReviewNotFound>()(
   "ReviewNotFound",

@@ -6,7 +6,22 @@ import mdx from "fumadocs-mdx/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  define: {
+    "import.meta.url": JSON.stringify("file:///worker.js"),
+  },
   plugins: [
+    {
+      name: "fix-cloudflare-create-require",
+      renderChunk(code) {
+        if (code.includes("createRequire(import.meta.url)")) {
+          return code.replaceAll(
+            "createRequire(import.meta.url)",
+            'createRequire("file:///worker.js")',
+          );
+        }
+        return null;
+      },
+    },
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     tanstackStart(),
     viteReact(),
@@ -19,6 +34,7 @@ export default defineConfig({
     },
   },
   ssr: {
+    noExternal: true,
     external: ["cloudflare:workers"],
   },
   server: {

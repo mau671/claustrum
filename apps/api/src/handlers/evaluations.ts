@@ -8,7 +8,7 @@ import * as Option from "effect/Option";
 
 import type { Env } from "../types";
 
-import { EvaluationsApi } from "../api/EvaluationsApi";
+import { ClaustrumApi } from "../api/index";
 import {
   type EvaluationDetail,
   type EvaluationItem,
@@ -69,7 +69,7 @@ function parseNullableNumber(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : Number.NaN;
 }
 
-export const EvaluationsHandlers = HttpApiBuilder.group(EvaluationsApi, "evaluations", (handlers) =>
+export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluations", (handlers) =>
   Effect.gen(function* () {
     const sql = (yield* Database) as unknown as PgClient.PgClient;
     const storage = (yield* Storage) as unknown as StorageService;

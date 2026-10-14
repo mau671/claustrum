@@ -1,15 +1,13 @@
 import { Effect } from "effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 
 import type { AcademicTerm, SuggestedTermQuery, TermsQuery } from "../domain/Terms";
 
-import { TermsApiGroup } from "../api/TermsApi";
+import { ClaustrumApi } from "../api/index";
 import { Database, type SqlClient } from "../services/Database";
 
-const termsApi = HttpApi.make("claustrum-terms").add(TermsApiGroup);
-
 export const termsHandlers = HttpApiBuilder.group(
-  termsApi,
+  ClaustrumApi,
   "terms",
   Effect.fn(function* (handlers) {
     const db = yield* Database;
@@ -38,8 +36,8 @@ export const termsHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: String(r.starts_on),
-            ends_on: String(r.ends_on),
+            starts_on: r.starts_on ? String(r.starts_on) : null,
+            ends_on: r.ends_on ? String(r.ends_on) : null,
           }));
         }),
 
@@ -133,8 +131,8 @@ export const termsHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: String(r.starts_on),
-            ends_on: String(r.ends_on),
+            starts_on: r.starts_on ? String(r.starts_on) : null,
+            ends_on: r.ends_on ? String(r.ends_on) : null,
           }));
         }),
     });

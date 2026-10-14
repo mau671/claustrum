@@ -7,7 +7,7 @@ import * as Option from "effect/Option";
 import type { FeedbackItem, FeedbackType } from "../domain/Feedback";
 import type { Env } from "../types";
 
-import { FeedbackApi } from "../api/FeedbackApi";
+import { ClaustrumApi } from "../api/index";
 import {
   BadRequestError,
   checkAuth,
@@ -30,7 +30,7 @@ interface FeedbackDbRow {
   readonly admin_notes: string | null;
 }
 
-export const FeedbackHandlers = HttpApiBuilder.group(FeedbackApi, "feedback", (handlers) =>
+export const FeedbackHandlers = HttpApiBuilder.group(ClaustrumApi, "feedback", (handlers) =>
   Effect.gen(function* () {
     const sql = (yield* Database) as unknown as PgClient.PgClient;
 

@@ -81,8 +81,16 @@ export default Alchemy.Stack(
       },
     });
 
-    const webSite = yield* Cloudflare.Website.Vite("claustrum-web", {
-      rootDir: "./apps/web",
+    const webWorker = yield* Cloudflare.Worker("claustrum-web", {
+      main: "./apps/web/dist/server/server.js",
+      bundle: false,
+      assets: "./apps/web/dist/client",
+      compatibility: {
+        flags: ["nodejs_compat"],
+      },
+      observability: {
+        logs: { enabled: true },
+      },
       routes:
         isProd && appDomain && zoneName
           ? [
@@ -92,10 +100,8 @@ export default Alchemy.Stack(
               },
             ]
           : undefined,
-      bindings: {
-        API: apiWorker,
-      },
       env: {
+        API: apiWorker,
         VITE_TURNSTILE_SITE_KEY: process.env.VITE_TURNSTILE_SITE_KEY ?? "",
         VITE_API_BASE_URL: process.env.VITE_API_BASE_URL ?? "",
       },
@@ -103,7 +109,7 @@ export default Alchemy.Stack(
 
     return {
       apiUrl: apiWorker.url,
-      webUrl: webSite.url,
+      webUrl: webWorker.url,
     };
   }),
 );

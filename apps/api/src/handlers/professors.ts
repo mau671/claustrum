@@ -3,7 +3,7 @@ import type { SqlClient } from "effect/sql";
 import { Effect } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 
-import { ProfessorsApi } from "../api/ProfessorsApi";
+import { ClaustrumApi } from "../api/index";
 import { ProfessorNotFound } from "../domain/Professors";
 import { Database } from "../services/Database";
 
@@ -70,7 +70,7 @@ interface RawProfessorHistoryRow {
 }
 
 export const ProfessorsApiHandlers = HttpApiBuilder.group(
-  ProfessorsApi,
+  ClaustrumApi,
   "professors",
   Effect.fn(function* (handlers) {
     const db = yield* Database;

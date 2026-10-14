@@ -1,13 +1,14 @@
 import { Schema } from "effect";
 
-export class StudyPlan extends Schema.Class<StudyPlan>("StudyPlan")({
+export const StudyPlan = Schema.Struct({
   id: Schema.Number,
   academic_unit_id: Schema.Number,
   external_plan_id: Schema.Number,
   name: Schema.String,
   academic_degree: Schema.String,
   modality_name: Schema.optional(Schema.String),
-}) {}
+});
+export type StudyPlan = typeof StudyPlan.Type;
 
 export class StudyPlansQuery extends Schema.Class<StudyPlansQuery>("StudyPlansQuery")({
   academicUnitId: Schema.optional(Schema.NumberFromString),
@@ -18,7 +19,7 @@ export class StudyPlanIdParams extends Schema.Class<StudyPlanIdParams>("StudyPla
   id: Schema.NumberFromString,
 }) {}
 
-export class StudyPlanCourse extends Schema.Class<StudyPlanCourse>("StudyPlanCourse")({
+export const StudyPlanCourse = Schema.Struct({
   courseId: Schema.Number,
   levelNumber: Schema.NullOr(Schema.Number),
   credits: Schema.Number,
@@ -37,25 +38,26 @@ export class StudyPlanCourse extends Schema.Class<StudyPlanCourse>("StudyPlanCou
   sort_order: Schema.Number,
   course_code: Schema.String,
   course_name: Schema.String,
-}) {}
+});
+export type StudyPlanCourse = typeof StudyPlanCourse.Type;
 
-export class CourseRelation extends Schema.Class<CourseRelation>("CourseRelation")({
+export const CourseRelation = Schema.Struct({
   fromCourseId: Schema.Number,
   toCourseId: Schema.Number,
   relationType: Schema.String,
   from_course_id: Schema.Number,
   to_course_id: Schema.Number,
   relation_type: Schema.String,
-}) {}
+});
+export type CourseRelation = typeof CourseRelation.Type;
 
-export class CoursePrerequisitesResponse extends Schema.Class<CoursePrerequisitesResponse>(
-  "CoursePrerequisitesResponse",
-)({
+export const CoursePrerequisitesResponse = Schema.Struct({
   prerequisites: Schema.Array(Schema.Number),
   corequisites: Schema.Array(Schema.Number),
-}) {}
+});
+export type CoursePrerequisitesResponse = typeof CoursePrerequisitesResponse.Type;
 
-export class StudyPlanDetail extends Schema.Class<StudyPlanDetail>("StudyPlanDetail")({
+export const StudyPlanDetail = Schema.Struct({
   id: Schema.Number,
   academic_unit_id: Schema.Number,
   external_plan_id: Schema.Number,
@@ -65,7 +67,8 @@ export class StudyPlanDetail extends Schema.Class<StudyPlanDetail>("StudyPlanDet
   plan: StudyPlan,
   courses: Schema.Array(StudyPlanCourse),
   relations: Schema.Array(CourseRelation),
-}) {}
+});
+export type StudyPlanDetail = typeof StudyPlanDetail.Type;
 
 export class StudyPlanRelationsQuery extends Schema.Class<StudyPlanRelationsQuery>(
   "StudyPlanRelationsQuery",

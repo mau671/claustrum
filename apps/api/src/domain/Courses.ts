@@ -1,10 +1,11 @@
 import { Schema } from "effect";
 
-export class CourseListItem extends Schema.Class<CourseListItem>("CourseListItem")({
+export const CourseListItem = Schema.Struct({
   id: Schema.Number,
   code: Schema.String,
   name: Schema.String,
-}) {}
+});
+export type CourseListItem = typeof CourseListItem.Type;
 
 export class CoursesQuery extends Schema.Class<CoursesQuery>("CoursesQuery")({
   ids: Schema.optional(Schema.String),
@@ -15,7 +16,7 @@ export class CourseIdParams extends Schema.Class<CourseIdParams>("CourseIdParams
   id: Schema.Number,
 }) {}
 
-export class CourseDetail extends Schema.Class<CourseDetail>("CourseDetail")({
+export const CourseDetail = Schema.Struct({
   id: Schema.Number,
   code: Schema.String,
   name: Schema.String,
@@ -23,7 +24,8 @@ export class CourseDetail extends Schema.Class<CourseDetail>("CourseDetail")({
   weekly_hours: Schema.NullOr(Schema.Number),
   created_at: Schema.String,
   updated_at: Schema.String,
-}) {}
+});
+export type CourseDetail = typeof CourseDetail.Type;
 
 export class CourseTermsQuery extends Schema.Class<CourseTermsQuery>("CourseTermsQuery")({
   campusId: Schema.optional(Schema.Number),
@@ -38,7 +40,7 @@ export class CourseGroupsQuery extends Schema.Class<CourseGroupsQuery>("CourseGr
   studyPlanId: Schema.optional(Schema.Number),
 }) {}
 
-export class CourseGroup extends Schema.Class<CourseGroup>("CourseGroup")({
+export const CourseGroup = Schema.Struct({
   academicTermId: Schema.Number,
   termDisplayName: Schema.String,
   termYear: Schema.Number,
@@ -66,7 +68,8 @@ export class CourseGroup extends Schema.Class<CourseGroup>("CourseGroup")({
   group_type: Schema.String,
   campus_id: Schema.NullOr(Schema.Number),
   campus_name: Schema.NullOr(Schema.String),
-}) {}
+});
+export type CourseGroup = typeof CourseGroup.Type;
 
 export class CourseProfessorsQuery extends Schema.Class<CourseProfessorsQuery>(
   "CourseProfessorsQuery",
@@ -77,9 +80,7 @@ export class CourseProfessorsQuery extends Schema.Class<CourseProfessorsQuery>(
   academicTermId: Schema.optional(Schema.Number),
 }) {}
 
-export class CourseRecentProfessor extends Schema.Class<CourseRecentProfessor>(
-  "CourseRecentProfessor",
-)({
+export const CourseRecentProfessor = Schema.Struct({
   professorId: Schema.Number,
   professorName: Schema.String,
   lastTaughtTermId: Schema.Number,
@@ -96,7 +97,8 @@ export class CourseRecentProfessor extends Schema.Class<CourseRecentProfessor>(
   last_taught_period_number: Schema.Number,
   groups_in_last_term_count: Schema.Number,
   terms_taught_count: Schema.Number,
-}) {}
+});
+export type CourseRecentProfessor = typeof CourseRecentProfessor.Type;
 
 export class CourseEquivalentsQuery extends Schema.Class<CourseEquivalentsQuery>(
   "CourseEquivalentsQuery",
@@ -106,7 +108,7 @@ export class CourseEquivalentsQuery extends Schema.Class<CourseEquivalentsQuery>
   offset: Schema.optional(Schema.Number),
 }) {}
 
-export class CourseEquivalent extends Schema.Class<CourseEquivalent>("CourseEquivalent")({
+export const CourseEquivalent = Schema.Struct({
   id: Schema.Number,
   code: Schema.String,
   name: Schema.String,
@@ -125,7 +127,8 @@ export class CourseEquivalent extends Schema.Class<CourseEquivalent>("CourseEqui
   is_placeholder: Schema.Boolean,
   has_offerings: Schema.Boolean,
   total_equivalents: Schema.Number,
-}) {}
+});
+export type CourseEquivalent = typeof CourseEquivalent.Type;
 
 export class CourseNotFound extends Schema.TaggedError<CourseNotFound>()(
   "CourseNotFound",

@@ -10,7 +10,7 @@ import type {
   ModerationReviewItem,
 } from "../domain/Moderation";
 
-import { ModerationApi } from "../api/ModerationApi";
+import { ClaustrumApi } from "../api/index";
 import { checkAuth, checkRole, CurrentUser, InternalServerError } from "../domain/Users";
 import { Database } from "../services/Database";
 
@@ -63,7 +63,7 @@ interface ModerationEvaluationDbRow {
   readonly total_count: number | string;
 }
 
-export const ModerationHandlers = HttpApiBuilder.group(ModerationApi, "moderation", (handlers) =>
+export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation", (handlers) =>
   Effect.gen(function* () {
     const sql = (yield* Database) as unknown as PgClient.PgClient;
 

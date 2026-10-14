@@ -1,14 +1,12 @@
 import { Effect } from "effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 
-import { CoursesApi } from "../api/CoursesApi";
+import { ClaustrumApi } from "../api/index";
 import { CourseNotFound } from "../domain/Courses";
 import { Database } from "../services/Database";
 
-const coursesApi = HttpApi.make("claustrum-courses").add(CoursesApi);
-
 export const coursesHandlers = HttpApiBuilder.group(
-  coursesApi,
+  ClaustrumApi,
   "courses",
   Effect.fn(function* (handlers) {
     const sql = yield* Database;

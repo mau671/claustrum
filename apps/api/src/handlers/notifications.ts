@@ -1,10 +1,10 @@
 import type { PgClient } from "@effect/sql-pg";
 
 import * as Effect from "effect/Effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 import * as Option from "effect/Option";
 
-import { NotificationsApiGroup } from "../api/NotificationsApi";
+import { ClaustrumApi } from "../api/index";
 import { checkAuth, CurrentUser } from "../domain/Auth";
 import { NotFoundError, type NotificationItem } from "../domain/Notifications";
 import { Database } from "../services/Database";
@@ -19,10 +19,8 @@ interface NotificationDbRow {
   readonly created_at: unknown;
 }
 
-const notificationsApi = HttpApi.make("claustrum-notifications").add(NotificationsApiGroup);
-
 export const notificationsHandlers = HttpApiBuilder.group(
-  notificationsApi,
+  ClaustrumApi,
   "notifications",
   (handlers: any) =>
     Effect.gen(function* () {

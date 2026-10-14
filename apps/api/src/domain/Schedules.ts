@@ -2,9 +2,7 @@ import { Schema } from "effect";
 
 export { CurrentUser } from "./Auth";
 
-export class ScheduleCourseOffering extends Schema.Class<ScheduleCourseOffering>(
-  "ScheduleCourseOffering",
-)({
+export const ScheduleCourseOffering = Schema.Struct({
   offering_id: Schema.Number,
   course_id: Schema.Number,
   course_code: Schema.String,
@@ -21,7 +19,8 @@ export class ScheduleCourseOffering extends Schema.Class<ScheduleCourseOffering>
   level_number: Schema.NullOr(Schema.Number),
   level_label: Schema.NullOr(Schema.String),
   sort_order: Schema.NullOr(Schema.Number),
-}) {}
+});
+export type ScheduleCourseOffering = typeof ScheduleCourseOffering.Type;
 
 export class ScheduleCoursesQuery extends Schema.Class<ScheduleCoursesQuery>(
   "ScheduleCoursesQuery",
@@ -34,13 +33,14 @@ export class ScheduleCoursesQuery extends Schema.Class<ScheduleCoursesQuery>(
   showAll: Schema.optional(Schema.Literals(["true", "false"])),
 }) {}
 
-export class SavedSchedule extends Schema.Class<SavedSchedule>("SavedSchedule")({
+export const SavedSchedule = Schema.Struct({
   id: Schema.Number,
   name: Schema.String,
   academic_term_id: Schema.Number,
   created_at: Schema.String,
   updated_at: Schema.String,
-}) {}
+});
+export type SavedSchedule = typeof SavedSchedule.Type;
 
 export class GroupLookup extends Schema.Class<GroupLookup>("GroupLookup")({
   courseCode: Schema.String,
@@ -59,20 +59,20 @@ export class ScheduleIdParams extends Schema.Class<ScheduleIdParams>("ScheduleId
   id: Schema.Number,
 }) {}
 
-export class SavedScheduleItem extends Schema.Class<SavedScheduleItem>("SavedScheduleItem")({
+export const SavedScheduleItem = Schema.Struct({
   id: Schema.Number,
   saved_schedule_id: Schema.Number,
   course_offering_group_id: Schema.Number,
   course_code: Schema.String,
   campus_id: Schema.NullOr(Schema.Number),
   group_code: Schema.String,
-}) {}
+});
+export type SavedScheduleItem = typeof SavedScheduleItem.Type;
 
-export class DeleteScheduleResponse extends Schema.Class<DeleteScheduleResponse>(
-  "DeleteScheduleResponse",
-)({
+export const DeleteScheduleResponse = Schema.Struct({
   success: Schema.Boolean,
-}) {}
+});
+export type DeleteScheduleResponse = typeof DeleteScheduleResponse.Type;
 
 export class ScheduleNotFound extends Schema.TaggedError<ScheduleNotFound>()(
   "ScheduleNotFound",

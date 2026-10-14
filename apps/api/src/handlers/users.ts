@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect";
 import { HttpApiBuilder } from "effect/http-api";
 import * as Option from "effect/Option";
 
-import { UsersApi } from "../api/UsersApi";
+import { ClaustrumApi } from "../api/index";
 import {
   BadRequestError,
   checkAuth,
@@ -51,7 +51,7 @@ interface UserDbRow {
   readonly total_count?: number | string;
 }
 
-export const UsersHandlers = HttpApiBuilder.group(UsersApi, "users", (handlers) =>
+export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handlers) =>
   Effect.gen(function* () {
     const sql = (yield* Database) as unknown as PgClient.PgClient;
 

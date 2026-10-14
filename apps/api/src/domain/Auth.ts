@@ -17,7 +17,7 @@ export interface AuthUser {
   readonly updatedAt?: Date;
 }
 
-export class CurrentUser extends Context.Service<CurrentUser, AuthUser>()(
+export class CurrentUser extends Context.Service<CurrentUser, AuthUser | null>()(
   "claustrum/CurrentUser",
 ) {}
 

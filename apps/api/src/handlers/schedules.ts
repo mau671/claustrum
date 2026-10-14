@@ -1,8 +1,8 @@
 import { Effect } from "effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 import * as Option from "effect/Option";
 
-import { SchedulesApi } from "../api/SchedulesApi";
+import { ClaustrumApi } from "../api/index";
 import {
   CurrentUser,
   SaveScheduleBadRequest,
@@ -12,10 +12,8 @@ import {
 } from "../domain/Schedules";
 import { Database } from "../services/Database";
 
-const schedulesApi = HttpApi.make("claustrum-schedules").add(SchedulesApi);
-
 export const schedulesHandlers = HttpApiBuilder.group(
-  schedulesApi,
+  ClaustrumApi,
   "schedules",
   Effect.fn(function* (handlers) {
     const sql = yield* Database;
@@ -24,7 +22,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
       courses: ({ query }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          const userId = Option.isSome(userOpt) ? userOpt.value.id : null;
+          const userId = Option.isSome(userOpt) && userOpt.value ? userOpt.value.id : null;
           const includeOtherCampuses = query.otherCampuses === "true";
           const showAllCourses = userId ? query.showAll !== "false" : true;
 
@@ -84,7 +82,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
       list: () =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (Option.isNone(userOpt)) {
+          if (Option.isNone(userOpt) || !userOpt.value) {
             return yield* new Unauthorized({ error: "Unauthorized" });
           }
           const user = userOpt.value;
@@ -117,7 +115,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
       create: ({ payload }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (Option.isNone(userOpt)) {
+          if (Option.isNone(userOpt) || !userOpt.value) {
             return yield* new Unauthorized({ error: "Unauthorized" });
           }
           const user = userOpt.value;
@@ -161,7 +159,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
       getById: ({ params }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (Option.isNone(userOpt)) {
+          if (Option.isNone(userOpt) || !userOpt.value) {
             return yield* new Unauthorized({ error: "Unauthorized" });
           }
           const user = userOpt.value;
@@ -198,7 +196,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
       getItems: ({ params }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (Option.isNone(userOpt)) {
+          if (Option.isNone(userOpt) || !userOpt.value) {
             return yield* new Unauthorized({ error: "Unauthorized" });
           }
           const user = userOpt.value;
@@ -254,7 +252,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
       delete: ({ params }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (Option.isNone(userOpt)) {
+          if (Option.isNone(userOpt) || !userOpt.value) {
             return yield* new Unauthorized({ error: "Unauthorized" });
           }
           const user = userOpt.value;

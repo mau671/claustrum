@@ -1,7 +1,7 @@
 import { Effect } from "effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 
-import { StudyPlansApiGroup } from "../api/StudyPlansApi";
+import { ClaustrumApi } from "../api/index";
 import {
   type CoursePrerequisitesResponse,
   type CourseRelation,
@@ -15,10 +15,8 @@ import {
 } from "../domain/StudyPlans";
 import { Database, type SqlClient } from "../services/Database";
 
-const studyPlansApi = HttpApi.make("claustrum-study-plans").add(StudyPlansApiGroup);
-
 export const studyPlansHandlers = HttpApiBuilder.group(
-  studyPlansApi,
+  ClaustrumApi,
   "studyPlans",
   Effect.fn(function* (handlers) {
     const db = yield* Database;

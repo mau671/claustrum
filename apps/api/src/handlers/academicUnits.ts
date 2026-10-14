@@ -1,15 +1,13 @@
 import { Effect } from "effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 
 import type { AcademicUnit, AcademicUnitsQuery } from "../domain/AcademicUnits";
 
-import { AcademicUnitsApiGroup } from "../api/AcademicUnitsApi";
+import { ClaustrumApi } from "../api/index";
 import { Database, type SqlClient } from "../services/Database";
 
-const academicUnitsApi = HttpApi.make("claustrum-academic-units").add(AcademicUnitsApiGroup);
-
 export const academicUnitsHandlers = HttpApiBuilder.group(
-  academicUnitsApi,
+  ClaustrumApi,
   "academicUnits",
   Effect.fn(function* (handlers) {
     const db = yield* Database;

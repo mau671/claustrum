@@ -9,9 +9,8 @@ export function getDbPool(env: Env): Pool {
 
   return new Pool({
     connectionString,
-    max: 10,
+    max: 5,
     connectionTimeoutMillis: 10000,
-    options: "-c search_path=better_auth,public",
   });
 }
 

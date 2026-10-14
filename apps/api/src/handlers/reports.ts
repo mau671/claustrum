@@ -6,7 +6,7 @@ import * as Option from "effect/Option";
 
 import type { ReportDetail, ReportItem } from "../domain/Reports";
 
-import { ReportsApi } from "../api/ReportsApi";
+import { ClaustrumApi } from "../api/index";
 import {
   checkAuth,
   checkRole,
@@ -47,7 +47,7 @@ interface ReportDetailDbRow {
   readonly comment: string | null;
 }
 
-export const ReportsHandlers = HttpApiBuilder.group(ReportsApi, "reports", (handlers) =>
+export const ReportsHandlers = HttpApiBuilder.group(ClaustrumApi, "reports", (handlers) =>
   Effect.gen(function* () {
     const sql = (yield* Database) as unknown as PgClient.PgClient;
 

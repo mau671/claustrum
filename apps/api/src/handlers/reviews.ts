@@ -4,7 +4,7 @@ import { HttpApiBuilder } from "effect/http-api";
 
 import type { SqlClient } from "../services/Database";
 
-import { ReviewsApi } from "../api/ReviewsApi";
+import { ClaustrumApi } from "../api/index";
 import { CurrentUser } from "../domain/Auth";
 import {
   ApiEnv,
@@ -61,7 +61,7 @@ interface RawReviewDetailRow extends RawReviewRow {
 }
 
 export const ReviewsApiHandlers = HttpApiBuilder.group(
-  ReviewsApi,
+  ClaustrumApi,
   "reviews",
   Effect.fn(function* (handlers) {
     const db = yield* Database;
@@ -114,7 +114,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
       create: ({ payload }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (userOpt._tag === "None") {
+          if (userOpt._tag === "None" || !userOpt.value) {
             return yield* Effect.fail(new ReviewUnauthorized({ error: "No autorizado" }));
           }
           const user = userOpt.value;
@@ -322,7 +322,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
       moderate: ({ params, payload }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (userOpt._tag === "None") {
+          if (userOpt._tag === "None" || !userOpt.value) {
             return yield* Effect.fail(new ReviewUnauthorized({ error: "No autorizado" }));
           }
           const user = userOpt.value;
@@ -375,7 +375,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
       remove: ({ params }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (userOpt._tag === "None") {
+          if (userOpt._tag === "None" || !userOpt.value) {
             return yield* Effect.fail(new ReviewUnauthorized({ error: "No autorizado" }));
           }
           const user = userOpt.value;
@@ -413,7 +413,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
       react: ({ params, payload }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (userOpt._tag === "None") {
+          if (userOpt._tag === "None" || !userOpt.value) {
             return yield* Effect.fail(new ReviewUnauthorized({ error: "No autorizado" }));
           }
           const user = userOpt.value;
@@ -482,7 +482,7 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
       report: ({ params, payload }) =>
         Effect.gen(function* () {
           const userOpt = yield* Effect.serviceOption(CurrentUser);
-          if (userOpt._tag === "None") {
+          if (userOpt._tag === "None" || !userOpt.value) {
             return yield* Effect.fail(new ReviewUnauthorized({ error: "No autorizado" }));
           }
           const user = userOpt.value;

@@ -1,6 +1,7 @@
-import { Effect, Layer } from "effect";
+import { Effect, FileSystem, Layer } from "effect";
 import { Etag, HttpEffect, HttpPlatform, HttpRouter } from "effect/http";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/http-api";
+import { Client, type Pool } from "pg";
 
 import type { Env } from "./types";
 
@@ -25,7 +26,7 @@ import { universitiesHandlers } from "./handlers/universities";
 import { UsersHandlers } from "./handlers/users";
 import { getCorsHeaders } from "./lib/cors";
 import { getAuth, getDbPool } from "./lib/db";
-import { createDatabaseLayer, getDatabaseConnectionString } from "./services/Database";
+import { createDatabaseLayer } from "./services/Database";
 import { makeStorageService, Storage } from "./services/Storage";
 
 export default {
@@ -105,12 +106,15 @@ export default {
       url.pathname.startsWith("/docs") ||
       url.pathname === "/openapi.json"
     ) {
-      const pool = getDbPool(env);
-      const auth = getAuth(env, pool);
+      const client = new Client({
+        connectionString: env.HYPERDRIVE ? env.HYPERDRIVE.connectionString : env.DATABASE_URL,
+      });
+      await client.connect();
 
       let sessionUser: AuthUser | null = null;
 
       try {
+        const auth = getAuth(env, client as unknown as Pool);
         const session = await auth.api.getSession({
           headers: request.headers,
         });
@@ -128,12 +132,11 @@ export default {
         console.warn("Failed to retrieve user session:", e);
       }
 
-      const connectionString = getDatabaseConnectionString(env);
-      const databaseLayer = createDatabaseLayer(connectionString);
+      const databaseLayer = createDatabaseLayer(client);
       const storageLayer = Layer.succeed(Storage, makeStorageService(env.EVALUATIONS_BUCKET));
       const envLayer = Layer.succeed(ApiEnv, env);
 
-      const userLayer = sessionUser ? Layer.succeed(CurrentUser, sessionUser) : Layer.empty;
+      const userLayer = Layer.succeed(CurrentUser, sessionUser);
 
       const handlersLayer = Layer.mergeAll(
         universitiesHandlers,
@@ -154,14 +157,21 @@ export default {
         notificationsHandlers,
       );
 
-      const apiLayer = HttpApiBuilder.layer(ClaustrumApi).pipe(
+      const platformLayer = HttpPlatform.layer.pipe(
+        Layer.provide([Etag.layer, FileSystem.layerNoop({})]),
+      );
+
+      const apiLayer = HttpApiBuilder.layer(ClaustrumApi, {
+        openapiPath: "/openapi.json",
+      }).pipe(
         Layer.provide(handlersLayer),
         Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/docs" })),
         Layer.provide(databaseLayer),
         Layer.provide(storageLayer),
         Layer.provide(envLayer),
         Layer.provide(userLayer),
-        Layer.provide([HttpPlatform.layer, Etag.layer]),
+        Layer.provide(platformLayer),
+        Layer.provide(Etag.layer),
       );
 
       const program = Effect.gen(function* () {
@@ -175,23 +185,32 @@ export default {
 
       try {
         const response = await Effect.runPromise(program as Effect.Effect<Response, Error>);
+        const bodyText = await response.text();
         const responseHeaders = new Headers(response.headers);
         for (const [key, value] of Object.entries(corsHeaders)) {
           responseHeaders.set(key, value);
         }
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: responseHeaders,
-        });
+        return new Response(
+          bodyText ||
+            (response.status >= 400
+              ? JSON.stringify({ error: `HTTP ${response.status}`, status: response.status })
+              : null),
+          {
+            status: response.status,
+            statusText: response.statusText,
+            headers: responseHeaders,
+          },
+        );
       } catch (error) {
         console.error("Effect HttpApi error:", error);
+        const message = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
         return Response.json(
-          { error: "Internal server error" },
+          { error: "Internal server error", message, stack },
           { status: 500, headers: corsHeaders },
         );
       } finally {
-        ctx.waitUntil(pool.end());
+        ctx.waitUntil(client.end());
       }
     }
 

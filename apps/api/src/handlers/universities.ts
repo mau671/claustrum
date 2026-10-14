@@ -1,15 +1,11 @@
 import { Effect } from "effect";
-import { HttpApi, HttpApiBuilder } from "effect/http-api";
+import { HttpApiBuilder } from "effect/http-api";
 
-import type { University } from "../domain/Universities";
-
-import { UniversitiesApiGroup } from "../api/UniversitiesApi";
+import { ClaustrumApi } from "../api/index";
 import { Database, type SqlClient } from "../services/Database";
 
-const universitiesApi = HttpApi.make("claustrum-universities").add(UniversitiesApiGroup);
-
 export const universitiesHandlers = HttpApiBuilder.group(
-  universitiesApi,
+  ClaustrumApi,
   "universities",
   Effect.fn(function* (handlers) {
     const db = yield* Database;
@@ -26,7 +22,7 @@ export const universitiesHandlers = HttpApiBuilder.group(
             }>("SELECT id, name, short_name FROM public.university ORDER BY name ASC")
             .pipe(Effect.orDie);
 
-          return res.map((row): University => ({
+          return res.map((row) => ({
             id: Number(row.id),
             name: row.name,
             short_name: row.short_name,

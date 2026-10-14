@@ -28,9 +28,7 @@ export class SearchProfessorsQuery extends Schema.Class<SearchProfessorsQuery>(
   offset: Schema.optional(Schema.NumberFromString),
 }) {}
 
-export class ProfessorSearchResult extends Schema.Class<ProfessorSearchResult>(
-  "ProfessorSearchResult",
-)({
+export const ProfessorSearchResult = Schema.Struct({
   professor_id: Schema.String,
   professor_name: Schema.String,
   approved_review_count: Schema.Number,
@@ -43,20 +41,20 @@ export class ProfessorSearchResult extends Schema.Class<ProfessorSearchResult>(
   search_rank: Schema.NullOr(Schema.Number),
   academic_unit: Schema.NullOr(Schema.String),
   total_count: Schema.Number,
-}) {}
+});
+export type ProfessorSearchResult = typeof ProfessorSearchResult.Type;
 
 export class ProfessorIdParam extends Schema.Class<ProfessorIdParam>("ProfessorIdParam")({
   id: Schema.String,
 }) {}
 
-export class ProfessorDetail extends Schema.Class<ProfessorDetail>("ProfessorDetail")({
+export const ProfessorDetail = Schema.Struct({
   id: Schema.Number,
   full_name: Schema.String,
-}) {}
+});
+export type ProfessorDetail = typeof ProfessorDetail.Type;
 
-export class ProfessorReviewSummary extends Schema.Class<ProfessorReviewSummary>(
-  "ProfessorReviewSummary",
-)({
+export const ProfessorReviewSummary = Schema.Struct({
   professor_id: Schema.String,
   approved_review_count: Schema.Number,
   average_overall_score: Schema.NullOr(Schema.Number),
@@ -66,15 +64,17 @@ export class ProfessorReviewSummary extends Schema.Class<ProfessorReviewSummary>
   average_fairness_score: Schema.NullOr(Schema.Number),
   would_take_again_percentage: Schema.NullOr(Schema.Number),
   tag_counts: Schema.Unknown,
-}) {}
+});
+export type ProfessorReviewSummary = typeof ProfessorReviewSummary.Type;
 
-export class ProfessorCourse extends Schema.Class<ProfessorCourse>("ProfessorCourse")({
+export const ProfessorCourse = Schema.Struct({
   id: Schema.Number,
   code: Schema.String,
   name: Schema.String,
-}) {}
+});
+export type ProfessorCourse = typeof ProfessorCourse.Type;
 
-export class ProfessorTerm extends Schema.Class<ProfessorTerm>("ProfessorTerm")({
+export const ProfessorTerm = Schema.Struct({
   id: Schema.Number,
   academic_modality_id: Schema.Number,
   year: Schema.Number,
@@ -83,27 +83,26 @@ export class ProfessorTerm extends Schema.Class<ProfessorTerm>("ProfessorTerm")(
   display_name: Schema.String,
   starts_on: Schema.NullOr(Schema.Unknown),
   ends_on: Schema.NullOr(Schema.Unknown),
-}) {}
+});
+export type ProfessorTerm = typeof ProfessorTerm.Type;
 
-export class ProfessorHistoryCourse extends Schema.Class<ProfessorHistoryCourse>(
-  "ProfessorHistoryCourse",
-)({
+export const ProfessorHistoryCourse = Schema.Struct({
   id: Schema.Number,
   code: Schema.String,
   name: Schema.String,
   groups: Schema.Array(Schema.String),
-}) {}
+});
+export type ProfessorHistoryCourse = typeof ProfessorHistoryCourse.Type;
 
-export class ProfessorHistoryTerm extends Schema.Class<ProfessorHistoryTerm>(
-  "ProfessorHistoryTerm",
-)({
+export const ProfessorHistoryTerm = Schema.Struct({
   term_id: Schema.Number,
   year: Schema.Number,
   period_number: Schema.Number,
   term_display_name: Schema.String,
   modality_name: Schema.NullOr(Schema.String),
   courses: Schema.Array(ProfessorHistoryCourse),
-}) {}
+});
+export type ProfessorHistoryTerm = typeof ProfessorHistoryTerm.Type;
 
 export class ProfessorNotFound extends Schema.TaggedError<ProfessorNotFound>()(
   "ProfessorNotFound",

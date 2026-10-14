@@ -4,7 +4,7 @@ export class StudyPlanIdQuery extends Schema.Class<StudyPlanIdQuery>("StudyPlanI
   studyPlanId: Schema.NumberFromString,
 }) {}
 
-export class StudentCourseStatus extends Schema.Class<StudentCourseStatus>("StudentCourseStatus")({
+export const StudentCourseStatus = Schema.Struct({
   courseId: Schema.Number,
   status: Schema.String,
   grade: Schema.NullOr(Schema.Number),
@@ -33,7 +33,8 @@ export class StudentCourseStatus extends Schema.Class<StudentCourseStatus>("Stud
   origin_academic_term_id: Schema.NullOr(Schema.Number),
   origin_academic_term_name: Schema.NullOr(Schema.String),
   origin_type: Schema.NullOr(Schema.String),
-}) {}
+});
+export type StudentCourseStatus = typeof StudentCourseStatus.Type;
 
 export class StudentAttemptsQuery extends Schema.Class<StudentAttemptsQuery>(
   "StudentAttemptsQuery",
@@ -42,9 +43,7 @@ export class StudentAttemptsQuery extends Schema.Class<StudentAttemptsQuery>(
   courseId: Schema.optional(Schema.NumberFromString),
 }) {}
 
-export class StudentCourseAttempt extends Schema.Class<StudentCourseAttempt>(
-  "StudentCourseAttempt",
-)({
+export const StudentCourseAttempt = Schema.Struct({
   id: Schema.Number,
   courseId: Schema.Number,
   courseCode: Schema.NullOr(Schema.String),
@@ -66,7 +65,8 @@ export class StudentCourseAttempt extends Schema.Class<StudentCourseAttempt>(
   equivalent_course_id: Schema.NullOr(Schema.Number),
   equivalent_course_code: Schema.NullOr(Schema.String),
   equivalent_course_name: Schema.NullOr(Schema.String),
-}) {}
+});
+export type StudentCourseAttempt = typeof StudentCourseAttempt.Type;
 
 export class InsertAttemptPayload extends Schema.Class<InsertAttemptPayload>(
   "InsertAttemptPayload",
@@ -84,12 +84,11 @@ export class InsertAttemptPayload extends Schema.Class<InsertAttemptPayload>(
   ),
 }) {}
 
-export class InsertAttemptResponse extends Schema.Class<InsertAttemptResponse>(
-  "InsertAttemptResponse",
-)({
+export const InsertAttemptResponse = Schema.Struct({
   success: Schema.Boolean,
   id: Schema.NullOr(Schema.Number),
-}) {}
+});
+export type InsertAttemptResponse = typeof InsertAttemptResponse.Type;
 
 export class AttemptIdParam extends Schema.Class<AttemptIdParam>("AttemptIdParam")({
   id: Schema.NumberFromString,
@@ -109,11 +108,10 @@ export class UpdateAttemptPayload extends Schema.Class<UpdateAttemptPayload>(
   ),
 }) {}
 
-export class StudentSuccessResponse extends Schema.Class<StudentSuccessResponse>(
-  "StudentSuccessResponse",
-)({
+export const StudentSuccessResponse = Schema.Struct({
   success: Schema.Boolean,
-}) {}
+});
+export type StudentSuccessResponse = typeof StudentSuccessResponse.Type;
 
 export class StudentUnauthorized extends Schema.TaggedError<StudentUnauthorized>()(
   "StudentUnauthorized",

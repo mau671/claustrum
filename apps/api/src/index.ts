@@ -1,7 +1,7 @@
 import { Effect, FileSystem, Layer } from "effect";
 import { Etag, HttpEffect, HttpPlatform, HttpRouter } from "effect/http";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/http-api";
-import { Client, type Pool } from "pg";
+import { Client } from "pg";
 
 import type { Env } from "./types";
 
@@ -100,6 +100,80 @@ export default {
       }
     }
 
+    // Server-Sent Events stream for real-time notifications
+    if (url.pathname === "/api/v1/notifications/stream") {
+      const pool = getDbPool(env);
+      const auth = getAuth(env, pool);
+      let sessionUser: AuthUser | null = null;
+
+      try {
+        const session = await auth.api.getSession({
+          headers: request.headers,
+        });
+        if (session?.user) {
+          sessionUser = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.name,
+          };
+        }
+      } catch (e) {
+        console.warn("Auth error in notifications stream:", e);
+      } finally {
+        ctx.waitUntil(pool.end());
+      }
+
+      if (!sessionUser) {
+        return new Response("Unauthorized", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
+      const { readable, writable } = new TransformStream();
+      const writer = writable.getWriter();
+      const encoder = new TextEncoder();
+
+      ctx.waitUntil(
+        (async () => {
+          try {
+            await writer.write(
+              encoder.encode(
+                `event: connected\ndata: ${JSON.stringify({ userId: sessionUser.id, timestamp: Date.now() })}\n\n`,
+              ),
+            );
+
+            // Periodic heartbeat every 30s to keep connection alive
+            for (let i = 0; i < 20; i++) {
+              await new Promise((resolve) => setTimeout(resolve, 30000));
+              await writer.write(
+                encoder.encode(
+                  `event: ping\ndata: ${JSON.stringify({ timestamp: Date.now() })}\n\n`,
+                ),
+              );
+            }
+          } catch {
+            // Client closed connection
+          } finally {
+            try {
+              await writer.close();
+            } catch {
+              // Ignore
+            }
+          }
+        })(),
+      );
+
+      return new Response(readable, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
     // Effect HttpApi endpoints (/api/v1/*, /docs, /openapi.json)
     if (
       url.pathname.startsWith("/api/v1") ||
@@ -111,10 +185,11 @@ export default {
       });
       await client.connect();
 
+      const pool = getDbPool(env);
       let sessionUser: AuthUser | null = null;
 
       try {
-        const auth = getAuth(env, client as unknown as Pool);
+        const auth = getAuth(env, pool);
         const session = await auth.api.getSession({
           headers: request.headers,
         });
@@ -210,7 +285,7 @@ export default {
           { status: 500, headers: corsHeaders },
         );
       } finally {
-        ctx.waitUntil(client.end());
+        ctx.waitUntil(Promise.all([client.end(), pool.end()]));
       }
     }
 

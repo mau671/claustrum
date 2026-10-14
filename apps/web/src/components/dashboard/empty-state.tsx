@@ -3,6 +3,7 @@
 import { ArrowRight01Icon, GraduationCapIcon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 
 interface EmptyDashboardProps {
@@ -80,58 +81,100 @@ export function EmptyDashboard({ isAuthenticated, hasProfile }: EmptyDashboardPr
 
 function GaugeSkeleton() {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border p-4">
-      <div className="bg-muted-foreground/20 size-32 rounded-full" />
-      <div className="flex flex-col items-center gap-1.5">
-        <div className="bg-muted-foreground/20 h-4 w-28 rounded" />
-        <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
-      </div>
-    </div>
-  );
-}
-
-function MetricSkeleton() {
-  return (
-    <div className="flex flex-col gap-2 rounded-xl border p-4">
-      <div className="flex items-center justify-between">
-        <div className="bg-muted-foreground/20 h-4 w-24 rounded" />
-      </div>
-      <div className="bg-muted-foreground/20 h-7 w-20 rounded" />
-      <div className="bg-muted-foreground/20 h-3 w-28 rounded" />
-    </div>
+    <Card className="flex flex-col">
+      <CardContent className="flex flex-1 items-center justify-center p-4">
+        <div className="grid w-full min-w-0 justify-items-center gap-2 text-center">
+          <div className="relative aspect-[100/90] w-full max-w-[176px]">
+            <svg
+              viewBox="0 0 100 90"
+              aria-hidden="true"
+              focusable="false"
+              className="block h-full w-full overflow-visible"
+            >
+              <path
+                d="M 20.298 79.699 A 42 42 0 1 1 79.702 79.699"
+                className="stroke-muted/40 fill-none"
+                strokeWidth={9}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="pointer-events-none absolute top-0 left-0 grid aspect-square w-full place-content-center justify-items-center gap-1">
+              <div className="bg-muted-foreground/20 h-7 w-12 rounded" />
+            </div>
+          </div>
+          <div className="grid min-w-0 justify-items-center gap-1 text-center">
+            <div className="bg-muted-foreground/20 h-4 w-28 rounded" />
+            <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 export function CourseStatusChartSkeleton() {
   return (
-    <div className="bg-card flex h-full flex-col rounded-xl border p-4">
-      <div className="mb-3">
+    <Card className="flex h-full w-full flex-col">
+      <CardHeader className="pb-1">
         <div className="bg-muted-foreground/20 h-5 w-40 rounded" />
-      </div>
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row">
-        <div className="border-muted/50 relative flex size-[180px] shrink-0 items-center justify-center rounded-full border-[20px]">
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="bg-muted-foreground/20 h-3 w-12 rounded" />
-            <div className="bg-muted-foreground/20 h-6 w-10 rounded" />
-            <div className="bg-muted-foreground/20 h-2.5 w-16 rounded" />
+      </CardHeader>
+      <CardContent className="flex flex-1 items-center justify-center p-3 pt-1">
+        <div className="flex w-full flex-col items-center justify-center gap-5 sm:flex-row sm:gap-6">
+          <div className="border-muted/40 relative flex size-[180px] shrink-0 items-center justify-center rounded-full border-[20px]">
+            <div className="flex flex-col items-center gap-1">
+              <div className="bg-muted-foreground/20 h-3 w-10 rounded" />
+              <div className="bg-muted-foreground/20 h-6 w-12 rounded" />
+              <div className="bg-muted-foreground/20 h-2.5 w-14 rounded" />
+            </div>
+          </div>
+          <div className="flex w-full flex-1 flex-col gap-1.5">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-center justify-between gap-3 px-2 py-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted-foreground/20 size-2.5 rounded-full" />
+                  <div className="bg-muted-foreground/20 h-3.5 w-20 rounded" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted-foreground/20 h-3.5 w-6 rounded" />
+                  <div className="bg-muted-foreground/20 h-3.5 w-8 rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex w-full flex-1 flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="flex items-center justify-between gap-3 px-2 py-1.5">
-              <div className="flex items-center gap-2">
-                <div className="bg-muted-foreground/20 size-2.5 rounded-full" />
-                <div className="bg-muted-foreground/20 h-3.5 w-20 rounded" />
+      </CardContent>
+    </Card>
+  );
+}
+
+export function NextCoursesSkeleton() {
+  return (
+    <Card className="flex h-full w-full flex-col overflow-hidden">
+      <CardHeader className="shrink-0 pb-2">
+        <div className="bg-muted-foreground/20 h-5 w-36 rounded" />
+      </CardHeader>
+      <CardContent className="flex min-h-0 flex-1 flex-col pt-0 pb-3">
+        <div className="grid grid-cols-2 gap-2 pb-1">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div
+              key={index}
+              className="border-border bg-card overflow-hidden rounded-lg border-2 shadow-xs"
+            >
+              <div className="border-border bg-card border-b px-2 py-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="bg-muted-foreground/20 h-3 w-6 rounded" />
+                  <div className="bg-muted-foreground/20 h-3 w-14 rounded" />
+                  <div className="bg-muted-foreground/20 h-3 w-6 rounded" />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-muted-foreground/20 h-3.5 w-6 rounded" />
-                <div className="bg-muted-foreground/20 h-3.5 w-8 rounded" />
+              <div className="bg-muted flex min-h-16 items-center justify-center px-2 py-2">
+                <div className="bg-muted-foreground/20 h-3.5 w-3/4 rounded" />
               </div>
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -140,68 +183,68 @@ export function DashboardStatsSkeleton() {
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <GaugeSkeleton />
       <GaugeSkeleton />
-      <MetricSkeleton />
+      <GaugeSkeleton />
     </div>
   );
 }
 
-function TimelineSkeleton() {
+export function TimelineSkeleton() {
   return (
-    <div className="bg-card flex h-full flex-col rounded-xl border p-4">
-      <div className="mb-4">
+    <Card>
+      <CardHeader>
         <div className="bg-muted-foreground/20 h-5 w-44 rounded" />
-      </div>
-      <div className="flex flex-col">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex items-start gap-3 pb-5 last:pb-0">
-            <div className="flex shrink-0 flex-col items-center self-stretch">
-              <div className="bg-muted-foreground/20 size-7 shrink-0 rounded-full" />
-              {index < 3 ? <div className="bg-muted my-1 w-0.5 flex-1 rounded-full" /> : null}
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
-              <div className="bg-muted-foreground/20 h-4 w-32 rounded" />
-              <div className="bg-muted h-1.5 w-full rounded-full" />
-              <div className="flex items-center justify-between gap-2">
-                <div className="bg-muted-foreground/20 h-3 w-16 rounded" />
-                <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex items-start gap-3 pb-4 last:pb-0">
+              <div className="flex shrink-0 flex-col items-center self-stretch">
+                <div className="bg-muted-foreground/20 size-7 shrink-0 rounded-full" />
+                {index < 4 ? (
+                  <div className="bg-border my-1 min-h-[20px] w-[2px] flex-1 rounded-full" />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1 pt-0.5">
+                <div className="flex min-h-7 items-center justify-between gap-3">
+                  <div className="bg-muted-foreground/20 h-4 w-28 rounded" />
+                </div>
+                <div className="mt-1.5 flex flex-col gap-1.5">
+                  <div className="bg-muted h-1.5 w-full rounded-full" />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="bg-muted-foreground/20 h-3 w-16 rounded" />
+                    <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 export function DashboardSkeleton() {
   return (
-    <div className="animate-pulse">
-      {/* Stats cards - 6 cards in 2x3 grid */}
+    <div className="flex animate-pulse flex-col gap-4 md:gap-6">
+      {/* Stats cards - 3 gauge cards */}
       <div className="px-4 lg:px-6">
         <DashboardStatsSkeleton />
       </div>
 
       {/* Distribution + Next courses row */}
-      <div className="mt-4 px-4 lg:px-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div className="h-full lg:col-span-4">
-            <CourseStatusChartSkeleton />
-          </div>
+      <div className="grid gap-4 px-4 md:grid-cols-2 lg:grid-cols-7 lg:px-6">
+        <div className="w-full min-w-0 lg:col-span-4">
+          <CourseStatusChartSkeleton />
+        </div>
 
-          <div className="bg-card flex h-full flex-col rounded-xl border p-3 lg:col-span-3">
-            <div className="bg-muted-foreground/20 mb-3 h-5 w-36 rounded" />
-            <div className="grid flex-1 grid-cols-2 content-start gap-2">
-              <div className="bg-muted h-24 rounded-lg" />
-              <div className="bg-muted h-24 rounded-lg" />
-              <div className="bg-muted h-24 rounded-lg" />
-              <div className="bg-muted h-24 rounded-lg" />
-            </div>
-          </div>
+        <div className="h-[310px] w-full min-w-0 lg:col-span-3">
+          <NextCoursesSkeleton />
         </div>
       </div>
 
       {/* Timeline */}
-      <div className="mt-4 px-4 lg:px-6">
+      <div className="px-4 lg:px-6">
         <TimelineSkeleton />
       </div>
     </div>

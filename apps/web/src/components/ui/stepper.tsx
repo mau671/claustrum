@@ -7,13 +7,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 export type StepperOrientation = "horizontal" | "vertical" | "responsive";
-export type StepperStatus = "complete" | "current" | "upcoming" | "error";
+export type StepperStatus =
+  | "complete"
+  | "completed"
+  | "current"
+  | "in_progress"
+  | "upcoming"
+  | "pending"
+  | "error";
 
 export interface StepperStep {
   /** Stable key for step item. */
   id: string;
   /** Short label for the step (e.g. Sede, Carrera, Plan de estudios, Carnet). */
   label: string;
+  /** Explicit status for non-linear or multi-step progress. Overrides index-based calculation. */
+  status?: StepperStatus;
   /** Optional summary of chosen value when step is completed. */
   summary?: string;
   /** Optional always-visible hint under the label (vertical orientation). */
@@ -28,8 +37,8 @@ export interface StepperStep {
 
 export interface StepperProps {
   steps: StepperStep[];
-  /** Index of current step (0-based). */
-  current: number;
+  /** Index of current step (0-based) for sequential steppers. Optional when steps provide explicit status. */
+  current?: number;
   orientation?: StepperOrientation;
   /** Called when a completed step is clicked to navigate back to it. */
   onStepSelect?: (index: number) => void;
@@ -289,7 +298,8 @@ export function Stepper({
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
   const count = steps.length;
-  const active = Math.min(Math.max(Math.round(current), 0), count);
+  const hasActiveNumber = typeof current === "number" && !Number.isNaN(current);
+  const active = hasActiveNumber ? Math.min(Math.max(Math.round(current), 0), count) : -1;
 
   // Track previous active step cleanly without setState in render
   const prevActiveRef = React.useRef(active);
@@ -301,13 +311,14 @@ export function Stepper({
   const gap = motionTokens.stagger.line;
 
   const delayAt = (index: number) => {
-    if (reduced) return 0;
+    if (reduced || active < 0) return 0;
     if (active > from) return index >= from && index < active ? (index - from) * gap : 0;
     return 0;
   };
 
   // Only apply ringDelay when advancing forward across steps; immediate on backward navigation
-  const ringDelay = reduced || active <= from ? 0 : Math.max(0, active - from - 1) * gap + 0.1;
+  const ringDelay =
+    reduced || active <= from || active < 0 ? 0 : Math.max(0, active - from - 1) * gap + 0.1;
 
   const effectiveOrientation =
     orientation === "responsive" ? (isMobile ? "vertical" : "horizontal") : orientation;
@@ -317,12 +328,30 @@ export function Stepper({
       <nav aria-label={label} className="w-full">
         <ol className="flex w-full items-center">
           {steps.map((step, index) => {
-            const isCompleted = index < active;
-            const isCurrent = index === active;
-            const isUpcoming = index > active;
+            const hasExplicitStatus = Boolean(step.status);
+            const isCompleted = step.status
+              ? step.status === "complete" || step.status === "completed"
+              : active >= 0 && index < active;
+            const isCurrent = step.status
+              ? step.status === "current" || step.status === "in_progress"
+              : active >= 0 && index === active;
+            const isUpcoming = step.status
+              ? step.status === "upcoming" || step.status === "pending"
+              : active >= 0
+                ? index > active
+                : !isCompleted && !isCurrent;
             const hasError = isCurrent && !!step.error;
             const isClickable = Boolean(onStepSelect && isCompleted);
             const kind: GlyphKind = hasError ? "error" : isCompleted ? "check" : "number";
+
+            const isConnectorActive = hasExplicitStatus
+              ? isCompleted ||
+                steps.slice(index + 1).some((s) => {
+                  const sCompleted = s.status === "complete" || s.status === "completed";
+                  const sCurrent = s.status === "current" || s.status === "in_progress";
+                  return sCompleted || sCurrent;
+                })
+              : active >= 0 && index < active;
 
             return (
               <li key={step.id} className="relative flex flex-1 items-center last:flex-none">
@@ -368,7 +397,7 @@ export function Stepper({
                     <motion.span
                       className="bg-primary absolute inset-y-0 left-0 w-full origin-left"
                       initial={false}
-                      animate={{ scaleX: index < active ? 1 : 0 }}
+                      animate={{ scaleX: isConnectorActive ? 1 : 0 }}
                       transition={
                         reduced ? still : { ...motionTokens.spring.smooth, delay: delayAt(index) }
                       }
@@ -382,23 +411,25 @@ export function Stepper({
       </nav>
 
       {/* Content for the active step */}
-      <div className="mt-6">
-        {reduced ? (
-          <div>{steps[active]?.content}</div>
-        ) : (
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={steps[active]?.id ?? active}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-            >
-              {steps[active]?.content}
-            </motion.div>
-          </AnimatePresence>
-        )}
-      </div>
+      {hasActiveNumber && steps[active]?.content ? (
+        <div className="mt-6">
+          {reduced ? (
+            <div>{steps[active]?.content}</div>
+          ) : (
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={steps[active]?.id ?? active}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+              >
+                {steps[active]?.content}
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 
@@ -406,13 +437,31 @@ export function Stepper({
     <nav aria-label={label} className="w-full">
       <ol className="flex w-full flex-col">
         {steps.map((step, index) => {
-          const isCompleted = index < active;
-          const isCurrent = index === active;
-          const isUpcoming = index > active;
+          const hasExplicitStatus = Boolean(step.status);
+          const isCompleted = step.status
+            ? step.status === "complete" || step.status === "completed"
+            : active >= 0 && index < active;
+          const isCurrent = step.status
+            ? step.status === "current" || step.status === "in_progress"
+            : active >= 0 && index === active;
+          const isUpcoming = step.status
+            ? step.status === "upcoming" || step.status === "pending"
+            : active >= 0
+              ? index > active
+              : !isCompleted && !isCurrent;
           const hasError = isCurrent && !!step.error;
           const isClickable = Boolean(onStepSelect && isCompleted);
           const kind: GlyphKind = hasError ? "error" : isCompleted ? "check" : "number";
           const isLast = index === count - 1;
+
+          const isConnectorActive = hasExplicitStatus
+            ? isCompleted ||
+              steps.slice(index + 1).some((s) => {
+                const sCompleted = s.status === "complete" || s.status === "completed";
+                const sCurrent = s.status === "current" || s.status === "in_progress";
+                return sCompleted || sCurrent;
+              })
+            : active >= 0 && index < active;
 
           return (
             <li key={step.id} className="relative flex items-start gap-3">
@@ -450,7 +499,7 @@ export function Stepper({
                     <motion.span
                       className="bg-primary absolute inset-x-0 top-0 h-full origin-top"
                       initial={false}
-                      animate={{ scaleY: index < active ? 1 : 0 }}
+                      animate={{ scaleY: isConnectorActive ? 1 : 0 }}
                       transition={
                         reduced ? still : { ...motionTokens.spring.smooth, delay: delayAt(index) }
                       }

@@ -28,6 +28,7 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
         return {
           id: String(semester.levelNumber),
           label: semester.levelLabel,
+          status: semester.status,
           details: (
             <div className="flex flex-col gap-1.5">
               <div
@@ -63,11 +64,6 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
     [semesters],
   );
 
-  const activeIndex = useMemo(() => {
-    const firstPending = semesters.findIndex((semester) => semester.status !== "completed");
-    return firstPending === -1 ? semesters.length : firstPending;
-  }, [semesters]);
-
   return (
     <Card>
       <CardHeader>
@@ -79,12 +75,7 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
             No hay semestres para mostrar.
           </p>
         ) : (
-          <Stepper
-            steps={steps}
-            current={activeIndex}
-            orientation="vertical"
-            label="Progreso por semestre"
-          />
+          <Stepper steps={steps} orientation="vertical" label="Progreso por semestre" />
         )}
       </CardContent>
     </Card>

@@ -52,6 +52,8 @@ export default Alchemy.Stack(
     );
 
     const apiWorker = yield* Cloudflare.Worker("claustrum-api", {
+      name: isProd ? "claustrum-api" : undefined,
+      adopt: true,
       main: "./apps/api/src/index.ts",
       compatibilityFlags: ["nodejs_compat"],
       observability: {
@@ -82,6 +84,9 @@ export default Alchemy.Stack(
     });
 
     const webWorker = yield* Cloudflare.Worker("claustrum-web", {
+      name: isProd ? "claustrum-web" : undefined,
+      adopt: true,
+      domain: isProd && appDomain ? appDomain : undefined,
       main: "./apps/web/dist/server/server.js",
       bundle: false,
       assets: "./apps/web/dist/client",

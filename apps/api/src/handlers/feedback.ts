@@ -48,7 +48,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(ClaustrumApi, "feedback", (
           const rows = yield* sql<FeedbackDbRow>`
               SELECT id, type, content, is_reviewed, created_at, user_id, admin_notes
               FROM public.user_feedback
-              ORDER BY created_at DESC
+              ORDER BY created_at DESC, id DESC
               LIMIT ${limit} OFFSET ${offset}
             `.pipe(
             Effect.mapError(

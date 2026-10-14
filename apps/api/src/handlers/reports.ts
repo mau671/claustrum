@@ -95,7 +95,7 @@ export const ReportsHandlers = HttpApiBuilder.group(ClaustrumApi, "reports", (ha
             JOIN public.professor_review pr ON pr.id = r.review_id
             JOIN public.professor p ON p.id = pr.professor_id
             LEFT JOIN review_courses rc ON rc.review_id = pr.id
-            ORDER BY r.created_at DESC
+            ORDER BY r.created_at DESC, r.id DESC
             LIMIT ${limit} OFFSET ${offset}
           `.pipe(
             Effect.mapError(

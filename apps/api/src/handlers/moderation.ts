@@ -167,9 +167,7 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
               JOIN public.professor p ON p.id = pr.professor_id
               LEFT JOIN review_courses rc ON rc.review_id = pr.id
               WHERE (${statusFilter}::text IS NULL OR pr.status::text = ${statusFilter})
-              ORDER BY
-                CASE WHEN ${statusFilter} = 'pending' THEN pr.created_at END ASC,
-                pr.created_at DESC
+              ORDER BY pr.created_at DESC, pr.id DESC
               LIMIT ${limit} OFFSET ${offset}
             `.pipe(
             Effect.mapError(
@@ -261,9 +259,7 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
               LEFT JOIN public.academic_term at ON at.id = e.academic_term_id
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.status = ${status}
-              ORDER BY
-                CASE WHEN ${status} = 'pending' THEN e.created_at END ASC,
-                e.created_at DESC
+              ORDER BY e.created_at DESC, e.id DESC
               LIMIT ${limit} OFFSET ${offset}
             `.pipe(
             Effect.mapError(

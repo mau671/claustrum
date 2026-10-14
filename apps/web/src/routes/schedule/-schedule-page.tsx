@@ -1427,49 +1427,43 @@ export function SchedulePage() {
                               </>
                             }
                           />
-                          <div
-                            className={cn(
-                              "flex h-[50vh] flex-col overflow-hidden",
-                              !isCourseListOpen && "hidden",
-                            )}
-                          >
-                            <div className="flex-1 overflow-hidden">
-                              {(coursesQuery.isLoading ||
-                                isPendingFilters ||
-                                isPendingLocalStorage) &&
-                              orderedCourses.length === 0 ? (
-                                <div className="space-y-3 p-4">
-                                  <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                  <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                  <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                </div>
-                              ) : (
-                                <ClientOnly
-                                  fallback={
-                                    <div className="space-y-3 p-4">
-                                      <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                      <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                      <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    </div>
-                                  }
-                                >
-                                  <CourseList
-                                    courseColors={courseColors}
-                                    key={
-                                      isCourseListOpen ? "course-list-open" : "course-list-closed"
+                          {isCourseListOpen && (
+                            <div className="flex h-[50vh] flex-col overflow-hidden">
+                              <div className="flex-1 overflow-hidden">
+                                {(coursesQuery.isLoading ||
+                                  isPendingFilters ||
+                                  isPendingLocalStorage) &&
+                                orderedCourses.length === 0 ? (
+                                  <div className="space-y-3 p-4">
+                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
+                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
+                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
+                                  </div>
+                                ) : (
+                                  <ClientOnly
+                                    fallback={
+                                      <div className="space-y-3 p-4">
+                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
+                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
+                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
+                                      </div>
                                     }
-                                    courses={orderedCourses}
-                                    selectedGroups={selectedGroups}
-                                    onSelectionChange={updateSelectedGroups}
-                                    campusById={campusById}
-                                    showCampus={showOtherCampuses}
-                                    viewMode={viewMode}
-                                    searchQuery={search.q}
-                                  />
-                                </ClientOnly>
-                              )}
+                                  >
+                                    <CourseList
+                                      courseColors={courseColors}
+                                      courses={orderedCourses}
+                                      selectedGroups={selectedGroups}
+                                      onSelectionChange={updateSelectedGroups}
+                                      campusById={campusById}
+                                      showCampus={showOtherCampuses}
+                                      viewMode={viewMode}
+                                      searchQuery={search.q}
+                                    />
+                                  </ClientOnly>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
 
                         <div className="bg-background relative flex min-h-[65vh] flex-1 flex-col overflow-hidden rounded-lg border shadow-2xs">

@@ -95,13 +95,29 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
             professor_id: r.professor_id,
             courses: r.courses ?? [],
             comment: r.comment,
-            ease_score: Number(r.ease_score),
-            quality_score: Number(r.quality_score),
-            clarity_score: Number(r.clarity_score),
-            fairness_score: Number(r.fairness_score),
-            attendance_required: r.attendance_required,
+            ease_score:
+              r.ease_score !== null && r.ease_score !== undefined ? Number(r.ease_score) : null,
+            quality_score:
+              r.quality_score !== null && r.quality_score !== undefined
+                ? Number(r.quality_score)
+                : null,
+            clarity_score:
+              r.clarity_score !== null && r.clarity_score !== undefined
+                ? Number(r.clarity_score)
+                : null,
+            fairness_score:
+              r.fairness_score !== null && r.fairness_score !== undefined
+                ? Number(r.fairness_score)
+                : null,
+            attendance_required:
+              r.attendance_required !== null && r.attendance_required !== undefined
+                ? Boolean(r.attendance_required)
+                : null,
             grade_received: r.grade_received,
-            engagement_level: r.engagement_level,
+            engagement_level:
+              r.engagement_level !== null && r.engagement_level !== undefined
+                ? Number(r.engagement_level)
+                : null,
             tags: r.tags ?? [],
             status: r.status,
             created_at: toIsoString(r.created_at) ?? "",
@@ -305,13 +321,29 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
             professor_name: r.professor_name,
             courses: r.courses ?? [],
             comment: r.comment,
-            ease_score: Number(r.ease_score),
-            quality_score: Number(r.quality_score),
-            clarity_score: Number(r.clarity_score),
-            fairness_score: Number(r.fairness_score),
-            attendance_required: r.attendance_required,
-            grade_received: r.grade_received,
-            engagement_level: r.engagement_level,
+            ease_score:
+              r.ease_score !== null && r.ease_score !== undefined ? Number(r.ease_score) : null,
+            quality_score:
+              r.quality_score !== null && r.quality_score !== undefined
+                ? Number(r.quality_score)
+                : null,
+            clarity_score:
+              r.clarity_score !== null && r.clarity_score !== undefined
+                ? Number(r.clarity_score)
+                : null,
+            fairness_score:
+              r.fairness_score !== null && r.fairness_score !== undefined
+                ? Number(r.fairness_score)
+                : null,
+            attendance_required:
+              r.attendance_required !== null && r.attendance_required !== undefined
+                ? Boolean(r.attendance_required)
+                : null,
+            grade_received: r.grade_received ?? null,
+            engagement_level:
+              r.engagement_level !== null && r.engagement_level !== undefined
+                ? Number(r.engagement_level)
+                : null,
             tags: r.tags ?? [],
             status: r.status,
             created_at: toIsoString(r.created_at) ?? "",

@@ -1,6 +1,7 @@
 import { QueryClientProvider, dehydrate, hydrate } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
+import { DefaultErrorComponent } from "@/components/default-error-component";
 import { createQueryClient } from "@/lib/query-client";
 
 // Import the generated route tree
@@ -16,6 +17,7 @@ export const getRouter = () => {
     defaultPreload: false,
     defaultPreloadStaleTime: 0,
     defaultStructuralSharing: true,
+    defaultErrorComponent: DefaultErrorComponent,
     context: {
       queryClient,
     },

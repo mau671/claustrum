@@ -14,6 +14,7 @@ import {
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 
 import { AppLayoutWrapper } from "@/components/app-layout-wrapper";
+import { DefaultErrorComponent } from "@/components/default-error-component";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
   Empty,
@@ -133,6 +134,7 @@ export const Route = createRootRouteWithContext<{
     return { isMobileHint: isMobile };
   },
   component: RootComponent,
+  errorComponent: DefaultErrorComponent,
   notFoundComponent: NotFound,
 });
 

@@ -221,8 +221,10 @@ export interface SemesterProgress {
   levelLabel: string;
   totalCourses: number;
   completedCourses: number;
+  inProgressCourses?: number;
   credits: number;
   completedCredits: number;
+  inProgressCredits?: number | null;
   status: "completed" | "in_progress" | "pending";
 }
 

@@ -14,6 +14,7 @@ export function ScrollArea({
   fill = false,
   clampContentMinWidth = true,
   overscrollContain = false,
+  viewportRef,
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
   scrollFade?: boolean;
@@ -21,6 +22,7 @@ export function ScrollArea({
   fill?: boolean;
   clampContentMinWidth?: boolean;
   overscrollContain?: boolean;
+  viewportRef?: React.Ref<HTMLDivElement>;
 }): React.ReactElement {
   return (
     <ScrollAreaPrimitive.Root
@@ -28,6 +30,7 @@ export function ScrollArea({
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
+        ref={viewportRef}
         className={cn(
           "focus-visible:ring-ring focus-visible:ring-offset-background h-full w-full max-w-full min-w-0 rounded-[inherit] transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
           overscrollContain &&

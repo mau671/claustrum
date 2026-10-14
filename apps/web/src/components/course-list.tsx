@@ -5,6 +5,7 @@ import {
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMemo, useCallback, memo, useEffect, useRef, useState } from "react";
 
 import type { ScheduleCourse, ScheduleGroup } from "@/lib/types";
@@ -45,25 +46,22 @@ const TruncatableText = ({ text }: { text: string }) => {
   const [isTruncated, setIsTruncated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
+  const handlePointerEnter = () => {
     const el = textRef.current;
-    if (!el) return;
-
-    const checkTruncation = () => {
+    if (el) {
       setIsTruncated(el.scrollWidth > el.clientWidth);
-    };
-
-    checkTruncation();
-    const observer = new ResizeObserver(checkTruncation);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [text]);
+    }
+  };
 
   return (
     <Tooltip open={isOpen && isTruncated} onOpenChange={setIsOpen}>
       <TooltipTrigger
         render={
-          <div ref={textRef} className={cn("w-full truncate", isTruncated && "cursor-help")} />
+          <div
+            ref={textRef}
+            onPointerEnter={handlePointerEnter}
+            className={cn("w-full truncate", isTruncated && "cursor-help")}
+          />
         }
       >
         {text}
@@ -435,55 +433,154 @@ export default function CourseList({
     [onSelectionChange, selectedGroups],
   );
 
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div ref={scrollAreaRootRef} className="flex-1 overflow-hidden">
         <ScrollArea
           scrollFade
+          viewportRef={viewportRef}
           className="h-full w-full [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
         >
-          <div className={cn("w-full", viewMode === "card" ? "space-y-3 p-1 pt-2" : "")}>
-            {viewMode === "table" ? (
-              <div className="bg-card/40 flex flex-col overflow-hidden rounded-xl border">
-                {filteredViewData.map((courseData) => (
-                  <CourseTableItem
-                    key={courseData.course.offering_id}
-                    course={courseData.course}
-                    groupViews={courseData.groupViews}
-                    colorStyles={
-                      courseColorStyles.get(courseData.course.course_code) ?? getColorStyles("blue")
-                    }
-                    selectedGroupIds={selectedGroups}
-                    disabledGroupIdSet={disabledSet}
-                    conflictReasonsByGroupId={conflictReasons}
-                    onGroupToggle={handleGroupToggle}
-                    showCampus={showCampus}
-                  />
-                ))}
-              </div>
-            ) : (
-              filteredViewData.map((courseData) => {
-                const course = courseData.course;
-                const colorStyles =
-                  courseColorStyles.get(course.course_code) ?? getColorStyles("blue");
-
-                return (
-                  <CourseCard
-                    key={course.offering_id}
-                    course={courseData.course}
-                    groupViews={courseData.groupViews}
-                    colorStyles={colorStyles}
-                    selectedGroupIds={selectedGroups}
-                    disabledGroupIdSet={disabledSet}
-                    conflictReasonsByGroupId={conflictReasons}
-                    onGroupToggle={handleGroupToggle}
-                  />
-                );
-              })
-            )}
-          </div>
+          <VirtualizedCourseList
+            key={viewMode}
+            viewMode={viewMode}
+            viewportRef={viewportRef}
+            items={filteredViewData}
+            courseColorStyles={courseColorStyles}
+            selectedGroups={selectedGroups}
+            disabledSet={disabledSet}
+            conflictReasons={conflictReasons}
+            handleGroupToggle={handleGroupToggle}
+            showCampus={showCampus}
+          />
         </ScrollArea>
       </div>
+    </div>
+  );
+}
+
+interface VirtualizedCourseListProps {
+  viewMode: "card" | "table";
+  viewportRef: React.RefObject<HTMLDivElement | null>;
+  items: CourseViewData[];
+  courseColorStyles: Map<string, { bg: string; border: string; text: string }>;
+  selectedGroups: SelectedGroups;
+  disabledSet: Set<string>;
+  conflictReasons: Map<string, ConflictReason[]>;
+  handleGroupToggle: (courseCode: string, groupCode: string) => void;
+  showCampus: boolean;
+}
+
+function VirtualizedCourseList({
+  viewMode,
+  viewportRef,
+  items,
+  courseColorStyles,
+  selectedGroups,
+  disabledSet,
+  conflictReasons,
+  handleGroupToggle,
+  showCampus,
+}: VirtualizedCourseListProps) {
+  const rowVirtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => viewportRef.current,
+    estimateSize: () => (viewMode === "table" ? 52 : 270),
+    overscan: 4,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  if (viewMode === "table") {
+    return (
+      <div className="bg-card/40 relative w-full overflow-hidden rounded-xl border">
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualItems.map((virtualRow) => {
+            const courseData = items[virtualRow.index];
+            if (!courseData) return null;
+            const course = courseData.course;
+            const colorStyles = courseColorStyles.get(course.course_code) ?? getColorStyles("blue");
+
+            return (
+              <div
+                key={course.offering_id}
+                ref={rowVirtualizer.measureElement}
+                data-index={virtualRow.index}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <CourseTableItem
+                  course={courseData.course}
+                  groupViews={courseData.groupViews}
+                  colorStyles={colorStyles}
+                  selectedGroupIds={selectedGroups}
+                  disabledGroupIdSet={disabledSet}
+                  conflictReasonsByGroupId={conflictReasons}
+                  onGroupToggle={handleGroupToggle}
+                  showCampus={showCampus}
+                  isLast={virtualRow.index === items.length - 1}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="w-full p-1 pt-2"
+      style={{
+        height: `${rowVirtualizer.getTotalSize()}px`,
+        position: "relative",
+      }}
+    >
+      {virtualItems.map((virtualRow) => {
+        const courseData = items[virtualRow.index];
+        if (!courseData) return null;
+        const course = courseData.course;
+        const colorStyles = courseColorStyles.get(course.course_code) ?? getColorStyles("blue");
+
+        return (
+          <div
+            key={course.offering_id}
+            ref={rowVirtualizer.measureElement}
+            data-index={virtualRow.index}
+            className="w-full pb-3"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              transform: `translateY(${virtualRow.start}px)`,
+            }}
+          >
+            <CourseCard
+              course={courseData.course}
+              groupViews={courseData.groupViews}
+              colorStyles={colorStyles}
+              selectedGroupIds={selectedGroups}
+              disabledGroupIdSet={disabledSet}
+              conflictReasonsByGroupId={conflictReasons}
+              onGroupToggle={handleGroupToggle}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -764,6 +861,7 @@ const CourseTableItem = memo(function CourseTableItem({
   conflictReasonsByGroupId,
   onGroupToggle,
   showCampus,
+  isLast = false,
 }: {
   course: ScheduleCourse;
   groupViews: GroupView[];
@@ -773,6 +871,7 @@ const CourseTableItem = memo(function CourseTableItem({
   conflictReasonsByGroupId: Map<string, ConflictReason[]>;
   onGroupToggle: (courseCode: string, groupCode: string) => void;
   showCampus: boolean;
+  isLast?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -780,7 +879,7 @@ const CourseTableItem = memo(function CourseTableItem({
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className="bg-card/50 border-border/70 w-full border-b last:border-b-0"
+      className={cn("bg-card/50 border-border/70 w-full", !isLast && "border-b")}
     >
       <CollapsibleTrigger
         render={

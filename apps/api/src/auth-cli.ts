@@ -18,10 +18,6 @@ function readCliEnv(): AuthEnv {
       "development-better-auth-secret-change-me-32-chars",
     )!,
     BETTER_AUTH_URL: getEnvValue("BETTER_AUTH_URL", "http://localhost:8787")!,
-    SUPABASE_URL:
-      getEnvValue("SUPABASE_URL") ?? getEnvValue("VITE_SUPABASE_URL", "http://127.0.0.1:54321")!,
-    SUPABASE_JWT_PRIVATE_JWK: getEnvValue("SUPABASE_JWT_PRIVATE_JWK"),
-    SUPABASE_JWT_KEY_ID: getEnvValue("SUPABASE_JWT_KEY_ID"),
     GOOGLE_CLIENT_ID: getEnvValue("GOOGLE_CLIENT_ID"),
     GOOGLE_CLIENT_SECRET: getEnvValue("GOOGLE_CLIENT_SECRET"),
     RESEND_API_KEY: getEnvValue("RESEND_API_KEY"),

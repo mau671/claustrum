@@ -81,12 +81,14 @@ flowchart TD
 horarios/
 ├── apps/
 │   ├── web/               # SPA React 19, TanStack Router/Query, Fumadocs y Tailwind v4
-│   └── api/               # Cloudflare Worker con Hono, Better Auth y capa de servicios
-├── supabase/
-│   ├── migrations/        # Migraciones SQL versionadas con esquemas y políticas RLS
+│   └── api/               # Cloudflare Worker con Effect TS (HttpApi), Alchemy y Better Auth
+├── drizzle/               # Migraciones SQL versionadas
+├── data/
 │   ├── seeds/             # Seeds deterministas para catálogo y datos iniciales
-│   └── tec-data/          # CLI en Python (uv) para extracción y sincronización académica
-├── scripts/               # Utilidades TypeScript para aplicación de seeds y generación OG
+│   └── itcr/              # CLI en Python (uv) para extracción y sincronización académica
+├── scripts/               # Utilidades TypeScript para migraciones, seeds y Drizzle Studio
+├── compose.yaml           # Contenedor PostgreSQL 17 local
+├── alchemy.run.ts         # Infraestructura como Código (IaC) en TypeScript con Alchemy
 ├── turbo.json             # Configuración de pipeline de Turborepo
 └── package.json           # Dependencias raíz del workspace (pnpm)
 ```
@@ -97,10 +99,10 @@ horarios/
 
 Asegúrate de contar con las siguientes herramientas en tu entorno local:
 
-- **Node.js**: `v20.0.0` o superior
+- **Node.js**: `v24.0.0` o superior (Active LTS)
 - **pnpm**: `v12.0.0` o superior (gestor de paquetes obligatorio)
-- **Docker**: Para ejecutar Supabase localmente
-- **Python** (Opcional): `3.14+` y [`uv`](https://docs.astral.sh/uv/) únicamente si requieres ejecutar el pipeline de datos en `supabase/tec-data`
+- **Docker**: Para ejecutar PostgreSQL localmente (`docker compose`)
+- **Python** (Opcional): `3.14+` y [`uv`](https://docs.astral.sh/uv/) únicamente si requieres ejecutar el pipeline de datos en `data/itcr`
 
 ---
 
@@ -126,35 +128,25 @@ cp apps/web/.env.example apps/web/.env.local
 cp apps/api/.dev.vars.example apps/api/.dev.vars
 ```
 
-> [!TIP]
-> Para el entorno de desarrollo básico puedes utilizar los valores por defecto de la instancia local de Supabase (`http://127.0.0.1:54321`).
-
 ### 3. Iniciar la base de datos local
 
-Inicia los servicios locales de Supabase y aplica las migraciones:
+Inicia el contenedor local de PostgreSQL y aplica las migraciones y seeds:
 
 ```bash
-pnpm run supabase:start
-pnpm run supabase:migrate-dev
-pnpm run supabase:seed
+pnpm run db:start
+pnpm run db:migrate
+pnpm run db:seed
 ```
 
 > [!IMPORTANT]
-> **Nunca ejecutes comandos destructivos** en la base de datos (como `supabase db reset`). Utiliza siempre `pnpm run supabase:migrate-dev` o `pnpm run supabase:migrate` para aplicar cambios de esquema pendientes sin perder los datos sincronizados.
+> **Nunca ejecutes comandos destructivos** en la base de datos. Utiliza siempre `pnpm run db:migrate` para aplicar cambios de esquema pendientes de forma transaccional sin perder datos. Para explorar la base de datos visualmente, ejecuta `pnpm run db:studio`.
 
-### 4. Iniciar los servidores de desarrollo
+### 4. Iniciar el entorno de desarrollo
 
-Ejecuta todas las aplicaciones simultáneamente con Turborepo:
+Ejecuta toda la infraestructura (Workers, simuladores R2 y Vite HMR) con Alchemy:
 
 ```bash
 pnpm run dev
-```
-
-O si prefieres ejecutar un servicio específico:
-
-```bash
-pnpm run dev:web  # Inicia únicamente la aplicación web (http://localhost:3000)
-pnpm run dev:api  # Inicia únicamente el API Worker (http://localhost:8787)
 ```
 
 ---

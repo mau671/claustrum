@@ -36,8 +36,8 @@ El repositorio incluye `.env.example`, `.env.production.local.example` y
 ```bash title="Preparar entorno local"
 pnpm install
 cp .env.example .env.local
-pnpm run supabase:start
-pnpm run supabase:migrate-dev
+pnpm run db:start
+pnpm run db:migrate
 ```
 
 El servidor de desarrollo solo debe iniciarse cuando se necesite trabajar en UI o
@@ -47,7 +47,7 @@ API local:
 pnpm run dev
 ```
 
-La base local usa los defaults de Supabase (`postgres:postgres@127.0.0.1:54322`)
+La base local usa los defaults de PostgreSQL (`postgres:postgres@127.0.0.1:54322`)
 cuando los puertos están disponibles.
 
 ## Build y despliegue
@@ -86,13 +86,13 @@ catálogo cada vez que se genera oferta semanal.
 ### Generate seed
 
 `.github/workflows/generate-seed.yml` se ejecuta semanalmente, manualmente o en PRs
-que tocan `supabase/tec-data`, migraciones o seeds. El flujo descarga el último
+que tocan `data/itcr`, migraciones o seeds. El flujo descarga el último
 artifact de catálogo exitoso, valida que tenga datos suficientes y corre:
 
 ```bash
 uv run tec-data sync \
   --target seed-history \
-  --seed-dir ../seeds/tec-data \
+  --seed-dir ../seeds/itcr \
   --scope offering \
   --years 2026 \
   --no-apply \
@@ -101,21 +101,21 @@ uv run tec-data sync \
 ```
 
 El workflow inspecciona el manifest generado. Si `noop` es `false`, abre un PR a
-`development` con los nuevos `.sql` y `.json` en `supabase/seeds/tec-data`.
+`development` con los nuevos `.sql` y `.json` en `data/seeds/itcr`.
 
 ## Aplicar datos manualmente
 
 Para generar y aplicar contra local:
 
 ```bash
-cd supabase/tec-data
+cd data/itcr
 uv run tec-data sync --target local --years 2026
 ```
 
 Para producción, usa el archivo de entorno correspondiente:
 
 ```bash
-cd supabase/tec-data
+cd data/itcr
 uv run tec-data sync --target remote --years 2026 --env-file ../../.env.production.local
 ```
 
@@ -128,7 +128,7 @@ uv run tec-data sync --target remote --years 2026 --env-file ../../.env.producti
 ## Reglas operativas
 
 - Usar `pnpm` para comandos Node/TypeScript.
-- Usar `uv` solo dentro de `supabase/tec-data`.
+- Usar `uv` solo dentro de `data/itcr`.
 - No resetear la base para aplicar migraciones normales.
 - No aplicar seeds de producción sin revisar target, scope, años y manifest.
 - El ledger `sync_seed_run` evita reaplicar seeds idénticos por SHA/fingerprint.

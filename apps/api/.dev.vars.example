@@ -1,13 +1,20 @@
-# Variables locales para el API Worker
-# Copiar a .dev.vars y llenar valores
+# Variables locales para el API Worker (Cloudflare Worker)
+# Copiar a apps/api/.dev.vars para desarrollo local
 
-SUPABASE_URL=
-SUPABASE_SECRET_KEY=
-DATABASE_URL=
-BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=
-SUPABASE_JWT_PRIVATE_JWK=
-SUPABASE_JWT_KEY_ID=
-CORS_ORIGINS=
-TURNSTILE_SECRET_KEY=
+# Base de datos local (PostgreSQL en Docker: postgres:postgres@127.0.0.1:54322)
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+# Better Auth
+BETTER_AUTH_SECRET=development-better-auth-secret-min-32-chars-long
+BETTER_AUTH_URL=http://localhost:3000
+
+# Seguridad y CORS
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Resend (correos transaccionales)
 RESEND_API_KEY=
+
+# OAuth (opcional)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=

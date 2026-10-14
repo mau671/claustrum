@@ -13,6 +13,14 @@ export default defineConfig({
     tailwindcss(),
     mdx(),
   ],
+  build: {
+    rolldownOptions: {
+      external: ["cloudflare:workers"],
+    },
+  },
+  ssr: {
+    external: ["cloudflare:workers"],
+  },
   server: {
     proxy: {
       "/api": {

@@ -1,0 +1,76 @@
+# KVNamespace
+
+A [Cloudflare KV Namespace](https://developers.cloudflare.com/kv/concepts/kv-namespaces/) is a key-value store that can be used to store data for your application.
+
+## Minimal Example
+
+Create a basic KV namespace for storing user data.
+
+```ts
+
+
+const users = await KVNamespace("users", {
+  title: "user-data",
+});
+```
+
+## With Initial Values and TTL
+
+Create a KV namespace with initial values and expiration.
+
+```ts
+
+
+const sessions = await KVNamespace("sessions", {
+  title: "user-sessions",
+  values: [
+    {
+      key: "session_123",
+      value: { userId: "user_456", role: "admin" },
+      expirationTtl: 3600, // Expires in 1 hour
+    },
+  ],
+});
+```
+
+## With Metadata
+
+Create a KV namespace with metadata for caching.
+
+```ts
+
+
+const assets = await KVNamespace("assets", {
+  title: "static-assets",
+  values: [
+    {
+      key: "main.js",
+      value: "content...",
+      metadata: {
+        contentType: "application/javascript",
+        etag: "abc123",
+      },
+    },
+  ],
+});
+```
+
+## Bind to a Worker
+
+Bind a KV namespace to a Worker for data access.
+
+```ts
+
+
+const store = await KVNamespace("store", {
+  title: "data-store",
+});
+
+await Worker("api", {
+  name: "api-worker",
+  script: "console.log('Hello, world!')",
+  bindings: {
+    STORE: store,
+  },
+});
+```

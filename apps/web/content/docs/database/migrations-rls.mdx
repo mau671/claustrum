@@ -31,7 +31,7 @@ con Better Auth en el schema `better_auth`. El perfil de la app vive en
 Tablas como `campus`, `academic_unit`, `study_plan`, `course`, `professor` y las
 tablas de oferta pueden leerse desde el cliente porque alimentan onboarding,
 mallas, búsqueda y horarios. Esa lectura no implica escritura: los cambios del
-catálogo se hacen por migraciones, seeds o procesos `tec-data` con credenciales
+catálogo se hacen por migraciones, seeds o procesos de sincronización (`data/itcr`) con credenciales
 elevadas.
 
 ```sql title="Lectura pública filtrada"
@@ -90,6 +90,96 @@ TO authenticated
 USING (public.is_admin());
 ```
 
+## Modelo de seguridad y roles (Cloudflare Hyperdrive)
+
+La arquitectura de conexión de producción desacopla la autenticación del pooler y la
+gestión de privilegios mediante el **Group Role Pattern** de PostgreSQL, asegurando el
+principio de mínimo privilegio (_least privilege_).
+
+### Patrón de roles grupales (`hyperdrive_role`)
+
+En lugar de otorgar permisos directamente a usuarios de login individuales, se define
+un rol de grupo no autenticable (`NOLOGIN`):
+
+```sql title="Definición del rol grupal hyperdrive_role"
+CREATE ROLE hyperdrive_role NOLOGIN;
+ALTER ROLE hyperdrive_role BYPASSRLS;
+
+-- Permisos estrictamente DML y ejecución (sin privilegios DDL ni DROP)
+GRANT USAGE ON SCHEMA public, better_auth, extensions TO hyperdrive_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public, better_auth TO hyperdrive_role;
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public, better_auth TO hyperdrive_role;
+GRANT EXECUTE ON ALL ROUTINES IN SCHEMA public, better_auth, extensions TO hyperdrive_role;
+```
+
+El usuario de conexión utilizado por Cloudflare Hyperdrive (`hyperdrive_user`) hereda los
+permisos de este grupo mediante `GRANT hyperdrive_role TO hyperdrive_user;`.
+
+### Riesgos de la guía rápida de Cloudflare (`GRANT postgres`)
+
+La documentación genérica de Cloudflare Hyperdrive suele sugerir vincular el usuario
+con `GRANT postgres TO hyperdrive_user;`. En Supabase o PostgreSQL estándar, este
+enfoque introduce vulnerabilidades críticas:
+
+1. **Privilegios de superusuario/owner**: Concede control total para ejecutar DDL
+   destructivo (`DROP TABLE`, `ALTER TABLE`, `DROP DATABASE`), alterar esquemas y
+   manipular extensiones o configuraciones globales del motor.
+2. **Violación de mínimo privilegio**: Una inyección SQL accidental o bug en la capa de
+   la aplicación podría destruir esquemas completos o crear roles con privilegios
+   elevados.
+3. **Falta de auditoría granular**: Impide separar las operaciones automatizadas de
+   migración (ejecutadas por `postgres`) del tráfico operacional DML generado por el
+   Worker.
+
+`hyperdrive_role` restringe el acceso exclusivamente a operaciones DML (`SELECT`,
+`INSERT`, `UPDATE`, `DELETE`) y ejecución de rutinas, impidiendo cualquier operación
+DDL o de administración de base de datos desde la API.
+
+### Privilegios por defecto (`ALTER DEFAULT PRIVILEGES`)
+
+Al aplicar nuevas migraciones con el usuario `postgres`, las tablas o rutinas recién
+creadas pertenecen a `postgres` sin permisos de acceso para `hyperdrive_role`, lo que
+históricamente requería _hotfixes_ manuales de permisos tras cada migración.
+
+Para resolver esto de forma preventiva y determinista, se configuran privilegios por
+defecto para todos los objetos futuros creados por el rol `postgres`:
+
+```sql title="Configuración de privilegios por defecto"
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO hyperdrive_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO hyperdrive_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  GRANT EXECUTE ON ROUTINES TO hyperdrive_role;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA better_auth
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO hyperdrive_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA better_auth
+  GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO hyperdrive_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA better_auth
+  GRANT EXECUTE ON ROUTINES TO hyperdrive_role;
+```
+
+Cualquier tabla, vista, secuencia o función creada en migraciones subsecuentes queda
+inmediatamente disponible para el Worker sin intervención manual.
+
+### Justificación de `BYPASSRLS` en la arquitectura
+
+El atributo `BYPASSRLS` en `hyperdrive_role` es apropiado y seguro bajo el diseño
+actual de la plataforma por dos motivos fundamentales:
+
+1. **Eliminación del PostgREST público**: El acceso directo de Supabase para los roles
+   `anon` y `authenticated` ha sido revocado (migración `0143`). Ningún cliente web
+   puede consultar la base de datos directamente vía REST o GraphQL sin pasar por el
+   Cloudflare Worker.
+2. **Autorización en la capa de aplicación (Better Auth + Effect)**: Toda petición es
+   recibida, autenticada y autorizada en el Cloudflare Worker mediante Better Auth y
+   servicios de Effect TS antes de consultar PostgreSQL. RLS a nivel de base de datos se
+   diseñó para clientes HTTP directos que pasan JWTs de Supabase (`auth.uid()`); al
+   centralizar la lógica de negocio y las verificaciones de permisos en Effect, el Worker
+   actúa como un servicio backend confiable de alto rendimiento que realiza consultas
+   directas parametrizadas.
+
 ## RPCs como contratos
 
 Muchas pantallas no consumen tablas directamente. Usan RPCs que encapsulan joins,
@@ -136,11 +226,11 @@ consumidores.
 ## Flujo para aplicar migraciones
 
 ```bash title="Aplicar migraciones locales"
-pnpm run supabase:migrate-dev
+pnpm run db:migrate
 ```
 
-```bash title="Aplicar migraciones al proyecto vinculado"
-pnpm run supabase:migrate-prod
+```bash title="Aplicar migraciones en producción"
+pnpm run db:migrate -- --prod
 ```
 
 Estos comandos aplican migraciones pendientes sin borrar datos. No se debe usar
@@ -159,3 +249,5 @@ puede ocultar una migración mal definida.
 - Columnas nuevas consideran backfill, defaults, nullability e índices.
 - Cambios en datos sync-managed consideran `is_active`, `updated_at` y
   `deactivated_at`.
+- Privilegios por defecto (`ALTER DEFAULT PRIVILEGES`) para `hyperdrive_role`
+  cubren nuevos objetos.

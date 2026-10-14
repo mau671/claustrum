@@ -40,11 +40,11 @@ jobs:
         run: supabase start
 
       - name: Run seed-history sync for catalog
-        working-directory: supabase/tec-data
+        working-directory: data/itcr
         run: >-
           uv run tec-data sync
           --target seed-history
-          --seed-dir ../seeds/tec-data
+          --seed-dir ../seeds/itcr
           --scope catalog
           --years "$CATALOG_YEARS"
           --no-apply
@@ -59,7 +59,7 @@ jobs:
           import os
           from pathlib import Path
 
-          seed_dir = Path("supabase/seeds/tec-data")
+          seed_dir = Path("data/seeds/itcr")
           seeds = sorted(seed_dir.glob("seed_*.sql"), key=lambda p: p.stat().st_mtime, reverse=True)
           if not seeds:
               raise SystemExit("No generated seed SQL file found")
@@ -155,14 +155,14 @@ jobs:
         if: steps.seed_check.outputs.create_pr == 'true'
         uses: peter-evans/create-pull-request@v8
         with:
-          commit-message: "chore(tec-data): catalog as of ${{ steps.seed_check.outputs.formatted_datetime }} with filter of: ${{ steps.seed_check.outputs.years }}"
-          branch: "bot/tec-data-catalog"
+          commit-message: "chore(itcr): catalog as of ${{ steps.seed_check.outputs.formatted_datetime }} with filter of: ${{ steps.seed_check.outputs.years }}"
+          branch: "bot/itcr-catalog"
           branch-suffix: "timestamp"
           base: "development"
           delete-branch: true
-          title: "chore(tec-data): catalog as of ${{ steps.seed_check.outputs.formatted_datetime }} with filter of: ${{ steps.seed_check.outputs.years }}"
+          title: "chore(itcr): catalog as of ${{ steps.seed_check.outputs.formatted_datetime }} with filter of: ${{ steps.seed_check.outputs.years }}"
           body: |
-            ## Automated tec-data seed generation
+            ## Automated itcr seed generation
 
             **Scope:** `${{ steps.seed_check.outputs.scope }}`
             **Years:** ${{ steps.seed_check.outputs.years }}
@@ -176,5 +176,5 @@ jobs:
             ---
             _Target: seed-history | Source: GitHub Actions_
           add-paths: |
-            supabase/seeds/tec-data/*.sql
-            supabase/seeds/tec-data/*.json
+            data/seeds/itcr/*.sql
+            data/seeds/itcr/*.json

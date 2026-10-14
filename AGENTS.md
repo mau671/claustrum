@@ -28,21 +28,36 @@ This document provides guidelines for AI agents operating in this repository.
 - Do NOT run `pnpm run test` or any test commands
 - If asked to run tests, inform the user that this project has no tests configured
 
-### Supabase (when needed)
+### Database Commands (`db:*`)
 
-- Start local Supabase: `pnpm run supabase:start`
-- Stop Supabase: `pnpm run supabase:stop`
-- Run migrations: `pnpm run supabase:migrate`
-- Seed database: `pnpm run supabase:seed`
-- Full setup: `pnpm run supabase:setup`
-- **NEVER run destructive database commands**. This includes:
-  - Any form of database reset (`supabase:reset`, `supabase db reset`, or equivalent).
-  - Any commands that roll back migrations (e.g., `supabase migration down`, `supabase db down`).
-  - Any raw Supabase CLI commands like `supabase migration up`, `supabase db push`.
-  - Scripts like `pnpm run supabase:migrate-dev` or `pnpm run supabase:migrate-prod`.
-  - Any manual `DELETE` or `UPDATE` queries on tables without explicit and repeated user confirmation.
-    These commands irreversibly wipe all local data because Supabase locally resets the database when rolling back or modifying states manually. If a migration needs to be applied, use exactly `pnpm run supabase:migrate` which only runs pending migrations without deleting data.
-- Do NOT use `pnpm run supabase:stop` or any destructive operation on production databases
+- Start local Postgres container: `pnpm run db:start`
+- Stop Postgres container: `pnpm run db:stop`
+- Run migrations locally: `pnpm run db:migrate`
+- Run migrations in production: `pnpm run db:migrate -- --prod`
+- Preview migrations (dry-run): `pnpm run db:migrate -- --dry-run`
+- Seed database locally: `pnpm run db:seed`
+- Seed database in production: `pnpm run db:seed -- --prod`
+- Seed reviews: `pnpm run db:seed -- --reviews` (add `-- --prod` for production)
+- Open Drizzle Studio: `pnpm run db:studio` (add `-- --prod` for production)
+- Full local setup: `pnpm run db:setup`
+- **NEVER run destructive database commands**. Do not drop databases or run manual DELETE/UPDATE queries without explicit confirmation.
+
+### Effect and Alchemy Guidelines
+
+This repository uses **Alchemy** for Infrastructure-as-Code and runtime orchestration on Cloudflare, and **Effect TS** for all backend services and APIs.
+
+- Before writing Effect code, read the Effect documentation in `node_modules/effect/` and the skill references in `.agents/skills/effect-ts` and `.agents/skills/alchemy-run`.
+- All code, types, and comments **must be in English**.
+- Do not mix unhandled Promises or raw procedural `try/catch` inside Effect workflows; use `Effect.gen`, `Effect.tryPromise`, `Effect.acquireRelease`, and `Layer`.
+- Model domain data and HTTP APIs using `effect/Schema` and `effect/unstable/httpapi/HttpApi`.
+- Database interactions use `@effect/sql-pg` with scoped layers; do not manually instantiate connection pools or leak handles.
+- No hardcoded secrets, database credentials, domains, or hostnames. All infrastructure configuration resides in `alchemy.run.ts` driven by environment variables, `Alchemy.Secret`, and deployment stages.
+
+### Cloudflare CLI (`cf`)
+
+- When interacting with Cloudflare, use the `cf` CLI.
+- Inspect and audit live Cloudflare account resources using `cf` commands (e.g., `cf hyperdrive list`, `cf r2 buckets list`, `cf zones list`, `cf cli search`).
+- For command discovery and schema inspection, use `cf cli search "<task>"` and `cf schema <command>`.
 
 ## Code Style Guidelines
 

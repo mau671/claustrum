@@ -4,14 +4,54 @@ import { apiClient } from "@/lib/api/client";
 
 const MAIN_CAMPUS_CODES = new Set(["AL", "CA", "LM", "SC", "SJ"]);
 
-const cache = new Map<string, { data: any; timestamp: number }>();
+export interface UniversityItem {
+  id: number;
+  name: string;
+  short_name: string;
+}
+
+export interface CampusItem {
+  id: number;
+  university_id: number;
+  code: string;
+  name: string;
+}
+
+export interface AcademicUnitItem {
+  id: number;
+  code: string;
+  name: string;
+  university_id?: number;
+}
+
+export interface StudyPlanItem {
+  id: number;
+  academic_unit_id: number;
+  external_plan_id: number;
+  name: string;
+  academic_degree: string;
+  modality_name?: string;
+}
+
+export interface AcademicTermItem {
+  id: number;
+  academic_modality_id: number;
+  year: number;
+  period_number: number;
+  external_key: string;
+  display_name: string;
+  starts_on: string;
+  ends_on: string;
+}
+
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
 async function withCache<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   const now = Date.now();
   const cached = cache.get(key);
   if (cached && now - cached.timestamp < CACHE_TTL) {
-    return cached.data;
+    return cached.data as T;
   }
   const data = await fetcher();
   cache.set(key, { data, timestamp: now });
@@ -20,7 +60,7 @@ async function withCache<T>(key: string, fetcher: () => Promise<T>): Promise<T> 
 
 export const getUniversitiesServerFn = createServerFn({ method: "GET" }).handler(async () => {
   return withCache("universities", async () => {
-    const data = await apiClient<any[]>("/universities");
+    const data = await apiClient<UniversityItem[]>("/universities");
     return data ?? [];
   });
 });
@@ -29,7 +69,7 @@ export const getCampusesServerFn = createServerFn({ method: "GET" })
   .validator((universityId: number) => universityId)
   .handler(async ({ data: universityId }) => {
     return withCache(`campuses-${universityId}`, async () => {
-      const data = await apiClient<any[]>(`/campuses?universityId=${universityId}`);
+      const data = await apiClient<CampusItem[]>(`/campuses?universityId=${universityId}`);
       return (data ?? []).filter((c) => MAIN_CAMPUS_CODES.has(c.code));
     });
   });
@@ -38,7 +78,7 @@ export const getAcademicUnitsServerFn = createServerFn({ method: "GET" })
   .validator((campusId: number) => campusId)
   .handler(async ({ data: campusId }) => {
     return withCache(`academic-units-${campusId}`, async () => {
-      const data = await apiClient<any[]>(`/academicunits?campusId=${campusId}`);
+      const data = await apiClient<AcademicUnitItem[]>(`/academicunits?campusId=${campusId}`);
       return data ?? [];
     });
   });
@@ -47,7 +87,7 @@ export const getStudyPlansServerFn = createServerFn({ method: "GET" })
   .validator((academicUnitId: number) => academicUnitId)
   .handler(async ({ data: academicUnitId }) => {
     return withCache(`study-plans-${academicUnitId}`, async () => {
-      const data = await apiClient<any[]>(`/studyplans?academicUnitId=${academicUnitId}`);
+      const data = await apiClient<StudyPlanItem[]>(`/studyplans?academicUnitId=${academicUnitId}`);
       return (data ?? []).sort(
         (a, b) =>
           Number(b.external_plan_id ?? b.id) - Number(a.external_plan_id ?? a.id) ||
@@ -63,7 +103,7 @@ export const getAcademicTermsServerFn = createServerFn({ method: "GET" })
       const query = studyPlanId
         ? `/terms?campusId=${campusId}&studyPlanId=${studyPlanId}`
         : `/terms?campusId=${campusId}`;
-      const data = await apiClient<any[]>(query);
+      const data = await apiClient<AcademicTermItem[]>(query);
       return data ?? [];
     });
   });

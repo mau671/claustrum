@@ -410,7 +410,7 @@ erDiagram
 
 ### Datos sincronizados del TEC
 
-Las tablas de catálogo y oferta son administradas por `supabase/tec-data`. Usan
+Las tablas de catálogo y oferta son administradas por `data/itcr`. Usan
 llaves naturales para upsert y columnas de lifecycle (`is_active`, `updated_at`,
 `deactivated_at`) para evitar borrados físicos. El sync remapea IDs contra la
 base destino antes de generar deltas, por lo que el ID es una PK interna y la
@@ -446,7 +446,7 @@ la carga anónima ya no existe `uploaded_by`; la moderación se representa con
 
 ### Operación de sync
 
-`sync_seed_run` registra el lifecycle de seeds generados/aplicados por `tec-data`:
+`sync_seed_run` registra el lifecycle de seeds generados/aplicados por `data/itcr` (o comando `itcr` / `tec-data`):
 archivo, SHA256, scope, años, términos, status y metadata. Los scopes válidos son
 `catalog`, `offering` y `all`; los estados válidos son `generated`, `applied`,
 `failed` y `skipped_duplicate`.

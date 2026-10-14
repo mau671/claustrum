@@ -1,9 +1,8 @@
 import {
-  jwtClient,
+  adminClient,
+  lastLoginMethodClient,
   magicLinkClient,
   twoFactorClient,
-  lastLoginMethodClient,
-  adminClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
@@ -23,7 +22,6 @@ export const authClient = createAuthClient({
     twoFactorClient({
       twoFactorPage: "/auth/2fa",
     }),
-    jwtClient(),
     adminClient({ ac, roles }),
   ],
 });

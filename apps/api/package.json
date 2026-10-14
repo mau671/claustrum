@@ -3,19 +3,19 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --config wrangler.jsonc",
-    "build": "wrangler deploy --dry-run --outdir dist",
-    "deploy": "wrangler deploy --config wrangler.jsonc",
+    "build": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
   },
   "dependencies": {
+    "@effect/sql-pg": "^4.0.4",
     "@hono/zod-validator": "^0.9.1",
-    "@supabase/supabase-js": "^2.90.1",
+    "alchemy": "2.0.0-beta.83",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.6.11",
+    "effect": "^4.0.4",
     "hono": "^4.13.13",
     "jose": "^6.2.3",
     "mailchecker": "^6.0.21",
@@ -24,6 +24,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261013.1",
     "@types/pg": "^8.20.0",
     "wrangler": "^4.148.0"
   },

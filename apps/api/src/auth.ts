@@ -1,8 +1,7 @@
 import bcrypt from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { magicLink, twoFactor, jwt, openAPI, lastLoginMethod, admin } from "better-auth/plugins";
-import { importJWK, SignJWT, type JWK, type JWTPayload } from "jose";
+import { magicLink, twoFactor, openAPI, lastLoginMethod, admin } from "better-auth/plugins";
 import { Pool } from "pg";
 import { Resend } from "resend";
 
@@ -14,9 +13,6 @@ export interface AuthEnv {
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
-  SUPABASE_URL: string;
-  SUPABASE_JWT_PRIVATE_JWK?: string;
-  SUPABASE_JWT_KEY_ID?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   RESEND_API_KEY?: string;
@@ -49,33 +45,13 @@ async function sendAuthEmail(
   }
 }
 
-async function signSupabaseJwt(env: AuthEnv, payload: JWTPayload): Promise<string> {
-  if (!env.SUPABASE_JWT_PRIVATE_JWK) {
-    throw new Error("SUPABASE_JWT_PRIVATE_JWK is required to issue Supabase RLS tokens");
-  }
-
-  const jwk = JSON.parse(env.SUPABASE_JWT_PRIVATE_JWK) as JWK & { kid?: string };
-  const { key_ops: _key_ops, ...importable } = jwk;
-  const key = await importJWK({ ...importable, key_ops: ["sign"] }, "ES256");
-  const kid = env.SUPABASE_JWT_KEY_ID ?? jwk.kid;
-  if (!kid) {
-    throw new Error("SUPABASE_JWT_KEY_ID or kid in SUPABASE_JWT_PRIVATE_JWK is required");
-  }
-
-  return await new SignJWT({ ...payload, role: "authenticated" })
-    .setProtectedHeader({ alg: "ES256", kid, typ: "JWT" })
-    .setIssuedAt()
-    .setExpirationTime("15m")
-    .sign(key);
-}
-
 function getSocialProviders(env: AuthEnv) {
   if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return {};
   return {
     google: {
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-      prompt: "select_account",
+      prompt: "select_account" as const,
     },
   };
 }
@@ -89,7 +65,7 @@ function getTrustedOrigins(env: AuthEnv): string[] {
   ];
 }
 
-export function createAuth(env: AuthEnv, pool: Pool): ReturnType<typeof betterAuth> {
+export function createAuth(env: AuthEnv, pool: Pool) {
   return betterAuth({
     appName: "Claustrum",
     baseURL: env.BETTER_AUTH_URL,
@@ -202,26 +178,6 @@ export function createAuth(env: AuthEnv, pool: Pool): ReturnType<typeof betterAu
       twoFactor({
         issuer: "Claustrum",
         allowPasswordless: true,
-      }),
-      jwt({
-        jwks: {
-          remoteUrl: `${env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
-          keyPairConfig: {
-            alg: "ES256",
-          },
-        },
-        jwt: {
-          audience: "authenticated",
-          issuer: `${env.SUPABASE_URL}/auth/v1`,
-          expirationTime: "15m",
-          getSubject: (session) => session.user.id,
-          definePayload: ({ user }) => ({
-            email: user.email,
-            role: "authenticated",
-            app_role: (user as any).role ?? "user",
-          }),
-          sign: async (payload) => await signSupabaseJwt(env, payload),
-        },
       }),
       admin({
         ac,

@@ -28,6 +28,9 @@
     ".opencode/**",
     ".agents/**",
     "docs/**",
-    "supabase/**"
+    "data/seeds/**",
+    "drizzle/**",
+    "data/itcr/**",
+    ".alchemy/**"
   ]
 }

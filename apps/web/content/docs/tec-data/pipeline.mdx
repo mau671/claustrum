@@ -3,9 +3,10 @@ title: Extracción de datos del ITCR
 description: Flujo actual de descarga, procesamiento, generación SQL y sincronización idempotente desde fuentes externas.
 ---
 
-El pipeline vive en `supabase/tec-data/`. Es una CLI de Python empaquetada con
+El pipeline vive en `data/itcr/`. Es una CLI de Python empaquetada con
 `uv` que descarga datos del ITCR, los normaliza a archivos `data/raw/**/data.json`
-y genera seeds SQL para Supabase.
+y genera seeds SQL para la base de datos.
+Los comandos están disponibles tanto como `itcr` como `tec-data` (`uv run itcr <comando>` o `uv run tec-data <comando>`).
 
 El flujo actual trabaja por alcance lógico (`scope`), no por una bandera
 `--entity`. Los alcances válidos son:
@@ -19,7 +20,7 @@ El flujo actual trabaja por alcance lógico (`scope`), no por una bandera
 ## Comandos principales
 
 ```bash title="Instalación"
-cd supabase/tec-data
+cd data/itcr
 uv sync
 ```
 
@@ -70,8 +71,8 @@ Las aulas vacías o `NO DISPONIBLE` se convierten en `NULL`.
 uv run tec-data sql --scope all --years 2026 --manifest
 ```
 
-Por defecto `tec-data sql` genera un seed versionado en
-`../seeds/tec-data/seed_YYYYMMDDTHHMMSSZ.sql`. También puede emitir un archivo
+Por defecto `itcr sql` (o `tec-data sql`) genera un seed versionado en
+`../seeds/itcr/seed_YYYYMMDDTHHMMSSZ.sql`. También puede emitir un archivo
 puntual con `--mode full --output ../seed.sql`.
 
 El generador SQL usa `INSERT ... ON CONFLICT DO UPDATE` contra llaves naturales y
@@ -119,7 +120,7 @@ genera un seed NOOP de auditoría y no vuelve a aplicar datos.
 ```bash title="Generar delta desde historial"
 uv run tec-data sync \
   --target seed-history \
-  --seed-dir ../seeds/tec-data \
+  --seed-dir ../seeds/itcr \
   --scope offering \
   --years 2026 \
   --no-apply
@@ -145,7 +146,7 @@ El workflow `.github/workflows/catalog-artifact.yml` genera un artifact con el
 catálogo procesado. El workflow `.github/workflows/generate-seed.yml` reutiliza
 ese artifact, valida que esté completo y ejecuta `sync --target seed-history
 --scope offering --years 2026 --no-apply`. Si el manifest no es NOOP, crea un PR
-con los nuevos seeds en `supabase/seeds/tec-data`.
+con los nuevos seeds en `data/seeds/itcr`.
 
 ## Implementación
 

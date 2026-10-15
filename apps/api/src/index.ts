@@ -102,25 +102,31 @@ export default {
 
     // Server-Sent Events stream for real-time notifications
     if (url.pathname === "/api/v1/notifications/stream") {
-      const pool = getDbPool(env);
-      const auth = getAuth(env, pool);
+      let pool: ReturnType<typeof getDbPool> | null = null;
       let sessionUser: AuthUser | null = null;
 
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers,
-        });
-        if (session?.user) {
-          sessionUser = {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.name,
-          };
+        const cookieHeader = request.headers.get("cookie") ?? "";
+        const hasAuth =
+          cookieHeader.includes("session_token") || request.headers.has("authorization");
+        if (hasAuth) {
+          pool = getDbPool(env);
+          const auth = getAuth(env, pool);
+          const session = await auth.api.getSession({
+            headers: request.headers,
+          });
+          if (session?.user) {
+            sessionUser = {
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.name,
+            };
+          }
         }
       } catch (e) {
         console.warn("Auth error in notifications stream:", e);
       } finally {
-        ctx.waitUntil(pool.end());
+        if (pool) ctx.waitUntil(pool.end());
       }
 
       if (!sessionUser) {
@@ -134,35 +140,17 @@ export default {
       const writer = writable.getWriter();
       const encoder = new TextEncoder();
 
-      ctx.waitUntil(
-        (async () => {
-          try {
-            await writer.write(
-              encoder.encode(
-                `event: connected\ndata: ${JSON.stringify({ userId: sessionUser.id, timestamp: Date.now() })}\n\n`,
-              ),
-            );
-
-            // Periodic heartbeat every 30s to keep connection alive
-            for (let i = 0; i < 20; i++) {
-              await new Promise((resolve) => setTimeout(resolve, 30000));
-              await writer.write(
-                encoder.encode(
-                  `event: ping\ndata: ${JSON.stringify({ timestamp: Date.now() })}\n\n`,
-                ),
-              );
-            }
-          } catch {
-            // Client closed connection
-          } finally {
-            try {
-              await writer.close();
-            } catch {
-              // Ignore
-            }
-          }
-        })(),
-      );
+      (async () => {
+        try {
+          await writer.write(
+            encoder.encode(
+              `event: connected\ndata: ${JSON.stringify({ userId: sessionUser.id, timestamp: Date.now() })}\n\n`,
+            ),
+          );
+        } catch {
+          // Client closed connection
+        }
+      })();
 
       return new Response(readable, {
         headers: {
@@ -181,26 +169,33 @@ export default {
       });
       await client.connect();
 
-      const pool = getDbPool(env);
       let sessionUser: AuthUser | null = null;
+      let pool: ReturnType<typeof getDbPool> | null = null;
 
-      try {
-        const auth = getAuth(env, pool);
-        const session = await auth.api.getSession({
-          headers: request.headers,
-        });
-        if (session?.user) {
-          sessionUser = {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.name,
-            role: session.user.role ?? null,
-            banned: session.user.banned ?? false,
-            banReason: session.user.banReason ?? null,
-          };
+      const cookieHeader = request.headers.get("cookie") ?? "";
+      const hasAuth =
+        cookieHeader.includes("session_token") || request.headers.has("authorization");
+
+      if (hasAuth) {
+        pool = getDbPool(env);
+        try {
+          const auth = getAuth(env, pool);
+          const session = await auth.api.getSession({
+            headers: request.headers,
+          });
+          if (session?.user) {
+            sessionUser = {
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.name,
+              role: session.user.role ?? null,
+              banned: session.user.banned ?? false,
+              banReason: session.user.banReason ?? null,
+            };
+          }
+        } catch (e) {
+          console.warn("Failed to retrieve user session:", e);
         }
-      } catch (e) {
-        console.warn("Failed to retrieve user session:", e);
       }
 
       const databaseLayer = createDatabaseLayer(client);
@@ -232,11 +227,13 @@ export default {
         Layer.provide([Etag.layer, FileSystem.layerNoop({})]),
       );
 
-      const apiLayer = HttpApiBuilder.layer(ClaustrumApi, {
-        openapiPath: "/api/v1/openapi.json",
+      const isDocs = url.pathname.startsWith("/api/v1/docs");
+      const isOpenApi = url.pathname === "/api/v1/openapi.json";
+
+      const baseApiLayer = HttpApiBuilder.layer(ClaustrumApi, {
+        openapiPath: isOpenApi || isDocs ? "/api/v1/openapi.json" : undefined,
       }).pipe(
         Layer.provide(handlersLayer),
-        Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/api/v1/docs" })),
         Layer.provide(databaseLayer),
         Layer.provide(storageLayer),
         Layer.provide(envLayer),
@@ -244,6 +241,12 @@ export default {
         Layer.provide(platformLayer),
         Layer.provide(Etag.layer),
       );
+
+      const apiLayer = isDocs
+        ? baseApiLayer.pipe(
+            Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/api/v1/docs" })),
+          )
+        : baseApiLayer;
 
       const program = Effect.gen(function* () {
         const httpEffect = yield* HttpRouter.toHttpEffect(apiLayer);
@@ -281,7 +284,7 @@ export default {
           { status: 500, headers: corsHeaders },
         );
       } finally {
-        ctx.waitUntil(Promise.all([client.end(), pool.end()]));
+        ctx.waitUntil(Promise.all([client.end(), pool ? pool.end() : Promise.resolve()]));
       }
     }
 

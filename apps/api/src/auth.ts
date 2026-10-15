@@ -143,6 +143,12 @@ export function createAuth(env: AuthEnv, pool: Pool) {
         lastSignInAt: { type: "date", required: false, input: false },
       },
     },
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 5 * 60,
+      },
+    },
     advanced: {
       useSecureCookies: env.BETTER_AUTH_URL.startsWith("https://"),
       ipAddress: {
@@ -150,6 +156,7 @@ export function createAuth(env: AuthEnv, pool: Pool) {
       },
       database: {
         generateId: "uuid",
+        joins: true,
       },
     },
     plugins: [

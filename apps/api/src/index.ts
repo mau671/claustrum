@@ -1,6 +1,7 @@
 import { Effect, FileSystem, Layer } from "effect";
 import { Etag, HttpEffect, HttpPlatform, HttpRouter } from "effect/http";
 import { HttpApiBuilder, HttpApiSwagger } from "effect/http-api";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { Client } from "pg";
 
 import type { Env } from "./types";
@@ -26,8 +27,115 @@ import { universitiesHandlers } from "./handlers/universities";
 import { UsersHandlers } from "./handlers/users";
 import { getCorsHeaders } from "./lib/cors";
 import { getAuth, getDbPool } from "./lib/db";
-import { createDatabaseLayer } from "./services/Database";
-import { makeStorageService, Storage } from "./services/Storage";
+import { Database, makeSqlClient, type SqlClient } from "./services/Database";
+import { makeStorageService, Storage, type StorageService } from "./services/Storage";
+
+interface RequestServices {
+  readonly sql: SqlClient;
+  readonly user: AuthUser | null;
+  readonly env: Env;
+  readonly storage: StorageService;
+}
+
+const requestStorage = new AsyncLocalStorage<RequestServices>();
+
+const dynamicDatabaseLayer = Layer.succeed(
+  Database,
+  new Proxy((() => {}) as unknown as SqlClient, {
+    get(_target, prop) {
+      const store = requestStorage.getStore();
+      if (!store) throw new Error("Database accessed outside of request context");
+      return (store.sql as any)[prop];
+    },
+    apply(_target, _thisArg, args) {
+      const store = requestStorage.getStore();
+      if (!store) throw new Error("Database accessed outside of request context");
+      return (store.sql as any)(...args);
+    },
+  }),
+);
+
+const dynamicUserLayer = Layer.effect(
+  CurrentUser,
+  Effect.sync(() => requestStorage.getStore()?.user ?? null),
+);
+
+const dynamicEnvLayer = Layer.effect(
+  ApiEnv,
+  Effect.sync(() => {
+    const store = requestStorage.getStore();
+    if (!store) throw new Error("ApiEnv accessed outside of request context");
+    return store.env;
+  }),
+);
+
+const dynamicStorageLayer = Layer.effect(
+  Storage,
+  Effect.sync(() => {
+    const store = requestStorage.getStore();
+    if (!store) throw new Error("Storage accessed outside of request context");
+    return store.storage;
+  }),
+);
+
+const handlersLayer = Layer.mergeAll(
+  universitiesHandlers,
+  campusesHandlers,
+  academicUnitsHandlers,
+  studyPlansHandlers,
+  termsHandlers,
+  coursesHandlers,
+  schedulesHandlers,
+  ProfessorsApiHandlers,
+  ReviewsApiHandlers,
+  StudentsApiHandlers,
+  EvaluationsHandlers,
+  ModerationHandlers,
+  FeedbackHandlers,
+  ReportsHandlers,
+  UsersHandlers,
+  notificationsHandlers,
+);
+
+const platformLayer = HttpPlatform.layer.pipe(
+  Layer.provide([Etag.layer, FileSystem.layerNoop({})]),
+);
+
+const apiLayer = HttpApiBuilder.layer(ClaustrumApi, {
+  openapiPath: "/api/v1/openapi.json",
+}).pipe(
+  Layer.provide(handlersLayer),
+  Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/api/v1/docs" })),
+  Layer.provide(dynamicDatabaseLayer),
+  Layer.provide(dynamicStorageLayer),
+  Layer.provide(dynamicEnvLayer),
+  Layer.provide(dynamicUserLayer),
+  Layer.provide(platformLayer),
+  Layer.provide(Etag.layer),
+);
+
+let cachedWebHandler: ((request: Request) => Promise<Response>) | null = null;
+let webHandlerPromise: Promise<(request: Request) => Promise<Response>> | null = null;
+
+function getWebHandler(): Promise<(request: Request) => Promise<Response>> {
+  if (cachedWebHandler) return Promise.resolve(cachedWebHandler);
+  if (!webHandlerPromise) {
+    webHandlerPromise = Effect.runPromise(
+      Effect.gen(function* () {
+        const httpEffect = yield* HttpRouter.toHttpEffect(apiLayer);
+        return HttpEffect.toWebHandler(httpEffect);
+      }).pipe(Effect.scoped) as Effect.Effect<
+        (request: Request) => Promise<Response>,
+        never,
+        never
+      >,
+    ).then((handler) => {
+      cachedWebHandler = handler;
+      return handler;
+    });
+  }
+  return webHandlerPromise;
+}
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -95,8 +203,8 @@ export default {
             headers: responseHeaders,
           });
         }
-      } finally {
-        ctx.waitUntil(pool.end());
+      } catch (err) {
+        console.error("Better Auth error:", err);
       }
     }
 
@@ -119,8 +227,6 @@ export default {
         }
       } catch (e) {
         console.warn("Auth error in notifications stream:", e);
-      } finally {
-        ctx.waitUntil(pool.end());
       }
 
       if (!sessionUser) {
@@ -134,35 +240,18 @@ export default {
       const writer = writable.getWriter();
       const encoder = new TextEncoder();
 
-      ctx.waitUntil(
-        (async () => {
-          try {
-            await writer.write(
-              encoder.encode(
-                `event: connected\ndata: ${JSON.stringify({ userId: sessionUser.id, timestamp: Date.now() })}\n\n`,
-              ),
-            );
-
-            // Periodic heartbeat every 30s to keep connection alive
-            for (let i = 0; i < 20; i++) {
-              await new Promise((resolve) => setTimeout(resolve, 30000));
-              await writer.write(
-                encoder.encode(
-                  `event: ping\ndata: ${JSON.stringify({ timestamp: Date.now() })}\n\n`,
-                ),
-              );
-            }
-          } catch {
-            // Client closed connection
-          } finally {
-            try {
-              await writer.close();
-            } catch {
-              // Ignore
-            }
-          }
-        })(),
-      );
+      // Send initial connection event immediately
+      (async () => {
+        try {
+          await writer.write(
+            encoder.encode(
+              `event: connected\ndata: ${JSON.stringify({ userId: sessionUser.id, timestamp: Date.now() })}\n\n`,
+            ),
+          );
+        } catch {
+          // Client closed connection
+        }
+      })();
 
       return new Response(readable, {
         headers: {
@@ -181,81 +270,47 @@ export default {
       });
       await client.connect();
 
-      const pool = getDbPool(env);
       let sessionUser: AuthUser | null = null;
+      let pool: ReturnType<typeof getDbPool> | null = null;
 
-      try {
-        const auth = getAuth(env, pool);
-        const session = await auth.api.getSession({
-          headers: request.headers,
-        });
-        if (session?.user) {
-          sessionUser = {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.name,
-            role: session.user.role ?? null,
-            banned: session.user.banned ?? false,
-            banReason: session.user.banReason ?? null,
-          };
+      const cookieHeader = request.headers.get("cookie") ?? "";
+      const hasAuth =
+        cookieHeader.includes("session_token") || request.headers.has("authorization");
+
+      if (hasAuth) {
+        pool = getDbPool(env);
+        try {
+          const auth = getAuth(env, pool);
+          const session = await auth.api.getSession({
+            headers: request.headers,
+          });
+          if (session?.user) {
+            sessionUser = {
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.name,
+              role: session.user.role ?? null,
+              banned: session.user.banned ?? false,
+              banReason: session.user.banReason ?? null,
+            };
+          }
+        } catch (e) {
+          console.warn("Failed to retrieve user session:", e);
         }
-      } catch (e) {
-        console.warn("Failed to retrieve user session:", e);
       }
 
-      const databaseLayer = createDatabaseLayer(client);
-      const storageLayer = Layer.succeed(Storage, makeStorageService(env.EVALUATIONS_BUCKET));
-      const envLayer = Layer.succeed(ApiEnv, env);
-
-      const userLayer = Layer.succeed(CurrentUser, sessionUser);
-
-      const handlersLayer = Layer.mergeAll(
-        universitiesHandlers,
-        campusesHandlers,
-        academicUnitsHandlers,
-        studyPlansHandlers,
-        termsHandlers,
-        coursesHandlers,
-        schedulesHandlers,
-        ProfessorsApiHandlers,
-        ReviewsApiHandlers,
-        StudentsApiHandlers,
-        EvaluationsHandlers,
-        ModerationHandlers,
-        FeedbackHandlers,
-        ReportsHandlers,
-        UsersHandlers,
-        notificationsHandlers,
-      );
-
-      const platformLayer = HttpPlatform.layer.pipe(
-        Layer.provide([Etag.layer, FileSystem.layerNoop({})]),
-      );
-
-      const apiLayer = HttpApiBuilder.layer(ClaustrumApi, {
-        openapiPath: "/api/v1/openapi.json",
-      }).pipe(
-        Layer.provide(handlersLayer),
-        Layer.provide(HttpApiSwagger.layer(ClaustrumApi, { path: "/api/v1/docs" })),
-        Layer.provide(databaseLayer),
-        Layer.provide(storageLayer),
-        Layer.provide(envLayer),
-        Layer.provide(userLayer),
-        Layer.provide(platformLayer),
-        Layer.provide(Etag.layer),
-      );
-
-      const program = Effect.gen(function* () {
-        const httpEffect = yield* HttpRouter.toHttpEffect(apiLayer);
-        const webHandler = HttpEffect.toWebHandler(httpEffect);
-        return yield* Effect.tryPromise({
-          try: () => webHandler(request),
-          catch: (err) => (err instanceof Error ? err : new Error(String(err))),
-        });
-      }).pipe(Effect.scoped);
+      const webHandler = await getWebHandler();
 
       try {
-        const response = await Effect.runPromise(program as Effect.Effect<Response, Error>);
+        const response = await requestStorage.run(
+          {
+            sql: makeSqlClient(client),
+            user: sessionUser,
+            env,
+            storage: makeStorageService(env.EVALUATIONS_BUCKET),
+          },
+          () => webHandler(request),
+        );
         const bodyText = await response.text();
         const responseHeaders = new Headers(response.headers);
         for (const [key, value] of Object.entries(corsHeaders)) {
@@ -281,7 +336,7 @@ export default {
           { status: 500, headers: corsHeaders },
         );
       } finally {
-        ctx.waitUntil(Promise.all([client.end(), pool.end()]));
+        ctx.waitUntil(client.end());
       }
     }
 

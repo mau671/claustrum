@@ -2,7 +2,7 @@
 
 import { Link01Icon, LockKeyholeIcon, LockKeyholeOpenIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "@tanstack/react-router";
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { flushSync } from "react-dom";
 
 import type { StudyPlanDetail, CourseEffectiveStatus } from "@/lib/types";
@@ -88,97 +88,60 @@ function CurriculumGrid({
     setQuickRegisterCourseId(courseId);
   }, []);
 
-  const headerScrollRef = useRef<HTMLDivElement>(null);
-  const contentScrollRef = useRef<HTMLDivElement>(null);
-
-  const handleContentScroll = useCallback(() => {
-    const content = contentScrollRef.current;
-    const header = headerScrollRef.current;
-    if (!content || !header) return;
-
-    if (Math.abs(header.scrollLeft - content.scrollLeft) > 0.5) {
-      header.scrollLeft = content.scrollLeft;
-    }
-  }, []);
-
-  const handleHeaderScroll = useCallback(() => {
-    const content = contentScrollRef.current;
-    const header = headerScrollRef.current;
-    if (!content || !header) return;
-
-    if (Math.abs(content.scrollLeft - header.scrollLeft) > 0.5) {
-      content.scrollLeft = header.scrollLeft;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (headerScrollRef.current && contentScrollRef.current) {
-      headerScrollRef.current.scrollLeft = contentScrollRef.current.scrollLeft;
-    }
-  }, [zoom]);
-
   return (
     <Frame className="relative flex h-full min-h-0 w-full flex-col overflow-hidden">
-      <FrameHeader className="shrink-0 p-0">
-        <div
-          ref={headerScrollRef}
-          className="w-full scrollbar-none overflow-x-auto [&::-webkit-scrollbar]:hidden"
-          onScroll={handleHeaderScroll}
-        >
-          <div className="flex w-max min-w-full gap-4 px-4 py-3" style={{ zoom }}>
-            {semesters.map((semester) => {
-              const totalCredits = semester.courses.reduce(
-                (acc, course) => acc + (course.credits ?? 0),
-                0,
-              );
-              const totalHours = semester.courses.reduce(
-                (acc, course) => acc + (course.hours ?? 0),
-                0,
-              );
+      <Card
+        className={cn(
+          "bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5",
+          readOnly ? "overflow-hidden" : "overflow-x-auto overflow-y-hidden",
+        )}
+      >
+        <CardPanel className="h-full min-h-0 w-max min-w-full flex-1 overflow-y-auto p-0">
+          <FrameHeader className="sticky top-0 z-10 shrink-0 p-0">
+            <div className="flex gap-4 px-4 py-3" style={{ zoom }}>
+              {semesters.map((semester) => {
+                const totalCredits = semester.courses.reduce(
+                  (acc, course) => acc + (course.credits ?? 0),
+                  0,
+                );
+                const totalHours = semester.courses.reduce(
+                  (acc, course) => acc + (course.hours ?? 0),
+                  0,
+                );
 
-              return (
-                <div
-                  key={semester.levelNumber}
-                  className="flex w-48 shrink-0 items-center justify-center text-center"
-                >
-                  <Popover>
-                    <PopoverTrigger className="text-foreground decoration-foreground/70 inline-flex cursor-pointer items-center justify-center text-center text-base font-semibold underline-offset-4 transition hover:underline focus-visible:outline-none">
-                      {semester.levelLabel}
-                    </PopoverTrigger>
-                    <PopoverContent
-                      side="bottom"
-                      align="center"
-                      sideOffset={6}
-                      className="w-auto min-w-36"
-                      viewportClassName="p-2.5"
-                    >
-                      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
-                        <span className="text-muted-foreground">Cursos</span>
-                        <span className="text-right font-medium">{semester.courses.length}</span>
-                        <span className="text-muted-foreground">Créditos</span>
-                        <span className="text-right font-medium">{totalCredits}</span>
-                        <span className="text-muted-foreground">Horas</span>
-                        <span className="text-right font-medium">{totalHours}</span>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </FrameHeader>
+                return (
+                  <div
+                    key={semester.levelNumber}
+                    className="flex w-48 shrink-0 items-center justify-center text-center"
+                  >
+                    <Popover>
+                      <PopoverTrigger className="text-foreground decoration-foreground/70 inline-flex cursor-pointer items-center justify-center text-center text-base font-semibold underline-offset-4 transition hover:underline focus-visible:outline-none">
+                        {semester.levelLabel}
+                      </PopoverTrigger>
+                      <PopoverContent
+                        side="bottom"
+                        align="center"
+                        sideOffset={6}
+                        className="w-auto min-w-36"
+                        viewportClassName="p-2.5"
+                      >
+                        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+                          <span className="text-muted-foreground">Cursos</span>
+                          <span className="text-right font-medium">{semester.courses.length}</span>
+                          <span className="text-muted-foreground">Créditos</span>
+                          <span className="text-right font-medium">{totalCredits}</span>
+                          <span className="text-muted-foreground">Horas</span>
+                          <span className="text-right font-medium">{totalHours}</span>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                );
+              })}
+            </div>
+          </FrameHeader>
 
-      <Card className="bg-card min-h-0 flex-1 overflow-hidden rounded-xl border shadow-xs/5">
-        <CardPanel
-          ref={contentScrollRef}
-          className={cn(
-            "h-full min-h-0 flex-1 p-0",
-            readOnly ? "overflow-hidden" : "overflow-x-auto overflow-y-auto",
-          )}
-          onScroll={handleContentScroll}
-        >
-          <div className="flex w-max min-w-full gap-4 p-4" style={{ zoom }}>
+          <div className="flex gap-4 p-4" style={{ zoom }}>
             {semesters.map((semester) => (
               <div key={semester.levelNumber} className="w-48 shrink-0">
                 <div className="space-y-4">

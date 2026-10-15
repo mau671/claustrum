@@ -15,8 +15,11 @@ import { checkAuth, checkRole, CurrentUser, InternalServerError } from "../domai
 import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
 
-interface CountRow {
-  readonly count?: number | string;
+interface ModerationCountsSummaryRow {
+  readonly pending_reviews: number | string;
+  readonly pending_evaluations: number | string;
+  readonly pending_reports: number | string;
+  readonly pending_feedback: number | string;
 }
 
 interface ModerationReviewDbRow {
@@ -75,23 +78,13 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
           const user = yield* checkAuth(Option.getOrNull(userOption));
           yield* checkRole(user, ["admin", "moderator"]);
 
-          const [reviewsRes, evalsRes, reportsRes, feedbackRes] = yield* Effect.all(
-            [
-              sql<CountRow>`
-                    SELECT COUNT(*)::bigint AS count FROM public.professor_review WHERE status = 'pending'
-                  `,
-              sql<CountRow>`
-                    SELECT COUNT(*)::bigint AS count FROM public.course_evaluations WHERE status = 'pending'
-                  `,
-              sql<CountRow>`
-                    SELECT COUNT(*)::bigint AS count FROM public.professor_review_report WHERE status = 'pending'
-                  `,
-              sql<CountRow>`
-                    SELECT COUNT(*)::bigint AS count FROM public.user_feedback WHERE is_reviewed = false
-                  `,
-            ],
-            { concurrency: "unbounded" },
-          ).pipe(
+          const rows = yield* sql<ModerationCountsSummaryRow>`
+            SELECT
+              (SELECT COUNT(*)::bigint FROM public.professor_review WHERE status = 'pending') AS pending_reviews,
+              (SELECT COUNT(*)::bigint FROM public.course_evaluations WHERE status = 'pending') AS pending_evaluations,
+              (SELECT COUNT(*)::bigint FROM public.professor_review_report WHERE status = 'pending') AS pending_reports,
+              (SELECT COUNT(*)::bigint FROM public.user_feedback WHERE is_reviewed = false) AS pending_feedback
+          `.pipe(
             Effect.mapError(
               (e) =>
                 new InternalServerError({
@@ -100,10 +93,11 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
             ),
           );
 
-          const pendingReviews = Number(reviewsRes[0]?.count ?? 0);
-          const pendingEvaluations = Number(evalsRes[0]?.count ?? 0);
-          const pendingReports = Number(reportsRes[0]?.count ?? 0);
-          const pendingFeedback = Number(feedbackRes[0]?.count ?? 0);
+          const row = rows[0];
+          const pendingReviews = Number(row?.pending_reviews ?? 0);
+          const pendingEvaluations = Number(row?.pending_evaluations ?? 0);
+          const pendingReports = Number(row?.pending_reports ?? 0);
+          const pendingFeedback = Number(row?.pending_feedback ?? 0);
 
           return {
             pendingReviews,

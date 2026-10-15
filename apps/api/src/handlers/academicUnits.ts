@@ -22,7 +22,18 @@ export const academicUnitsHandlers = HttpApiBuilder.group(
                 id: string | number;
                 code: string;
                 name: string;
-              }>("SELECT * FROM public.get_academic_units_with_professors()")
+              }>(
+                `SELECT au.id, au.code, au.name
+                 FROM public.academic_unit au
+                 WHERE EXISTS (
+                   SELECT 1
+                   FROM public.course_offering co
+                   JOIN public.course_offering_group cog ON cog.course_offering_id = co.id
+                   JOIN public.course_offering_group_professor cogp ON cogp.course_offering_group_id = cog.id
+                   WHERE co.academic_unit_id = au.id
+                 )
+                 ORDER BY au.name ASC`,
+              )
               .pipe(Effect.orDie);
 
             return res.map((row): AcademicUnit => ({

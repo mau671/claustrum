@@ -28,7 +28,7 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -53,6 +53,78 @@ const PAGE_SIZE = 25;
 function formatScore(score: number | null): string {
   if (score === null) return "-";
   return score.toFixed(2);
+}
+
+const SKELETON_NAME_WIDTHS = ["w-44", "w-52", "w-36", "w-48", "w-40"];
+const SKELETON_SCHOOL_WIDTHS = ["w-36", "w-48", "w-32", "w-44", "w-40"];
+
+function ProfessorsTableSkeleton({ count = 25, isMobile }: { count?: number; isMobile: boolean }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, index) => {
+        const nameWidth = SKELETON_NAME_WIDTHS[index % SKELETON_NAME_WIDTHS.length];
+        const schoolWidth = SKELETON_SCHOOL_WIDTHS[index % SKELETON_SCHOOL_WIDTHS.length];
+
+        if (isMobile) {
+          return (
+            <TableRow key={index} className="border-border/70 border-b">
+              <TableCell className="max-w-0">
+                <div className="max-w-full min-w-0">
+                  <div className="flex min-w-0 flex-col">
+                    <div className="py-0.5 leading-normal">
+                      <Skeleton className={cn("h-5 rounded-sm", nameWidth)} />
+                    </div>
+                    <span className="text-[10px] leading-tight">
+                      <Skeleton className="inline-block h-2.5 w-24 rounded-sm align-middle" />
+                    </span>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end">
+                  <Skeleton className="h-4 w-6 rounded-sm" />
+                </div>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end">
+                  <Skeleton className="h-4 w-7 rounded-sm" />
+                </div>
+              </TableCell>
+            </TableRow>
+          );
+        }
+
+        return (
+          <TableRow key={index} className="border-border/70 border-b">
+            <TableCell className="max-w-0">
+              <div className="max-w-full min-w-0">
+                <div className="flex min-w-0 flex-col">
+                  <div className="py-0.5 leading-normal">
+                    <Skeleton className={cn("h-5 rounded-sm", nameWidth)} />
+                  </div>
+                </div>
+              </div>
+            </TableCell>
+            <TableCell className="max-w-0">
+              <div className="max-w-full min-w-0">
+                <Skeleton className={cn("h-4 rounded-sm", schoolWidth)} />
+              </div>
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end">
+                <Skeleton className="h-4 w-8 rounded-sm" />
+              </div>
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end">
+                <Skeleton className="h-4 w-10 rounded-sm" />
+              </div>
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </>
+  );
 }
 
 const routeApi = getRouteApi("/professors/");
@@ -465,13 +537,7 @@ export function ProfessorsReviewsPage() {
           </TableHeader>
           <TableBody>
             {query.isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="p-0">
-                  <div className="flex h-[650px] items-center justify-center">
-                    <Spinner className="text-muted-foreground size-8" />
-                  </div>
-                </TableCell>
-              </TableRow>
+              <ProfessorsTableSkeleton count={PAGE_SIZE} isMobile={isMobile} />
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">

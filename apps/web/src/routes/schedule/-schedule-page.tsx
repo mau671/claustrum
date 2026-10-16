@@ -35,10 +35,7 @@ import CourseList from "@/components/course-list";
 import { CourseSearchInput } from "@/components/course-search-input";
 import { ScheduleCornerActions } from "@/components/schedule/schedule-corner-actions";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
-import {
-  CourseListSkeleton,
-  ScheduleCalendarSkeleton,
-} from "@/components/schedule/schedule-skeletons";
+import { CourseListSkeleton } from "@/components/schedule/schedule-skeletons";
 import { SCHEDULE_DEFAULT_HOUR_HEIGHT } from "@/components/schedule/schedule-zoom-controls";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -1460,29 +1457,20 @@ export function SchedulePage() {
 
                         <div className="bg-background relative flex min-h-[65vh] flex-1 flex-col overflow-hidden rounded-lg border shadow-2xs">
                           <div ref={calendarRef} className="relative flex-1 overflow-hidden p-0">
-                            {(coursesQuery.isLoading ||
-                              isPendingFilters ||
-                              isPendingLocalStorage) &&
-                            orderedCourses.length === 0 ? (
-                              <ScheduleCalendarSkeleton hourHeight={hourHeight} />
-                            ) : (
-                              <ClientOnly
-                                fallback={<ScheduleCalendarSkeleton hourHeight={hourHeight} />}
-                              >
-                                <Calendar
-                                  events={calendarEvents}
-                                  setEvents={() => {}}
-                                  mode={mode}
-                                  setMode={() => {}}
-                                  date={date}
-                                  setDate={() => {}}
-                                  onRemoveEvent={handleRemoveEvent}
-                                  hourHeight={hourHeight}
-                                  setHourHeight={setHourHeight}
-                                  cornerAction={cornerAction}
-                                />
-                              </ClientOnly>
-                            )}
+                            <ClientOnly fallback={<div className="h-[801px] w-full" />}>
+                              <Calendar
+                                events={calendarEvents}
+                                setEvents={() => {}}
+                                mode={mode}
+                                setMode={() => {}}
+                                date={date}
+                                setDate={() => {}}
+                                onRemoveEvent={handleRemoveEvent}
+                                hourHeight={hourHeight}
+                                setHourHeight={setHourHeight}
+                                cornerAction={cornerAction}
+                              />
+                            </ClientOnly>
                           </div>
                         </div>
                       </div>
@@ -1557,29 +1545,20 @@ export function SchedulePage() {
                         <ResizablePanel defaultSize="70%" className="min-w-0">
                           <div className="bg-background relative flex h-full flex-col overflow-hidden rounded-lg border shadow-2xs">
                             <div ref={calendarRef} className="h-full flex-1 overflow-hidden p-0">
-                              {(coursesQuery.isLoading ||
-                                isPendingFilters ||
-                                isPendingLocalStorage) &&
-                              orderedCourses.length === 0 ? (
-                                <ScheduleCalendarSkeleton hourHeight={hourHeight} />
-                              ) : (
-                                <ClientOnly
-                                  fallback={<ScheduleCalendarSkeleton hourHeight={hourHeight} />}
-                                >
-                                  <Calendar
-                                    events={calendarEvents}
-                                    setEvents={() => {}}
-                                    mode={mode}
-                                    setMode={() => {}}
-                                    date={date}
-                                    setDate={() => {}}
-                                    onRemoveEvent={handleRemoveEvent}
-                                    hourHeight={hourHeight}
-                                    setHourHeight={setHourHeight}
-                                    cornerAction={cornerAction}
-                                  />
-                                </ClientOnly>
-                              )}
+                              <ClientOnly fallback={<div className="h-full w-full" />}>
+                                <Calendar
+                                  events={calendarEvents}
+                                  setEvents={() => {}}
+                                  mode={mode}
+                                  setMode={() => {}}
+                                  date={date}
+                                  setDate={() => {}}
+                                  onRemoveEvent={handleRemoveEvent}
+                                  hourHeight={hourHeight}
+                                  setHourHeight={setHourHeight}
+                                  cornerAction={cornerAction}
+                                />
+                              </ClientOnly>
                             </div>
                           </div>
                         </ResizablePanel>

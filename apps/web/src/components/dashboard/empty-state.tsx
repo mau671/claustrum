@@ -199,7 +199,7 @@ export function TimelineSkeleton() {
   return (
     <Card>
       <CardHeader>
-        <div className="bg-muted-foreground/20 h-5 w-44 rounded" />
+        <div className="bg-muted-foreground/20 h-6 w-44 rounded" />
       </CardHeader>
       <CardContent>
         <div className="flex flex-col">
@@ -215,12 +215,8 @@ export function TimelineSkeleton() {
                 <div className="flex min-h-7 items-center justify-between gap-3">
                   <div className="bg-muted-foreground/20 h-4 w-28 rounded" />
                 </div>
-                <div className="mt-1.5 flex flex-col gap-1.5">
-                  <div className="bg-muted h-1.5 w-full rounded-full" />
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="bg-muted-foreground/20 h-3 w-16 rounded" />
-                    <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
-                  </div>
+                <div className="mt-1.5 w-full pt-1">
+                  <div className="bg-muted h-2 w-full rounded-full" />
                 </div>
               </div>
             </div>

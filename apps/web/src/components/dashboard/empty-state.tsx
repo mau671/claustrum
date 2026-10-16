@@ -5,6 +5,7 @@ import { ArrowRight01Icon, GraduationCapIcon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EmptyDashboardProps {
   isAuthenticated: boolean;
@@ -99,12 +100,15 @@ function GaugeSkeleton() {
               />
             </svg>
             <div className="pointer-events-none absolute top-0 left-0 grid aspect-square w-full place-content-center justify-items-center gap-1">
-              <div className="bg-muted-foreground/20 h-7 w-12 rounded" />
+              <div className="flex items-baseline gap-1">
+                <div className="bg-muted-foreground/20 h-9 w-12 rounded" />
+                <span className="text-muted-foreground/30 text-base font-normal">%</span>
+              </div>
             </div>
           </div>
-          <div className="grid min-w-0 justify-items-center gap-1 text-center">
-            <div className="bg-muted-foreground/20 h-4 w-28 rounded" />
-            <div className="bg-muted-foreground/20 h-3 w-20 rounded" />
+          <div className="grid min-w-0 justify-items-center gap-0.5 text-center">
+            <div className="bg-muted-foreground/20 h-5 w-28 rounded" />
+            <div className="bg-muted-foreground/20 h-4 w-24 rounded" />
           </div>
         </div>
       </CardContent>
@@ -116,7 +120,7 @@ export function CourseStatusChartSkeleton() {
   return (
     <Card className="flex h-full w-full flex-col">
       <CardHeader className="pb-1">
-        <div className="bg-muted-foreground/20 h-5 w-40 rounded" />
+        <div className="bg-muted-foreground/20 h-6 w-40 rounded" />
       </CardHeader>
       <CardContent className="flex flex-1 items-center justify-center p-3 pt-1">
         <div className="flex w-full flex-col items-center justify-center gap-5 sm:flex-row sm:gap-6">
@@ -151,28 +155,31 @@ export function NextCoursesSkeleton() {
   return (
     <Card className="flex h-full w-full flex-col overflow-hidden">
       <CardHeader className="shrink-0 pb-2">
-        <div className="bg-muted-foreground/20 h-5 w-36 rounded" />
+        <div className="bg-muted-foreground/20 h-6 w-36 rounded" />
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col pt-0 pb-3">
-        <div className="grid grid-cols-2 gap-2 pb-1">
-          {Array.from({ length: 2 }).map((_, index) => (
-            <div
-              key={index}
-              className="border-border bg-card overflow-hidden rounded-lg border-2 shadow-xs"
-            >
-              <div className="border-border bg-card border-b px-2 py-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="bg-muted-foreground/20 h-3 w-6 rounded" />
-                  <div className="bg-muted-foreground/20 h-3 w-14 rounded" />
-                  <div className="bg-muted-foreground/20 h-3 w-6 rounded" />
+        <ScrollArea className="size-full min-h-0" scrollFade>
+          <div className="grid grid-cols-2 gap-2 pb-1">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="border-border bg-card overflow-hidden rounded-lg border-2 shadow-sm transition-all duration-200"
+              >
+                <div className="border-border bg-card border-b px-2 py-1.5">
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <div className="bg-muted-foreground/20 h-4 w-7 rounded" />
+                    <div className="bg-muted-foreground/20 h-4 w-14 rounded" />
+                    <div className="bg-muted-foreground/20 h-4 w-6 rounded" />
+                  </div>
+                </div>
+                <div className="bg-muted flex min-h-16 flex-col items-center justify-center gap-1 px-2 py-2">
+                  <div className="bg-muted-foreground/20 h-3.5 w-5/6 rounded" />
+                  <div className="bg-muted-foreground/20 h-3.5 w-3/5 rounded" />
                 </div>
               </div>
-              <div className="bg-muted flex min-h-16 items-center justify-center px-2 py-2">
-                <div className="bg-muted-foreground/20 h-3.5 w-3/4 rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

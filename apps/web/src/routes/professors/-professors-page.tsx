@@ -71,23 +71,25 @@ function ProfessorsTableSkeleton({ count = 25, isMobile }: { count?: number; isM
               <TableCell className="max-w-0">
                 <div className="max-w-full min-w-0">
                   <div className="flex min-w-0 flex-col">
-                    <div className="py-0.5 leading-normal">
-                      <Skeleton className={cn("h-5 rounded-sm", nameWidth)} />
+                    <div className="inline-block max-w-full py-0.5 leading-normal">
+                      <Skeleton
+                        className={cn("inline-block h-3.5 rounded-sm align-middle", nameWidth)}
+                      />
                     </div>
-                    <span className="text-[10px] leading-tight">
-                      <Skeleton className="inline-block h-2.5 w-24 rounded-sm align-middle" />
+                    <span className="truncate text-[10px] leading-tight sm:hidden">
+                      <Skeleton className="inline-block h-2 w-24 rounded-sm align-middle" />
                     </span>
                   </div>
                 </div>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end">
-                  <Skeleton className="h-4 w-6 rounded-sm" />
+                  <Skeleton className="h-3.5 w-6 rounded-sm" />
                 </div>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end">
-                  <Skeleton className="h-4 w-7 rounded-sm" />
+                  <Skeleton className="h-3.5 w-7 rounded-sm" />
                 </div>
               </TableCell>
             </TableRow>
@@ -99,25 +101,27 @@ function ProfessorsTableSkeleton({ count = 25, isMobile }: { count?: number; isM
             <TableCell className="max-w-0">
               <div className="max-w-full min-w-0">
                 <div className="flex min-w-0 flex-col">
-                  <div className="py-0.5 leading-normal">
-                    <Skeleton className={cn("h-5 rounded-sm", nameWidth)} />
+                  <div className="inline-block max-w-full py-0.5 leading-normal">
+                    <Skeleton
+                      className={cn("inline-block h-3.5 rounded-sm align-middle", nameWidth)}
+                    />
                   </div>
                 </div>
               </div>
             </TableCell>
             <TableCell className="max-w-0">
               <div className="max-w-full min-w-0">
-                <Skeleton className={cn("h-4 rounded-sm", schoolWidth)} />
+                <Skeleton className={cn("h-3.5 rounded-sm", schoolWidth)} />
               </div>
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end">
-                <Skeleton className="h-4 w-8 rounded-sm" />
+                <Skeleton className="h-3.5 w-8 rounded-sm" />
               </div>
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end">
-                <Skeleton className="h-4 w-10 rounded-sm" />
+                <Skeleton className="h-3.5 w-10 rounded-sm" />
               </div>
             </TableCell>
           </TableRow>

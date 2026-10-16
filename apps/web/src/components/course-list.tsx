@@ -351,24 +351,6 @@ export default function CourseList({
   courseColors: courseColorsProp,
   searchQuery = "",
 }: CourseListProps) {
-  const scrollAreaRootRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const viewport = scrollAreaRootRef.current?.querySelector<HTMLElement>(
-      '[data-slot="scroll-area-viewport"]',
-    );
-    const wrapper = viewport?.firstElementChild as HTMLElement | null;
-    if (!wrapper) return;
-
-    wrapper.style.display = "block";
-    wrapper.style.width = "100%";
-
-    return () => {
-      wrapper.style.display = "";
-      wrapper.style.width = "";
-    };
-  }, []);
-
   const courseColors = useMemo(() => {
     if (courseColorsProp) return courseColorsProp;
     const map = new Map<string, string>();
@@ -437,11 +419,11 @@ export default function CourseList({
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div ref={scrollAreaRootRef} className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         <ScrollArea
           scrollFade
           viewportRef={viewportRef}
-          className="h-full w-full [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
+          className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-viewport]]:pr-2.5 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
         >
           <VirtualizedCourseList
             key={viewMode}
@@ -543,7 +525,7 @@ function VirtualizedCourseList({
 
   return (
     <div
-      className="w-full p-1 pt-2"
+      className="w-full pt-2"
       style={{
         height: `${rowVirtualizer.getTotalSize()}px`,
         position: "relative",

@@ -16,61 +16,80 @@ export interface NotificationRow {
   created_at: string;
 }
 
+let activeEventSource: EventSource | null = null;
+let activeEventSourceUserId: string | null = null;
+const notificationListeners = new Set<(event: MessageEvent) => void>();
+
 export function useNotifications(userId?: string | null) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!userId || typeof window === "undefined") return;
 
-    let eventSource: EventSource | null = null;
-    try {
-      const streamUrl = getApiV1Url("/notifications/stream");
-      eventSource = new EventSource(streamUrl, { withCredentials: true });
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data && typeof data === "object" && "title" in data && "message" in data) {
+          void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+          const notif = data as NotificationRow;
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data && typeof data === "object" && "title" in data && "message" in data) {
-            void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
-            const notif = data as NotificationRow;
-
-            toast.info(notif.title, {
-              description: notif.message,
-              action: {
-                label: (
-                  <div className="flex items-center gap-1.5">
-                    <Icon icon={CheckIcon} size={14} className="size-3.5" />
-                    <span>Visto</span>
-                  </div>
-                ),
-                onClick: () => {
-                  void apiClient(`/notifications/${notif.id}`, {
-                    method: "PATCH",
-                    body: JSON.stringify({ isRead: true }),
-                  }).then(() => {
-                    void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
-                  });
-                },
+          toast.info(notif.title, {
+            description: notif.message,
+            action: {
+              label: (
+                <div className="flex items-center gap-1.5">
+                  <Icon icon={CheckIcon} size={14} className="size-3.5" />
+                  <span>Visto</span>
+                </div>
+              ),
+              onClick: () => {
+                void apiClient(`/notifications/${notif.id}`, {
+                  method: "PATCH",
+                  body: JSON.stringify({ isRead: true }),
+                }).then(() => {
+                  void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+                });
               },
-            });
-          } else {
-            void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
-          }
-        } catch {
-          // ignore non-json messages / heartbeat
+            },
+          });
+        } else {
+          void queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
         }
-      };
+      } catch {
+        // ignore non-json messages / heartbeat
+      }
+    };
 
-      eventSource.onerror = () => {
-        // Fallback handled by browser EventSource reconnecting
-      };
-    } catch {
-      // EventSource instantiation fallback
+    notificationListeners.add(handleMessage);
+
+    // Initialize shared EventSource if not already connected for this user
+    if (!activeEventSource || activeEventSourceUserId !== userId) {
+      if (activeEventSource) {
+        activeEventSource.close();
+      }
+      try {
+        const streamUrl = getApiV1Url("/notifications/stream");
+        activeEventSource = new EventSource(streamUrl, { withCredentials: true });
+        activeEventSourceUserId = userId;
+
+        activeEventSource.onmessage = (event) => {
+          notificationListeners.forEach((listener) => listener(event));
+        };
+
+        activeEventSource.onerror = () => {
+          // Handled by browser reconnect with keepalive
+        };
+      } catch {
+        // EventSource instantiation fallback
+      }
     }
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      notificationListeners.delete(handleMessage);
+      if (notificationListeners.size === 0 && activeEventSource) {
+        activeEventSource.close();
+        activeEventSource = null;
+        activeEventSourceUserId = null;
       }
     };
   }, [userId, queryClient]);
@@ -81,7 +100,8 @@ export function useNotifications(userId?: string | null) {
       const data = await apiClient<NotificationRow[]>("/notifications");
       return data ?? [];
     },
-    staleTime: 10_000,
+    enabled: Boolean(userId),
+    staleTime: 60_000,
   });
 }
 

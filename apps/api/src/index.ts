@@ -140,6 +140,25 @@ export default {
       const writer = writable.getWriter();
       const encoder = new TextEncoder();
 
+      let intervalId: ReturnType<typeof setInterval> | null = null;
+      let isClosed = false;
+
+      const cleanup = () => {
+        if (isClosed) return;
+        isClosed = true;
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+        try {
+          void writer.close();
+        } catch {
+          // ignore already closed
+        }
+      };
+
+      request.signal.addEventListener("abort", cleanup);
+
       (async () => {
         try {
           await writer.write(
@@ -147,8 +166,17 @@ export default {
               `event: connected\ndata: ${JSON.stringify({ userId: sessionUser.id, timestamp: Date.now() })}\n\n`,
             ),
           );
+
+          intervalId = setInterval(async () => {
+            if (isClosed) return;
+            try {
+              await writer.write(encoder.encode(": keepalive\n\n"));
+            } catch {
+              cleanup();
+            }
+          }, 25000);
         } catch {
-          // Client closed connection
+          cleanup();
         }
       })();
 
@@ -263,6 +291,38 @@ export default {
         const responseHeaders = new Headers(response.headers);
         for (const [key, value] of Object.entries(corsHeaders)) {
           responseHeaders.set(key, value);
+        }
+
+        if (
+          request.method === "GET" &&
+          response.status === 200 &&
+          !responseHeaders.has("Cache-Control")
+        ) {
+          const path = url.pathname;
+          if (
+            path.includes("/studyplans") ||
+            path.includes("/universities") ||
+            path.includes("/campuses") ||
+            path.includes("/academicunits") ||
+            path.includes("/terms")
+          ) {
+            responseHeaders.set(
+              "Cache-Control",
+              "public, max-age=300, stale-while-revalidate=86400",
+            );
+          } else if (path.includes("/schedules/courses")) {
+            responseHeaders.set(
+              "Cache-Control",
+              "public, max-age=120, stale-while-revalidate=3600",
+            );
+          } else if (
+            path.includes("/students/me") ||
+            path.includes("/users/me") ||
+            path.includes("/schedules") ||
+            path.includes("/notifications")
+          ) {
+            responseHeaders.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
+          }
         }
         return new Response(
           bodyText ||

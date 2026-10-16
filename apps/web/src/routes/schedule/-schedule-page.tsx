@@ -172,25 +172,25 @@ export function SchedulePage() {
   const selectedTermId = search.term ?? null;
 
   const shouldAutoSelectPlanRef = useRef(false);
-  const [storedShowAll, setStoredShowAll] = useState(true);
-  const [storedShowOtherCampuses, setStoredShowOtherCampuses] = useState(false);
-
-  useEffect(() => {
-    const storedAll = localStorage.getItem(SHOW_ALL_STORAGE_KEY);
-    if (storedAll !== null) setStoredShowAll(storedAll === "true");
-
-    const storedOther = localStorage.getItem(SHOW_OTHER_CAMPUSES_STORAGE_KEY);
-    if (storedOther !== null) setStoredShowOtherCampuses(storedOther === "true");
-  }, []);
+  const [storedShowAll, setStoredShowAll] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem(SHOW_ALL_STORAGE_KEY);
+    return stored !== null ? stored === "true" : true;
+  });
+  const [storedShowOtherCampuses, setStoredShowOtherCampuses] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const stored = localStorage.getItem(SHOW_OTHER_CAMPUSES_STORAGE_KEY);
+    return stored !== null ? stored === "true" : false;
+  });
 
   const showAllCourses = search.showAll ?? storedShowAll;
   const showOtherCampuses = search.otherCampuses ?? storedShowOtherCampuses;
 
-  const [storedViewMode, setStoredViewMode] = useState<"card" | "table">("card");
-  useEffect(() => {
+  const [storedViewMode, setStoredViewMode] = useState<"card" | "table">(() => {
+    if (typeof window === "undefined") return "card";
     const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-    if (stored === "card" || stored === "table") setStoredViewMode(stored);
-  }, []);
+    return stored === "card" || stored === "table" ? stored : "card";
+  });
   const SHOW_VIEW_MODE_TOGGLE = false;
   const viewMode = SHOW_VIEW_MODE_TOGGLE ? (search.view ?? storedViewMode) : "card";
 

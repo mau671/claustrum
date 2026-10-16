@@ -561,7 +561,7 @@ export function scheduleCoursesQueryOptions(params: {
       );
       return (data ?? []) as import("@/lib/types").ScheduleCourse[];
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

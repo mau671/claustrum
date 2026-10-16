@@ -12,16 +12,20 @@ export function CourseCardSkeleton() {
     <Frame className="w-full max-w-full p-1.5 transition-[border-color,box-shadow,background-color] duration-150">
       <FrameHeader className="flex flex-row items-baseline justify-between gap-2 px-3 pt-2 pb-1.5">
         <div className="min-w-0 flex-1">
-          <FrameTitle className="flex items-center gap-1.5 leading-snug">
-            <Skeleton className="h-3.5 w-14" />
-            <Skeleton className="h-4 w-36 sm:w-48" />
+          <FrameTitle className="leading-snug">
+            <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+              <Skeleton className="inline-block h-3.5 w-14 -translate-y-px align-middle" />
+            </span>
+            <span className="text-foreground text-sm font-medium">
+              <Skeleton className="inline-block h-3.5 w-36 -translate-y-px align-middle sm:w-48" />
+            </span>
           </FrameTitle>
         </div>
         <Badge
           variant="secondary"
           className="text-muted-foreground shrink-0 py-0.5 text-xs font-normal tabular-nums"
         >
-          <Skeleton className="h-3 w-7" />
+          <Skeleton className="inline-block h-2.5 w-7 align-middle" />
         </Badge>
       </FrameHeader>
 
@@ -32,14 +36,14 @@ export function CourseCardSkeleton() {
             <CardPanel className="p-3">
               <div className="mb-2 flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                  GR <Skeleton className="ml-1 inline-block h-3 w-3.5" />
+                  GR <Skeleton className="ml-1 inline-block h-3 w-3.5 align-middle" />
                 </Badge>
-                <Skeleton className="h-3.5 w-8" />
+                <Skeleton className="inline-block h-3.5 w-8 align-middle" />
                 <Badge
                   variant="outline"
                   className="bg-muted text-muted-foreground ml-auto h-5 px-1.5 text-[10px]"
                 >
-                  <Skeleton className="h-2.5 w-4" />
+                  <Skeleton className="inline-block h-2.5 w-4 align-middle" />
                 </Badge>
               </div>
 
@@ -52,7 +56,11 @@ export function CourseCardSkeleton() {
                     size={14}
                     className="text-muted-foreground shrink-0 self-center"
                   />
-                  <Skeleton className="h-3.5 w-28" />
+                  <div className="flex flex-col justify-center gap-1">
+                    <span className="text-foreground text-xs leading-tight whitespace-nowrap">
+                      <Skeleton className="inline-block h-3.5 w-28 align-middle" />
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -61,9 +69,17 @@ export function CourseCardSkeleton() {
                     size={14}
                     className="text-muted-foreground shrink-0 self-center"
                   />
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-3.5 w-24" />
-                    <Skeleton className="ml-auto h-3.5 w-9" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <span className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums">
+                          <Skeleton className="inline-block h-3.5 w-24 align-middle" />
+                        </span>
+                      </div>
+                      <span className="text-muted-foreground ml-auto self-center font-mono text-xs whitespace-nowrap">
+                        <Skeleton className="inline-block h-3.5 w-9 align-middle" />
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -73,7 +89,9 @@ export function CourseCardSkeleton() {
                     size={14}
                     className="text-muted-foreground shrink-0"
                   />
-                  <Skeleton className="h-3.5 w-6" />
+                  <span className="text-foreground font-mono text-xs whitespace-nowrap tabular-nums">
+                    <Skeleton className="inline-block h-3.5 w-6 align-middle" />
+                  </span>
                 </div>
               </div>
             </CardPanel>
@@ -84,9 +102,9 @@ export function CourseCardSkeleton() {
             <CardPanel className="p-3">
               <div className="mb-2 flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                  GR <Skeleton className="ml-1 inline-block h-3 w-3.5" />
+                  GR <Skeleton className="ml-1 inline-block h-3 w-3.5 align-middle" />
                 </Badge>
-                <Skeleton className="h-3.5 w-8" />
+                <Skeleton className="inline-block h-3.5 w-8 align-middle" />
               </div>
 
               <Separator className="mb-2" />
@@ -98,7 +116,11 @@ export function CourseCardSkeleton() {
                     size={14}
                     className="text-muted-foreground shrink-0 self-center"
                   />
-                  <Skeleton className="h-3.5 w-24" />
+                  <div className="flex flex-col justify-center gap-1">
+                    <span className="text-foreground text-xs leading-tight whitespace-nowrap">
+                      <Skeleton className="inline-block h-3.5 w-24 align-middle" />
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -107,9 +129,17 @@ export function CourseCardSkeleton() {
                     size={14}
                     className="text-muted-foreground shrink-0 self-center"
                   />
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-3.5 w-20" />
-                    <Skeleton className="ml-auto h-3.5 w-8" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <span className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums">
+                          <Skeleton className="inline-block h-3.5 w-20 align-middle" />
+                        </span>
+                      </div>
+                      <span className="text-muted-foreground ml-auto self-center font-mono text-xs whitespace-nowrap">
+                        <Skeleton className="inline-block h-3.5 w-8 align-middle" />
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -119,7 +149,9 @@ export function CourseCardSkeleton() {
                     size={14}
                     className="text-muted-foreground shrink-0"
                   />
-                  <Skeleton className="h-3.5 w-6" />
+                  <span className="text-foreground font-mono text-xs whitespace-nowrap tabular-nums">
+                    <Skeleton className="inline-block h-3.5 w-6 align-middle" />
+                  </span>
                 </div>
               </div>
             </CardPanel>

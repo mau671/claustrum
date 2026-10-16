@@ -6,7 +6,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useMemo, useCallback, memo, useEffect, useRef, useState } from "react";
+import { useMemo, useCallback, memo, useRef, useState } from "react";
 
 import type { ScheduleCourse, ScheduleGroup } from "@/lib/types";
 
@@ -469,8 +469,9 @@ function VirtualizedCourseList({
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => viewportRef.current,
-    estimateSize: () => (viewMode === "table" ? 52 : 270),
-    overscan: 4,
+    estimateSize: () => (viewMode === "table" ? 52 : 185),
+    getItemKey: (index) => items[index]?.course.offering_id ?? index,
+    overscan: 6,
   });
 
   const virtualItems = rowVirtualizer.getVirtualItems();
@@ -493,7 +494,7 @@ function VirtualizedCourseList({
 
             return (
               <div
-                key={course.offering_id}
+                key={virtualRow.key}
                 ref={rowVirtualizer.measureElement}
                 data-index={virtualRow.index}
                 style={{
@@ -539,7 +540,7 @@ function VirtualizedCourseList({
 
         return (
           <div
-            key={course.offering_id}
+            key={virtualRow.key}
             ref={rowVirtualizer.measureElement}
             data-index={virtualRow.index}
             className="w-full pb-3"
@@ -590,10 +591,9 @@ const CourseCard = memo(function CourseCard({
   return (
     <Frame
       className={cn(
-        "w-full max-w-full p-1.5 transition-all",
+        "w-full max-w-full p-1.5 transition-[border-color,box-shadow,background-color] duration-150",
         hasSelectedGroup && "border-primary/40 ring-primary/20 ring-1",
       )}
-      style={{ contentVisibility: "auto", containIntrinsicSize: "0 270px" }}
     >
       <FrameHeader className="flex flex-row items-baseline justify-between gap-2 px-3 pt-2 pb-1.5">
         <div className="min-w-0 flex-1">

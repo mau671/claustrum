@@ -123,25 +123,41 @@ export function CourseStatusChartSkeleton() {
         <div className="bg-muted-foreground/20 h-6 w-40 rounded" />
       </CardHeader>
       <CardContent className="flex flex-1 items-center justify-center p-3 pt-1">
-        <div className="flex w-full flex-col items-center justify-center gap-5 sm:flex-row sm:gap-6">
-          <div className="border-muted/40 relative flex size-[180px] shrink-0 items-center justify-center rounded-full border-[20px]">
-            <div className="flex flex-col items-center gap-1">
-              <div className="bg-muted-foreground/20 h-3 w-10 rounded" />
-              <div className="bg-muted-foreground/20 h-6 w-12 rounded" />
-              <div className="bg-muted-foreground/20 h-2.5 w-14 rounded" />
+        <div className="m-0 grid w-full min-w-0 grid-cols-1 justify-items-center gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-6">
+          <div
+            className="relative aspect-square max-w-full shrink-0 justify-self-center select-none"
+            style={{ width: 180 }}
+          >
+            <svg viewBox="0 0 180 180" className="block size-full overflow-visible">
+              <circle
+                cx={90}
+                cy={90}
+                r={73}
+                strokeWidth={20}
+                className="stroke-muted/40 fill-none"
+              />
+            </svg>
+            <div
+              className="pointer-events-none absolute top-1/2 left-1/2 grid -translate-x-1/2 -translate-y-1/2 text-center"
+              style={{ width: "calc(70% - 14px)" }}
+            >
+              <div className="grid min-w-0 justify-items-center gap-0.5 text-center">
+                <div className="bg-muted-foreground/20 h-4 w-10 rounded" />
+                <div className="bg-muted-foreground/20 h-8 w-12 rounded" />
+                <div className="bg-muted-foreground/20 h-4 w-12 rounded" />
+              </div>
             </div>
           </div>
-          <div className="flex w-full flex-1 flex-col gap-1.5">
+          <div className="m-0 grid w-full list-none gap-1 p-0">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="flex items-center justify-between gap-3 px-2 py-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="bg-muted-foreground/20 size-2.5 rounded-full" />
-                  <div className="bg-muted-foreground/20 h-3.5 w-20 rounded" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-muted-foreground/20 h-3.5 w-6 rounded" />
-                  <div className="bg-muted-foreground/20 h-3.5 w-8 rounded" />
-                </div>
+              <div
+                key={index}
+                className="grid min-h-8.5 w-full grid-cols-[10px_minmax(0,1fr)_auto_3.25em] items-center gap-2 rounded-lg px-2 py-1"
+              >
+                <div className="bg-muted-foreground/20 size-2.5 rounded-full" />
+                <div className="bg-muted-foreground/20 h-4 w-20 rounded" />
+                <div className="bg-muted-foreground/20 h-4 w-5 justify-self-end rounded" />
+                <div className="bg-muted-foreground/20 h-4 w-8 justify-self-end rounded" />
               </div>
             ))}
           </div>

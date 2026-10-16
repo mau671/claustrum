@@ -132,6 +132,8 @@ const COLOR_STYLE_MAP: Record<string, { bg: string; border: string; text: string
   },
 };
 
+import { CourseListSkeleton } from "@/components/schedule/schedule-skeletons";
+
 const getColorStyles = (color: string) => COLOR_STYLE_MAP[color] || COLOR_STYLE_MAP.blue;
 
 interface CourseListProps {
@@ -143,6 +145,7 @@ interface CourseListProps {
   viewMode?: "card" | "table";
   courseColors?: Map<string, string>;
   searchQuery?: string;
+  isLoading?: boolean;
 }
 
 interface GroupView {
@@ -350,6 +353,7 @@ export default function CourseList({
   viewMode = "card",
   courseColors: courseColorsProp,
   searchQuery = "",
+  isLoading = false,
 }: CourseListProps) {
   const courseColors = useMemo(() => {
     if (courseColorsProp) return courseColorsProp;
@@ -425,18 +429,22 @@ export default function CourseList({
           viewportRef={viewportRef}
           className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:mr-0 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
         >
-          <VirtualizedCourseList
-            key={viewMode}
-            viewMode={viewMode}
-            viewportRef={viewportRef}
-            items={filteredViewData}
-            courseColorStyles={courseColorStyles}
-            selectedGroups={selectedGroups}
-            disabledSet={disabledSet}
-            conflictReasons={conflictReasons}
-            handleGroupToggle={handleGroupToggle}
-            showCampus={showCampus}
-          />
+          {isLoading && courses.length === 0 ? (
+            <CourseListSkeleton count={5} />
+          ) : (
+            <VirtualizedCourseList
+              key={viewMode}
+              viewMode={viewMode}
+              viewportRef={viewportRef}
+              items={filteredViewData}
+              courseColorStyles={courseColorStyles}
+              selectedGroups={selectedGroups}
+              disabledSet={disabledSet}
+              conflictReasons={conflictReasons}
+              handleGroupToggle={handleGroupToggle}
+              showCampus={showCampus}
+            />
+          )}
         </ScrollArea>
       </div>
     </div>

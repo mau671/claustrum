@@ -35,7 +35,6 @@ import CourseList from "@/components/course-list";
 import { CourseSearchInput } from "@/components/course-search-input";
 import { ScheduleCornerActions } from "@/components/schedule/schedule-corner-actions";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
-import { CourseListSkeleton } from "@/components/schedule/schedule-skeletons";
 import { SCHEDULE_DEFAULT_HOUR_HEIGHT } from "@/components/schedule/schedule-zoom-controls";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -1431,25 +1430,24 @@ export function SchedulePage() {
                           {isCourseListOpen && (
                             <div className="flex h-[50vh] flex-col overflow-hidden">
                               <div className="flex-1 overflow-hidden">
-                                {(coursesQuery.isLoading ||
-                                  isPendingFilters ||
-                                  isPendingLocalStorage) &&
-                                orderedCourses.length === 0 ? (
-                                  <CourseListSkeleton count={3} />
-                                ) : (
-                                  <ClientOnly fallback={<CourseListSkeleton count={3} />}>
-                                    <CourseList
-                                      courseColors={courseColors}
-                                      courses={orderedCourses}
-                                      selectedGroups={selectedGroups}
-                                      onSelectionChange={updateSelectedGroups}
-                                      campusById={campusById}
-                                      showCampus={showOtherCampuses}
-                                      viewMode={viewMode}
-                                      searchQuery={search.q}
-                                    />
-                                  </ClientOnly>
-                                )}
+                                <ClientOnly fallback={null}>
+                                  <CourseList
+                                    isLoading={
+                                      (coursesQuery.isLoading ||
+                                        isPendingFilters ||
+                                        isPendingLocalStorage) &&
+                                      orderedCourses.length === 0
+                                    }
+                                    courseColors={courseColors}
+                                    courses={orderedCourses}
+                                    selectedGroups={selectedGroups}
+                                    onSelectionChange={updateSelectedGroups}
+                                    campusById={campusById}
+                                    showCampus={showOtherCampuses}
+                                    viewMode={viewMode}
+                                    searchQuery={search.q}
+                                  />
+                                </ClientOnly>
                               </div>
                             </div>
                           )}
@@ -1516,25 +1514,24 @@ export function SchedulePage() {
                             />
                             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                               <div className="flex-1 overflow-hidden">
-                                {(coursesQuery.isLoading ||
-                                  isPendingFilters ||
-                                  isPendingLocalStorage) &&
-                                orderedCourses.length === 0 ? (
-                                  <CourseListSkeleton count={5} />
-                                ) : (
-                                  <ClientOnly fallback={<CourseListSkeleton count={5} />}>
-                                    <CourseList
-                                      courseColors={courseColors}
-                                      courses={orderedCourses}
-                                      selectedGroups={selectedGroups}
-                                      onSelectionChange={updateSelectedGroups}
-                                      campusById={campusById}
-                                      showCampus={showOtherCampuses}
-                                      viewMode={viewMode}
-                                      searchQuery={search.q}
-                                    />
-                                  </ClientOnly>
-                                )}
+                                <ClientOnly fallback={null}>
+                                  <CourseList
+                                    isLoading={
+                                      (coursesQuery.isLoading ||
+                                        isPendingFilters ||
+                                        isPendingLocalStorage) &&
+                                      orderedCourses.length === 0
+                                    }
+                                    courseColors={courseColors}
+                                    courses={orderedCourses}
+                                    selectedGroups={selectedGroups}
+                                    onSelectionChange={updateSelectedGroups}
+                                    campusById={campusById}
+                                    showCampus={showOtherCampuses}
+                                    viewMode={viewMode}
+                                    searchQuery={search.q}
+                                  />
+                                </ClientOnly>
                               </div>
                             </div>
                           </div>

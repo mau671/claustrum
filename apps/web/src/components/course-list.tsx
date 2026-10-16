@@ -423,7 +423,7 @@ export default function CourseList({
         <ScrollArea
           scrollFade
           viewportRef={viewportRef}
-          className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-viewport]]:pr-2.5 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
+          className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:mr-0 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
         >
           <VirtualizedCourseList
             key={viewMode}

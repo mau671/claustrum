@@ -35,6 +35,10 @@ import CourseList from "@/components/course-list";
 import { CourseSearchInput } from "@/components/course-search-input";
 import { ScheduleCornerActions } from "@/components/schedule/schedule-corner-actions";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
+import {
+  CourseListSkeleton,
+  ScheduleCalendarSkeleton,
+} from "@/components/schedule/schedule-skeletons";
 import { SCHEDULE_DEFAULT_HOUR_HEIGHT } from "@/components/schedule/schedule-zoom-controls";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -1434,21 +1438,9 @@ export function SchedulePage() {
                                   isPendingFilters ||
                                   isPendingLocalStorage) &&
                                 orderedCourses.length === 0 ? (
-                                  <div className="space-y-3 p-4">
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                  </div>
+                                  <CourseListSkeleton count={3} />
                                 ) : (
-                                  <ClientOnly
-                                    fallback={
-                                      <div className="space-y-3 p-4">
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                      </div>
-                                    }
-                                  >
+                                  <ClientOnly fallback={<CourseListSkeleton count={3} />}>
                                     <CourseList
                                       courseColors={courseColors}
                                       courses={orderedCourses}
@@ -1472,12 +1464,10 @@ export function SchedulePage() {
                               isPendingFilters ||
                               isPendingLocalStorage) &&
                             orderedCourses.length === 0 ? (
-                              <div className="bg-muted/20 h-[801px] w-full animate-pulse rounded-lg" />
+                              <ScheduleCalendarSkeleton hourHeight={hourHeight} />
                             ) : (
                               <ClientOnly
-                                fallback={
-                                  <div className="bg-muted/20 h-[801px] w-full animate-pulse rounded-lg" />
-                                }
+                                fallback={<ScheduleCalendarSkeleton hourHeight={hourHeight} />}
                               >
                                 <Calendar
                                   events={calendarEvents}
@@ -1542,25 +1532,9 @@ export function SchedulePage() {
                                   isPendingFilters ||
                                   isPendingLocalStorage) &&
                                 orderedCourses.length === 0 ? (
-                                  <div className="space-y-3 p-4">
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                    <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                  </div>
+                                  <CourseListSkeleton count={5} />
                                 ) : (
-                                  <ClientOnly
-                                    fallback={
-                                      <div className="space-y-3 p-4">
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                        <div className="bg-muted/50 h-24 w-full animate-pulse rounded-md" />
-                                      </div>
-                                    }
-                                  >
+                                  <ClientOnly fallback={<CourseListSkeleton count={5} />}>
                                     <CourseList
                                       courseColors={courseColors}
                                       courses={orderedCourses}
@@ -1587,12 +1561,10 @@ export function SchedulePage() {
                                 isPendingFilters ||
                                 isPendingLocalStorage) &&
                               orderedCourses.length === 0 ? (
-                                <div className="bg-muted/20 h-full w-full animate-pulse" />
+                                <ScheduleCalendarSkeleton hourHeight={hourHeight} />
                               ) : (
                                 <ClientOnly
-                                  fallback={
-                                    <div className="bg-muted/20 h-full w-full animate-pulse" />
-                                  }
+                                  fallback={<ScheduleCalendarSkeleton hourHeight={hourHeight} />}
                                 >
                                   <Calendar
                                     events={calendarEvents}

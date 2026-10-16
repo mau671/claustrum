@@ -534,7 +534,7 @@ function VirtualizedCourseList({
 
   return (
     <div
-      className="w-full pt-2"
+      className="w-full"
       style={{
         height: `${rowVirtualizer.getTotalSize()}px`,
         position: "relative",

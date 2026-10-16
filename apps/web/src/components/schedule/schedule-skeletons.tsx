@@ -164,7 +164,7 @@ export function CourseCardSkeleton() {
 
 export function CourseListSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <div className="flex flex-col gap-3 pt-2">
+    <div className="flex flex-col gap-3">
       {Array.from({ length: count }).map((_, index) => (
         <CourseCardSkeleton key={index} />
       ))}

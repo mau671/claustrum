@@ -435,9 +435,11 @@ export function EvaluationUploadDialog({
         >
           <ComboboxTrigger
             ref={courseTriggerRef}
+            aria-label="Curso"
             render={
               <Button
                 variant="outline"
+                aria-label="Curso"
                 className="w-full min-w-0 justify-between overflow-hidden font-normal"
                 disabled={!isPlaceholderCourse || courseOptions.length === 0}
               />
@@ -491,9 +493,11 @@ export function EvaluationUploadDialog({
           >
             <ComboboxTrigger
               ref={termTriggerRef}
+              aria-label="Período académico"
               render={
                 <Button
                   variant="outline"
+                  aria-label="Período académico"
                   className="w-full min-w-0 justify-between overflow-hidden font-normal"
                   disabled={!effectiveCourseId || academicTerms.length === 0}
                 />
@@ -561,9 +565,11 @@ export function EvaluationUploadDialog({
           >
             <ComboboxTrigger
               ref={professorTriggerRef}
+              aria-label="Profesor"
               render={
                 <Button
                   variant="outline"
+                  aria-label="Profesor"
                   className="w-full min-w-0 justify-between overflow-hidden font-normal"
                   disabled={!selectedTerm || recentProfessorsQuery.isLoading}
                 />
@@ -632,8 +638,14 @@ export function EvaluationUploadDialog({
           >
             <ComboboxTrigger
               ref={typeTriggerRef}
+              aria-label="Tipo de evaluación"
               render={
-                <Button id="evaluation-type" variant="outline" className="w-44 justify-between" />
+                <Button
+                  id="evaluation-type"
+                  variant="outline"
+                  aria-label="Tipo de evaluación"
+                  className="w-44 justify-between"
+                />
               }
             >
               <span className="block min-w-0 truncate text-left">

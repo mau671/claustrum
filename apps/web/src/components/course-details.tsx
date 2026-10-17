@@ -1028,9 +1028,11 @@ export function CourseDetails({
           <ComboboxTrigger
             ref={attemptCourseTriggerRef}
             className="w-full max-w-full min-w-0"
+            aria-label="Curso a registrar"
             render={
               <Button
                 variant="outline"
+                aria-label="Curso a registrar"
                 className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
                 disabled={!isPlaceholderCourse || attemptCourseOptions.length === 0}
               />
@@ -1084,9 +1086,11 @@ export function CourseDetails({
           <ComboboxTrigger
             ref={progressTermTriggerRef}
             className="w-full max-w-full min-w-0"
+            aria-label="Periodo"
             render={
               <Button
                 variant="outline"
+                aria-label="Periodo"
                 className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
               />
             }
@@ -1515,7 +1519,14 @@ export function CourseDetails({
               itemToStringValue={(term) => formatTermNameWithoutYear(term.display_name)}
             >
               <ComboboxTrigger
-                render={<Button variant="outline" className="w-[200px] justify-between sm:w-64" />}
+                aria-label="Período de horarios"
+                render={
+                  <Button
+                    variant="outline"
+                    aria-label="Período de horarios"
+                    className="w-[200px] justify-between sm:w-64"
+                  />
+                }
               >
                 <span
                   className={cn(
@@ -1724,10 +1735,12 @@ export function CourseDetails({
                 >
                   <ComboboxTrigger
                     ref={editAttemptCourseTriggerRef}
+                    aria-label="Curso equivalente"
                     render={
                       <Button
                         id="edit-attempt-course"
                         variant="outline"
+                        aria-label="Curso equivalente"
                         className="mt-2 w-full justify-between font-normal"
                       />
                     }
@@ -1787,10 +1800,12 @@ export function CourseDetails({
               >
                 <ComboboxTrigger
                   ref={editTermTriggerRef}
+                  aria-label="Periodo"
                   render={
                     <Button
                       id="edit-attempt-term"
                       variant="outline"
+                      aria-label="Periodo"
                       className="mt-2 w-full justify-between font-normal"
                     />
                   }

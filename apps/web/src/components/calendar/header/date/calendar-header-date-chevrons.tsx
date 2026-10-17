@@ -40,7 +40,13 @@ export default function CalendarHeaderDateChevrons() {
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="icon" className="size-8" onClick={handleDateBackward}>
+      <Button
+        variant="outline"
+        size="icon"
+        className="size-8"
+        onClick={handleDateBackward}
+        aria-label="Período anterior"
+      >
         <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
       </Button>
 
@@ -48,7 +54,13 @@ export default function CalendarHeaderDateChevrons() {
         {format(date, "d 'de' MMMM, yyyy", { locale: es })}
       </span>
 
-      <Button variant="outline" size="icon" className="size-8" onClick={handleDateForward}>
+      <Button
+        variant="outline"
+        size="icon"
+        className="size-8"
+        onClick={handleDateForward}
+        aria-label="Período siguiente"
+      >
         <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
       </Button>
     </div>

@@ -146,6 +146,14 @@ export function FilterCombobox({
     return name;
   };
 
+  const triggerText = isActuallyLoading
+    ? `Cargando ${label?.toLowerCase() ?? placeholder.toLowerCase()}...`
+    : selectedItem
+      ? getItemLabel(selectedItem)
+      : placeholder;
+
+  const accessibleTriggerLabel = label ? `${label}: ${triggerText}` : triggerText;
+
   return (
     <div
       className={cn(
@@ -162,9 +170,11 @@ export function FilterCombobox({
       >
         <ComboboxTrigger
           ref={triggerRef}
+          aria-label={accessibleTriggerLabel}
           render={
             <Button
               variant="outline"
+              aria-label={accessibleTriggerLabel}
               disabled={isActuallyLoading}
               className={cn(
                 "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
@@ -179,11 +189,7 @@ export function FilterCombobox({
               !selectedItem && "text-muted-foreground",
             )}
           >
-            {isActuallyLoading
-              ? `Cargando ${label?.toLowerCase() ?? placeholder.toLowerCase()}...`
-              : selectedItem
-                ? getItemLabel(selectedItem)
-                : placeholder}
+            {triggerText}
           </span>
           {isActuallyLoading ? (
             <Spinner className="text-muted-foreground size-3.5 shrink-0" />

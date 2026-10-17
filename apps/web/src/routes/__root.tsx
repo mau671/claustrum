@@ -35,6 +35,7 @@ import {
   useOnboardingStatus,
   useProfileContext,
 } from "@/lib/hooks/use-queries";
+import { DEFAULT_TITLE } from "@/lib/seo";
 import { getDeviceHintServerFn } from "@/lib/server-fns";
 import appCss from "@/styles.css?url";
 
@@ -51,6 +52,7 @@ export const Route = createRootRouteWithContext<{
         },
       ],
       meta: [
+        { title: DEFAULT_TITLE },
         { charSet: "UTF-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1.0, viewport-fit=cover" },
         { name: "application-name", content: "Claustrum" },

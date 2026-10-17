@@ -264,9 +264,19 @@ export function ScheduleFilters({
               itemToStringValue={(term) => formatTermNameWithoutYear(term.display_name)}
             >
               <ComboboxTrigger
+                aria-label={
+                  selectedTerm
+                    ? `Período académico: ${formatClosedTermLabel(selectedTerm)}`
+                    : "Período académico"
+                }
                 render={
                   <Button
                     variant="outline"
+                    aria-label={
+                      selectedTerm
+                        ? `Período académico: ${formatClosedTermLabel(selectedTerm)}`
+                        : "Período académico"
+                    }
                     className="h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
                   />
                 }

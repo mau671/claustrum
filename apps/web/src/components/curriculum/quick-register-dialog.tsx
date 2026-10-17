@@ -297,9 +297,11 @@ export function QuickRegisterDialog({
           <ComboboxTrigger
             ref={attemptCourseTriggerRef}
             className="w-full max-w-full min-w-0"
+            aria-label="Curso a registrar"
             render={
               <Button
                 variant="outline"
+                aria-label="Curso a registrar"
                 className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
                 disabled={!isPlaceholderCourse || attemptCourseOptions.length === 0}
               />
@@ -353,9 +355,11 @@ export function QuickRegisterDialog({
           <ComboboxTrigger
             ref={progressTermTriggerRef}
             className="w-full max-w-full min-w-0"
+            aria-label="Periodo"
             render={
               <Button
                 variant="outline"
+                aria-label="Periodo"
                 className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
               />
             }

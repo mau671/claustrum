@@ -142,18 +142,18 @@ export function MobileBottomNav() {
   const transition = shouldReduceMotion ? instantTransition : springTransition;
 
   return (
-    <div
+    <nav
+      aria-label="Navegación móvil"
       className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex items-center justify-center gap-2.5 px-3 md:hidden"
       style={{ viewTransitionName: "mobile-bottom-nav" }}
     >
       <LayoutGroup id="mobile-nav">
-        <nav
+        <div
           className={cn(
             "pointer-events-auto flex items-center gap-1 rounded-full p-1.5",
             "border-border/80 bg-background/95 text-muted-foreground border shadow-xl shadow-black/10 backdrop-blur-xl",
             "dark:border-border/60 dark:bg-card/95 dark:text-muted-foreground dark:shadow-black/40",
           )}
-          aria-label="Navegación principal"
         >
           {mainNavItems.map((item) => {
             const isCurrent = activeTab === item.url;
@@ -230,7 +230,7 @@ export function MobileBottomNav() {
               </motion.div>
             );
           })}
-        </nav>
+        </div>
 
         {/* Contenedor del Avatar con el mismo fondo, estilo y altura que la barra principal */}
         <div
@@ -439,6 +439,6 @@ export function MobileBottomNav() {
         open={isNotificationsOpen}
         onOpenChange={setIsNotificationsOpen}
       />
-    </div>
+    </nav>
   );
 }

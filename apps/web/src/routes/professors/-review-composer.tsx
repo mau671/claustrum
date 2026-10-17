@@ -431,10 +431,12 @@ export function ReviewComposer({
           >
             <ComboboxTrigger
               ref={termTriggerRef}
+              aria-label="Período"
               render={
                 <Button
                   id="composer-term-trigger"
                   variant="outline"
+                  aria-label="Período"
                   className="w-full min-w-0 justify-between overflow-hidden px-3 font-normal"
                   disabled={termsQuery.isLoading || termOptions.length === 0}
                 />

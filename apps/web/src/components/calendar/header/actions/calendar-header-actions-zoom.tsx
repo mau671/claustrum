@@ -33,6 +33,7 @@ export default function CalendarHeaderActionsZoom() {
         className="size-8"
         onClick={handleZoomOut}
         disabled={!canZoomOut}
+        aria-label="Reducir zoom"
         title="Reducir zoom (Ctrl + rueda del ratón)"
       >
         <HugeiconsIcon icon={ZoomOutIcon} size={16} />
@@ -43,6 +44,7 @@ export default function CalendarHeaderActionsZoom() {
         className="size-8"
         onClick={handleZoomIn}
         disabled={!canZoomIn}
+        aria-label="Aumentar zoom"
         title="Aumentar zoom (Ctrl + rueda del ratón)"
       >
         <HugeiconsIcon icon={ZoomInIcon} size={16} />

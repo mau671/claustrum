@@ -361,6 +361,7 @@ export function Stepper({
                   onClick={isClickable ? () => onStepSelect?.(index) : undefined}
                   disabled={!isClickable}
                   aria-current={isCurrent ? "step" : undefined}
+                  aria-label={`Paso ${index + 1}: ${step.label}`}
                   className={cn(
                     "group flex items-center gap-2 outline-none select-none",
                     isClickable ? "cursor-pointer" : "cursor-default",
@@ -472,6 +473,7 @@ export function Stepper({
                   onClick={isClickable ? () => onStepSelect?.(index) : undefined}
                   disabled={!isClickable}
                   aria-current={isCurrent ? "step" : undefined}
+                  aria-label={`Paso ${index + 1}: ${step.label}`}
                   className={cn(
                     "rounded-full outline-none",
                     isClickable
@@ -515,6 +517,7 @@ export function Stepper({
                     type="button"
                     onClick={isClickable ? () => onStepSelect?.(index) : undefined}
                     disabled={!isClickable}
+                    aria-label={`Paso ${index + 1}: ${step.label}`}
                     className={cn(
                       "flex shrink-0 items-center text-left outline-none",
                       isClickable ? "group cursor-pointer" : "cursor-default",

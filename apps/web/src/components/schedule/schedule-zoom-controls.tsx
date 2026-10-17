@@ -62,6 +62,8 @@ export function ScheduleZoomControls({
         onClick={() => setIsPanelOpen(!isPanelOpen)}
         className="bg-background/95 supports-[backdrop-filter]:bg-background/60 hover:bg-muted flex items-center gap-2 rounded-lg border p-1.5 shadow-sm backdrop-blur transition-colors"
         title={isPanelOpen ? "Ocultar controles" : "Mostrar controles"}
+        aria-label={isPanelOpen ? "Ocultar controles de zoom" : "Mostrar controles de zoom"}
+        aria-expanded={isPanelOpen}
       >
         <span className="text-sm font-medium">{zoomPercentage}%</span>
         {isPanelOpen ? (
@@ -79,6 +81,7 @@ export function ScheduleZoomControls({
               disabled={canZoomOut}
               className="hover:bg-muted rounded-md p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Alejar"
+              aria-label="Alejar zoom"
             >
               <HugeiconsIcon icon={ZoomOutIcon} size={16} />
             </button>
@@ -87,6 +90,7 @@ export function ScheduleZoomControls({
               disabled={canZoomIn}
               className="hover:bg-muted rounded-md p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Acercar"
+              aria-label="Acercar zoom"
             >
               <HugeiconsIcon icon={ZoomInIcon} size={16} />
             </button>
@@ -95,6 +99,7 @@ export function ScheduleZoomControls({
               onClick={handleReset}
               className="hover:bg-muted rounded-md p-2 transition-colors"
               title="Restablecer tamaño"
+              aria-label="Restablecer tamaño de zoom"
             >
               <HugeiconsIcon icon={RotateLeft01Icon} size={16} />
             </button>

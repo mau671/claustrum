@@ -330,9 +330,11 @@ function ProfilePage() {
             >
               <ComboboxTrigger
                 ref={campusTriggerRef}
+                aria-label="Sede"
                 render={
                   <Button
                     variant="outline"
+                    aria-label="Sede"
                     className="w-full justify-between text-base font-normal md:text-sm"
                   />
                 }
@@ -399,9 +401,11 @@ function ProfilePage() {
             >
               <ComboboxTrigger
                 ref={academicUnitTriggerRef}
+                aria-label="Escuela"
                 render={
                   <Button
                     variant="outline"
+                    aria-label="Escuela"
                     className="w-full justify-between text-base font-normal md:text-sm"
                   />
                 }
@@ -472,9 +476,11 @@ function ProfilePage() {
             >
               <ComboboxTrigger
                 ref={studyPlanTriggerRef}
+                aria-label="Plan de estudios"
                 render={
                   <Button
                     variant="outline"
+                    aria-label="Plan de estudios"
                     className="w-full justify-between text-base font-normal md:text-sm"
                   />
                 }

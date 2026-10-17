@@ -159,6 +159,7 @@ function CurriculumBoard({
               disabled={canZoomOut}
               className="hover:bg-muted rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Alejar"
+              aria-label="Alejar zoom"
             >
               <Icon icon={ZoomOutIcon} className="size-3.5" />
             </button>
@@ -172,6 +173,7 @@ function CurriculumBoard({
               disabled={canZoomIn}
               className="hover:bg-muted rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Acercar"
+              aria-label="Acercar zoom"
             >
               <Icon icon={ZoomInIcon} className="size-3.5" />
             </button>
@@ -183,6 +185,7 @@ function CurriculumBoard({
               disabled={zoom === ZOOM_DEFAULT}
               className="hover:bg-muted rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               title="Restablecer tamaño"
+              aria-label="Restablecer tamaño de zoom"
             >
               <Icon icon={RotateCcwIcon} className="size-3.5" />
             </button>

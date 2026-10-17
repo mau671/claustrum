@@ -185,9 +185,19 @@ export function InsetOnboardingPage() {
             itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
           >
             <ComboboxTrigger
+              aria-label={
+                selectedCampus
+                  ? `Sede: ${selectedCampus.code ? `${selectedCampus.code}: ${selectedCampus.name}` : selectedCampus.name}`
+                  : "Selecciona una sede"
+              }
               render={
                 <Button
                   variant="outline"
+                  aria-label={
+                    selectedCampus
+                      ? `Sede: ${selectedCampus.code ? `${selectedCampus.code}: ${selectedCampus.name}` : selectedCampus.name}`
+                      : "Selecciona una sede"
+                  }
                   className={cn(
                     "!h-10 w-full justify-between text-sm font-normal",
                     showCampusError &&
@@ -265,9 +275,19 @@ export function InsetOnboardingPage() {
             itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
           >
             <ComboboxTrigger
+              aria-label={
+                selectedAcademicUnit
+                  ? `Carrera: ${selectedAcademicUnit.code ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}` : selectedAcademicUnit.name}`
+                  : "Selecciona una carrera"
+              }
               render={
                 <Button
                   variant="outline"
+                  aria-label={
+                    selectedAcademicUnit
+                      ? `Carrera: ${selectedAcademicUnit.code ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}` : selectedAcademicUnit.name}`
+                      : "Selecciona una carrera"
+                  }
                   className={cn(
                     "!h-10 w-full justify-between text-sm font-normal",
                     showAcademicUnitError &&
@@ -348,9 +368,19 @@ export function InsetOnboardingPage() {
             }
           >
             <ComboboxTrigger
+              aria-label={
+                selectedStudyPlan
+                  ? `Plan de estudios: ${selectedStudyPlan.external_plan_id ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}` : selectedStudyPlan.name}`
+                  : "Selecciona un plan de estudios"
+              }
               render={
                 <Button
                   variant="outline"
+                  aria-label={
+                    selectedStudyPlan
+                      ? `Plan de estudios: ${selectedStudyPlan.external_plan_id ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}` : selectedStudyPlan.name}`
+                      : "Selecciona un plan de estudios"
+                  }
                   className={cn(
                     "!h-10 w-full justify-between text-sm font-normal",
                     showStudyPlanError &&
@@ -465,7 +495,7 @@ export function InsetOnboardingPage() {
       <AuthPageBackdrop />
       <div className="relative grid h-screen w-full grid-cols-1 lg:grid-cols-[1fr_minmax(440px,560px)]">
         <AuthLeftPanel />
-        <div className="bg-card text-foreground relative flex h-full flex-col overflow-y-auto">
+        <main className="bg-card text-foreground relative flex h-full flex-col overflow-y-auto">
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8 lg:py-10">
             <div className="mb-6 flex items-center justify-between gap-3">
               <h1 className="text-xl font-semibold tracking-tight md:text-2xl">Completar perfil</h1>
@@ -531,7 +561,7 @@ export function InsetOnboardingPage() {
               )}
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

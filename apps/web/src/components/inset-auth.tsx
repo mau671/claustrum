@@ -42,13 +42,19 @@ export function InsetSigninPage() {
       <SignInForm email={email} setEmail={setEmail} />
       <div className="text-muted-foreground mt-5 text-center text-sm">
         ¿No tienes cuenta?{" "}
-        <Link to="/auth/signup" className="text-foreground hover:underline">
+        <Link
+          to="/auth/signup"
+          className="text-foreground underline underline-offset-4 hover:opacity-80"
+        >
           Regístrate
         </Link>
       </div>
       <p className="text-muted-foreground mt-4 px-4 text-center text-[11px] leading-relaxed">
         Al continuar, aceptas nuestras{" "}
-        <Link to="/policies" className="text-foreground hover:underline">
+        <Link
+          to="/policies"
+          className="text-foreground underline underline-offset-4 hover:opacity-80"
+        >
           políticas y condiciones de uso
         </Link>
         .
@@ -67,13 +73,19 @@ export function InsetSignupPage() {
       <SignUpForm />
       <div className="text-muted-foreground mt-5 text-center text-sm">
         ¿Ya tienes una cuenta?{" "}
-        <Link to="/auth/signin" className="text-foreground hover:underline">
+        <Link
+          to="/auth/signin"
+          className="text-foreground underline underline-offset-4 hover:opacity-80"
+        >
           Inicia sesión
         </Link>
       </div>
       <p className="text-muted-foreground mt-4 px-4 text-center text-[11px] leading-relaxed">
         Al continuar, aceptas nuestras{" "}
-        <Link to="/policies" className="text-foreground hover:underline">
+        <Link
+          to="/policies"
+          className="text-foreground underline underline-offset-4 hover:opacity-80"
+        >
           políticas y condiciones de uso
         </Link>
         .

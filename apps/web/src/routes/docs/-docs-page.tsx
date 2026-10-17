@@ -1,0 +1,57 @@
+import { notFound } from "@tanstack/react-router";
+import browserCollections from "collections/browser";
+import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { Suspense } from "react";
+
+import { DocsNavTitle } from "@/components/docs/nav-title";
+import { DocPathProvider, DocsPageContent } from "@/components/docs/page-content";
+import { docsTree } from "@/lib/docs/tree";
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component: DocsPageContent,
+});
+
+export function preloadDoc(path: string): Promise<void> {
+  return clientLoader.preload(path).then(() => undefined);
+}
+
+export function resolveDocPath(slugs: string[]): string {
+  const normalized = slugs.join("/");
+  const candidates = [
+    `${normalized}.mdx`,
+    `${normalized}.md`,
+    `${normalized}/index.mdx`,
+    `${normalized}/index.md`,
+  ];
+  const available = new Set(
+    Object.keys(browserCollections.docs.raw).map((entry) =>
+      entry.startsWith("./") ? entry.slice(2) : entry,
+    ),
+  );
+
+  for (const candidate of candidates) {
+    if (available.has(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw notFound();
+}
+
+export function DocsPageShell({ path }: { path: string }) {
+  return (
+    <DocsLayout
+      tree={docsTree}
+      nav={{ title: <DocsNavTitle /> }}
+      githubUrl="https://github.com/mau671/claustrum"
+      containerProps={{
+        className: "bg-fd-background text-fd-foreground",
+        style: { scrollbarGutter: "stable" },
+      }}
+    >
+      <DocPathProvider path={path}>
+        <Suspense>{clientLoader.useContent(path)}</Suspense>
+      </DocPathProvider>
+    </DocsLayout>
+  );
+}

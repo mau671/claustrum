@@ -94,12 +94,12 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/docs/',
   path: '/docs/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/docs/index.lazy').then((d) => d.Route))
 const DocsSplatRoute = DocsSplatRouteImport.update({
   id: '/docs/$',
   path: '/docs/$',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/docs/$.lazy').then((d) => d.Route))
 const ModerationIndexRoute = ModerationIndexRouteImport.update({
   id: '/',
   path: '/',

@@ -16,6 +16,7 @@ import type {
 } from "@/lib/professor-reviews/types";
 
 import { NumberedPagination } from "@/components/numbered-pagination";
+import { ReviewComment } from "@/components/review-comment";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardPanel } from "@/components/ui/card";
@@ -252,8 +253,8 @@ export function ReviewReportSection({
 
               <div className="space-y-1.5">
                 <h4 className="text-foreground text-sm font-medium">Comentario reportado</h4>
-                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed whitespace-pre-wrap">
-                  {selectedReport.comment}
+                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed break-words whitespace-pre-wrap">
+                  <ReviewComment comment={selectedReport.comment} />
                 </blockquote>
               </div>
 
@@ -443,7 +444,7 @@ export function ReviewSection({
                 </span>
               ))}
             </div>
-            <span className="text-muted-foreground mt-1 line-clamp-2 text-xs">
+            <span className="text-muted-foreground mt-1 line-clamp-2 text-xs break-words">
               {row.original.comment}
             </span>
           </CardPanel>
@@ -538,8 +539,8 @@ export function ReviewSection({
               {/* Comentario del estudiante */}
               <div className="space-y-1.5">
                 <h4 className="text-foreground text-sm font-medium">Comentario</h4>
-                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed whitespace-pre-wrap">
-                  {selectedReview.comment}
+                <blockquote className="border-primary/50 bg-muted/20 text-foreground rounded-r-lg border-l-2 py-2.5 pr-4 pl-3.5 text-sm leading-relaxed break-words whitespace-pre-wrap">
+                  <ReviewComment comment={selectedReview.comment} />
                 </blockquote>
               </div>
 

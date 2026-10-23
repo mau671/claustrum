@@ -17,6 +17,7 @@ import type {
 } from "@/lib/professor-reviews/types";
 
 import { NumberedPagination } from "@/components/numbered-pagination";
+import { ReviewComment } from "@/components/review-comment";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -282,7 +283,9 @@ function getColumns(
                 ))}
               </div>
             )}
-            <p>{row.original.comment}</p>
+            <p className="min-w-0 break-words">
+              <ReviewComment comment={row.original.comment} />
+            </p>
           </div>
           <ReviewActions
             review={row.original}
@@ -464,7 +467,9 @@ export function ProfessorReviewsList({
                           ))}
                         </div>
                       ) : null}
-                      <p>{review.comment}</p>
+                      <p className="min-w-0 break-words">
+                        <ReviewComment comment={review.comment} />
+                      </p>
                     </div>
                     <ReviewActions
                       review={review}

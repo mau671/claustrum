@@ -21,7 +21,9 @@ export default Alchemy.Stack(
       Config.withDefault(process.env.ZONE_NAME ?? "maugp.com"),
     );
 
-    const evaluationsBucket = yield* Cloudflare.R2.Bucket("claustrum-evaluations");
+    const evaluationsBucket = yield* Cloudflare.R2.Bucket("claustrum-evaluations", {
+      name: isProd ? "claustrum-files" : undefined,
+    });
 
     const dbPassword = yield* Config.Redacted("DB_PASSWORD").pipe(
       Config.withDefault(Redacted.make("development-dummy-password")),

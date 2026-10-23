@@ -287,7 +287,6 @@ export default {
 
       try {
         const response = await Effect.runPromise(program as Effect.Effect<Response, Error>);
-        const bodyText = await response.text();
         const responseHeaders = new Headers(response.headers);
         for (const [key, value] of Object.entries(corsHeaders)) {
           responseHeaders.set(key, value);
@@ -324,17 +323,19 @@ export default {
             responseHeaders.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
           }
         }
-        return new Response(
-          bodyText ||
-            (response.status >= 400
-              ? JSON.stringify({ error: `HTTP ${response.status}`, status: response.status })
-              : null),
-          {
-            status: response.status,
-            statusText: response.statusText,
-            headers: responseHeaders,
-          },
-        );
+        // Stream the body through untouched: decoding it as text would corrupt
+        // binary responses (e.g. evaluation PDFs served from R2).
+        const hasBody =
+          response.body !== null && response.status !== 204 && response.status !== 304;
+        const fallbackBody =
+          response.status >= 400
+            ? JSON.stringify({ error: `HTTP ${response.status}`, status: response.status })
+            : null;
+        return new Response(hasBody ? response.body : fallbackBody, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: responseHeaders,
+        });
       } catch (error) {
         console.error("Effect HttpApi error:", error);
         const message = error instanceof Error ? error.message : String(error);

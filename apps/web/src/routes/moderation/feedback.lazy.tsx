@@ -95,7 +95,7 @@ function FeedbackModerationPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
-        <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+        <FrameHeader className="flex h-11 shrink-0 flex-row items-center px-4 py-2 sm:h-12 sm:px-5">
           <FrameTitle className="text-muted-foreground text-sm font-semibold">
             Retroalimentación
           </FrameTitle>
@@ -168,10 +168,10 @@ function FeedbackModerationPage() {
       {/* Right Detail Pane */}
       {selectedFeedback && (
         <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0">
-          <FrameHeader className="flex h-11 shrink-0 items-center justify-between px-4 py-2 sm:h-12 sm:px-5">
+          <FrameHeader className="flex h-11 shrink-0 flex-row items-center justify-between px-4 py-2 sm:h-12 sm:px-5">
             <FrameTitle
               className={cn(
-                "truncate text-base font-semibold sm:text-lg",
+                "min-w-0 flex-1 truncate text-base font-semibold sm:text-lg",
                 getTypeColor(selectedFeedback.type),
               )}
             >

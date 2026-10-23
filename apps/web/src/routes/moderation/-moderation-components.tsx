@@ -160,7 +160,7 @@ export function ReviewReportSection({
   return (
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
-        <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
+        <FrameHeader className="flex h-11 shrink-0 flex-row items-center px-4 py-2 sm:h-12 sm:px-5">
           <FrameTitle className="text-muted-foreground text-sm font-semibold">
             Reportes pendientes
           </FrameTitle>
@@ -225,8 +225,8 @@ export function ReviewReportSection({
 
       {selectedReport && (
         <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0">
-          <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
-            <FrameTitle className="truncate text-base font-semibold sm:text-lg">
+          <FrameHeader className="flex h-11 shrink-0 flex-row items-center px-4 py-2 sm:h-12 sm:px-5">
+            <FrameTitle className="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">
               {selectedReport.course_code}: {selectedReport.course_name}
             </FrameTitle>
           </FrameHeader>
@@ -475,7 +475,7 @@ export function ReviewSection({
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
         {onStatusChange && (
-          <FrameHeader className="flex h-11 shrink-0 items-center p-1 sm:h-12">
+          <FrameHeader className="flex h-11 shrink-0 flex-row items-center p-1 sm:h-12">
             <ModerationStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
           </FrameHeader>
         )}
@@ -524,8 +524,8 @@ export function ReviewSection({
 
       {selectedReview && (
         <Frame className="min-w-0 flex-1 flex-col lg:max-h-full lg:min-h-0">
-          <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
-            <FrameTitle className="truncate text-base font-semibold sm:text-lg">
+          <FrameHeader className="flex h-11 shrink-0 flex-row items-center px-4 py-2 sm:h-12 sm:px-5">
+            <FrameTitle className="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">
               {selectedReview.professor_name}
             </FrameTitle>
           </FrameHeader>
@@ -783,7 +783,7 @@ export function EvaluationSection({
     <div className="flex flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
       <Frame className="min-h-0 w-full shrink-0 flex-col lg:w-80 xl:w-96">
         {onStatusChange && (
-          <FrameHeader className="flex h-11 shrink-0 items-center p-1 sm:h-12">
+          <FrameHeader className="flex h-11 shrink-0 flex-row items-center p-1 sm:h-12">
             <ModerationStatusTabs statusFilter={statusFilter} onStatusChange={onStatusChange} />
           </FrameHeader>
         )}
@@ -869,8 +869,8 @@ export function EvaluationSection({
       {selectedEvaluation && (
         <div className="flex min-w-0 flex-1 flex-col gap-4 lg:min-h-0 lg:flex-row">
           <Frame className="min-w-0 shrink-0 flex-col lg:w-80">
-            <FrameHeader className="flex h-11 shrink-0 items-center px-4 py-2 sm:h-12 sm:px-5">
-              <FrameTitle className="truncate text-base font-semibold sm:text-lg">
+            <FrameHeader className="flex h-11 shrink-0 flex-row items-center px-4 py-2 sm:h-12 sm:px-5">
+              <FrameTitle className="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">
                 {selectedEvaluation.course_code}: {selectedEvaluation.course_name}
               </FrameTitle>
             </FrameHeader>

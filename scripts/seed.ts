@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     dirArgIndex !== -1 && args[dirArgIndex + 1]
       ? args[dirArgIndex + 1]
       : isReviews
-        ? "data/reviews/data/processed/sql"
+        ? "data/seeds/reviews"
         : "data/seeds/itcr";
 
   let connectionString = process.env.DATABASE_URL;
@@ -144,11 +144,17 @@ async function main(): Promise<void> {
   }
 
   try {
-    // 1. Fetch already applied seed SHAs
-    const { rows: appliedRows } = await client.query<{ seed_sha256: string }>(
-      "SELECT seed_sha256 FROM public.sync_seed_run WHERE status = 'applied';",
-    );
+    // 1. Fetch already applied seeds by SHA and by filename.
+    //    Filename matters for baseline seeds (`*_initial.sql`, `*_fix.sql`):
+    //    their content can be edited after being applied (for example to strip
+    //    leaked secrets), which changes the SHA. Without the filename check the
+    //    seeder would try to re-apply an already-applied baseline and fail.
+    const { rows: appliedRows } = await client.query<{
+      seed_sha256: string;
+      seed_file_name: string;
+    }>("SELECT seed_sha256, seed_file_name FROM public.sync_seed_run WHERE status = 'applied';");
     const appliedShas = new Set(appliedRows.map((r) => r.seed_sha256));
+    const appliedFileNames = new Set(appliedRows.map((r) => r.seed_file_name));
     console.log(`🔍 Found ${appliedShas.size} already applied seed SHAs in database.`);
 
     let appliedCount = 0;
@@ -161,6 +167,16 @@ async function main(): Promise<void> {
 
       if (appliedShas.has(sha)) {
         console.log(`  [skip] ${file}`);
+        skippedCount++;
+        continue;
+      }
+
+      // Baseline/fix seeds keep the same filename across content edits.
+      // Re-applying them is never safe (they are plain INSERTs without
+      // ON CONFLICT), so treat a matching filename as already applied.
+      const isBaseline = file.includes("_initial") || file.includes("_fix");
+      if (isBaseline && appliedFileNames.has(file)) {
+        console.log(`  [skip] ${file} (baseline already applied, content changed)`);
         skippedCount++;
         continue;
       }

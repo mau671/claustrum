@@ -92,6 +92,10 @@ uv run itcr sync --target db-url --db-url "postgresql://..." --years 2026
 la base destino, genera un delta mínimo, escribe un manifest JSON y, salvo
 `--no-apply`, aplica el seed.
 
+`--target local` usa el Postgres de `docker compose` (`LOCAL_DB_URL` o
+`DATABASE_URL`). `--target remote` lee `DATABASE_URL` de `--env-file`
+(`../../.env.prod` por defecto). No se usa Supabase CLI en ningún paso.
+
 El remapeo consulta la base por llaves naturales: `campus.code`,
 `academic_unit.code`, `academic_term.external_key`, `course.code`,
 `professor.full_name`, `study_plan` por `(unidad, external_plan_id)`, oferta por
@@ -126,19 +130,47 @@ uv run tec-data sync \
   --no-apply
 ```
 
-`seed-history` reconstruye el estado esperado aplicando migraciones y replayeando
-los seeds históricos en una base PostgreSQL efímera. En CI usa un service
-container; localmente puede levantar un contenedor temporal. Este modo no escribe
-en `sync_seed_run` porque su propósito es producir un nuevo delta versionado para
-revisar o subir en PR.
+`seed-history` reconstruye el estado esperado aplicando las migraciones Drizzle y
+replayeando los seeds históricos en una base PostgreSQL efímera. En CI el workflow
+declara un service container `postgres:17`; localmente, si no se pasa
+`--seed-history-db-url`, se levanta un contenedor temporal con Docker. Este modo no
+escribe en `sync_seed_run` porque su propósito es producir un nuevo delta
+versionado para revisar o subir en PR.
+
+Durante el replay, las filas de `sync_seed_run` y los `setval` de secuencias que ya
+no existen en el esquema actual se descartan automáticamente. Sin ese filtro, el
+baseline histórico importaría SHAs de otro entorno y podría producir falsos NOOP.
+
+El replay no se puede omitir aunque los datos no hayan cambiado: para
+`scope=offering` el catálogo se exporta desde esa base reconstruida, y el generador
+de deltas lo necesita como línea base. El fingerprint sí evita emitir un seed
+distinto de NOOP cuando no hubo cambios.
+
+## Seguridad de credenciales
+
+Las contraseñas nunca viajan en `argv`. `psql_connection_args()` las pasa por
+`PGPASSWORD` y deja la URL reducida a host, puerto, usuario y base. Además, todo
+error se filtra con `redact_db_url()` antes de escribirse en `sync_seed_run`: una
+`CalledProcessError` con `stderr` vacío incluye el argv completo en `str(exc)`, y
+ese fue el origen de una fuga real de credenciales hacia un baseline commiteado.
+
+El repositorio escanea secretos con gitleaks (`.github/workflows/secret-scan.yml`).
 
 ## Ledger de seeds
 
 Los seeds aplicados a entornos reales se registran en `public.sync_seed_run`.
 La tabla guarda `seed_file_name`, `seed_sha256`, `scope`, `years`,
 `term_external_keys`, timestamps de generación/aplicación, `status` y metadata
-JSON. Los scopes válidos son `catalog`, `offering` y `all`; los estados válidos
-son `generated`, `applied`, `failed` y `skipped_duplicate`.
+JSON. Los scopes válidos son `catalog`, `offering`, `reviews` y `all`; los estados
+válidos son `generated`, `applied`, `failed` y `skipped_duplicate`.
+
+Los seeds se aplican siempre con el seeder unificado:
+
+```bash
+pnpm run db:seed                      # seeds de data/seeds/itcr
+pnpm run db:seed -- --reviews         # seeds de data/seeds/reviews
+pnpm run db:seed -- --prod            # contra .env.prod
+```
 
 ## CI operativo
 
@@ -147,6 +179,9 @@ catálogo procesado. El workflow `.github/workflows/generate-seed.yml` reutiliza
 ese artifact, valida que esté completo y ejecuta `sync --target seed-history
 --scope offering --years 2026 --no-apply`. Si el manifest no es NOOP, crea un PR
 con los nuevos seeds en `data/seeds/itcr`.
+
+Ambos workflows de seeds declaran un service container `postgres:17` y corren las
+migraciones Drizzle antes del replay, así que no dependen de Supabase CLI.
 
 ## Implementación
 

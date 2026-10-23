@@ -85,9 +85,9 @@ catálogo cada vez que se genera oferta semanal.
 
 ### Generate seed
 
-`.github/workflows/generate-seed.yml` se ejecuta semanalmente, manualmente o en PRs
-que tocan `data/itcr`, migraciones o seeds. El flujo descarga el último
-artifact de catálogo exitoso, valida que tenga datos suficientes y corre:
+`.github/workflows/generate-seed-offering.yml` se ejecuta semanalmente, manualmente
+o en PRs que tocan `data/itcr`, migraciones o seeds. El workflow declara un service
+container `postgres:17`, aplica las migraciones Drizzle del repo y corre:
 
 ```bash
 uv run tec-data sync \
@@ -100,8 +100,10 @@ uv run tec-data sync \
   --seed-history-db-url postgresql://postgres:postgres@127.0.0.1:5432/postgres
 ```
 
-El workflow inspecciona el manifest generado. Si `noop` es `false`, abre un PR a
-`development` con los nuevos `.sql` y `.json` en `data/seeds/itcr`.
+`.github/workflows/generate-seed-catalog.yml` hace lo mismo con
+`--scope catalog`. Ambos workflows inspeccionan el manifest generado: si `noop` es
+`false`, abren un PR a `development` con los nuevos `.sql` y `.json` en
+`data/seeds/itcr`. No se usa Supabase CLI.
 
 ## Aplicar datos manualmente
 
@@ -128,7 +130,11 @@ uv run itcr sync --target remote --years 2026 --env-file ../../.env.prod --no-ap
 ## Reglas operativas
 
 - Usar `pnpm` para comandos Node/TypeScript.
-- Usar `uv` solo dentro de `data/itcr`.
+- Usar `uv` solo dentro de `data/itcr` y `data/reviews`.
+- La conexión a base de datos es directa con `psql`/`pg`; no hay Supabase CLI.
 - No resetear la base para aplicar migraciones normales.
 - No aplicar seeds de producción sin revisar target, scope, años y manifest.
 - El ledger `sync_seed_run` evita reaplicar seeds idénticos por SHA/fingerprint.
+- Los seeds se aplican con `pnpm run db:seed` (ITCR) y `pnpm run db:seed -- --reviews`.
+- Nunca commitear `pg_dump` crudos: excluye siempre `sync_seed_run`, `auth.*` y
+  `better_auth.*`, y pasa gitleaks antes de subir.

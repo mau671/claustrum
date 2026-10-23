@@ -1,0 +1,41 @@
+# Secret scanning configuration for gitleaks.
+# Docs: https://github.com/gitleaks/gitleaks
+
+title = "claustrum"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "postgres-connection-string"
+description = "PostgreSQL connection string with an inline password"
+regex = '''postgres(?:ql)?://[^:/@\s]+:[^@\s/$]+@[^\s/]+'''
+keywords = ["postgresql://", "postgres://"]
+tags = ["database", "credentials"]
+
+[allowlist]
+description = "Placeholders, generated data and local-only env files"
+regexes = [
+  '''postgresql://postgres:postgres@''',
+  '''postgres://postgres:postgres@''',
+  '''postgres://user:pass@''',
+  '''postgresql://user:password@''',
+  '''postgresql://\[PASSWORD\]@''',
+  '''postgresql://[^:/@\s]+:\*\*\*@''',
+  '''postgres(?:ql)?://[^:/@\s]+:\$\{[A-Za-z_]+\}@''',
+  '''postgresql://postgres:\{password\}@''',
+  '''postgresql://postgres:[^@]*@db\.[a-z0-9]+\.supabase\.co:5432/postgres\?sslmode=require''',
+  # Code identifiers that the generic-api-key rule misreads as secrets.
+  '''allow_acronyms=match_scope''',
+]
+paths = [
+  '''node_modules/''',
+  '''\.venv/''',
+  '''__pycache__/''',
+  '''pnpm-lock\.yaml''',
+  '''\.agents/skills/''',
+  '''\.env\.''',
+  '''\.dev\.vars''',
+  '''lighthouse-.*\.json''',
+  '''apps/api/src/auth-cli\.ts''',
+]

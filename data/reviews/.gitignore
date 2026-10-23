@@ -5,10 +5,7 @@ __pycache__/
 *.txt
 .env
 
-# Ignore all data folder
+# Local working data (raw snapshots, state, processed output)
 data/*
-!data/processed/
-data/processed/*
-!data/processed/sql/
-data/processed/sql/*
-!data/processed/sql/*.sql
+
+# Generated review seeds live in the shared data/seeds tree, not here.

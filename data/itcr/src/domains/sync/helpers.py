@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -132,11 +133,16 @@ def collect_term_external_keys(data_dir: Path, years: list[int]) -> list[str]:
 
 def build_db_url_from_env(env_file: Path) -> str:
     env_content = env_file.read_text()
+    direct = re.search(r"^DATABASE_URL=(.+)$", env_content, flags=re.M)
+    if direct:
+        return direct.group(1).strip()
+
     match_url = re.search(r"^VITE_SUPABASE_URL=(.+)$", env_content, flags=re.M)
     match_password = re.search(r"^SUPABASE_PASSWORD=(.+)$", env_content, flags=re.M)
     if not match_url or not match_password:
         raise ValueError(
-            f"Missing VITE_SUPABASE_URL or SUPABASE_PASSWORD in {env_file}"
+            f"Missing DATABASE_URL (or legacy VITE_SUPABASE_URL + SUPABASE_PASSWORD) "
+            f"in {env_file}"
         )
 
     supabase_url = match_url.group(1).strip()
@@ -150,11 +156,20 @@ def build_db_url_from_env(env_file: Path) -> str:
 
 def resolve_db_url(target: str, db_url: str | None, env_file: Path) -> str:
     if target == "local":
-        return LOCAL_DB_URL
+        return os.environ.get("LOCAL_DB_URL") or os.environ.get(
+            "DATABASE_URL", LOCAL_DB_URL
+        )
     if target == "remote":
-        return build_db_url_from_env(env_file)
+        if db_url:
+            return db_url
+        if env_file.exists():
+            return build_db_url_from_env(env_file)
+        raise ValueError(
+            f"Cannot resolve remote database URL: {env_file} does not exist and "
+            "--db-url was not provided"
+        )
     if target == "seed-history":
-        return LOCAL_DB_URL
+        return os.environ.get("SEED_HISTORY_DB_URL", LOCAL_DB_URL)
     if not db_url:
         raise ValueError("--db-url is required when --target=db-url")
     return db_url

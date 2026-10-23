@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -69,10 +70,32 @@ def write_professor_sql(professor_id: int, page_data: list[dict[str, Any]], outp
     if not reviews:
         return 0
         
-    statements: list[str] = [
-        "BEGIN;",
-        "SET LOCAL search_path = public;"
-    ]
+    generated_at = datetime.now(timezone.utc).isoformat()
+    header = "\n".join(
+        [
+            "-- ============================================================================",
+            "-- REVIEWS DELTA SEED",
+            "-- ============================================================================",
+            "-- TEC-DATA-META scope=reviews",
+            f"-- TEC-DATA-META professor_id={professor_id}",
+            "-- TEC-DATA-META years="
+            + ",".join(
+                sorted(
+                    {
+                        str(review.get("created_at"))[:4]
+                        for review in reviews
+                        if review.get("created_at")
+                    }
+                )
+            ),
+            "-- TEC-DATA-META term_external_keys=",
+            f"-- TEC-DATA-META generated_at_utc={generated_at}",
+            "",
+            "BEGIN;",
+            "SET LOCAL search_path = public;",
+        ]
+    )
+    statements: list[str] = []
     
     # Process reviews in batches of 1000 to avoid overly massive queries
     batch_size = 1000
@@ -117,6 +140,6 @@ ON CONFLICT DO NOTHING;"""
         
     statements.append("COMMIT;")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text("\n\n".join(statements) + "\n")
+    output_path.write_text(header + "\n\n" + "\n\n".join(statements) + "\n")
     return len(reviews)
 

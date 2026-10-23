@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -12,9 +13,10 @@ import time
 import uuid
 from collections.abc import Iterable
 from datetime import UTC, datetime
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import typer
 
@@ -81,10 +83,58 @@ TABLE_CONFLICT_COLUMNS: dict[str, list[str]] = {
 }
 
 
+def psql_connection_args(db_url: str) -> tuple[list[str], dict[str, str]]:
+    """Split a Postgres URL into psql connection flags plus a safe env.
+
+    Credentials must never travel in `argv`: process arguments are readable via
+    `ps` and, more importantly, any failure that ends up as
+    `str(CalledProcessError)` embeds the full command line. That is exactly how
+    a production password once leaked into `sync_seed_run.error_message` and
+    from there into a committed `pg_dump` baseline.
+    """
+    parsed = urlparse(db_url)
+    args = ["psql", "-X"]
+    env = dict(os.environ)
+    env.pop("PGPASSWORD", None)
+
+    host = parsed.hostname
+    if host:
+        args += ["-h", host]
+    if parsed.port:
+        args += ["-p", str(parsed.port)]
+    if parsed.username:
+        args += ["-U", unquote(parsed.username)]
+    database = (parsed.path or "/postgres").lstrip("/") or "postgres"
+    args += ["-d", database]
+
+    if parsed.password:
+        env["PGPASSWORD"] = unquote(parsed.password)
+    query = parsed.query
+    if query:
+        # psql accepts the libpq connection string via PGOPTIONS/PGSERVICE, but
+        # `sslmode` specifically is honoured through PGSSLMODE.
+        for pair in query.split("&"):
+            key, _, value = pair.partition("=")
+            if key.lower() == "sslmode":
+                env["PGSSLMODE"] = value
+    return args, env
+
+
+def redact_db_url(text: str) -> str:
+    """Strip credentials out of anything that will be persisted or logged."""
+    return re.sub(
+        r"(postgres(?:ql)?://[^:/@\s]+:)[^@\s]+(@)",
+        r"\1***\2",
+        text,
+    )
+
+
 def query_rows(db_url: str, sql: str) -> list[str]:
+    args, env = psql_connection_args(db_url)
     output = subprocess.check_output(
-        ["psql", db_url, "-At", "-F", "\t", "-c", sql],
+        [*args, "-At", "-F", "\t", "-c", sql],
         text=True,
+        env=env,
     )
     return [line for line in output.splitlines() if line.strip()]
 
@@ -124,10 +174,12 @@ def _start_seed_history_postgres_container() -> tuple[str, str]:
     )
 
     for _ in range(60):
+        args, env = psql_connection_args(db_url)
         probe = subprocess.run(
-            ["psql", db_url, "-v", "ON_ERROR_STOP=1", "-c", "SELECT 1;"],
+            [*args, "-v", "ON_ERROR_STOP=1", "-c", "SELECT 1;"],
             text=True,
             capture_output=True,
+            env=env,
         )
         if probe.returncode == 0:
             return container_name, db_url
@@ -202,50 +254,220 @@ def _apply_migrations(db_url: str, migrations_dir: Path) -> None:
       SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid;
     $$;
     """
+    bootstrap_args, bootstrap_env = psql_connection_args(db_url)
     subprocess.run(
-        ["psql", db_url, "-v", "ON_ERROR_STOP=1", "-c", bootstrap_sql],
+        [*bootstrap_args, "-v", "ON_ERROR_STOP=1", "-c", bootstrap_sql],
         check=True,
         text=True,
         capture_output=True,
+        env=bootstrap_env,
     )
 
     migration_files = sorted(p for p in migrations_dir.glob("*.sql") if p.is_file())
     if not migration_files:
         raise RuntimeError(f"No migrations found in {migrations_dir}")
-    for migration in migration_files:
+
+    migrate_args, migrate_env = psql_connection_args(db_url)
+
+    def run_psql(extra: list[str]) -> None:
         subprocess.run(
-            ["psql", db_url, "-v", "ON_ERROR_STOP=1", "-f", str(migration)],
+            [*migrate_args, *extra],
             check=True,
             text=True,
             capture_output=True,
+            env=migrate_env,
         )
+
+    run_psql(
+        [
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-c",
+            (
+                "CREATE SCHEMA IF NOT EXISTS public;"
+                "CREATE TABLE IF NOT EXISTS public.__drizzle_migrations ("
+                "  id SERIAL PRIMARY KEY,"
+                "  hash TEXT NOT NULL,"
+                "  created_at BIGINT"
+                ");"
+            ),
+        ]
+    )
+    applied_hashes = set(
+        query_rows(db_url, "SELECT hash FROM public.__drizzle_migrations")
+    )
+
+    for migration in migration_files:
+        digest = sha256(migration.read_bytes()).hexdigest()
+        if digest in applied_hashes:
+            continue
+        run_psql(["-v", "ON_ERROR_STOP=1", "-f", str(migration)])
+        run_psql(
+            [
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                "INSERT INTO public.__drizzle_migrations (hash, created_at) "
+                f"VALUES ('{digest}', {int(datetime.now(UTC).timestamp() * 1000)});",
+            ]
+        )
+        applied_hashes.add(digest)
+
+
+def _sequence_exists(db_url: str, sequence_name: str) -> bool:
+    rows = query_rows(
+        db_url,
+        "SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+        f"WHERE c.relkind = 'S' AND n.nspname = 'public' "
+        f"AND c.relname = '{quote_literal(sequence_name)}' LIMIT 1",
+    )
+    return bool(rows)
+
+
+SEED_HISTORY_IGNORED_TABLE = "sync_seed_run"
+
+
+def _assert_seed_history_db_is_disposable(db_url: str) -> None:
+    """Refuse to truncate a database that has real application data.
+
+    `seed-history` wipes `public` and replays historical seeds. That is safe for
+    a throwaway container, but catastrophic against a real environment (including
+    a local development database with data). We allow the wipe only when the
+    schema is still empty, or when the caller explicitly opts in via
+    `TEC_SEED_HISTORY_ALLOW_NONEMPTY=1`.
+    """
+    if os.environ.get("TEC_SEED_HISTORY_ALLOW_NONEMPTY") == "1":
+        typer.echo(
+            "WARNING: TEC_SEED_HISTORY_ALLOW_NONEMPTY=1, skipping the disposable-database guard."
+        )
+        return
+
+    probes = {
+        "public.sync_seed_run": "SELECT 1 FROM public.sync_seed_run LIMIT 1",
+        "public.course_offering": "SELECT 1 FROM public.course_offering LIMIT 1",
+        'better_auth."user"': 'SELECT 1 FROM better_auth."user" LIMIT 1',
+    }
+    for label, sql in probes.items():
+        try:
+            populated = bool(query_rows(db_url, sql))
+        except subprocess.CalledProcessError:
+            continue
+        if populated:
+            raise RuntimeError(
+                "Refusing to run --target seed-history against a database that "
+                f"already contains data ({label}).\n"
+                "seed-history truncates the public schema and replays the historical "
+                "seeds, which would destroy that data.\n"
+                "Use a disposable database: either omit --seed-history-db-url so a "
+                "temporary container is started, or point it at a CI service "
+                "container. Set TEC_SEED_HISTORY_ALLOW_NONEMPTY=1 only if you are "
+                "certain the target can be wiped."
+            )
+
+
+def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> Path:
+    """Rewrite a historical seed so it can be replayed on a migrations-built schema.
+
+    Two classes of statements in `pg_dump`-style baselines cannot be replayed safely:
+
+    - Rows for `public.sync_seed_run`: the ledger describes which seeds were applied
+      to *some* environment. Replaying it would import foreign SHAs and fingerprints
+      into the ephemeral DB and could make `ledger_fingerprint_applied` return a
+      false positive, silently producing NOOP seeds.
+    - `setval` for sequences whose table no longer exists after later migrations
+      (for example `user_role_id_seq`, dropped when roles moved to Better Auth).
+    """
+    content = seed_path.read_text(encoding="utf-8")
+    if SEED_HISTORY_IGNORED_TABLE not in content and "setval" not in content:
+        return seed_path
+
+    lines = content.splitlines()
+    kept: list[str] = []
+    skipped_ledger = 0
+    skipped_setval: list[str] = []
+    index = 0
+    ledger_prefix = f'INSERT INTO "public"."{SEED_HISTORY_IGNORED_TABLE}"'
+
+    def drop_dangling_header() -> None:
+        """Remove the comment banner that introduced a skipped statement."""
+        while kept and (
+            not kept[-1].strip() or kept[-1].lstrip().startswith("--")
+        ):
+            kept.pop()
+
+    while index < len(lines):
+        line = lines[index]
+
+        if line.startswith(ledger_prefix):
+            skipped_ledger += 1
+            while index < len(lines) and not lines[index].rstrip().endswith(";"):
+                index += 1
+            index += 1
+            drop_dangling_header()
+            continue
+
+        if "pg_catalog.setval(" in line:
+            for token in line.split("'\"public\".\""):
+                candidate = token.split('"')[0]
+                if candidate.endswith("_seq") and not _sequence_exists(
+                    db_url, candidate
+                ):
+                    skipped_setval.append(candidate)
+                    break
+            else:
+                kept.append(line)
+                index += 1
+                continue
+            index += 1
+            drop_dangling_header()
+            continue
+
+        kept.append(line)
+        index += 1
+
+    if not skipped_ledger and not skipped_setval:
+        return seed_path
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    sanitized_path = output_dir / seed_path.name
+    sanitized_path.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    details: list[str] = []
+    if skipped_ledger:
+        details.append(f"{skipped_ledger} {SEED_HISTORY_IGNORED_TABLE} statement(s)")
+    if skipped_setval:
+        obsolete = ", ".join(sorted(set(skipped_setval)))
+        details.append(f"{len(skipped_setval)} obsolete setval(s): {obsolete}")
+    typer.echo(f"Sanitized {seed_path.name}: skipped {'; '.join(details)}")
+    return sanitized_path
 
 
 def create_temp_seed_history_db(
-    seed_paths: list[Path], db_url: str, migrations_dir: Path, skip_migrations: bool = False
+    seed_paths: list[Path], db_url: str, migrations_dir: Path
 ) -> tuple[str | None, str]:
     admin_db_url = db_url
     temp_db_url = db_url
 
     try:
-        if not skip_migrations:
-            _apply_migrations(admin_db_url, migrations_dir)
+        _apply_migrations(admin_db_url, migrations_dir)
+        _assert_seed_history_db_is_disposable(temp_db_url)
+        truncate_args, truncate_env = psql_connection_args(temp_db_url)
         subprocess.run(
             [
-                "psql",
-                temp_db_url,
+                *truncate_args,
                 "-v",
                 "ON_ERROR_STOP=1",
                 "-c",
                 "DO $$ DECLARE tbls TEXT; BEGIN "
                 "SELECT string_agg(format('%I.%I', schemaname, tablename), ', ') INTO tbls "
-                "FROM pg_tables WHERE schemaname = 'public'; "
+                "FROM pg_tables WHERE schemaname = 'public' "
+                "AND tablename <> '__drizzle_migrations'; "
                 "IF tbls IS NOT NULL THEN EXECUTE 'TRUNCATE TABLE ' || tbls || ' RESTART IDENTITY CASCADE'; END IF; "
                 "END $$;",
             ],
             check=True,
             text=True,
             capture_output=True,
+            env=truncate_env,
         )
     except subprocess.CalledProcessError as exc:
         error_output = (exc.stderr or exc.stdout or "").strip()
@@ -253,19 +475,34 @@ def create_temp_seed_history_db(
             f"Failed preparing seed-history temporary DB:\n{error_output}"
         ) from exc
 
-    for seed_path in seed_paths:
-        try:
-            subprocess.run(
-                ["psql", temp_db_url, "-v", "ON_ERROR_STOP=1", "-f", str(seed_path)],
-                check=True,
-                text=True,
-                capture_output=True,
-            )
-        except subprocess.CalledProcessError as exc:
-            error_output = (exc.stderr or exc.stdout or "").strip()
-            raise RuntimeError(
-                f"Failed applying seed history file {seed_path.name}:\n{error_output}"
-            ) from exc
+    sanitized_dir = Path(tempfile.mkdtemp(prefix="tec-seed-history-"))
+    replay_args, replay_env = psql_connection_args(temp_db_url)
+    try:
+        for seed_path in seed_paths:
+            replay_path = sanitize_seed_for_replay(seed_path, temp_db_url, sanitized_dir)
+            try:
+                subprocess.run(
+                    [
+                        *replay_args,
+                        "-v",
+                        "ON_ERROR_STOP=1",
+                        "-f",
+                        str(replay_path),
+                    ],
+                    check=True,
+                    text=True,
+                    capture_output=True,
+                    env=replay_env,
+                )
+            except subprocess.CalledProcessError as exc:
+                error_output = redact_db_url(
+                    (exc.stderr or exc.stdout or "").strip()
+                )
+                raise RuntimeError(
+                    f"Failed applying seed history file {seed_path.name}:\n{error_output}"
+                ) from exc
+    finally:
+        shutil.rmtree(sanitized_dir, ignore_errors=True)
 
     return None, temp_db_url
 
@@ -273,10 +510,10 @@ def create_temp_seed_history_db(
 def drop_temp_seed_history_db(db_name: str) -> None:
     parsed = urlparse(LOCAL_DB_URL)
     admin_db_url = parsed._replace(path="/postgres").geturl()
+    args, env = psql_connection_args(admin_db_url)
     subprocess.run(
         [
-            "psql",
-            admin_db_url,
+            *args,
             "-v",
             "ON_ERROR_STOP=1",
             "-c",
@@ -285,6 +522,7 @@ def drop_temp_seed_history_db(db_name: str) -> None:
         check=True,
         text=True,
         capture_output=True,
+        env=env,
     )
 
 
@@ -293,6 +531,8 @@ def normalize_for_compare(value: Any, value_type: str) -> Any:
         return None
     if value_type in {"INTEGER", "BIGINT", "SMALLINT"}:
         return int(value)
+    if value_type in {"NUMERIC", "REAL", "DOUBLE PRECISION"}:
+        return normalize_decimal(value)
     if value_type == "BOOLEAN":
         if isinstance(value, bool):
             return value
@@ -308,7 +548,45 @@ def normalize_for_compare(value: Any, value_type: str) -> Any:
         if len(parts) >= 3:
             return f"{parts[0].zfill(2)}:{parts[1].zfill(2)}:{parts[2].zfill(2)}"
         return text
+    if value_type in {"TIMESTAMPTZ", "TIMESTAMP", "DATE"}:
+        return normalize_temporal(value)
     return str(value)
+
+
+def normalize_decimal(value: Any) -> str:
+    """Compare numerics by value, not by textual representation."""
+    from decimal import Decimal, InvalidOperation
+
+    try:
+        decimal_value = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError):
+        return str(value).strip()
+    normalized = decimal_value.normalize()
+    if normalized == normalized.to_integral():
+        return str(normalized.quantize(Decimal(1)))
+    return format(normalized, "f")
+
+
+def normalize_temporal(value: Any) -> str:
+    """Normalize timestamps so DB and JSON renderings compare equal.
+
+    `psql` returns `2026-05-19 20:28:32.759073+00` while the JSON payload holds
+    `2026-05-19T20:28:32.759073+00:00`. Comparing them as raw strings reports a
+    change on every single row, which used to produce huge phantom deltas.
+    """
+    text = str(value).strip()
+    if not text:
+        return text
+    candidate = text.replace(" ", "T", 1)
+    if candidate.endswith("+00"):
+        candidate += ":00"
+    try:
+        parsed = datetime.fromisoformat(candidate.replace("Z", "+00:00"))
+    except ValueError:
+        return text
+    if parsed.tzinfo is None:
+        return parsed.isoformat()
+    return parsed.astimezone(UTC).isoformat(timespec="microseconds")
 
 
 def load_existing_rows_by_id(
@@ -323,10 +601,10 @@ def load_existing_rows_by_id(
     if where_clause:
         sql += f" {where_clause}"
 
+    load_args, load_env = psql_connection_args(db_url)
     output = subprocess.check_output(
         [
-            "psql",
-            db_url,
+            *load_args,
             "-At",
             "-F",
             "\t",
@@ -336,6 +614,7 @@ def load_existing_rows_by_id(
             sql,
         ],
         text=True,
+        env=load_env,
     )
     rows: dict[int, dict[str, Any]] = {}
     for line in output.splitlines():
@@ -475,10 +754,12 @@ def build_batch_update_statements(
     changed_columns: tuple[str, ...],
     column_types: dict[str, str],
     available_columns: set[str],
+    payload_columns: set[str] | None = None,
 ) -> list[str]:
     if not rows or not changed_columns:
         return []
-        
+
+    carried = payload_columns if payload_columns is not None else set()
     statements = []
     batch_size = 1000
     for i in range(0, len(rows), batch_size):
@@ -498,10 +779,22 @@ def build_batch_update_statements(
         for col in changed_columns:
             assignments.append(f"{col} = nv.{col}::{column_types.get(col, 'TEXT')}")
             
+        # Only force lifecycle columns back to "active" when the payload does
+        # not manage them. If the payload carries `is_active`/`deactivated_at`
+        # (soft-deleted source rows do), overriding them here would silently
+        # reactivate rows the source explicitly marked inactive.
         lifecycle = []
-        if "is_active" in available_columns and "is_active" not in changed_columns:
+        if (
+            "is_active" in available_columns
+            and "is_active" not in changed_columns
+            and "is_active" not in carried
+        ):
             lifecycle.append("is_active = TRUE")
-        if "deactivated_at" in available_columns and "deactivated_at" not in changed_columns:
+        if (
+            "deactivated_at" in available_columns
+            and "deactivated_at" not in changed_columns
+            and "deactivated_at" not in carried
+        ):
             lifecycle.append("deactivated_at = NULL")
         if "updated_at" in available_columns and "updated_at" not in changed_columns:
             lifecycle.append("updated_at = NOW()")
@@ -654,6 +947,16 @@ def generate_minimal_delta_seed(
         db_columns, db_column_types, db_column_set = get_table_schema(db_url, table)
         payload_path = data_dir / table / "data.json"
         payload_rows = load_json(payload_path) if payload_path.exists() else []
+        if not payload_path.exists():
+            # A missing payload file means "this table was not part of the run",
+            # not "every row was deleted". Treating it as an empty payload would
+            # soft-delete the whole table, which is catastrophic for offering
+            # child tables when only the catalog was exported.
+            typer.echo(
+                f"Skipping {table}: no payload at {payload_path} (soft-delete disabled)."
+            )
+            table_stats[table] = {"inserted": 0, "updated": 0, "soft_deleted": 0}
+            continue
         payload_columns = sorted({key for row in payload_rows for key in row.keys()})
         columns = [col for col in db_columns if col in payload_columns]
         if "id" not in columns and "id" in db_column_set:
@@ -732,6 +1035,7 @@ def generate_minimal_delta_seed(
                     changed_cols,
                     column_types,
                     db_column_set,
+                    payload_columns=set(payload_columns),
                 )
             )
 
@@ -1579,7 +1883,13 @@ def remap_all_ids_to_db(
     for table, payload in tables.items():
         if table not in selected_tables:
             continue
-        write_json(data_dir / table / "data.json", payload)
+        table_file = data_dir / table / "data.json"
+        if not payload and not table_file.exists():
+            # Do not materialize an empty payload for a table the run never had.
+            # Writing `[]` here turns "not part of this run" into "every row was
+            # deleted" for the delta generator.
+            continue
+        write_json(table_file, payload)
 
 
 def run_command(command: list[str], cwd: Path) -> None:
@@ -1587,12 +1897,14 @@ def run_command(command: list[str], cwd: Path) -> None:
 
 
 def run_sql_command(db_url: str, sql: str, cwd: Path) -> None:
+    args, env = psql_connection_args(db_url)
     subprocess.run(
-        ["psql", db_url, "-q", "-v", "ON_ERROR_STOP=1", "-c", sql],
+        [*args, "-q", "-v", "ON_ERROR_STOP=1", "-c", sql],
         cwd=cwd,
         text=True,
         capture_output=True,
         check=True,
+        env=env,
     )
 
 
@@ -1688,7 +2000,9 @@ def mark_seed_status(
 
     error_sql = "NULL"
     if error_message:
-        error_sql = f"'{quote_literal(error_message[:4000])}'"
+        # Defence in depth: even if a caller forgets to redact, nothing with a
+        # database URL reaches the ledger.
+        error_sql = f"'{quote_literal(redact_db_url(error_message)[:4000])}'"
 
     sql = f"""
     UPDATE public.sync_seed_run
@@ -1703,10 +2017,10 @@ def mark_seed_status(
 
 
 def run_verification(db_url: str) -> None:
+    args, env = psql_connection_args(db_url)
     subprocess.run(
         [
-            "psql",
-            db_url,
+            *args,
             "-P",
             "pager=off",
             "-c",
@@ -1719,6 +2033,7 @@ def run_verification(db_url: str) -> None:
             """,
         ],
         check=True,
+        env=env,
     )
 
 
@@ -1791,24 +2106,27 @@ def export_catalog_from_db(db_url: str, data_dir: Path) -> None:
     if "professor" not in catalog_tables:
         catalog_tables.append("professor")
 
+    export_args, export_env = psql_connection_args(db_url)
+
     for table in catalog_tables:
         sql = f"SELECT row_to_json(t) FROM public.{table} t;"
         try:
             output = subprocess.check_output(
-                ["psql", db_url, "-At", "-c", sql],
+                [*export_args, "-At", "-c", sql],
                 text=True,
+                env=export_env,
             )
             rows = [json.loads(line) for line in output.splitlines() if line.strip()]
             out_path = data_dir / table / "data.json"
             write_json(out_path, rows)
         except Exception as exc:
-            typer.echo(f"Warning: Failed to export {table} from DB: {exc}")
+            typer.echo(f"Warning: Failed to export {table} from DB: {redact_db_url(str(exc))}")
 
     # Export historical modalities by school
     sql = """
-    SELECT json_build_object('school_code', au.code, 'modality_code', am.code)
+    SELECT json_build_object('school_code', t.school_code, 'modality_code', t.modality_code)
     FROM (
-        SELECT DISTINCT au.code, am.code
+        SELECT DISTINCT au.code AS school_code, am.code AS modality_code
         FROM public.course_offering co
         JOIN public.academic_unit au ON au.id = co.academic_unit_id
         JOIN public.academic_term at ON at.id = co.academic_term_id
@@ -1818,8 +2136,9 @@ def export_catalog_from_db(db_url: str, data_dir: Path) -> None:
     """
     try:
         output = subprocess.check_output(
-            ["psql", db_url, "-At", "-c", sql],
+            [*export_args, "-At", "-c", sql],
             text=True,
+            env=export_env,
         )
         historical: dict[str, list[str]] = {}
         for line in output.splitlines():
@@ -1835,7 +2154,10 @@ def export_catalog_from_db(db_url: str, data_dir: Path) -> None:
         write_json(out_path, historical)
         typer.echo("Exported historical modalities mapping successfully.")
     except Exception as exc:
-        typer.echo(f"Warning: Failed to export historical modalities from DB: {exc}")
+        typer.echo(
+            "Warning: Failed to export historical modalities from DB: "
+            f"{redact_db_url(str(exc))}"
+        )
 
 
 def run_sync(
@@ -1854,7 +2176,6 @@ def run_sync(
     seed_dir: Path,
     baseline_seed: str | None,
     seed_history_db_url: str,
-    skip_migrations: bool = False,
 ) -> None:
     scope = normalize_scope(scope)
     scoped_tables = tables_for_scope(scope)
@@ -1870,6 +2191,8 @@ def run_sync(
         )
 
     root_dir = Path(__file__).resolve().parents[3]
+    repo_dir = Path(__file__).resolve().parents[4]
+    backup_dir: Path | None = None
 
     try:
         if target == "seed-history":
@@ -1882,20 +2205,25 @@ def run_sync(
                 seed_dir_resolved, baseline_seed=baseline_seed
             )
             typer.echo(f"Building local state from {len(seed_paths)} seed files...")
-            migrations_dir = root_dir / "migrations"
+            migrations_dir = repo_dir / "drizzle"
             resolved_db_url = seed_history_db_url
-            if not os.environ.get("GITHUB_ACTIONS"):
+            explicit_seed_db = seed_history_db_url != SEED_HISTORY_SERVICE_DB_URL
+            if not os.environ.get("GITHUB_ACTIONS") and not explicit_seed_db:
                 typer.echo(
                     "Starting ephemeral Postgres Docker container for seed-history..."
                 )
                 seed_history_container, resolved_db_url = (
                     _start_seed_history_postgres_container()
                 )
+            # The replay cannot be skipped even when the data is unchanged:
+            # `scope=offering` exports the catalog from this reconstructed
+            # database, and the delta generator needs that baseline to compute
+            # inserts/updates/soft-deletes. The fingerprint short-circuit below
+            # still avoids emitting a non-NOOP seed when nothing changed.
             temp_db_name, resolved_db_url = create_temp_seed_history_db(
                 seed_paths,
                 db_url=resolved_db_url,
                 migrations_dir=migrations_dir,
-                skip_migrations=skip_migrations,
             )
 
             if scope == "offering":
@@ -2063,11 +2391,11 @@ def run_sync(
                     f"file={file_environment_id} destination={environment_id}"
                 )
             typer.echo("Applying seed to destination DB...")
+            apply_args, apply_env = psql_connection_args(resolved_db_url)
             try:
                 subprocess.run(
                     [
-                        "psql",
-                        resolved_db_url,
+                        *apply_args,
                         "-q",
                         "-v",
                         "ON_ERROR_STOP=1",
@@ -2078,6 +2406,7 @@ def run_sync(
                     text=True,
                     capture_output=True,
                     check=True,
+                    env=apply_env,
                 )
                 if target != "seed-history":
                     mark_seed_status(
@@ -2089,24 +2418,30 @@ def run_sync(
                     )
                 typer.echo("Seed apply completed successfully.")
             except subprocess.CalledProcessError as exc:
+                # Never persist `str(exc)` raw: it embeds the full argv, and any
+                # credential still present there ends up stored in the ledger.
+                failure_output = redact_db_url(
+                    (exc.stderr or exc.stdout or str(exc)).strip()
+                )
                 if target != "seed-history":
                     mark_seed_status(
                         db_url=resolved_db_url,
                         cwd=root_dir,
                         sha256=sha256,
                         status="failed",
-                        error_message=(exc.stderr or str(exc)),
+                        error_message=failure_output,
                     )
-                if exc.stderr:
-                    typer.echo(exc.stderr.strip())
+                if failure_output:
+                    typer.echo(failure_output)
                 raise
 
         if verify and apply_seed:
             typer.echo("Running post-sync verification queries...")
             run_verification(resolved_db_url)
     finally:
-        restore_data_files(data_dir, backup_dir)
-        shutil.rmtree(backup_dir, ignore_errors=True)
+        if backup_dir is not None:
+            restore_data_files(data_dir, backup_dir)
+            shutil.rmtree(backup_dir, ignore_errors=True)
         if temp_db_name is not None:
             drop_temp_seed_history_db(temp_db_name)
         if seed_history_container is not None:
@@ -2190,11 +2525,6 @@ def sync_cmd(
         "--seed-history-db-url",
         help="Postgres URL used by target=seed-history (typically a GitHub service container)",
     ),
-    skip_migrations: bool = typer.Option(
-        False,
-        "--skip-migrations",
-        help="Skip applying migrations and bootstrap SQL to the seed history database",
-    ),
 ) -> None:
     """Run a full idempotent synchronization against local or remote DB."""
     year_list = [int(value.strip()) for value in years.split(",") if value.strip()]
@@ -2217,5 +2547,4 @@ def sync_cmd(
         seed_dir=seed_dir,
         baseline_seed=baseline_seed,
         seed_history_db_url=seed_history_db_url,
-        skip_migrations=skip_migrations,
     )

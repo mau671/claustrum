@@ -268,6 +268,10 @@ uv run itcr sync --target seed-history --seed-dir ../seeds/itcr --scope offering
 uv run itcr sync --target seed-history --seed-history-db-url "postgresql://postgres:postgres@127.0.0.1:5432/postgres" --seed-dir ../seeds/itcr --scope offering --years 2026 --no-apply
 ```
 
+`--target seed-history` aplica las migraciones Drizzle (`drizzle/`) y luego replaya
+los seeds históricos. No requiere `--skip-migrations` ni Supabase CLI: si se pasa
+`--seed-history-db-url` se usa esa base; si no, se levanta un contenedor temporal.
+
 Qué hace `sync`:
 
 1. Ejecuta el pipeline completo de `download + process`.

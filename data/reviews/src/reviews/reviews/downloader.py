@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -172,6 +173,30 @@ def write_page(
     if page > 1 and not page_reviews:
         output_path.unlink(missing_ok=True)
         return output_path, []
+
+    review_ids = [
+        str(review["source_review_id"])
+        for review in page_reviews
+        if review.get("source_review_id")
+    ]
+    reviews_hash = hashlib.sha256(
+        json.dumps(page_reviews, sort_keys=True, ensure_ascii=True).encode("utf-8")
+    ).hexdigest()
+
+    # Skip the write when the page content did not change. This keeps mtimes
+    # stable so the processing step can detect unmodified pages and skip them.
+    if output_path.exists():
+        try:
+            existing = json.loads(output_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            existing = None
+        if (
+            isinstance(existing, dict)
+            and existing.get("reviews_hash") == reviews_hash
+            and existing.get("total_pages") == total_pages
+        ):
+            return output_path, review_ids
+
     output_path.write_text(
         json.dumps(
             {
@@ -181,6 +206,7 @@ def write_page(
                 "page": page,
                 "total_pages": total_pages,
                 "fetched_at": fetched_at,
+                "reviews_hash": reviews_hash,
                 "reviews": page_reviews,
             },
             ensure_ascii=True,
@@ -188,7 +214,7 @@ def write_page(
         )
         + "\n"
     )
-    return output_path, [str(review["source_review_id"]) for review in page_reviews if review.get("source_review_id")]
+    return output_path, review_ids
 
 
 def save_profile_index(base_dir: Path, profile_index: dict[str, Any]) -> None:

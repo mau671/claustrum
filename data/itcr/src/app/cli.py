@@ -231,11 +231,6 @@ def sync_cli(
         "--seed-history-db-url",
         help="Postgres URL used by target=seed-history (typically a GitHub service container)",
     ),
-    skip_migrations: bool = typer.Option(
-        False,
-        "--skip-migrations",
-        help="Skip applying migrations and bootstrap SQL to the seed history database",
-    ),
 ) -> None:
     """Run a full idempotent synchronization against local or remote DB."""
     sync_cmd(
@@ -254,7 +249,6 @@ def sync_cli(
         seed_dir=seed_dir,
         baseline_seed=baseline_seed,
         seed_history_db_url=seed_history_db_url,
-        skip_migrations=skip_migrations,
     )
 
 

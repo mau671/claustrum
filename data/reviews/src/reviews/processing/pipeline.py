@@ -31,7 +31,16 @@ from .normalizers import (
     normalize_tags,
     parse_review_date,
 )
-from reviews.paths import COURSE_DECISIONS_PATH, COURSE_FAMILY_DECISIONS_PATH, COURSE_VARIATIONS_PATH, PROCESSED_PROFESSORS_ROOT, PROCESSED_REPORTS_ROOT, PROCESSED_ROOT, RAW_PROFESSORS_ROOT, ROOT
+from reviews.paths import (
+    COURSE_DECISIONS_PATH,
+    COURSE_FAMILY_DECISIONS_PATH,
+    COURSE_VARIATIONS_PATH,
+    PROCESSED_PROFESSORS_ROOT,
+    PROCESSED_REPORTS_ROOT,
+    RAW_PROFESSORS_ROOT,
+    ROOT,
+    SEED_REVIEWS_ROOT,
+)
 from .reports import collect_reports
 from .sql_export import write_professor_sql
 
@@ -165,7 +174,7 @@ def process_file(
     return output
 
 
-def select_raw_files(*, professor_ids: list[int] | None, limit_professors: int | None, professor_offset: int, limit_files: int | None, limit_pages_per_professor: int | None) -> list[Path]:
+def select_raw_files(*, professor_ids: list[int] | None, limit_professors: int | None, professor_offset: int, limit_files: int | None, limit_pages_per_professor: int | None, only_changed: bool = False) -> list[Path]:
     all_files = sorted(
         RAW_PROFESSORS_ROOT.glob("*/*/pages/page-*.json"),
         key=lambda path: (int(path.relative_to(RAW_PROFESSORS_ROOT).parts[0]), path.relative_to(RAW_PROFESSORS_ROOT).parts[1], path.name),
@@ -190,9 +199,38 @@ def select_raw_files(*, professor_ids: list[int] | None, limit_professors: int |
             professor_files = professor_files[: max(limit_pages_per_professor, 0)]
         selected_files.extend(professor_files)
 
+    if only_changed:
+        selected_files = [path for path in selected_files if is_page_stale(path)]
+
     if limit_files is not None:
         selected_files = selected_files[: max(limit_files, 0)]
     return selected_files
+
+
+def is_page_stale(raw_path: Path) -> bool:
+    """True when the raw page has not been processed or changed since then."""
+    relative = raw_path.relative_to(RAW_PROFESSORS_ROOT)
+    processed_path = PROCESSED_PROFESSORS_ROOT / relative
+    if not processed_path.exists():
+        return True
+    try:
+        return raw_path.stat().st_mtime_ns > processed_path.stat().st_mtime_ns
+    except OSError:
+        return True
+
+
+def load_processed_pages_for_professor(professor_id: int) -> list[dict[str, Any]]:
+    """Load every processed page for a professor, in a stable order."""
+    professor_root = PROCESSED_PROFESSORS_ROOT / str(professor_id)
+    if not professor_root.exists():
+        return []
+    pages: list[dict[str, Any]] = []
+    for path in sorted(professor_root.glob("*/pages/page-*.json")):
+        try:
+            pages.append(json.loads(path.read_text()))
+        except (json.JSONDecodeError, OSError):
+            continue
+    return pages
 
 
 def remove_professors_from_course_variations(variations: dict[str, dict[str, Any]], professor_ids: set[int]) -> dict[str, dict[str, Any]]:
@@ -256,7 +294,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--reset-course-cache", action="store_true", help="Ignore existing data/state/courses/decisions.json.")
     parser.add_argument("--reset-variation-cache", action="store_true", help="Ignore existing data/state/courses/variations.json.")
     parser.add_argument("--clean-output", action="store_true", help="Remove data/processed/professors and data/processed/reports before writing this run.")
-    parser.add_argument("--write-sql", action="store_true", help="Write idempotent SQL files under data/processed/professors/{professor_id}/reviews.sql.")
+    parser.add_argument("--write-sql", action="store_true", help="Write idempotent SQL files under data/seeds/reviews/seed_YYYYMMDDTHHMMSSZ_{professor_id}.sql.")
+    parser.add_argument("--only-changed", action="store_true", help="Process only raw pages newer than their processed output (incremental runs).")
     return parser.parse_args()
 
 
@@ -303,6 +342,7 @@ def main() -> None:
         professor_offset=args.professor_offset,
         limit_files=args.limit_files,
         limit_pages_per_professor=args.limit_pages_per_professor,
+        only_changed=args.only_changed,
     )
     print(f"Raw files selected: {len(raw_files):,}")
     print("Priming course variations")
@@ -336,17 +376,21 @@ def main() -> None:
     sql_review_count = 0
     if args.write_sql:
         professor_items = sorted(processed_page_data_by_professor.items())
-        timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-        sql_dir = PROCESSED_ROOT / "sql"
+        timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        sql_dir = SEED_REVIEWS_ROOT
         sql_dir.mkdir(parents=True, exist_ok=True)
         for _, item in progress_iter(professor_items, total=len(professor_items), label="Writing SQL"):
-            professor_id, page_data = item
+            professor_id, changed_page_data = item
+            # With --only-changed the run may hold a subset of pages. Read every
+            # processed page for the professor so the seed stays complete; the
+            # import_key filter still prevents duplicate rows.
+            page_data = load_processed_pages_for_professor(professor_id) or changed_page_data
             try:
                 existing_keys = get_existing_import_keys(professor_id)
             except Exception as e:
                 print(f"Warning: Could not fetch existing keys for {professor_id}: {e}")
                 existing_keys = set()
-            sql_path = sql_dir / f"{timestamp_str}_{professor_id}.sql"
+            sql_path = sql_dir / f"seed_{timestamp_str}_{professor_id}.sql"
             count = write_professor_sql(professor_id, page_data, sql_path, existing_keys)
             sql_review_count += count
             if count == 0:
@@ -375,6 +419,7 @@ def main() -> None:
             "limit_pages_per_professor": args.limit_pages_per_professor,
             "max_openrouter_calls": args.max_openrouter_calls,
             "min_course_confidence": args.min_course_confidence,
+            "only_changed": args.only_changed,
         },
     }
     save_json(PROCESSED_REPORTS_ROOT / "summary.json", summary)

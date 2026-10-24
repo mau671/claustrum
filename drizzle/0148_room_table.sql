@@ -29,8 +29,10 @@ CREATE TABLE IF NOT EXISTS public.room (
   campus_id  BIGINT NOT NULL REFERENCES public.campus(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   building   TEXT NOT NULL,
   number     SMALLINT NOT NULL,
-  -- Canonical display form: BUILDING-NN. Generated so it can never drift from
-  -- the building/number pair.
+  -- Canonical display form: BUILDING-NNN. Generated so it can never drift from
+  -- the building/number pair. NOTE: the original definition used lpad, which
+  -- truncates numbers longer than the width; 0155 replaces it with a correct
+  -- three-digit form.
   code       TEXT GENERATED ALWAYS AS (building || '-' || lpad(number::text, 2, '0')) STORED,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -82,13 +82,23 @@ def normalize_group_type(raw_group_type: str) -> str:
 
 
 def normalize_classroom(raw_classroom: str) -> str | None:
-    """Normalize classroom values and convert placeholders to NULL."""
+    """Normalise a classroom string to the canonical BUILDING-NNN form.
+
+    The ITCR always publishes three digits after the hyphen ('UTN-603',
+    'A-002', 'UTN-000'). Re-padding here guarantees that `classroom` and the
+    generated `room.code` are identical, so a future mismatch cannot silently
+    create a second room for the same physical space.
+    """
     classroom = raw_classroom.strip()
     if not classroom:
         return None
     if classroom.upper() == "NO DISPONIBLE":
         return None
-    return classroom
+    match = re.fullmatch(r"([A-Z0-9]{1,5})-([0-9]{1,3})", classroom)
+    if not match:
+        return classroom
+    building, number = match.group(1), int(match.group(2))
+    return f"{building}-{number:03d}"
 
 
 def parse_classroom(raw_classroom: str | None) -> tuple[str, int] | None:

@@ -123,10 +123,15 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
 
       getById: ({ params }) =>
         Effect.gen(function* () {
+          const profId = Number(params.id);
+          if (!Number.isInteger(profId) || profId <= 0) {
+            return yield* Effect.fail(new ProfessorNotFound({ error: "Professor not found" }));
+          }
+
           const rows = yield* sql
             .unsafe<RawProfessorDetailRow>(
-              "SELECT id, full_name FROM public.professor WHERE id::text = $1",
-              [params.id],
+              "SELECT id, full_name FROM public.professor WHERE id = $1",
+              [profId],
             )
             .pipe(Effect.orDie);
 
@@ -221,6 +226,11 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
 
       getHistory: ({ params }) =>
         Effect.gen(function* () {
+          const profId = Number(params.id);
+          if (!Number.isInteger(profId) || profId <= 0) {
+            return [];
+          }
+
           const rows = yield* sql
             .unsafe<RawProfessorHistoryRow>(
               `SELECT
@@ -240,11 +250,11 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
              JOIN public.course c ON c.id = co.course_id
              JOIN public.academic_term at ON at.id = co.academic_term_id
              LEFT JOIN public.academic_modality am ON am.id = at.academic_modality_id
-             WHERE cogp.professor_id::text = $1
+             WHERE cogp.professor_id = $1
                AND co.is_active = TRUE
                AND (cog.is_active IS NULL OR cog.is_active = TRUE)
              ORDER BY at.year DESC, at.period_number DESC, at.id DESC, c.code ASC, cog.group_code ASC`,
-              [params.id],
+              [profId],
             )
             .pipe(Effect.orDie);
 

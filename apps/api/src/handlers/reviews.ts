@@ -184,9 +184,16 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
                   );
                 }
 
+                const profId = Number(payload.professorId);
+                if (!Number.isInteger(profId) || profId <= 0) {
+                  return yield* Effect.fail(
+                    new ReviewBadRequest({ error: "Professor does not exist" }),
+                  );
+                }
+
                 const profRows = yield* sql.unsafe<{ id: string; full_name: string }>(
-                  "SELECT id, full_name FROM public.professor WHERE id::text = $1",
-                  [payload.professorId],
+                  "SELECT id, full_name FROM public.professor WHERE id = $1",
+                  [profId],
                 );
                 if (profRows.length === 0) {
                   return yield* Effect.fail(
@@ -209,10 +216,10 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
                      FROM public.course_offering_group_professor cogp
                      JOIN public.course_offering_group cog ON cog.id = cogp.course_offering_group_id
                      JOIN public.course_offering co ON co.id = cog.course_offering_id
-                     WHERE cogp.professor_id::text = $1
+                     WHERE cogp.professor_id = $1
                        AND co.academic_term_id = $2
                      LIMIT 1`,
-                    [payload.professorId, payload.academicTermId],
+                    [profId, payload.academicTermId],
                   );
                   if (termCheckRows.length === 0) {
                     return yield* Effect.fail(

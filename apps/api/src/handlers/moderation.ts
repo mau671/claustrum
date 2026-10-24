@@ -149,7 +149,7 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
                 pr.clarity_score,
                 pr.fairness_score,
                 pr.attendance_required,
-                pr.grade_received,
+                pr.grade_received::text AS grade_received,
                 pr.engagement_level,
                 pr.tags,
                 pr.status,
@@ -198,7 +198,10 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
               fairness_score: Number(r.fairness_score),
               attendance_required:
                 r.attendance_required !== null ? Boolean(r.attendance_required) : null,
-              grade_received: r.grade_received ?? null,
+              grade_received:
+                r.grade_received !== null && r.grade_received !== undefined
+                  ? String(r.grade_received)
+                  : null,
               engagement_level:
                 r.engagement_level !== null && r.engagement_level !== undefined
                   ? Number(r.engagement_level)

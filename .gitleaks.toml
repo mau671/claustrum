@@ -37,5 +37,4 @@ paths = [
   '''\.env\.''',
   '''\.dev\.vars''',
   '''lighthouse-.*\.json''',
-  '''apps/api/src/auth-cli\.ts''',
 ]

@@ -514,7 +514,7 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
     # breaking the foreign key. Unknown values are also surfaced in the delta.
     group_type_codes = {str(g["group_type"]) for g in groups if g.get("group_type")}
     group_type_catalog = [
-        {"code": code, "name": code.title(), "sort_order": 100}
+        {"code": code, "name": code.title()}
         for code in sorted(group_type_codes)
     ]
     group_type_path = data_dir / "group_type" / "data.json"
@@ -530,7 +530,7 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
         str(o["course_type"]) for o in offering_list if o.get("course_type")
     }
     course_type_catalog = [
-        {"code": code, "name": code.title(), "sort_order": 100}
+        {"code": code, "name": code.title()}
         for code in sorted(course_type_codes)
     ]
     course_type_path = data_dir / "course_type" / "data.json"

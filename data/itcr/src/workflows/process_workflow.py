@@ -95,7 +95,7 @@ def run_process(
                     if p.get("academic_degree")
                 }
                 degree_catalog = [
-                    {"code": code, "name": code.title(), "sort_order": 100}
+                    {"code": code, "name": code.title()}
                     for code in sorted(degree_codes)
                 ]
                 degree_path = data_dir / "academic_degree" / "data.json"

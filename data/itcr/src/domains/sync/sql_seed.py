@@ -324,8 +324,8 @@ def generate_seed(
             "supports_soft_delete": True,
         },
         "group_type": {
-            "columns": ["code", "name", "sort_order"],
-            "types": {"sort_order": "SMALLINT"},
+            "columns": ["code", "name"],
+            "types": {},
             "order": 15,
             "conflict_columns": ["code"],
             "update_assignments": [
@@ -335,8 +335,8 @@ def generate_seed(
             "supports_soft_delete": False,
         },
         "academic_degree": {
-            "columns": ["code", "name", "sort_order"],
-            "types": {"sort_order": "SMALLINT"},
+            "columns": ["code", "name"],
+            "types": {},
             "order": 16,
             "conflict_columns": ["code"],
             "update_assignments": [
@@ -346,8 +346,8 @@ def generate_seed(
             "supports_soft_delete": False,
         },
         "course_type": {
-            "columns": ["code", "name", "sort_order"],
-            "types": {"sort_order": "SMALLINT"},
+            "columns": ["code", "name"],
+            "types": {},
             "order": 17,
             "conflict_columns": ["code"],
             "update_assignments": [

@@ -68,6 +68,9 @@ TABLE_CONFLICT_COLUMNS: dict[str, list[str]] = {
         "relation_type",
     ],
     "professor": ["full_name"],
+    "group_type": ["code"],
+    "academic_degree": ["code"],
+    "course_type": ["code"],
     "room": ["campus_id", "building", "number"],
     "course_offering": [
         "course_id",
@@ -792,9 +795,14 @@ def pg_type_to_generic(data_type: str, udt_name: str) -> str:
 
 def get_table_schema(
     db_url: str, table: str
-) -> tuple[list[str], dict[str, str], set[str]]:
+) -> tuple[list[str], dict[str, str], set[str], set[str]]:
     sql = f"""
-    SELECT column_name, data_type, udt_name
+    SELECT
+      column_name,
+      data_type,
+      udt_name,
+      coalesce(column_default, ''),
+      is_nullable
     FROM information_schema.columns
     WHERE table_schema = 'public'
       AND table_name = '{quote_literal(table)}'
@@ -806,12 +814,15 @@ def get_table_schema(
     columns: list[str] = []
     column_types: dict[str, str] = {}
     column_set: set[str] = set()
+    defaulted_columns: set[str] = set()
     for row in rows:
-        col_name, data_type, udt_name = row.split("\t")
+        col_name, data_type, udt_name, column_default, _ = row.split("\t")
         columns.append(col_name)
         column_set.add(col_name)
         column_types[col_name] = pg_type_to_generic(data_type, udt_name)
-    return columns, column_types, column_set
+        if column_default:
+            defaulted_columns.add(col_name)
+    return columns, column_types, column_set, defaulted_columns
 
 
 def build_insert_statement(
@@ -820,15 +831,25 @@ def build_insert_statement(
     columns: list[str],
     column_types: dict[str, str],
     available_columns: set[str],
+    defaulted_columns: set[str] | None = None,
 ) -> list[str]:
     if not rows:
         return []
+    defaults = defaulted_columns or set()
     lines = [f"INSERT INTO public.{table}", f"  ({', '.join(columns)})", "VALUES"]
     values_lines: list[str] = []
     for row in rows:
-        formatted = [
-            format_value(row.get(col), column_types.get(col, "TEXT")) for col in columns
-        ]
+        formatted: list[str] = []
+        for col in columns:
+            if col not in row and col in defaults:
+                # The payload does not carry this column for this row, but the
+                # database defines a default. Emit DEFAULT instead of NULL so a
+                # generated row inherits is_active/created_at/updated_at.
+                formatted.append("DEFAULT")
+            else:
+                formatted.append(
+                    format_value(row.get(col), column_types.get(col, "TEXT"))
+                )
         values_lines.append(f"  ({', '.join(formatted)})")
     conflict_columns = TABLE_CONFLICT_COLUMNS.get(table, ["id"])
     updatable = [
@@ -956,9 +977,13 @@ def payload_row_normalized(
     columns: list[str],
     column_types: dict[str, str],
 ) -> dict[str, Any]:
+    # Only carry the columns the payload actually provides. Filling the rest
+    # with None would make a generated INSERT write NULL over a column that has
+    # a database default (is_active, created_at, updated_at).
     return {
         col: normalize_for_compare(row.get(col), column_types.get(col, "TEXT"))
         for col in columns
+        if col in row
     }
 
 
@@ -1082,7 +1107,12 @@ def generate_minimal_delta_seed(
     preserved_group_ids: set[int] = set()
 
     for table in target_tables:
-        db_columns, db_column_types, db_column_set = get_table_schema(db_url, table)
+        (
+            db_columns,
+            db_column_types,
+            db_column_set,
+            db_defaulted_columns,
+        ) = get_table_schema(db_url, table)
         payload_path = data_dir / table / "data.json"
         payload_rows = load_json(payload_path) if payload_path.exists() else []
         if not payload_path.exists():
@@ -1348,6 +1378,7 @@ def generate_minimal_delta_seed(
                         columns,
                         column_types,
                         db_column_set,
+                        defaulted_columns=db_defaulted_columns,
                     )
                 )
             lines.extend(update_rows)

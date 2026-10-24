@@ -2342,8 +2342,12 @@ def export_catalog_from_db(db_url: str, data_dir: Path) -> None:
     """Export catalog tables from DB to data/raw/ as JSON for offering processors."""
     typer.echo("Exporting catalog prerequisites from seed-history DB to JSON...")
     catalog_tables = tables_for_scope("catalog")
-    if "professor" not in catalog_tables:
-        catalog_tables.append("professor")
+    # Lookup catalogues and rooms are needed by the offering delta even though
+    # they are not part of the `catalog` scope, because the offering run is what
+    # discovers new group types, course types and rooms.
+    for extra in ("professor", "group_type", "course_type", "room"):
+        if extra not in catalog_tables:
+            catalog_tables.append(extra)
 
     export_args, export_env = psql_connection_args(db_url)
 

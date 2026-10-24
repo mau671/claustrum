@@ -5,6 +5,7 @@ from typing import Any
 
 import typer
 
+from src.domains.sync.helpers import canonical_group_code
 from src.domains.sync.helpers import load_json
 from src.domains.sync.helpers import write_json
 from src.workflows.download_workflow import download
@@ -89,6 +90,7 @@ def run_sync_pipeline(
     merged_group_professors: dict[tuple[int, int], dict[str, Any]] = {}
     merged_meetings: dict[tuple[int, int, str, str], dict[str, Any]] = {}
     merged_professors: dict[str, dict[str, Any]] = {}
+    merged_rooms: dict[tuple[int, str, int], dict[str, Any]] = {}
 
     for year in year_list:
         year_str = str(year)
@@ -103,6 +105,15 @@ def run_sync_pipeline(
         )
         meetings = load_json(data_dir / "course_offering_meeting" / "data.json")
         professors = load_json(data_dir / "professor" / "data.json")
+        rooms = (
+            load_json(data_dir / "room" / "data.json")
+            if (data_dir / "room" / "data.json").exists()
+            else []
+        )
+
+        merged_rooms.update(
+            {(int(r["campus_id"]), str(r["building"]), int(r["number"])): r for r in rooms}
+        )
 
         merged_offerings.update(
             {
@@ -116,7 +127,7 @@ def run_sync_pipeline(
             }
         )
         merged_groups.update(
-            {(int(r["course_offering_id"]), str(r["group_code"])): r for r in groups}
+            {(int(r["course_offering_id"]), canonical_group_code(r["group_code"])): r for r in groups}
         )
         merged_group_professors.update(
             {
@@ -152,3 +163,5 @@ def run_sync_pipeline(
         list(merged_meetings.values()),
     )
     write_json(data_dir / "professor" / "data.json", list(merged_professors.values()))
+    if merged_rooms:
+        write_json(data_dir / "room" / "data.json", list(merged_rooms.values()))

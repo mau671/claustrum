@@ -44,7 +44,7 @@ interface RawReviewRow {
   clarity_score: number | string;
   fairness_score: number | string;
   attendance_required: boolean;
-  grade_received: string | null;
+  grade_received: number | string | null;
   engagement_level: number;
   tags: string[] | null;
   status: string;
@@ -113,7 +113,10 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
               r.attendance_required !== null && r.attendance_required !== undefined
                 ? Boolean(r.attendance_required)
                 : null,
-            grade_received: r.grade_received,
+            grade_received:
+              r.grade_received !== null && r.grade_received !== undefined
+                ? String(r.grade_received)
+                : null,
             engagement_level:
               r.engagement_level !== null && r.engagement_level !== undefined
                 ? Number(r.engagement_level)
@@ -339,7 +342,10 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
               r.attendance_required !== null && r.attendance_required !== undefined
                 ? Boolean(r.attendance_required)
                 : null,
-            grade_received: r.grade_received ?? null,
+            grade_received:
+              r.grade_received !== null && r.grade_received !== undefined
+                ? String(r.grade_received)
+                : null,
             engagement_level:
               r.engagement_level !== null && r.engagement_level !== undefined
                 ? Number(r.engagement_level)

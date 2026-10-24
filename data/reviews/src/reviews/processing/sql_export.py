@@ -47,7 +47,11 @@ def get_review_values(professor_id: int, review: dict[str, Any]) -> str:
         "clarity_score": f"{sql_numeric(review.get('clarity_score'))}::NUMERIC(3,1)",
         "fairness_score": f"{sql_numeric(review.get('fairness_score'))}::NUMERIC(3,1)",
         "attendance_required": f"{sql_bool(review.get('attendance_required'))}::BOOLEAN",
-        "grade_received": f"{sql_literal(review.get('grade_received'))}::TEXT",
+        "grade_received": (
+            "NULLIF("
+            f"{sql_literal(review.get('grade_received'))}"
+            ",'')::SMALLINT"
+        ),
         "engagement_level": f"{sql_numeric(review.get('engagement_level'))}::SMALLINT",
         "tags": f"{sql_text_array(review.get('tags') if isinstance(review.get('tags'), list) else [])}",
         "created_at": f"{sql_literal(review.get('created_at'))}::TIMESTAMPTZ",

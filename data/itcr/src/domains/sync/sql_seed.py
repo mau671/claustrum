@@ -177,7 +177,7 @@ def generate_seed(
                 "academic_modality_id": "BIGINT",
                 "external_plan_id": "INTEGER",
                 "first_level_number": "INTEGER",
-                "academic_degree": "TEXT",
+                "academic_degree": "public.academic_degree",
             },
             "order": 8,
             "conflict_columns": ["academic_unit_id", "external_plan_id"],
@@ -323,6 +323,25 @@ def generate_seed(
             ],
             "supports_soft_delete": True,
         },
+        "room": {
+            "columns": ["id", "campus_id", "building", "number"],
+            "types": {
+                "id": "BIGINT",
+                "campus_id": "BIGINT",
+                "number": "SMALLINT",
+            },
+            "order": 15,
+            "conflict_columns": ["campus_id", "building", "number"],
+            "update_assignments": [
+                "campus_id = EXCLUDED.campus_id",
+                "building = EXCLUDED.building",
+                "number = EXCLUDED.number",
+                "updated_at = NOW()",
+            ],
+            # Rooms are never removed from the catalogue: a room that stops
+            # being used simply stops receiving meetings.
+            "supports_soft_delete": False,
+        },
         "course_offering": {
             "columns": [
                 "id",
@@ -343,7 +362,7 @@ def generate_seed(
                 "credits_snapshot": "INTEGER",
                 "weekly_hours_snapshot": "INTEGER",
             },
-            "order": 15,
+            "order": 16,
             "conflict_columns": [
                 "course_id",
                 "campus_id",
@@ -375,9 +394,10 @@ def generate_seed(
             "types": {
                 "id": "BIGINT",
                 "course_offering_id": "BIGINT",
+                "group_code": "SMALLINT",
                 "capacity": "INTEGER",
             },
-            "order": 16,
+            "order": 17,
             "conflict_columns": ["course_offering_id", "group_code"],
             "update_assignments": [
                 "course_offering_id = EXCLUDED.course_offering_id",
@@ -397,7 +417,7 @@ def generate_seed(
                 "course_offering_group_id": "BIGINT",
                 "professor_id": "BIGINT",
             },
-            "order": 17,
+            "order": 18,
             "conflict_columns": ["course_offering_group_id", "professor_id"],
             "update_assignments": [
                 "course_offering_group_id = EXCLUDED.course_offering_group_id",
@@ -412,6 +432,7 @@ def generate_seed(
             "columns": [
                 "id",
                 "course_offering_group_id",
+                "room_id",
                 "weekday",
                 "starts_at",
                 "ends_at",
@@ -420,11 +441,12 @@ def generate_seed(
             "types": {
                 "id": "BIGINT",
                 "course_offering_group_id": "BIGINT",
+                "room_id": "BIGINT",
                 "weekday": "INTEGER",
                 "starts_at": "TIME",
                 "ends_at": "TIME",
             },
-            "order": 18,
+            "order": 19,
             "conflict_columns": [
                 "course_offering_group_id",
                 "weekday",
@@ -437,6 +459,7 @@ def generate_seed(
                 "starts_at = EXCLUDED.starts_at",
                 "ends_at = EXCLUDED.ends_at",
                 "classroom = EXCLUDED.classroom",
+                "room_id = EXCLUDED.room_id",
                 "is_active = TRUE",
                 "deactivated_at = NULL",
                 "updated_at = NOW()",

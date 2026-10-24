@@ -28,6 +28,7 @@ SYNC_TABLES = [
     "study_plan_level_course",
     "course_relation",
     "professor",
+    "room",
     "course_offering",
     "course_offering_group",
     "course_offering_group_professor",
@@ -35,6 +36,7 @@ SYNC_TABLES = [
 ]
 
 OFFERING_TABLES = {
+    "room",
     "course_offering",
     "course_offering_group",
     "course_offering_group_professor",
@@ -64,6 +66,20 @@ def next_sequential_id(state: dict[str, int], table: str) -> int:
     """Return next positive sequential BIGINT id for a table."""
     state[table] = state.get(table, 0) + 1
     return state[table]
+
+
+def canonical_group_code(value: Any) -> str:
+    """Canonical two-digit form of a group code, for natural-key comparisons.
+
+    The column is SMALLINT now, so psql returns `1` while the JSON payload still
+    carries `"01"`. Comparing the raw representations made the remapping miss
+    every existing group and allocate new IDs, which then broke the foreign keys
+    pointing at the old ones. Normalise both sides through this helper.
+    """
+    text = str(value if value is not None else "").strip()
+    if not text.isdigit():
+        return text
+    return f"{int(text):02d}"
 
 
 def quote_literal(value: str) -> str:

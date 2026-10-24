@@ -57,7 +57,14 @@ const reviewFormSchema = z.object({
   clarityScore: z.number().min(0).max(10),
   fairnessScore: z.number().min(0).max(10),
   attendanceRequired: z.boolean(),
-  gradeReceived: z.string().trim().max(32).optional(),
+  gradeReceived: z
+    .string()
+    .trim()
+    .regex(/^$|^\d{1,3}$/, "La nota debe ser un número entre 0 y 100")
+    .refine((value) => value === "" || Number(value) <= 100, {
+      message: "La nota debe ser un número entre 0 y 100",
+    })
+    .optional(),
   engagementLevel: z.number().int().min(1).max(5),
   tags: z.array(z.enum(REVIEW_TAG_OPTIONS)).max(6),
   turnstileToken: z.string().min(1),

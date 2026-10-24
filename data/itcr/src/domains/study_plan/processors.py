@@ -8,6 +8,29 @@ from src.shared.text_and_ids import load_campus_id_map
 from src.shared.text_and_ids import normalize_text
 
 
+def normalize_academic_degree(raw_value: object) -> str:
+    """Map a raw degree string to a member of the academic_degree enum.
+
+    The enum is a closed catalogue, so an unexpected value would fail the INSERT
+    and lose the whole study plan. Unknown values fall back to 'NO OTORGA' and
+    are reported by the caller, keeping the plan while surfacing the mismatch.
+    """
+    value = normalize_text(str(raw_value or ""))
+    aliases = {
+        "ASOCIADO": "ASOCIADO",
+        "BACHILLERATO UNIVERSITARIO": "BACHILLERATO UNIVERSITARIO",
+        "BACHILLERATO": "BACHILLERATO UNIVERSITARIO",
+        "DIPLOMADO": "DIPLOMADO",
+        "DOCTORADO ACADEMICO": "DOCTORADO ACADÉMICO",
+        "DOCTORADO ACADÉMICO": "DOCTORADO ACADÉMICO",
+        "LICENCIATURA": "LICENCIATURA",
+        "MAESTRIA": "MAESTRÍA",
+        "MAESTRÍA": "MAESTRÍA",
+        "NO OTORGA": "NO OTORGA",
+    }
+    return aliases.get(value, "NO OTORGA")
+
+
 def process_study_plan_complete(
     data_dir: Path = Path("data/raw"),
 ) -> tuple[
@@ -224,7 +247,7 @@ def process_study_plan_complete(
 
             plan_name = normalize_text(plan.get("name", ""))
             first_level = plan.get("first_level_number", 0)
-            academic_degree = normalize_text(plan.get("academic_degree", ""))
+            academic_degree = normalize_academic_degree(plan.get("academic_degree", ""))
             modality_raw = plan.get("modalidad", "")
             modality_norm = normalize_text(str(modality_raw)) if modality_raw else ""
             modality_id = modality_code_to_id.get(
@@ -239,7 +262,7 @@ def process_study_plan_complete(
                     "academic_modality_id": modality_id,
                     "external_plan_id": external_plan_id,
                     "name": plan_name,
-                    "academic_degree": academic_degree or None,
+                    "academic_degree": academic_degree,
                     "first_level_number": first_level,
                 }
                 study_plan_id_counter += 1

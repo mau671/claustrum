@@ -1,5 +1,13 @@
 import * as Schema from "effect/Schema";
 
+/**
+ * ITCR carnet: 10 digits, `<year:4><sequence:6>` (e.g. 2020042209).
+ * Mirrors the `user_carnet_format_check` constraint so the API rejects an
+ * invalid carnet with a 400 instead of surfacing a Postgres constraint
+ * violation as a 500.
+ */
+const Carnet = Schema.String.pipe(Schema.check(Schema.isPattern(/^20[0-9]{2}[0-9]{6}$/)));
+
 export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>()(
   "UnauthorizedError",
   {
@@ -56,7 +64,7 @@ export const UpdateStudyPlanPayload = Schema.Struct({
   studyPlanId: Schema.Number,
   campusId: Schema.Number,
   entryYear: Schema.optional(Schema.Number),
-  carnet: Schema.optional(Schema.String),
+  carnet: Schema.optional(Carnet),
 });
 export type UpdateStudyPlanPayload = typeof UpdateStudyPlanPayload.Type;
 
@@ -65,7 +73,7 @@ export const SubmitOnboardingPayload = Schema.Struct({
   academicUnitId: Schema.optional(Schema.Number),
   studyPlanId: Schema.Number,
   entryYear: Schema.optional(Schema.NullOr(Schema.Number)),
-  carnet: Schema.optional(Schema.NullOr(Schema.String)),
+  carnet: Schema.optional(Schema.NullOr(Carnet)),
 });
 export type SubmitOnboardingPayload = typeof SubmitOnboardingPayload.Type;
 
@@ -130,7 +138,7 @@ export const UserProfileResponse = Schema.Struct({
   departmentId: Schema.optional(Schema.NullOr(Schema.Number)),
   academicUnitId: Schema.optional(Schema.NullOr(Schema.Number)),
   termId: Schema.optional(Schema.NullOr(Schema.Number)),
-  carnet: Schema.optional(Schema.NullOr(Schema.String)),
+  carnet: Schema.optional(Schema.NullOr(Carnet)),
   user_study_plan_id: Schema.optional(Schema.Number),
   study_plan_id: Schema.optional(Schema.Number),
   campus_id: Schema.optional(Schema.Number),

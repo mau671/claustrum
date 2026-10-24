@@ -23,6 +23,7 @@ import typer
 from src.domains.sync.helpers import (
     OFFERING_TABLES,
     SYNC_TABLES,
+    canonical_group_code,
     collect_seed_history,
     collect_term_external_keys,
     compute_sync_fingerprint,
@@ -39,6 +40,7 @@ from src.domains.sync.helpers import (
     write_json,
 )
 from src.domains.sync.sql_seed import format_value
+from src.domains.offering.processors import parse_classroom
 from src.shared.scope import normalize_scope
 from src.workflows.sync_pipeline import run_sync_pipeline
 
@@ -66,6 +68,7 @@ TABLE_CONFLICT_COLUMNS: dict[str, list[str]] = {
         "relation_type",
     ],
     "professor": ["full_name"],
+    "room": ["campus_id", "building", "number"],
     "course_offering": [
         "course_id",
         "campus_id",
@@ -1269,6 +1272,7 @@ def remap_all_ids_to_db(
     level_courses = tables["study_plan_level_course"]
     course_relations = tables["course_relation"]
     professors = tables["professor"]
+    rooms = tables["room"]
     offerings = tables["course_offering"]
     groups = tables["course_offering_group"]
     group_professors = tables["course_offering_group_professor"]
@@ -1279,6 +1283,10 @@ def remap_all_ids_to_db(
     local_term_by_id = {int(r["id"]): r for r in terms}
     local_course_by_id = {int(r["id"]): r for r in courses}
     local_professor_by_id = {int(r["id"]): r for r in professors}
+    local_room_by_id = {int(r["id"]): r for r in rooms}
+    local_group_offering_by_id = {
+        int(r["id"]): int(r["course_offering_id"]) for r in groups
+    }
     local_study_plan_level_by_id = {int(r["id"]): r for r in study_plan_levels}
 
     country_by_iso = {
@@ -1343,6 +1351,20 @@ def remap_all_ids_to_db(
             for line in query_rows(db_url, "SELECT id, full_name FROM public.professor")
         )
     }
+
+    # Rooms are keyed by (campus, building, number) so the same building code
+    # can exist in more than one campus without colliding.
+    room_by_key: dict[tuple[str, str, int], int] = {}
+    for line in query_rows(
+        db_url,
+        """
+        SELECT r.id, cp.code, r.building, r.number
+        FROM public.room r
+        JOIN public.campus cp ON cp.id = r.campus_id
+        """,
+    ):
+        rid, campus_code, building, number = line.split("\t")
+        room_by_key[(campus_code, building, int(number))] = int(rid)
 
     study_plan_by_key: dict[tuple[str, int], int] = {}
     for line in query_rows(
@@ -1411,7 +1433,13 @@ def remap_all_ids_to_db(
             "\t"
         )
         group_by_key[
-            (course_code, campus_code, unit_code, external_key, group_code)
+            (
+                course_code,
+                campus_code,
+                unit_code,
+                external_key,
+                canonical_group_code(group_code),
+            )
         ] = int(pid)
 
     next_ids: dict[str, int] = {
@@ -1423,6 +1451,7 @@ def remap_all_ids_to_db(
         "academic_term": max(term_by_external_key.values(), default=0),
         "course": max(course_by_code.values(), default=0),
         "professor": max(professor_by_name.values(), default=0),
+        "room": max(room_by_key.values(), default=0),
         "study_plan": max(study_plan_by_key.values(), default=0),
         "study_plan_level": max(study_plan_level_by_key.values(), default=0),
         "course_offering": max(offering_by_key.values(), default=0),
@@ -1529,7 +1558,7 @@ def remap_all_ids_to_db(
                 campus_code,
                 unit_code,
                 external_key,
-                group_code,
+                canonical_group_code(group_code),
                 professor_name,
             )
         ] = int(pid)
@@ -1569,7 +1598,7 @@ def remap_all_ids_to_db(
                 campus_code,
                 unit_code,
                 external_key,
-                group_code,
+                canonical_group_code(group_code),
                 int(weekday),
                 str(normalize_for_compare(starts_at, "TIME")),
                 str(normalize_for_compare(ends_at, "TIME")),
@@ -1623,7 +1652,7 @@ def remap_all_ids_to_db(
             campus_code,
             unit_code,
             external_key,
-            str(row["group_code"]),
+            canonical_group_code(row["group_code"]),
         )
 
     for row in countries:
@@ -1701,6 +1730,22 @@ def remap_all_ids_to_db(
         professor_by_name[key] = new_id
         row["id"] = new_id
         professor_old_to_new[old_id] = new_id
+
+    # Rooms: resolve by (campus code, building, number) so an existing row is
+    # reused instead of duplicated across syncs.
+    room_old_to_new: dict[int, int] = {}
+    for row in rooms:
+        old_id = int(row["id"])
+        old_campus_id = int(row["campus_id"])
+        campus_code = str(local_campus_by_id[old_campus_id]["code"])
+        building = str(row["building"])
+        number = int(row["number"])
+        key = (campus_code, building, number)
+        new_id = room_by_key.get(key) or next_sequential_id(next_ids, "room")
+        room_by_key[key] = new_id
+        row["id"] = new_id
+        row["campus_id"] = campus_old_to_new[old_campus_id]
+        room_old_to_new[old_id] = new_id
 
     for row in unit_campus:
         old_unit_id = int(row["academic_unit_id"])
@@ -1878,6 +1923,24 @@ def remap_all_ids_to_db(
         )
         meeting_by_key[meeting_key] = meeting_id
         row["id"] = meeting_id
+
+        # Resolve the room from the classroom string, disambiguated by the
+        # offering's campus: the same building code may exist in two campuses.
+        # The meeting payload only carries `classroom` (the room_* scaffolding
+        # is stripped before writing data.json), so parse it here.
+        parsed_room = parse_classroom(row.get("classroom"))
+        if parsed_room is not None:
+            offering_key = offering_old_to_key.get(
+                int(local_group_offering_by_id.get(old_group_id, 0))
+            )
+            campus_code = offering_key[1] if offering_key else None
+            row["room_id"] = (
+                room_by_key.get((campus_code, parsed_room[0], parsed_room[1]))
+                if campus_code
+                else None
+            )
+        else:
+            row["room_id"] = None
 
     selected_tables = set(tables_to_write or SYNC_TABLES)
     for table, payload in tables.items():

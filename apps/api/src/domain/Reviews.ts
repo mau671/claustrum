@@ -98,7 +98,7 @@ export class CreateReviewPayload extends Schema.Class<CreateReviewPayload>("Crea
   fairnessScore: Schema.Number.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 10 }))),
   attendanceRequired: Schema.Boolean,
   gradeReceived: Schema.optional(
-    Schema.NullOr(Schema.String.pipe(Schema.check(Schema.isMaxLength(32)))),
+    Schema.NullOr(Schema.String.pipe(Schema.check(Schema.isPattern(/^$|^\d{1,3}$/)))),
   ),
   engagementLevel: Schema.Number.pipe(
     Schema.check(Schema.isInt()),

@@ -7,6 +7,20 @@ from pathlib import Path
 from typing import Any
 
 
+def normalize_group_code(raw_group_code: object) -> str:
+    """Normalise a group identifier to its canonical two-digit form.
+
+    Mirrors `normalize_group_code` in the TEC client so values coming from a
+    previously downloaded `data/raw` payload are normalised too, not only the
+    ones scraped in this run. Keeping the padding stable is what makes
+    `(course_offering_id, group_code)` a reliable natural key.
+    """
+    value = str(raw_group_code or "").strip()
+    if not value.isdigit():
+        return value
+    return f"{int(value):02d}"
+
+
 def remove_accents(text: str) -> str:
     """Remove accents from text for SQL enum compatibility."""
     normalized = unicodedata.normalize("NFD", text)
@@ -60,6 +74,21 @@ def normalize_classroom(raw_classroom: str) -> str | None:
     if classroom.upper() == "NO DISPONIBLE":
         return None
     return classroom
+
+
+def parse_classroom(raw_classroom: str | None) -> tuple[str, int] | None:
+    """Split a classroom string into (building, number).
+
+    The ITCR publishes rooms as BUILDING-NN ('F5-04', 'J01-07', 'LAB-02').
+    Returns None for empty values and for anything that does not match, so an
+    unexpected format stays as free text instead of becoming a wrong room.
+    """
+    if not raw_classroom:
+        return None
+    match = re.fullmatch(r"([A-Z0-9]{1,5})-([0-9]{1,3})", raw_classroom.strip())
+    if not match:
+        return None
+    return match.group(1), int(match.group(2))
 
 
 def is_placeholder_professor_name(raw_name: str) -> bool:
@@ -235,7 +264,7 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
 
         for entry in schedule_data:
             course_code = entry.get("IDE_MATERIA", "")
-            group_code = entry.get("IDE_GRUPO", "")
+            group_code = normalize_group_code(entry.get("IDE_GRUPO", ""))
 
             course_id = course_code_to_id.get(course_code)
             if not course_id:
@@ -358,6 +387,7 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
 
             meeting_key = (group_id, weekday, starts_at, ends_at)
             if meeting_key not in created_meetings:
+                parsed_room = parse_classroom(classroom)
                 meeting = {
                     "id": next_meeting_id,
                     "course_offering_group_id": group_id,
@@ -365,6 +395,10 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
                     "starts_at": starts_at,
                     "ends_at": ends_at,
                     "classroom": classroom,
+                    # Denormalised at parse time; the sync resolves it to room_id.
+                    "room_building": parsed_room[0] if parsed_room else None,
+                    "room_number": parsed_room[1] if parsed_room else None,
+                    "room_campus_id": campus_id if parsed_room else None,
                 }
                 meetings.append(meeting)
                 created_meetings.add(meeting_key)
@@ -413,8 +447,50 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
     meeting_output_dir = data_dir / "course_offering_meeting"
     meeting_output_dir.mkdir(parents=True, exist_ok=True)
     meeting_path = meeting_output_dir / "data.json"
-    meeting_path.write_text(json.dumps(meetings, indent=2, ensure_ascii=False))
-    print(f"Saved course_offering_meeting: {meeting_path} ({len(meetings)} meetings)")
+    # The room_* keys are internal scaffolding used to build the room catalogue
+    # and resolve room_id during sync. They must not reach the SQL generator,
+    # which only understands real database columns.
+    public_meetings = [
+        {key: value for key, value in meeting.items() if not key.startswith("room_")}
+        for meeting in meetings
+    ]
+    meeting_path.write_text(
+        json.dumps(public_meetings, indent=2, ensure_ascii=False)
+    )
+    print(
+        f"Saved course_offering_meeting: {meeting_path} ({len(public_meetings)} meetings)"
+    )
+
+    # Emit the room catalogue discovered while parsing meetings. The sync
+    # resolves each (campus, building, number) against the database and assigns
+    # real ids, so this list only needs the natural key.
+    rooms_by_key: dict[tuple[int, str, int], dict[str, Any]] = {}
+    next_room_id = 1
+    for meeting in meetings:
+        building = meeting.get("room_building")
+        number = meeting.get("room_number")
+        if building is None or number is None:
+            continue
+        campus_id = meeting.get("room_campus_id")
+        if campus_id is None:
+            continue
+        key = (int(campus_id), str(building), int(number))
+        if key not in rooms_by_key:
+            rooms_by_key[key] = {
+                "id": next_room_id,
+                "campus_id": int(campus_id),
+                "building": str(building),
+                "number": int(number),
+            }
+            next_room_id += 1
+
+    room_output_dir = data_dir / "room"
+    room_output_dir.mkdir(parents=True, exist_ok=True)
+    room_path = room_output_dir / "data.json"
+    room_path.write_text(
+        json.dumps(list(rooms_by_key.values()), indent=2, ensure_ascii=False)
+    )
+    print(f"Saved room: {room_path} ({len(rooms_by_key)} rooms)")
 
     professor_list = [
         {"id": professors[name], "full_name": name} for name in sorted(professors)

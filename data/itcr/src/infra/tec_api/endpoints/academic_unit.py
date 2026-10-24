@@ -12,6 +12,27 @@ import requests
 from src.infra.tec_api.client import APIClient
 
 
+def normalize_group_code(raw_group_code: str) -> str:
+    """Normalise a group identifier to the canonical database form.
+
+    The TEC sometimes renders group numbers zero-padded to two digits ('01') and
+    sometimes to three ('001', '020'). Because group_code is a natural key in
+    `course_offering_group`, the padding must be normalised before the value
+    reaches the database: otherwise the same group is inserted as a new row and
+    the previous one is soft-deleted. That is what produced the 2026-10-23
+    offering seed with 4609 inserts and 4253 soft-deletes but no overlap.
+
+    Values that are not numeric are returned untouched so an unexpected format
+    surfaces in the reports instead of being silently rewritten.
+    """
+    value = raw_group_code.strip()
+    if not value.isdigit():
+        return value
+    # Two digits is the canonical form ('01'..'97'). Numbers above 99 keep
+    # their natural width instead of being truncated.
+    return f"{int(value):02d}"
+
+
 class AcademicUnitClient(APIClient):
     """Client for academic unit/career endpoints."""
 
@@ -597,7 +618,7 @@ class AcademicUnitClient(APIClient):
 
                 codigo = cells[0].get_text(strip=True)
                 materia = cells[1].get_text(strip=True)
-                grupo = cells[2].get_text(strip=True)
+                grupo = normalize_group_code(cells[2].get_text(strip=True))
                 creditos = cells[3].get_text(strip=True)
                 raw_horario = cells[4].get_text(strip=True)
                 aula = cells[5].get_text(strip=True)

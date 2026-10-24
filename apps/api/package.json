@@ -24,9 +24,9 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261013.1",
+    "@cloudflare/workers-types": "^5.20261019.1",
     "@types/pg": "^8.20.0",
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.152.0"
   },
   "packageManager": "pnpm@12.10.1"
 }

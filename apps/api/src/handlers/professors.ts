@@ -233,7 +233,7 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
                c.code AS course_code,
                c.name AS course_name,
                cog.id AS group_id,
-               cog.group_code
+               cog.group_code::text AS group_code
              FROM public.course_offering_group_professor cogp
              JOIN public.course_offering_group cog ON cog.id = cogp.course_offering_group_id
              JOIN public.course_offering co ON co.id = cog.course_offering_id

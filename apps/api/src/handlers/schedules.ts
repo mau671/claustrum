@@ -227,7 +227,7 @@ export const schedulesHandlers = HttpApiBuilder.group(
                  ssi.course_offering_group_id,
                  c.code AS course_code,
                  co.campus_id,
-                 cog.group_code
+                 cog.group_code::text AS group_code
                FROM public.saved_schedule_item ssi
                JOIN public.course_offering_group cog ON cog.id = ssi.course_offering_group_id
                JOIN public.course_offering co ON co.id = cog.course_offering_id

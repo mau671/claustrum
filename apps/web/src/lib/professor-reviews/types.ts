@@ -194,7 +194,7 @@ export type SubmitProfessorReviewPayload = {
   clarityScore: number;
   fairnessScore: number;
   attendanceRequired: boolean;
-  gradeReceived?: string;
+  gradeReceived?: string | number | null;
   engagementLevel: number;
   tags: ReviewTag[];
   turnstileToken: string;

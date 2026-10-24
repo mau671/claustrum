@@ -250,7 +250,11 @@ export const ReviewsApiHandlers = HttpApiBuilder.group(
                     payload.clarityScore,
                     payload.fairnessScore,
                     payload.attendanceRequired,
-                    payload.gradeReceived ?? null,
+                    payload.gradeReceived !== null &&
+                    payload.gradeReceived !== undefined &&
+                    payload.gradeReceived !== ""
+                      ? Number(payload.gradeReceived)
+                      : null,
                     payload.engagementLevel,
                     payload.tags,
                   ],

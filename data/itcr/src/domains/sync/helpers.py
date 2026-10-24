@@ -28,6 +28,9 @@ SYNC_TABLES = [
     "study_plan_level_course",
     "course_relation",
     "professor",
+    "group_type",
+    "academic_degree",
+    "course_type",
     "room",
     "course_offering",
     "course_offering_group",
@@ -35,7 +38,12 @@ SYNC_TABLES = [
     "course_offering_meeting",
 ]
 
+CATALOG_LOOKUPS = {"academic_degree"}
+
 OFFERING_TABLES = {
+    # Lookup values that the offering run can discover for the first time.
+    "group_type",
+    "course_type",
     "room",
     "course_offering",
     "course_offering_group",

@@ -87,6 +87,26 @@ def run_process(
                 )
                 typer.echo(f"Processed {len(study_plans)} study_plans to {plan_path}")
 
+                # Emit the academic_degree catalogue discovered in this run so
+                # the sync can insert a new degree instead of failing the FK.
+                degree_codes = {
+                    str(p["academic_degree"])
+                    for p in study_plans
+                    if p.get("academic_degree")
+                }
+                degree_catalog = [
+                    {"code": code, "name": code.title(), "sort_order": 100}
+                    for code in sorted(degree_codes)
+                ]
+                degree_path = data_dir / "academic_degree" / "data.json"
+                degree_path.parent.mkdir(parents=True, exist_ok=True)
+                degree_path.write_text(
+                    json.dumps(degree_catalog, indent=2, ensure_ascii=False)
+                )
+                typer.echo(
+                    f"Processed {len(degree_catalog)} academic_degree to {degree_path}"
+                )
+
                 plan_campus_path = data_dir / "study_plan_campus" / "data.json"
                 plan_campus_path.parent.mkdir(parents=True, exist_ok=True)
                 plan_campus_path.write_text(

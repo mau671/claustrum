@@ -27,6 +27,20 @@ def remove_accents(text: str) -> str:
     return "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
 
 
+KNOWN_GROUP_TYPES = {
+    "REGULAR",
+    "SEMIPRESENCIAL",
+    "VIRTUAL",
+    "ASISTIDA",
+    "TUTORIA",
+    "LABORATORIO",
+    "RN",
+    "ENSEÑANZA REMOTA",
+    "TRABAJO FINAL DE GRADUACIÓN",
+    "TALLER",
+}
+
+
 def normalize_group_type_key(raw_group_type: str) -> str:
     """Normalize group type to a comparable uppercase key without accents."""
     normalized = remove_accents(raw_group_type.upper().strip())
@@ -35,7 +49,13 @@ def normalize_group_type_key(raw_group_type: str) -> str:
 
 
 def normalize_group_type(raw_group_type: str) -> str:
-    """Normalize external group type values to DB enum-compatible values."""
+    """Map a raw group type to its canonical catalogue value.
+
+    Known aliases collapse onto a single code. An unrecognised value is returned
+    normalised and untouched instead of raising: the value is inserted into the
+    `group_type` lookup by the sync and reported, so a new type published by the
+    TEC never causes a group (and its professors and meetings) to be dropped.
+    """
     normalized = normalize_group_type_key(raw_group_type)
 
     aliases = {
@@ -58,12 +78,7 @@ def normalize_group_type(raw_group_type: str) -> str:
         "TFG": "TRABAJO FINAL DE GRADUACIÓN",
     }
 
-    canonical = aliases.get(normalized)
-    if canonical:
-        return canonical
-
-    msg = f"Unknown group type: {raw_group_type!r} (normalized={normalized!r})"
-    raise ValueError(msg)
+    return aliases.get(normalized, normalized)
 
 
 def normalize_classroom(raw_classroom: str) -> str | None:
@@ -326,22 +341,23 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
             group_key = (offering_id, group_code)
             capacity = entry.get("CAPACIDAD", 0)
             raw_group_type = entry.get("TIPO_GRUPO", "REGULAR")
-            try:
-                group_type = normalize_group_type(raw_group_type)
-            except ValueError:
-                normalized_raw = normalize_group_type_key(str(raw_group_type))
-                unknown_group_types[normalized_raw] = (
-                    unknown_group_types.get(normalized_raw, 0) + 1
+            group_type = normalize_group_type(raw_group_type)
+            # Report values that are not yet part of the catalogue. They are
+            # still stored: the sync inserts them into the lookup table so a new
+            # type published by the TEC never drops the group.
+            normalized_group_type = normalize_group_type_key(str(raw_group_type))
+            if normalized_group_type not in KNOWN_GROUP_TYPES:
+                unknown_group_types[group_type] = (
+                    unknown_group_types.get(group_type, 0) + 1
                 )
                 if len(unknown_group_type_examples) < 20:
                     unknown_group_type_examples.append(
                         (
                             f"file={schedule_file.name}, course={course_code}, "
                             f"group={group_code}, raw={raw_group_type!r}, "
-                            f"normalized={normalized_raw!r}"
+                            f"stored={group_type!r}"
                         )
                     )
-                continue
 
             if group_key not in created_groups:
                 group_id = next_group_id
@@ -414,13 +430,14 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
             )
         )
         examples = "\n  - " + "\n  - ".join(unknown_group_type_examples)
-        msg = (
-            "Unknown TIPO_GRUPO values detected. "
-            "Add them to enum/mapping before generating seed.\n"
+        print()
+        print(
+            "WARNING: new TIPO_GRUPO values detected. They will be added to the "
+            "group_type catalogue and included in the delta seed. Review the PR "
+            "description before merging.\n"
             f"Detected: {detected}\n"
             f"Examples:{examples}"
         )
-        raise ValueError(msg)
 
     output_dir = data_dir / "course_offering"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -491,6 +508,39 @@ def run_process_course_offering(data_dir: Path, year: str) -> None:
         json.dumps(list(rooms_by_key.values()), indent=2, ensure_ascii=False)
     )
     print(f"Saved room: {room_path} ({len(rooms_by_key)} rooms)")
+
+    # Emit the lookup catalogues discovered in this run. The sync upserts them,
+    # so a value published by the TEC for the first time is inserted instead of
+    # breaking the foreign key. Unknown values are also surfaced in the delta.
+    group_type_codes = {str(g["group_type"]) for g in groups if g.get("group_type")}
+    group_type_catalog = [
+        {"code": code, "name": code.title(), "sort_order": 100}
+        for code in sorted(group_type_codes)
+    ]
+    group_type_path = data_dir / "group_type" / "data.json"
+    group_type_path.parent.mkdir(parents=True, exist_ok=True)
+    group_type_path.write_text(
+        json.dumps(group_type_catalog, indent=2, ensure_ascii=False)
+    )
+    print(
+        f"Saved group_type: {group_type_path} ({len(group_type_catalog)} values)"
+    )
+
+    course_type_codes = {
+        str(o["course_type"]) for o in offering_list if o.get("course_type")
+    }
+    course_type_catalog = [
+        {"code": code, "name": code.title(), "sort_order": 100}
+        for code in sorted(course_type_codes)
+    ]
+    course_type_path = data_dir / "course_type" / "data.json"
+    course_type_path.parent.mkdir(parents=True, exist_ok=True)
+    course_type_path.write_text(
+        json.dumps(course_type_catalog, indent=2, ensure_ascii=False)
+    )
+    print(
+        f"Saved course_type: {course_type_path} ({len(course_type_catalog)} values)"
+    )
 
     professor_list = [
         {"id": professors[name], "full_name": name} for name in sorted(professors)

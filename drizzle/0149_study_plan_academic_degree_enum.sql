@@ -6,10 +6,10 @@
 -- variants at any time. A closed catalogue is exactly what an enum is for: the
 -- value set is validated by the type and cannot drift through a typo.
 --
--- Note on course_type: it deliberately stays TEXT. It already was an enum in an
--- early version of the schema and had to be migrated away because the TEC added
--- values ('TRABAJO FINAL DE GRADUACION', 'CENTROS DE FORMACION', ...). Keeping
--- it as text (or a lookup table) avoids a DDL migration every semester.
+-- NOTE: this enum is superseded by 0151, which replaces it with the
+-- `academic_degree` lookup table along with group_type and course_type.
+-- It is kept as-is so the migration history stays linear and already-applied
+-- databases do not need an edit.
 
 BEGIN;
 

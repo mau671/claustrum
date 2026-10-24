@@ -368,6 +368,108 @@ def _assert_seed_history_db_is_disposable(db_url: str) -> None:
             )
 
 
+def bootstrap_lookups(
+    db_url: str,
+    psql_args: list[str],
+    psql_env: dict[str, str],
+    seed_paths: list[Path],
+) -> None:
+    """Populate the lookup catalogues with every value the seeds reference.
+
+    The lookup tables replaced enums that the historical seeds predate. Without
+    this step the first seed that inserts a `course_offering` row fails on the
+    `course_type` foreign key, because the catalogue is empty.
+    """
+    import re as _re
+
+    group_types: set[str] = set()
+    course_types: set[str] = set()
+    degrees: set[str] = set()
+
+    known_group_types = {
+        "REGULAR",
+        "SEMIPRESENCIAL",
+        "VIRTUAL",
+        "ASISTIDA",
+        "TUTORIA",
+        "LABORATORIO",
+        "RN",
+        "ENSEÑANZA REMOTA",
+        "TRABAJO FINAL DE GRADUACIÓN",
+        "TALLER",
+    }
+    known_course_types = {
+        "CURSO UNICO",
+        "CURSO COMUN",
+        "ELECTIVA UNICA",
+        "ELECTIVA COMUN",
+        "LABORATORIO UNICO",
+        "LABORATORIO COMUN",
+        "OPTATIVO UNICO",
+        "CENTROS DE FORMACION",
+        "TRABAJO FINAL DE GRADUACION",
+    }
+    known_degrees = {
+        "ASOCIADO",
+        "BACHILLERATO UNIVERSITARIO",
+        "DIPLOMADO",
+        "DOCTORADO ACADÉMICO",
+        "LICENCIATURA",
+        "MAESTRÍA",
+        "NO OTORGA",
+    }
+
+    # Values are written as plain literals (E'CURSO COMUN'), not casts, so the
+    # only reliable signal is the known catalogue plus what the seed declares.
+    # Start from the canonical sets and add anything a seed casts explicitly.
+    group_types.update(known_group_types)
+    course_types.update(known_course_types)
+    degrees.update(known_degrees)
+
+    for seed_path in seed_paths:
+        try:
+            content = seed_path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for pattern, target in (
+            (r"(?:E)?'([^']*)'::group_type", group_types),
+            (r"(?:E)?'([^']*)'::course_type", course_types),
+            (r"(?:E)?'([^']*)'::academic_degree", degrees),
+        ):
+            target.update(_re.findall(pattern, content))
+
+    if not (group_types or course_types or degrees):
+        return
+
+    def esc(value: str) -> str:
+        return value.replace("'", "''")
+
+    statements: list[str] = []
+    for table, values in (
+        ("group_type", group_types),
+        ("course_type", course_types),
+        ("academic_degree", degrees),
+    ):
+        if not values:
+            continue
+        tuples = ", ".join(f"('{esc(v)}', '{esc(v.title())}')" for v in sorted(values))
+        statements.append(
+            f"INSERT INTO public.{table} (code, name) VALUES {tuples} "
+            "ON CONFLICT (code) DO NOTHING;"
+        )
+
+    if not statements:
+        return
+
+    subprocess.run(
+        [*psql_args, "-v", "ON_ERROR_STOP=1", "-c", "\n".join(statements)],
+        check=False,
+        text=True,
+        capture_output=True,
+        env=psql_env,
+    )
+
+
 def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> Path:
     """Rewrite a historical seed so it can be replayed on a migrations-built schema.
 
@@ -381,7 +483,26 @@ def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> 
       (for example `user_role_id_seq`, dropped when roles moved to Better Auth).
     """
     content = seed_path.read_text(encoding="utf-8")
-    if SEED_HISTORY_IGNORED_TABLE not in content and "setval" not in content:
+
+    # Seeds written before 0151 cast group_type and academic_degree to their
+    # enum types (`nv.group_type::group_type`). Those names are lookup tables
+    # now, so the cast is a syntax error. Stripping it is safe: the column is
+    # TEXT and the literal is already a plain string.
+    legacy_casts = [
+        ("::group_type", ""),
+        ("::academic_degree", ""),
+    ]
+    cast_rewrites = 0
+    for needle, replacement in legacy_casts:
+        if needle in content:
+            cast_rewrites += content.count(needle)
+            content = content.replace(needle, replacement)
+
+    if (
+        SEED_HISTORY_IGNORED_TABLE not in content
+        and "setval" not in content
+        and cast_rewrites == 0
+    ):
         return seed_path
 
     lines = content.splitlines()
@@ -428,7 +549,7 @@ def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> 
         kept.append(line)
         index += 1
 
-    if not skipped_ledger and not skipped_setval:
+    if not skipped_ledger and not skipped_setval and cast_rewrites == 0:
         return seed_path
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -440,7 +561,9 @@ def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> 
     if skipped_setval:
         obsolete = ", ".join(sorted(set(skipped_setval)))
         details.append(f"{len(skipped_setval)} obsolete setval(s): {obsolete}")
-    typer.echo(f"Sanitized {seed_path.name}: skipped {'; '.join(details)}")
+    if cast_rewrites:
+        details.append(f"{cast_rewrites} legacy enum cast(s)")
+    typer.echo(f"Sanitized {seed_path.name}: {'; '.join(details)}")
     return sanitized_path
 
 
@@ -481,6 +604,13 @@ def create_temp_seed_history_db(
     sanitized_dir = Path(tempfile.mkdtemp(prefix="tec-seed-history-"))
     replay_args, replay_env = psql_connection_args(temp_db_url)
     try:
+        # The lookup tables were introduced after these seeds were generated, so
+        # the seeds insert group_type / course_type / academic_degree values
+        # without creating the catalogue rows and the foreign keys reject them.
+        # Scan every seed once, collect the referenced values, and seed the
+        # catalogues before the replay starts.
+        bootstrap_lookups(temp_db_url, replay_args, replay_env, seed_paths)
+
         for seed_path in seed_paths:
             replay_path = sanitize_seed_for_replay(seed_path, temp_db_url, sanitized_dir)
             try:
@@ -619,7 +749,7 @@ def load_existing_rows_by_id(
         text=True,
         env=load_env,
     )
-    rows: dict[int, dict[str, Any]] = {}
+    rows: dict[Any, dict[str, Any]] = {}
     for line in output.splitlines():
         if not line.strip():
             continue
@@ -629,7 +759,12 @@ def load_existing_rows_by_id(
             raw = values[index] if index < len(values) else "\\N"
             value = None if raw == "\\N" else raw
             row[col] = normalize_for_compare(value, column_types.get(col, "TEXT"))
-        rows[int(row["id"])] = row
+        # Lookup tables use a natural `code` primary key instead of a surrogate
+        # `id`, so index by whichever key the table actually has.
+        if "id" in row:
+            rows[int(row["id"])] = row
+        elif "code" in row:
+            rows[str(row["code"])] = row
     return rows
 
 
@@ -969,10 +1104,13 @@ def generate_minimal_delta_seed(
             continue
 
         column_types = {col: db_column_types.get(col, "TEXT") for col in columns}
+        # Lookup tables key on `code` instead of a surrogate `id`.
+        key_column = "id" if "id" in columns else "code"
         normalized_payload = {
-            int(row["id"]): payload_row_normalized(row, columns, column_types)
+            int(row["id"]) if key_column == "id" else str(row["code"]):
+                payload_row_normalized(row, columns, column_types)
             for row in payload_rows
-            if row.get("id") is not None
+            if row.get(key_column) is not None
         }
         if scope == "offering" and table in OFFERING_TABLES:
             if not term_ids:
@@ -1159,7 +1297,11 @@ def generate_minimal_delta_seed(
                             "WHERE g.id = m.course_offering_group_id "
                             f"AND co.academic_term_id = ANY(ARRAY[{', '.join(str(t) for t in sorted(term_ids))}]::BIGINT[]));"
                         )
-            elif scope != "offering":
+            elif scope != "offering" and "is_active" in db_column_set:
+                # Lookup tables (group_type, course_type, academic_degree) have
+                # no is_active column: a value that stops appearing in the sync
+                # must stay in the catalogue because rows may still reference
+                # it, and the FK is ON DELETE RESTRICT anyway.
                 soft_delete_statements.append(
                     f"UPDATE public.{table} "
                     "SET is_active = FALSE, deactivated_at = NOW(), updated_at = NOW() "
@@ -1272,6 +1414,9 @@ def remap_all_ids_to_db(
     level_courses = tables["study_plan_level_course"]
     course_relations = tables["course_relation"]
     professors = tables["professor"]
+    group_types = tables["group_type"]
+    academic_degrees = tables["academic_degree"]
+    course_types = tables["course_type"]
     rooms = tables["room"]
     offerings = tables["course_offering"]
     groups = tables["course_offering_group"]

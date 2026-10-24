@@ -177,7 +177,7 @@ def generate_seed(
                 "academic_modality_id": "BIGINT",
                 "external_plan_id": "INTEGER",
                 "first_level_number": "INTEGER",
-                "academic_degree": "public.academic_degree",
+                "academic_degree": "TEXT",
             },
             "order": 8,
             "conflict_columns": ["academic_unit_id", "external_plan_id"],
@@ -323,6 +323,39 @@ def generate_seed(
             ],
             "supports_soft_delete": True,
         },
+        "group_type": {
+            "columns": ["code", "name", "sort_order"],
+            "types": {"sort_order": "SMALLINT"},
+            "order": 15,
+            "conflict_columns": ["code"],
+            "update_assignments": [
+                "name = EXCLUDED.name",
+                "updated_at = NOW()",
+            ],
+            "supports_soft_delete": False,
+        },
+        "academic_degree": {
+            "columns": ["code", "name", "sort_order"],
+            "types": {"sort_order": "SMALLINT"},
+            "order": 16,
+            "conflict_columns": ["code"],
+            "update_assignments": [
+                "name = EXCLUDED.name",
+                "updated_at = NOW()",
+            ],
+            "supports_soft_delete": False,
+        },
+        "course_type": {
+            "columns": ["code", "name", "sort_order"],
+            "types": {"sort_order": "SMALLINT"},
+            "order": 17,
+            "conflict_columns": ["code"],
+            "update_assignments": [
+                "name = EXCLUDED.name",
+                "updated_at = NOW()",
+            ],
+            "supports_soft_delete": False,
+        },
         "room": {
             "columns": ["id", "campus_id", "building", "number"],
             "types": {
@@ -330,7 +363,7 @@ def generate_seed(
                 "campus_id": "BIGINT",
                 "number": "SMALLINT",
             },
-            "order": 15,
+            "order": 18,
             "conflict_columns": ["campus_id", "building", "number"],
             "update_assignments": [
                 "campus_id = EXCLUDED.campus_id",
@@ -362,7 +395,7 @@ def generate_seed(
                 "credits_snapshot": "INTEGER",
                 "weekly_hours_snapshot": "INTEGER",
             },
-            "order": 16,
+            "order": 19,
             "conflict_columns": [
                 "course_id",
                 "campus_id",
@@ -397,7 +430,7 @@ def generate_seed(
                 "group_code": "SMALLINT",
                 "capacity": "INTEGER",
             },
-            "order": 17,
+            "order": 20,
             "conflict_columns": ["course_offering_id", "group_code"],
             "update_assignments": [
                 "course_offering_id = EXCLUDED.course_offering_id",
@@ -417,7 +450,7 @@ def generate_seed(
                 "course_offering_group_id": "BIGINT",
                 "professor_id": "BIGINT",
             },
-            "order": 18,
+            "order": 21,
             "conflict_columns": ["course_offering_group_id", "professor_id"],
             "update_assignments": [
                 "course_offering_group_id = EXCLUDED.course_offering_group_id",
@@ -446,7 +479,7 @@ def generate_seed(
                 "starts_at": "TIME",
                 "ends_at": "TIME",
             },
-            "order": 19,
+            "order": 22,
             "conflict_columns": [
                 "course_offering_group_id",
                 "weekday",

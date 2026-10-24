@@ -29,6 +29,29 @@ import { getAuth, getDbPool } from "./lib/db";
 import { createDatabaseLayer } from "./services/Database";
 import { makeStorageService, Storage } from "./services/Storage";
 
+const platformLayer = HttpPlatform.layer.pipe(
+  Layer.provide([Etag.layer, FileSystem.layerNoop({})]),
+);
+
+const handlersLayer = Layer.mergeAll(
+  universitiesHandlers,
+  campusesHandlers,
+  academicUnitsHandlers,
+  studyPlansHandlers,
+  termsHandlers,
+  coursesHandlers,
+  schedulesHandlers,
+  ProfessorsApiHandlers,
+  ReviewsApiHandlers,
+  StudentsApiHandlers,
+  EvaluationsHandlers,
+  ModerationHandlers,
+  FeedbackHandlers,
+  ReportsHandlers,
+  UsersHandlers,
+  notificationsHandlers,
+);
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const corsHeaders = getCorsHeaders(request, env);
@@ -231,29 +254,6 @@ export default {
       const envLayer = Layer.succeed(ApiEnv, env);
 
       const userLayer = Layer.succeed(CurrentUser, sessionUser);
-
-      const handlersLayer = Layer.mergeAll(
-        universitiesHandlers,
-        campusesHandlers,
-        academicUnitsHandlers,
-        studyPlansHandlers,
-        termsHandlers,
-        coursesHandlers,
-        schedulesHandlers,
-        ProfessorsApiHandlers,
-        ReviewsApiHandlers,
-        StudentsApiHandlers,
-        EvaluationsHandlers,
-        ModerationHandlers,
-        FeedbackHandlers,
-        ReportsHandlers,
-        UsersHandlers,
-        notificationsHandlers,
-      );
-
-      const platformLayer = HttpPlatform.layer.pipe(
-        Layer.provide([Etag.layer, FileSystem.layerNoop({})]),
-      );
 
       const isDocs = url.pathname.startsWith("/api/v1/docs");
       const isOpenApi = url.pathname === "/api/v1/openapi.json";

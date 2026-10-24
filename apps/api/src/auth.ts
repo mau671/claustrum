@@ -157,6 +157,7 @@ export function createAuth(env: AuthEnv, pool: Pool) {
       database: {
         generateId: "uuid",
         joins: true,
+        validateSchema: false,
       },
     },
     plugins: [

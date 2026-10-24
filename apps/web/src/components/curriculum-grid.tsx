@@ -222,21 +222,15 @@ function CurriculumGrid({
               <span className="text-muted-foreground text-xs font-semibold">Relaciones:</span>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-1.5">
-                  <div className="bg-background flex size-4 shrink-0 items-center justify-center rounded-full border border-amber-500 text-amber-600 shadow-xs">
-                    <Icon icon={LockKeyholeIcon} className="size-2.5 shrink-0" />
-                  </div>
+                  <Icon icon={LockKeyholeIcon} className="size-3.5 shrink-0 text-amber-600" />
                   <span className="text-muted-foreground text-xs">Requisito</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="bg-background flex size-4 shrink-0 items-center justify-center rounded-full border border-blue-500 text-blue-600 shadow-xs">
-                    <Icon icon={Link01Icon} className="size-2.5 shrink-0" />
-                  </div>
+                  <Icon icon={Link01Icon} className="size-3.5 shrink-0 text-blue-600" />
                   <span className="text-muted-foreground text-xs">Correquisito</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="bg-background flex size-4 shrink-0 items-center justify-center rounded-full border border-emerald-500 text-emerald-600 shadow-xs">
-                    <Icon icon={LockKeyholeOpenIcon} className="size-2.5 shrink-0" />
-                  </div>
+                  <Icon icon={LockKeyholeOpenIcon} className="size-3.5 shrink-0 text-emerald-600" />
                   <span className="text-muted-foreground text-xs">Desbloquea</span>
                 </div>
               </div>

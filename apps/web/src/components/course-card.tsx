@@ -97,13 +97,9 @@ export function CourseCard({
         !isHovered && !relationType && "hover:border-primary/50",
       )}
     >
-      {relation && (
-        <div className="bg-background border-border absolute -top-1 -right-1 z-20 rounded-full border p-1 shadow-sm">
-          {relation.icon}
-        </div>
-      )}
+      {relation && <div className="absolute top-1 right-1 z-20">{relation.icon}</div>}
 
-      <div className="bg-card border-border border-b px-3 py-2">
+      <div className={cn("bg-card border-border border-b px-3 py-2", relation && "pr-6")}>
         <div className="text-muted-foreground flex items-center justify-between font-mono text-xs">
           <span className="min-w-[3ch] text-right">{course.credits} cr</span>
           <span className="flex-1 px-2 text-center font-semibold">{course.code}</span>

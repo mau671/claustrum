@@ -3,8 +3,6 @@ packages:
 
 engineStrict: true
 minimumReleaseAge: 72
-publicHoistPattern:
-  - "pdfjs-dist"
 
 # Security pins for transitively resolved dependencies. Ranges are restricted to
 # the major they already resolve to, so no consumer receives a new major.

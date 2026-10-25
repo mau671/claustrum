@@ -6,7 +6,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { Fragment, lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import type { EvaluationModerationRow, EvaluationStatus } from "@/lib/evaluations/types";
 import type {
@@ -16,6 +16,7 @@ import type {
 } from "@/lib/professor-reviews/types";
 
 import { NumberedPagination } from "@/components/numbered-pagination";
+import { PdfDocumentViewer } from "@/components/pdf-document-viewer";
 import { ReviewComment } from "@/components/review-comment";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,16 +27,13 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-
-const PdfViewer = lazy(() =>
-  import("@/components/pdf-viewer").then((mod) => ({ default: mod.PdfViewer })),
-);
 import { formatEvaluationFileName, formatEvaluationTypeLabel } from "@/lib/evaluations/types";
+import { useBlobUrl } from "@/lib/hooks/use-blob-url";
 import {
   useEvaluationDocumentQuery,
   useEvaluationAnswersDocumentQuery,
 } from "@/lib/hooks/use-evaluations";
+import { cn } from "@/lib/utils";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -625,8 +623,6 @@ function EvaluationPdfViewer({
 }: {
   selectedEvaluation: EvaluationModerationRow;
 }) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [answersBlobUrl, setAnswersBlobUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"evaluation" | "answers">("evaluation");
   const {
     data: evalDoc,
@@ -641,32 +637,15 @@ function EvaluationPdfViewer({
     selectedEvaluation.has_separate_answers ? selectedEvaluation.id : null,
   );
 
+  const blobUrl = useBlobUrl(evalDoc?.blob);
+  const answersBlobUrl = useBlobUrl(answersDoc?.blob);
+
   const fileLoading = isEvalLoading || isAnswersLoading;
   const fileError = evalError
     ? (evalError as Error).message
     : answersError
       ? (answersError as Error).message
       : null;
-
-  useEffect(() => {
-    let evalUrl: string | null = null;
-    let answersUrl: string | null = null;
-
-    if (evalDoc?.blob) {
-      evalUrl = URL.createObjectURL(evalDoc.blob);
-      setBlobUrl(evalUrl);
-    }
-
-    if (answersDoc?.blob) {
-      answersUrl = URL.createObjectURL(answersDoc.blob);
-      setAnswersBlobUrl(answersUrl);
-    }
-
-    return () => {
-      if (evalUrl) URL.revokeObjectURL(evalUrl);
-      if (answersUrl) URL.revokeObjectURL(answersUrl);
-    };
-  }, [evalDoc, answersDoc]);
 
   const baseFileName = formatEvaluationFileName(
     selectedEvaluation.course_code,
@@ -679,7 +658,7 @@ function EvaluationPdfViewer({
   return (
     <div className="bg-card text-card-foreground flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs">
       {selectedEvaluation.has_separate_answers && (
-        <div className="border-border/50 flex border-b">
+        <div className="border-border/50 flex shrink-0 border-b">
           <button
             onClick={() => setActiveTab("evaluation")}
             className={cn(
@@ -714,26 +693,19 @@ function EvaluationPdfViewer({
         </div>
       )}
 
-      {!fileLoading && !fileError && (
-        <Suspense
-          fallback={
-            <div className="flex flex-1 flex-col items-center justify-center gap-4">
-              <Spinner className="text-muted-foreground size-8" />
-              <p className="text-muted-foreground text-sm">Cargando visor…</p>
-            </div>
-          }
-        >
-          {activeTab === "evaluation" && blobUrl && (
-            <PdfViewer blobUrl={blobUrl} fileName={baseFileName} className="h-full rounded-b-xl" />
-          )}
-          {activeTab === "answers" && answersBlobUrl && (
-            <PdfViewer
-              blobUrl={answersBlobUrl}
-              fileName={answersFileName}
-              className="h-full rounded-b-xl"
-            />
-          )}
-        </Suspense>
+      {!fileLoading && !fileError && activeTab === "evaluation" && blobUrl && (
+        <PdfDocumentViewer
+          blobUrl={blobUrl}
+          fileName={baseFileName}
+          className="h-[70svh] rounded-b-xl lg:h-full"
+        />
+      )}
+      {!fileLoading && !fileError && activeTab === "answers" && answersBlobUrl && (
+        <PdfDocumentViewer
+          blobUrl={answersBlobUrl}
+          fileName={answersFileName}
+          className="h-[70svh] rounded-b-xl lg:h-full"
+        />
       )}
     </div>
   );

@@ -82,7 +82,7 @@ export function ModerationLayout() {
   ];
 
   return (
-    <div className="flex min-h-full flex-1 flex-col gap-6 px-4 py-6 lg:h-full lg:min-h-0 lg:px-6">
+    <div className="flex min-h-full flex-1 flex-col gap-6 px-4 py-6 lg:h-[calc(100dvh-var(--header-height))] lg:min-h-0 lg:flex-none lg:overflow-hidden lg:px-6">
       {/* Tabs principales de moderación */}
       <div className="w-full">
         <ScrollArea scrollFade className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden">

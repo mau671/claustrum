@@ -570,6 +570,63 @@ def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> 
     return sanitized_path
 
 
+def resync_identity_sequences(args: list[str], env: dict[str, str]) -> None:
+    """Align every identity sequence with the maximum id of its table.
+
+    The delta seeds in `data/seeds/itcr` insert rows with explicit ids, because
+    the ids are part of the natural-key remapping that makes a seed replayable
+    on a fresh database. PostgreSQL does not advance a sequence when an id is
+    supplied explicitly, so after replaying the history the sequences sit at
+    whatever value the oldest seed set with `setval`, while the tables hold
+    much higher ids. The next insert that relies on `nextval` then collides
+    with an existing primary key.
+
+    The replay must therefore re-align the sequences before each new seed, so a
+    seed that omits `id` (defaulting to `nextval`) starts after the highest id
+    that the history already produced. This is the same invariant that
+    migration 0156 enforces on a real database.
+    """
+    subprocess.run(
+        [
+            *args,
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-c",
+            """
+            DO $$
+            DECLARE
+              r record;
+              max_id BIGINT;
+            BEGIN
+              FOR r IN
+                SELECT c.oid::regclass::text AS table_name,
+                       a.attname AS column_name,
+                       pg_get_serial_sequence(c.oid::regclass::text, a.attname) AS sequence_name
+                FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum > 0 AND NOT a.attisdropped
+                WHERE n.nspname = 'public'
+                  AND c.relkind = 'r'
+                  AND pg_get_serial_sequence(c.oid::regclass::text, a.attname) IS NOT NULL
+              LOOP
+                EXECUTE format('SELECT COALESCE(MAX(%I), 0) FROM %s', r.column_name, r.table_name)
+                  INTO max_id;
+                IF max_id > 0 THEN
+                  PERFORM setval(r.sequence_name, max_id, true);
+                ELSE
+                  PERFORM setval(r.sequence_name, 1, false);
+                END IF;
+              END LOOP;
+            END $$;
+            """,
+        ],
+        check=True,
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+
 def create_temp_seed_history_db(
     seed_paths: list[Path], db_url: str, migrations_dir: Path
 ) -> tuple[str | None, str]:
@@ -637,6 +694,7 @@ def create_temp_seed_history_db(
                 raise RuntimeError(
                     f"Failed applying seed history file {seed_path.name}:\n{error_output}"
                 ) from exc
+            resync_identity_sequences(replay_args, replay_env)
     finally:
         shutil.rmtree(sanitized_dir, ignore_errors=True)
 
@@ -836,12 +894,38 @@ def build_insert_statement(
     if not rows:
         return []
     defaults = defaulted_columns or set()
-    lines = [f"INSERT INTO public.{table}", f"  ({', '.join(columns)})", "VALUES"]
+
+    # `room_id` is deliberately not written as an absolute id. A seed is
+    # replayed on a freshly built database before it reaches production, and
+    # that replay database does not contain the rooms that live migrations
+    # backfilled into production (0148 creates one room per distinct classroom
+    # found in the meetings table). The absolute ids would therefore point at
+    # different physical rooms in the two databases. The room is instead
+    # resolved by its natural key inside the seed, so the same SQL is correct
+    # on any database that has the room catalogue.
+    resolve_room = table == "course_offering_meeting" and "room_id" in columns
+    emitted_columns = [col for col in columns if not (resolve_room and col == "room_id")]
+    if resolve_room:
+        emitted_columns.append("room_id")
+
+    # `room` is identified by its natural key (campus_id, building, number), not
+    # by the surrogate id. The replay database and production hold different
+    # room ids for the same physical room (production also has the rooms that
+    # migration 0148 backfilled), so emitting an absolute id would either
+    # collide with a different room's primary key or silently skip a room that
+    # still has to be created. Letting Postgres assign the id keeps the seed
+    # correct on both databases; the conflict target does the matching.
+    if table == "room":
+        emitted_columns = [col for col in emitted_columns if col != "id"]
+
+    lines = [f"INSERT INTO public.{table}", f"  ({', '.join(emitted_columns)})", "VALUES"]
     values_lines: list[str] = []
     for row in rows:
         formatted: list[str] = []
-        for col in columns:
-            if col not in row and col in defaults:
+        for col in emitted_columns:
+            if resolve_room and col == "room_id":
+                formatted.append(format_room_id_reference(row))
+            elif col not in row and col in defaults:
                 # The payload does not carry this column for this row, but the
                 # database defines a default. Emit DEFAULT instead of NULL so a
                 # generated row inherits is_active/created_at/updated_at.
@@ -871,8 +955,59 @@ def build_insert_statement(
             f"ON CONFLICT ({', '.join(conflict_columns)}) DO UPDATE SET {update_sql};"
         )
     else:
-        lines.append(f"ON CONFLICT ({', '.join(conflict_columns)}) DO NOTHING;")
+        # The payload says this row exists, so a previously soft-deleted row
+        # must come back to life instead of being left inactive. Without this
+        # the generator would keep re-emitting the same insert on every run,
+        # because it only reads active rows when computing the delta.
+        lifecycle = []
+        if "is_active" in available_columns:
+            lifecycle.append("is_active = TRUE")
+        if "deactivated_at" in available_columns:
+            lifecycle.append("deactivated_at = NULL")
+        if "updated_at" in available_columns:
+            lifecycle.append("updated_at = NOW()")
+        if lifecycle:
+            lines.append(
+                f"ON CONFLICT ({', '.join(conflict_columns)}) "
+                f"DO UPDATE SET {', '.join(lifecycle)};"
+            )
+        else:
+            lines.append(f"ON CONFLICT ({', '.join(conflict_columns)}) DO NOTHING;")
     return lines
+
+
+def format_room_id_reference(row: dict[str, Any]) -> str:
+    """Resolve `room_id` through the room's natural key instead of an absolute id.
+
+    The meeting payload carries `classroom` (the canonical BUILDING-NNN string)
+    and `course_offering_group_id`, but not the campus. Both the classroom and
+    the campus that owns the offering are stable across databases, unlike the
+    surrogate `room.id`, which differs between a replayed database and
+    production (production holds rooms that migration 0148 backfilled from the
+    meetings table, and the replay does not).
+
+    The campus is read from the group's offering, so the subquery does not
+    depend on anything that only exists in one of the two databases. Rooms are
+    inserted by the same seed (order 18) before meetings (order 22), so the row
+    is already visible when this subquery runs.
+    """
+    classroom = row.get("classroom")
+    group_id = row.get("course_offering_group_id")
+    if not classroom or group_id is None:
+        return "NULL"
+    building, _, number = str(classroom).partition("-")
+    if not number:
+        return "NULL"
+    return (
+        "(SELECT r.id FROM public.room r WHERE r.building = "
+        f"'{quote_literal(str(building))}'"
+        f" AND r.number = {int(number)}"
+        " AND r.campus_id = (SELECT co.campus_id"
+        " FROM public.course_offering_group g"
+        " JOIN public.course_offering co ON co.id = g.course_offering_id"
+        f" WHERE g.id = {int(group_id)}))"
+    )
+
 
 
 def write_noop_seed(
@@ -928,6 +1063,12 @@ def build_batch_update_statements(
         for row in batch:
             row_values = [str(int(row["id"]))]
             for col in changed_columns:
+                if table == "course_offering_meeting" and col == "room_id":
+                    # Same reason as in build_insert_statement: the surrogate
+                    # room id is not stable between the replay database and
+                    # production, so it is resolved by natural key here too.
+                    row_values.append(format_room_id_reference(row))
+                    continue
                 row_values.append(format_value(row.get(col), column_types.get(col, "TEXT")))
             values_lines.append(f"  ({', '.join(row_values)})")
             
@@ -936,6 +1077,9 @@ def build_batch_update_statements(
         
         assignments = []
         for col in changed_columns:
+            if table == "course_offering_meeting" and col == "room_id":
+                assignments.append(f"{col} = nv.{col}::BIGINT")
+                continue
             assignments.append(f"{col} = nv.{col}::{column_types.get(col, 'TEXT')}")
             
         # Only force lifecycle columns back to "active" when the payload does

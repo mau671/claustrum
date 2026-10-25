@@ -166,6 +166,21 @@ export function SchedulePage() {
   useEffect(() => {
     hydrateLocalStudyPlan();
     setIsHydrated(true);
+
+    const storedShowAllValue = localStorage.getItem(SHOW_ALL_STORAGE_KEY);
+    if (storedShowAllValue !== null) {
+      setStoredShowAll(storedShowAllValue === "true");
+    }
+
+    const storedOtherCampusesValue = localStorage.getItem(SHOW_OTHER_CAMPUSES_STORAGE_KEY);
+    if (storedOtherCampusesValue !== null) {
+      setStoredShowOtherCampuses(storedOtherCampusesValue === "true");
+    }
+
+    const storedViewModeValue = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    if (storedViewModeValue === "card" || storedViewModeValue === "table") {
+      setStoredViewMode(storedViewModeValue);
+    }
   }, []);
   const selectedCampusId = search.campus ?? null;
   const selectedCareerId = search.career ?? null;
@@ -173,25 +188,13 @@ export function SchedulePage() {
   const selectedTermId = search.term ?? null;
 
   const shouldAutoSelectPlanRef = useRef(false);
-  const [storedShowAll, setStoredShowAll] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    const stored = localStorage.getItem(SHOW_ALL_STORAGE_KEY);
-    return stored !== null ? stored === "true" : true;
-  });
-  const [storedShowOtherCampuses, setStoredShowOtherCampuses] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const stored = localStorage.getItem(SHOW_OTHER_CAMPUSES_STORAGE_KEY);
-    return stored !== null ? stored === "true" : false;
-  });
+  const [storedShowAll, setStoredShowAll] = useState<boolean>(true);
+  const [storedShowOtherCampuses, setStoredShowOtherCampuses] = useState<boolean>(false);
 
   const showAllCourses = search.showAll ?? storedShowAll;
   const showOtherCampuses = search.otherCampuses ?? storedShowOtherCampuses;
 
-  const [storedViewMode, setStoredViewMode] = useState<"card" | "table">(() => {
-    if (typeof window === "undefined") return "card";
-    const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-    return stored === "card" || stored === "table" ? stored : "card";
-  });
+  const [storedViewMode, setStoredViewMode] = useState<"card" | "table">("card");
   const SHOW_VIEW_MODE_TOGGLE = false;
   const viewMode = SHOW_VIEW_MODE_TOGGLE ? (search.view ?? storedViewMode) : "card";
 
@@ -907,7 +910,7 @@ export function SchedulePage() {
       const sessions = group.meetings;
       if (!sessions) return;
 
-      sessions.forEach((session: any) => {
+      sessions.forEach((session) => {
         try {
           const event = sessionToEvent({
             session,
@@ -1575,17 +1578,19 @@ export function SchedulePage() {
         className="bg-background pointer-events-none fixed top-0 left-0 -z-10 overflow-hidden border opacity-0 [&_*]:!transition-none"
         style={{ width: EXPORT_IMAGE_WIDTH, height: EXPORT_IMAGE_HEIGHT }}
       >
-        <Calendar
-          events={calendarEvents}
-          setEvents={() => {}}
-          mode="week"
-          setMode={() => {}}
-          date={date}
-          setDate={() => {}}
-          hourHeight={EXPORT_HOUR_HEIGHT}
-          dayWidth={EXPORT_DAY_WIDTH}
-          exportTheme={currentExportTheme}
-        />
+        <ClientOnly>
+          <Calendar
+            events={calendarEvents}
+            setEvents={() => {}}
+            mode="week"
+            setMode={() => {}}
+            date={date}
+            setDate={() => {}}
+            hourHeight={EXPORT_HOUR_HEIGHT}
+            dayWidth={EXPORT_DAY_WIDTH}
+            exportTheme={currentExportTheme}
+          />
+        </ClientOnly>
       </div>
     </>
   );

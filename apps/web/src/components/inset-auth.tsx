@@ -1,30 +1,29 @@
 import {
   ArrowLeft01Icon,
-  Cancel01Icon,
   InformationCircleIcon,
   Mail01Icon,
   ShuffleIcon,
-  Tick01Icon,
-  ViewIcon,
-  ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
+import {
+  PasswordInput,
+  PasswordMatchIndicator,
+  PasswordStrengthIndicator,
+} from "@/components/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient, getSession, signIn, signUp } from "@/lib/auth/client";
 import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
-import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
 /*  Layout común                                                       */
@@ -614,7 +613,6 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
   const queryClient = useQueryClient();
   const lastMethod = useLastUsedLoginMethod();
   const [password, setPassword] = useState("");
-  const [reveal, setReveal] = useState(false);
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -711,29 +709,14 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
             ¿Olvidaste tu contraseña?
           </Link>
         </div>
-        <InputGroup>
-          <InputGroupInput
-            id="login-password"
-            type={reveal ? "text" : "password"}
-            required
-            placeholder="••••••••"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <InputGroupAddon align="inline-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => setReveal((v) => !v)}
-              aria-label={reveal ? "Ocultar contraseña" : "Mostrar contraseña"}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Icon icon={reveal ? ViewOffSlashIcon : ViewIcon} size={16} className="size-4" />
-            </Button>
-          </InputGroupAddon>
-        </InputGroup>
+        <PasswordInput
+          id="login-password"
+          required
+          placeholder="••••••••"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
       </Field>
 
       <Button type="submit" size="lg" className="mt-2" disabled={pending}>
@@ -748,34 +731,6 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
 /*  Formulario de Sign Up                                              */
 /* ------------------------------------------------------------------ */
 
-const passwordRequirements = [
-  { regex: /.{8,}/, text: "Al menos 8 caracteres" },
-  { regex: /[a-z]/, text: "Al menos 1 letra minúscula" },
-  { regex: /[A-Z]/, text: "Al menos 1 letra mayúscula" },
-  { regex: /[0-9]/, text: "Al menos 1 número" },
-  {
-    regex: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
-    text: "Al menos 1 carácter especial",
-  },
-];
-
-function getStrengthColor(score: number) {
-  if (score === 0) return "bg-border";
-  if (score <= 1) return "bg-destructive";
-  if (score <= 2) return "bg-orange-500";
-  if (score <= 3) return "bg-amber-500";
-  if (score === 4) return "bg-yellow-400";
-  return "bg-green-500";
-}
-
-function getStrengthText(score: number) {
-  if (score === 0) return "Ingresa una contraseña";
-  if (score <= 2) return "Contraseña débil";
-  if (score <= 3) return "Contraseña media";
-  if (score === 4) return "Contraseña fuerte";
-  return "Contraseña muy fuerte";
-}
-
 function SignUpForm() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -784,8 +739,6 @@ function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -793,22 +746,6 @@ function SignUpForm() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [suggestedEmail, setSuggestedEmail] = useState<string | null>(null);
-
-  const passwordStrength = useMemo(
-    () =>
-      passwordRequirements.map((requirement) => ({
-        met: requirement.regex.test(password),
-        text: requirement.text,
-      })),
-    [password],
-  );
-
-  const passwordStrengthScore = useMemo(
-    () => passwordStrength.filter((requirement) => requirement.met).length,
-    [passwordStrength],
-  );
-
-  const doPasswordsMatch = Boolean(confirmPassword && password === confirmPassword);
 
   useEffect(() => {
     const bootstrapSession = async () => {
@@ -991,150 +928,41 @@ function SignUpForm() {
         <FieldLabel htmlFor="signup-password">
           Contraseña <span className="text-muted-foreground">*</span>
         </FieldLabel>
-        <InputGroup>
-          <InputGroupInput
-            id="signup-password"
-            type={isPasswordVisible ? "text" : "password"}
-            required
-            placeholder="••••••••"
-            value={password}
-            aria-invalid={passwordError ? true : undefined}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setPasswordError(null);
-              setConfirmPasswordError(null);
-              setFormError(null);
-            }}
-          />
-          <InputGroupAddon align="inline-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => setIsPasswordVisible((v) => !v)}
-              aria-label={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Icon
-                icon={isPasswordVisible ? ViewOffSlashIcon : ViewIcon}
-                size={16}
-                className="size-4"
-              />
-            </Button>
-          </InputGroupAddon>
-        </InputGroup>
+        <PasswordInput
+          id="signup-password"
+          required
+          placeholder="••••••••"
+          value={password}
+          aria-invalid={passwordError ? true : undefined}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setPasswordError(null);
+            setConfirmPasswordError(null);
+            setFormError(null);
+          }}
+        />
         <FieldError>{passwordError}</FieldError>
-
-        <div className="mt-1 space-y-1">
-          <div className="flex h-1 w-full gap-1">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <span
-                key={index}
-                className={cn(
-                  "h-full flex-1 rounded-full transition-all duration-300 ease-out",
-                  index < passwordStrengthScore
-                    ? getStrengthColor(passwordStrengthScore)
-                    : "bg-border",
-                )}
-              />
-            ))}
-          </div>
-          <p className="text-sm font-medium">{getStrengthText(passwordStrengthScore)}.</p>
-          <ul className="space-y-1">
-            {passwordStrength.map((requirement) => (
-              <li key={requirement.text} className="flex items-center gap-2">
-                {requirement.met ? (
-                  <Icon
-                    icon={Tick01Icon}
-                    size={16}
-                    className="size-4 text-green-600 dark:text-green-400"
-                  />
-                ) : (
-                  <Icon icon={Cancel01Icon} size={16} className="text-muted-foreground size-4" />
-                )}
-                <span
-                  className={cn(
-                    "text-xs",
-                    requirement.met
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  {requirement.text}
-                  <span className="sr-only">
-                    {requirement.met ? " - Requisito cumplido" : " - Requisito pendiente"}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <PasswordStrengthIndicator password={password} className="mt-1" />
       </Field>
 
       <Field>
         <FieldLabel htmlFor="signup-confirm-password">
           Confirmar contraseña <span className="text-muted-foreground">*</span>
         </FieldLabel>
-        <InputGroup>
-          <InputGroupInput
-            id="signup-confirm-password"
-            type={isConfirmPasswordVisible ? "text" : "password"}
-            required
-            placeholder="••••••••"
-            value={confirmPassword}
-            aria-invalid={confirmPasswordError ? true : undefined}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              setConfirmPasswordError(null);
-              setFormError(null);
-            }}
-          />
-          <InputGroupAddon align="inline-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => setIsConfirmPasswordVisible((v) => !v)}
-              aria-label={
-                isConfirmPasswordVisible ? "Ocultar confirmación" : "Mostrar confirmación"
-              }
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Icon
-                icon={isConfirmPasswordVisible ? ViewOffSlashIcon : ViewIcon}
-                size={16}
-                className="size-4"
-              />
-            </Button>
-          </InputGroupAddon>
-        </InputGroup>
+        <PasswordInput
+          id="signup-confirm-password"
+          required
+          placeholder="••••••••"
+          value={confirmPassword}
+          aria-invalid={confirmPasswordError ? true : undefined}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            setConfirmPasswordError(null);
+            setFormError(null);
+          }}
+        />
         <FieldError>{confirmPasswordError}</FieldError>
-        <div className="mt-1 space-y-1">
-          <div className="flex items-center gap-2">
-            {doPasswordsMatch ? (
-              <Icon
-                icon={Tick01Icon}
-                size={16}
-                className="size-4 text-green-600 dark:text-green-400"
-              />
-            ) : (
-              <Icon icon={Cancel01Icon} size={16} className="text-muted-foreground size-4" />
-            )}
-            <span
-              className={cn(
-                "text-xs",
-                doPasswordsMatch
-                  ? "font-medium text-green-600 dark:text-green-400"
-                  : "text-muted-foreground",
-              )}
-            >
-              {doPasswordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
-              <span className="sr-only">
-                {doPasswordsMatch ? " - Requisito cumplido" : " - Requisito pendiente"}
-              </span>
-            </span>
-          </div>
-        </div>
+        <PasswordMatchIndicator password={password} confirmPassword={confirmPassword} />
       </Field>
 
       <Button type="submit" size="lg" className="mt-2" disabled={pending}>

@@ -1,5 +1,4 @@
 import {
-  Cancel01Icon,
   ComputerIcon,
   Copy01Icon,
   Globe02Icon,
@@ -11,35 +10,27 @@ import {
   SmartPhone01Icon,
   Tablet01Icon,
   Tick01Icon,
-  ViewIcon,
-  ViewOffSlashIcon,
 } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ReactQrCode from "react-qr-code";
 
+import {
+  PasswordInput,
+  PasswordMatchIndicator,
+  PasswordStrengthIndicator,
+} from "@/components/password-input";
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon, MorphIcon } from "@/components/ui/icon";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { StatefulButton } from "@/components/ui/stateful-button";
 import { toast } from "@/components/ui/toast";
 import { authClient, signOut } from "@/lib/auth/client";
 import { useAuthAccounts, useAuthUser } from "@/lib/hooks/use-queries";
 import { cn } from "@/lib/utils";
-
-const passwordRequirements = [
-  { regex: /.{8,}/, text: "Al menos 8 caracteres" },
-  { regex: /[a-z]/, text: "Al menos 1 letra minúscula" },
-  { regex: /[A-Z]/, text: "Al menos 1 letra mayúscula" },
-  { regex: /[0-9]/, text: "Al menos 1 número" },
-  {
-    regex: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
-    text: "Al menos 1 carácter especial",
-  },
-];
 
 type ActiveSession = {
   id: string;
@@ -58,23 +49,6 @@ type AuthConnectionItem = {
   linked: boolean;
   description: string;
 };
-
-function getStrengthColor(score: number) {
-  if (score === 0) return "bg-border";
-  if (score <= 1) return "bg-destructive";
-  if (score <= 2) return "bg-orange-500";
-  if (score <= 3) return "bg-amber-500";
-  if (score === 4) return "bg-yellow-400";
-  return "bg-green-500";
-}
-
-function getStrengthText(score: number) {
-  if (score === 0) return "Ingresa una contraseña";
-  if (score <= 2) return "Contraseña débil";
-  if (score <= 3) return "Contraseña media";
-  if (score === 4) return "Contraseña fuerte";
-  return "Contraseña muy fuerte";
-}
 
 function getSessionDeviceType(userAgent: string | null | undefined) {
   if (!userAgent) return "unknown" as const;
@@ -285,57 +259,6 @@ function sortSessionsByActivity(
   });
 }
 
-function PasswordStrengthIndicator({ password }: { password: string }) {
-  const passwordStrength = passwordRequirements.map((requirement) => ({
-    met: requirement.regex.test(password),
-    text: requirement.text,
-  }));
-  const passwordStrengthScore = passwordStrength.filter((requirement) => requirement.met).length;
-
-  return (
-    <div className="space-y-1 pt-1">
-      <div className="flex h-1 w-full gap-1">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <span
-            key={index}
-            className={cn(
-              "h-full flex-1 rounded-full transition-all duration-300 ease-out",
-              index < passwordStrengthScore ? getStrengthColor(passwordStrengthScore) : "bg-border",
-            )}
-          />
-        ))}
-      </div>
-      <p className="text-sm font-medium">{getStrengthText(passwordStrengthScore)}.</p>
-      <ul className="space-y-1">
-        {passwordStrength.map((requirement) => (
-          <li key={requirement.text} className="flex items-center gap-2">
-            {requirement.met ? (
-              <Icon
-                icon={Tick01Icon}
-                size={16}
-                className="size-4 text-green-600 dark:text-green-400"
-              />
-            ) : (
-              <Icon icon={Cancel01Icon} size={16} className="text-muted-foreground size-4" />
-            )}
-            <span
-              className={cn(
-                "text-xs",
-                requirement.met ? "text-green-600 dark:text-green-400" : "text-muted-foreground",
-              )}
-            >
-              {requirement.text}
-              <span className="sr-only">
-                {requirement.met ? " - Requisito cumplido" : " - Requisito pendiente"}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export function SecurityPage() {
   const QRCodeComponent =
     (ReactQrCode as unknown as { default?: typeof ReactQrCode }).default ?? ReactQrCode;
@@ -344,11 +267,11 @@ export function SecurityPage() {
   const queryClient = useQueryClient();
   const { data: authUser, isLoading } = useAuthUser();
 
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isLoadingMfa, setIsLoadingMfa] = useState(false);
   const [isDisablingMfa, setIsDisablingMfa] = useState(false);
   const [isMfaPasswordVerified, setIsMfaPasswordVerified] = useState(false);
@@ -370,7 +293,8 @@ export function SecurityPage() {
   const linkedProviderIds = accountsQuery.data?.linkedProviderIds ?? [];
   const pendingTotpEnrollmentRef = useRef<{ qrCode: string; secret: string | null } | null>(null);
   const pendingTotpActivationRef = useRef(false);
-  const canSavePassword = newPassword.length >= 8 && newPassword === confirmPassword;
+  const canSavePassword =
+    newPassword.length >= 8 && newPassword === confirmPassword && !!currentPassword;
   const canVerifyMfaEnrollment = totpCode.length === 6 && !!totpEnrollment;
   const canVerifyMfaPassword =
     !isMfaPasswordVerified &&
@@ -442,34 +366,47 @@ export function SecurityPage() {
     );
   }
 
-  async function handlePasswordReset() {
-    if (!authUser) return;
+  async function handlePasswordChange() {
+    if (!hasCredentialAccount) return;
 
     if (newPassword !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      setPasswordError("Las contraseñas no coinciden.");
       return;
     }
 
     if (newPassword.length < 8) {
-      toast.error("La contraseña debe tener al menos 8 caracteres");
+      setPasswordError("La contraseña debe tener al menos 8 caracteres.");
       return;
     }
 
-    setIsSendingPasswordReset(true);
+    if (!currentPassword) {
+      setPasswordError("Ingresa tu contraseña actual.");
+      return;
+    }
+
+    setPasswordError(null);
+    setIsSavingPassword(true);
     try {
-      const { error } = await authClient.requestPasswordReset({
-        email: authUser.email,
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      const { error } = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: true,
       });
       if (error) throw error;
 
-      toast.success("Te enviamos un enlace para confirmar el cambio de contraseña");
+      toast.success("Contraseña actualizada correctamente");
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error al actualizar contraseña");
+      const message =
+        typeof err === "object" && err !== null && "code" in err && err.code === "INVALID_PASSWORD"
+          ? "La contraseña actual es incorrecta."
+          : getReadableErrorMessage(err, "Error al actualizar contraseña");
+      setPasswordError(message);
+      toast.error(message);
     } finally {
-      setIsSendingPasswordReset(false);
+      setIsSavingPassword(false);
     }
   }
 
@@ -638,71 +575,54 @@ export function SecurityPage() {
           <div className="max-w-md space-y-4">
             <div className="space-y-4">
               <Field data-disabled={!hasCredentialAccount}>
+                <FieldLabel htmlFor="current-password">Contraseña actual</FieldLabel>
+                <PasswordInput
+                  id="current-password"
+                  value={currentPassword}
+                  onChange={(e) => {
+                    setCurrentPassword(e.target.value);
+                    setPasswordError(null);
+                  }}
+                  autoComplete="current-password"
+                  disabled={!hasCredentialAccount}
+                />
+              </Field>
+              <Field data-disabled={!hasCredentialAccount}>
                 <FieldLabel htmlFor="new-password">Nueva contraseña</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput
-                    id="new-password"
-                    type={isNewPasswordVisible ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    autoComplete="new-password"
-                    disabled={!hasCredentialAccount}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => setIsNewPasswordVisible((value) => !value)}
-                      aria-label={
-                        isNewPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"
-                      }
-                      className="text-muted-foreground hover:text-foreground"
-                      disabled={!hasCredentialAccount}
-                    >
-                      <Icon
-                        icon={isNewPasswordVisible ? ViewOffSlashIcon : ViewIcon}
-                        size={16}
-                        className="size-4"
-                      />
-                    </Button>
-                  </InputGroupAddon>
-                </InputGroup>
+                <PasswordInput
+                  id="new-password"
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    setPasswordError(null);
+                  }}
+                  autoComplete="new-password"
+                  disabled={!hasCredentialAccount}
+                />
               </Field>
               {hasCredentialAccount && <PasswordStrengthIndicator password={newPassword} />}
               <Field data-disabled={!hasCredentialAccount}>
                 <FieldLabel htmlFor="confirm-password">Confirmar contraseña</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput
-                    id="confirm-password"
-                    type={isConfirmPasswordVisible ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    autoComplete="new-password"
-                    disabled={!hasCredentialAccount}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => setIsConfirmPasswordVisible((value) => !value)}
-                      aria-label={
-                        isConfirmPasswordVisible ? "Ocultar confirmación" : "Mostrar confirmación"
-                      }
-                      className="text-muted-foreground hover:text-foreground"
-                      disabled={!hasCredentialAccount}
-                    >
-                      <Icon
-                        icon={isConfirmPasswordVisible ? ViewOffSlashIcon : ViewIcon}
-                        size={16}
-                        className="size-4"
-                      />
-                    </Button>
-                  </InputGroupAddon>
-                </InputGroup>
+                <PasswordInput
+                  id="confirm-password"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setPasswordError(null);
+                  }}
+                  autoComplete="new-password"
+                  disabled={!hasCredentialAccount}
+                  showLabel="Mostrar confirmación"
+                  hideLabel="Ocultar confirmación"
+                />
+                <PasswordMatchIndicator password={newPassword} confirmPassword={confirmPassword} />
               </Field>
             </div>
+            {passwordError && (
+              <p className="text-destructive-foreground text-sm" role="alert">
+                {passwordError}
+              </p>
+            )}
             {!hasCredentialAccount && (
               <p className="text-muted-foreground text-sm">
                 Tu cuenta inició sesión con Google. Configura una contraseña para habilitar este
@@ -711,10 +631,10 @@ export function SecurityPage() {
             )}
             <div className="flex justify-end">
               <Button
-                onClick={handlePasswordReset}
-                disabled={!hasCredentialAccount || isSendingPasswordReset || !canSavePassword}
+                onClick={() => void handlePasswordChange()}
+                disabled={!hasCredentialAccount || isSavingPassword || !canSavePassword}
               >
-                {isSendingPasswordReset && (
+                {isSavingPassword && (
                   <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
                 )}
                 Guardar contraseña
@@ -775,27 +695,24 @@ export function SecurityPage() {
             <Field>
               <FieldLabel htmlFor="mfa-password">Contraseña actual</FieldLabel>
               <div className="flex items-center gap-2">
-                <InputGroup>
-                  <InputGroupInput
-                    id="mfa-password"
-                    type="password"
-                    value={mfaPassword}
-                    onChange={(event) => {
-                      const nextValue = event.target.value;
-                      setMfaPassword(nextValue);
-                      if (isMfaPasswordVerified) {
-                        setIsMfaPasswordVerified(false);
-                      }
-                    }}
-                    autoComplete="current-password"
-                    placeholder={
-                      verifiedTotpFactorId
-                        ? "Ingresa tu contraseña para desactivar"
-                        : "Ingresa tu contraseña para verificar"
+                <PasswordInput
+                  id="mfa-password"
+                  value={mfaPassword}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    setMfaPassword(nextValue);
+                    if (isMfaPasswordVerified) {
+                      setIsMfaPasswordVerified(false);
                     }
-                    disabled={isMfaPasswordVerified}
-                  />
-                </InputGroup>
+                  }}
+                  autoComplete="current-password"
+                  placeholder={
+                    verifiedTotpFactorId
+                      ? "Ingresa tu contraseña para desactivar"
+                      : "Ingresa tu contraseña para verificar"
+                  }
+                  disabled={isMfaPasswordVerified}
+                />
                 {!verifiedTotpFactorId && (
                   <StatefulButton
                     onClick={handleVerifyMfaPassword}

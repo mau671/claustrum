@@ -2,9 +2,15 @@ import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
+import {
+  PasswordInput,
+  PasswordMatchIndicator,
+  PasswordStrengthIndicator,
+  meetsAllPasswordRequirements,
+} from "@/components/password-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -35,6 +41,8 @@ export function AuthResetPasswordPage() {
     () => confirmPassword.length > 0 && newPassword !== confirmPassword,
     [confirmPassword, newPassword],
   );
+
+  const isPasswordValid = useMemo(() => meetsAllPasswordRequirements(newPassword), [newPassword]);
 
   const onRequestSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,6 +77,10 @@ export function AuthResetPasswordPage() {
 
     if (!newPassword || newPassword.length < 8) {
       setErrorMessage("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (!meetsAllPasswordRequirements(newPassword)) {
+      setErrorMessage("La contraseña no cumple con todos los requisitos de seguridad.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -126,6 +138,7 @@ export function AuthResetPasswordPage() {
             errorMessage={errorMessage}
             successMessage={successMessage}
             passwordMismatch={passwordMismatch}
+            isPasswordValid={isPasswordValid}
             onSubmit={onUpdateSubmit}
           />
         ) : null}
@@ -237,6 +250,7 @@ function UpdateState({
   errorMessage,
   successMessage,
   passwordMismatch,
+  isPasswordValid,
   onSubmit,
 }: {
   pending: boolean;
@@ -247,6 +261,7 @@ function UpdateState({
   errorMessage: string | null;
   successMessage: string | null;
   passwordMismatch: boolean;
+  isPasswordValid: boolean;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
@@ -275,32 +290,38 @@ function UpdateState({
 
           <Field>
             <FieldLabel htmlFor="new-password">Nueva contraseña</FieldLabel>
-            <Input
+            <PasswordInput
               id="new-password"
-              type="password"
               required
               minLength={8}
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
+            <PasswordStrengthIndicator password={newPassword} />
           </Field>
 
           <Field>
             <FieldLabel htmlFor="confirm-new-password">Confirmar contraseña</FieldLabel>
-            <Input
+            <PasswordInput
               id="confirm-new-password"
-              type="password"
               required
               minLength={8}
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              showLabel="Mostrar confirmación"
+              hideLabel="Ocultar confirmación"
             />
-            <FieldError>{passwordMismatch ? "Las contraseñas no coinciden." : null}</FieldError>
+            <PasswordMatchIndicator password={newPassword} confirmPassword={confirmPassword} />
           </Field>
 
-          <Button type="submit" size="lg" disabled={pending || passwordMismatch} className="mt-1">
+          <Button
+            type="submit"
+            size="lg"
+            disabled={pending || passwordMismatch || !isPasswordValid}
+            className="mt-1"
+          >
             {pending ? <Spinner className="size-4" /> : null}
             {pending ? "Actualizando..." : "Guardar nueva contraseña"}
           </Button>

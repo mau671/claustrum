@@ -419,23 +419,26 @@ export default function CourseList({
     [onSelectionChange, selectedGroups],
   );
 
-  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
+  const handleViewportRef = useCallback((node: HTMLDivElement | null) => {
+    setViewportEl(node);
+  }, []);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex-1 overflow-hidden">
         <ScrollArea
           scrollFade
-          viewportRef={viewportRef}
+          viewportRef={handleViewportRef}
           className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:mr-0 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
         >
-          {isLoading && courses.length === 0 ? (
+          {(isLoading && courses.length === 0) || !viewportEl ? (
             <CourseListSkeleton count={5} />
           ) : (
             <VirtualizedCourseList
               key={viewMode}
               viewMode={viewMode}
-              viewportRef={viewportRef}
+              viewportEl={viewportEl}
               items={filteredViewData}
               courseColorStyles={courseColorStyles}
               selectedGroups={selectedGroups}
@@ -453,7 +456,7 @@ export default function CourseList({
 
 interface VirtualizedCourseListProps {
   viewMode: "card" | "table";
-  viewportRef: React.RefObject<HTMLDivElement | null>;
+  viewportEl: HTMLDivElement;
   items: CourseViewData[];
   courseColorStyles: Map<string, { bg: string; border: string; text: string }>;
   selectedGroups: SelectedGroups;
@@ -465,7 +468,7 @@ interface VirtualizedCourseListProps {
 
 function VirtualizedCourseList({
   viewMode,
-  viewportRef,
+  viewportEl,
   items,
   courseColorStyles,
   selectedGroups,
@@ -476,7 +479,7 @@ function VirtualizedCourseList({
 }: VirtualizedCourseListProps) {
   const rowVirtualizer = useVirtualizer({
     count: items.length,
-    getScrollElement: () => viewportRef.current,
+    getScrollElement: () => viewportEl,
     estimateSize: () => (viewMode === "table" ? 52 : 220),
     getItemKey: (index) => items[index]?.course.offering_id ?? index,
     overscan: 3,

@@ -87,7 +87,7 @@ catálogo cada vez que se genera oferta semanal.
 
 `.github/workflows/generate-seed-offering.yml` se ejecuta semanalmente, manualmente
 o en PRs que tocan `data/itcr`, migraciones o seeds. El workflow declara un service
-container `postgres:17`, aplica las migraciones Drizzle del repo y corre:
+container `postgres:17`, aplica las migraciones SQL del repo (`data/migrations/`) y corre:
 
 ```bash
 uv run tec-data sync \

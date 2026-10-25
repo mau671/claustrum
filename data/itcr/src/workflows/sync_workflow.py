@@ -2448,7 +2448,7 @@ def run_sync(
                 seed_dir_resolved, baseline_seed=baseline_seed
             )
             typer.echo(f"Building local state from {len(seed_paths)} seed files...")
-            migrations_dir = repo_dir / "drizzle"
+            migrations_dir = repo_dir / "data" / "migrations"
             resolved_db_url = seed_history_db_url
             explicit_seed_db = seed_history_db_url != SEED_HISTORY_SERVICE_DB_URL
             if not os.environ.get("GITHUB_ACTIONS") and not explicit_seed_db:

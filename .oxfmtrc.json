@@ -29,7 +29,7 @@
     ".agents/**",
     "docs/**",
     "data/seeds/**",
-    "drizzle/**",
+    "data/migrations/**",
     "data/itcr/**",
     ".alchemy/**"
   ]

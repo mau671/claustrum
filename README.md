@@ -82,8 +82,8 @@ horarios/
 ├── apps/
 │   ├── web/               # SPA React 19, TanStack Router/Query, Fumadocs y Tailwind v4
 │   └── api/               # Cloudflare Worker con Effect TS (HttpApi), Alchemy y Better Auth
-├── drizzle/               # Migraciones SQL versionadas
 ├── data/
+│   ├── migrations/        # Migraciones SQL versionadas
 │   ├── seeds/             # Seeds deterministas para catálogo y datos iniciales
 │   └── itcr/              # CLI en Python (uv) para extracción y sincronización académica
 ├── scripts/               # Utilidades TypeScript para migraciones, seeds y Drizzle Studio

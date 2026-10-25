@@ -1,4 +1,4 @@
-drizzle/** linguist-detectable=false
+data/migrations/** linguist-detectable=false
 data/seeds/seed.sql linguist-detectable=false
 src/routeTree.gen.ts linguist-generated=true
 data/seeds/itcr/*.sql linguist-generated=true

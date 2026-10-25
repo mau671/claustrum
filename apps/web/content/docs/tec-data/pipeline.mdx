@@ -130,7 +130,7 @@ uv run tec-data sync \
   --no-apply
 ```
 
-`seed-history` reconstruye el estado esperado aplicando las migraciones Drizzle y
+`seed-history` reconstruye el estado esperado aplicando las migraciones SQL (`data/migrations/`) y
 replayeando los seeds históricos en una base PostgreSQL efímera. En CI el workflow
 declara un service container `postgres:17`; localmente, si no se pasa
 `--seed-history-db-url`, se levanta un contenedor temporal con Docker. Este modo no
@@ -181,7 +181,7 @@ ese artifact, valida que esté completo y ejecuta `sync --target seed-history
 con los nuevos seeds en `data/seeds/itcr`.
 
 Ambos workflows de seeds declaran un service container `postgres:17` y corren las
-migraciones Drizzle antes del replay, así que no dependen de Supabase CLI.
+migraciones SQL (`data/migrations/`) antes del replay, así que no dependen de Supabase CLI.
 
 ## Implementación
 

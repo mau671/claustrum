@@ -57,23 +57,23 @@ async function main(): Promise<void> {
     console.log("💻 Targeting LOCAL database (127.0.0.1:54322 from .env.dev)");
   }
 
-  const drizzleDir = path.resolve(process.cwd(), "drizzle");
-  if (!fs.existsSync(drizzleDir)) {
-    console.error(`❌ Error: Migration directory not found: ${drizzleDir}`);
+  const migrationsDir = path.resolve(process.cwd(), "data/migrations");
+  if (!fs.existsSync(migrationsDir)) {
+    console.error(`❌ Error: Migration directory not found: ${migrationsDir}`);
     process.exit(1);
   }
 
   const files = fs
-    .readdirSync(drizzleDir)
+    .readdirSync(migrationsDir)
     .filter((f) => f.endsWith(".sql"))
     .sort();
 
   if (files.length === 0) {
-    console.log("ℹ️ No .sql migration files found in drizzle directory.");
+    console.log("ℹ️ No .sql migration files found in migrations directory.");
     return;
   }
 
-  console.log(`📁 Scanning ${files.length} migration files in ${drizzleDir}...`);
+  console.log(`📁 Scanning ${files.length} migration files in ${migrationsDir}...`);
 
   const pool = new Pool({
     connectionString,
@@ -126,7 +126,7 @@ async function main(): Promise<void> {
       for (const file of files) {
         const versionPrefix = file.split("_")[0];
         if (versionPrefix && legacyVersions.has(versionPrefix)) {
-          const fullPath = path.join(drizzleDir, file);
+          const fullPath = path.join(migrationsDir, file);
           const content = fs.readFileSync(fullPath, "utf-8");
           const hash = crypto.createHash("sha256").update(content).digest("hex");
           if (!appliedHashes.has(hash)) {
@@ -149,7 +149,7 @@ async function main(): Promise<void> {
     let skippedCount = 0;
 
     for (const file of files) {
-      const fullPath = path.join(drizzleDir, file);
+      const fullPath = path.join(migrationsDir, file);
       const content = fs.readFileSync(fullPath, "utf-8");
       const hash = crypto.createHash("sha256").update(content).digest("hex");
 

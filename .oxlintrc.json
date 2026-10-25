@@ -19,7 +19,7 @@
     "coverage/**",
     "**/routeTree.gen.ts",
     "data/seeds/**",
-    "drizzle/**",
+    "data/migrations/**",
     "data/itcr/**",
     ".alchemy/**",
     ".wrangler/**",

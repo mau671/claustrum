@@ -477,10 +477,11 @@ function VirtualizedCourseList({
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => viewportRef.current,
-    estimateSize: () => (viewMode === "table" ? 52 : 185),
+    estimateSize: () => (viewMode === "table" ? 52 : 220),
     getItemKey: (index) => items[index]?.course.offering_id ?? index,
-    overscan: 6,
+    overscan: 3,
   });
+  rowVirtualizer.shouldAdjustScrollPositionOnItemSizeChange = () => false;
 
   const virtualItems = rowVirtualizer.getVirtualItems();
 
@@ -600,7 +601,7 @@ const CourseCard = memo(function CourseCard({
     <Frame
       className={cn(
         "w-full max-w-full p-1.5 transition-[border-color,box-shadow,background-color] duration-150",
-        hasSelectedGroup && "border-primary/40 ring-primary/20 ring-1",
+        hasSelectedGroup && "ring-primary/40 ring-1 ring-inset",
       )}
     >
       <FrameHeader className="flex flex-row items-baseline justify-between gap-2 px-3 pt-2 pb-1.5">

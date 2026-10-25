@@ -82,6 +82,53 @@ const parseView = (value: unknown): ScheduleSearch["view"] => {
 const getSearchValue = (search: SearchInput, longKey: string, shortKey: string) =>
   search[longKey] ?? search[shortKey];
 
+const DIGITS_PATTERN = /^\d+$/;
+const PADDED_DIGITS_PATTERN = /^0\d+$/;
+
+const splitGroupId = (groupId: string): { courseCode: string; suffix: string } | null => {
+  const separatorIndex = groupId.lastIndexOf("-");
+  if (separatorIndex <= 0) return null;
+  return {
+    courseCode: groupId.slice(0, separatorIndex),
+    suffix: groupId.slice(separatorIndex + 1),
+  };
+};
+
+const stripLeadingZeros = (digits: string): string => digits.replace(/^0+(?=\d)/, "");
+
+export function normalizeGroupId(groupId: string): string {
+  const trimmed = groupId.trim();
+  const parts = splitGroupId(trimmed);
+  if (!parts || !DIGITS_PATTERN.test(parts.suffix)) return trimmed;
+  return `${parts.courseCode}-${stripLeadingZeros(parts.suffix)}`;
+}
+
+export function normalizeGroupsString(groups: string | undefined): string | undefined {
+  if (!groups) return undefined;
+
+  const normalized = groups
+    .split(",")
+    .map((value) => normalizeGroupId(value))
+    .filter((value) => value.length > 0);
+
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique.join(",") : undefined;
+}
+
+export function hasLegacyPaddedGroupCodes(searchString: string): boolean {
+  const params = new URLSearchParams(searchString);
+
+  return ["groups", "g"].some((key) => {
+    const value = params.get(key);
+    if (!value) return false;
+
+    return value.split(",").some((token) => {
+      const parts = splitGroupId(token.trim());
+      return !!parts && PADDED_DIGITS_PATTERN.test(parts.suffix);
+    });
+  });
+}
+
 export function parseScheduleSearch(search: SearchInput): ScheduleSearch {
   return {
     view: parseView(getSearchValue(search, "view", "v")),
@@ -92,7 +139,7 @@ export function parseScheduleSearch(search: SearchInput): ScheduleSearch {
     term: parseNumber(getSearchValue(search, "term", "t")),
     otherCampuses: parseBoolean(getSearchValue(search, "otherCampuses", "oc")),
     showAll: parseBoolean(getSearchValue(search, "showAll", "a")),
-    groups: parseString(getSearchValue(search, "groups", "g")),
+    groups: normalizeGroupsString(parseString(getSearchValue(search, "groups", "g"))),
     loadSchedule: parseNumber(getSearchValue(search, "loadSchedule", "l")),
     filters: parseBoolean(getSearchValue(search, "filters", "f")),
     q: parseString(search.q ?? search.s),

@@ -69,6 +69,7 @@ import { cn } from "@/lib/utils";
 import {
   buildScheduleShortUrl,
   isMeaningfulScheduleSearch,
+  normalizeGroupId,
   normalizeScheduleUniversityId,
   SCHEDULE_DEFAULT_UNIVERSITY_ID,
 } from "./-schedule-search";
@@ -599,8 +600,6 @@ export function SchedulePage() {
           Array<{
             course_code?: string;
             courseCode?: string;
-            campus_id?: number | null;
-            campusId?: number | null;
             group_code?: string;
             groupCode?: string;
           }>
@@ -610,22 +609,17 @@ export function SchedulePage() {
 
         const savedGroupLookups = items ?? [];
         const lookupSet = new Set(
-          savedGroupLookups.map((i) => {
-            const courseCode = i.courseCode ?? i.course_code ?? "";
-            const campusId = i.campusId ?? i.campus_id ?? "";
-            const groupCode = i.groupCode ?? i.group_code ?? "";
-            return `${courseCode}-${campusId}-${groupCode}`;
+          savedGroupLookups.map((item) => {
+            const courseCode = (item.courseCode ?? item.course_code ?? "").trim();
+            const groupCode = (item.groupCode ?? item.group_code ?? "").trim();
+            return normalizeGroupId(`${courseCode}-${groupCode}`);
           }),
         );
         const matchingGroups: string[] = [];
 
-        groupById.forEach((value, key) => {
-          if (
-            lookupSet.has(
-              `${value.course.course_code}-${value.campusId ?? ""}-${value.group.group_code}`,
-            )
-          ) {
-            matchingGroups.push(key);
+        groupById.forEach((_groupData, groupId) => {
+          if (lookupSet.has(normalizeGroupId(groupId))) {
+            matchingGroups.push(groupId);
           }
         });
 

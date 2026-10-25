@@ -82,12 +82,7 @@ function metricLabel(value: number | null, suffix = "") {
 }
 
 function formatGroupCode(group: string): string {
-  const clean = group.trim();
-  const num = parseInt(clean, 10);
-  if (!isNaN(num) && clean.length <= 2) {
-    return `GR ${String(num).padStart(2, "0")}`;
-  }
-  return `GR ${clean}`;
+  return `GR ${group.trim()}`;
 }
 
 function sortTermsAlphabetical<T extends { term_display_name: string }>(terms: T[]): T[] {

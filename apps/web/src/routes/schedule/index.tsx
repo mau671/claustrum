@@ -12,6 +12,7 @@ import {
 import { buildSeoMeta } from "@/lib/seo";
 
 import {
+  hasLegacyPaddedGroupCodes,
   hasLegacyScheduleSearchParams,
   parseScheduleSearch,
   SCHEDULE_DEFAULT_UNIVERSITY_ID,
@@ -35,11 +36,12 @@ export const Route = createFileRoute("/schedule/")({
     ],
   },
   beforeLoad: ({ search, location, context: { queryClient } }) => {
-    const hasLegacyParams = hasLegacyScheduleSearchParams(location.searchStr);
-    if (
-      hasLegacyParams ||
-      (search.university !== undefined && search.university !== SCHEDULE_DEFAULT_UNIVERSITY_ID)
-    ) {
+    const needsSearchNormalization =
+      hasLegacyScheduleSearchParams(location.searchStr) ||
+      hasLegacyPaddedGroupCodes(location.searchStr) ||
+      (search.university !== undefined && search.university !== SCHEDULE_DEFAULT_UNIVERSITY_ID);
+
+    if (needsSearchNormalization) {
       throw redirect({
         to: "/schedule",
         search: {

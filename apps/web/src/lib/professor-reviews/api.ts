@@ -109,6 +109,7 @@ export async function getProfessorReviewSummary(
     average_fairness_score: data?.average_fairness_score ?? null,
     would_take_again_percentage: data?.would_take_again_percentage ?? null,
     tag_counts: tagCounts,
+    community_summary: data?.community_summary ?? null,
   };
 }
 

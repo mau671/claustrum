@@ -51,7 +51,7 @@ function escapeSqlString(str: string): string {
   return str.replace(/'/g, "''");
 }
 
-function runOpenCodeAgent(prompt: string): Promise<string> {
+function runOpenCodeAgent(prompt: string, timeoutMs = 45000): Promise<string> {
   return new Promise((resolve, reject) => {
     const args = [
       "run",
@@ -71,6 +71,15 @@ function runOpenCodeAgent(prompt: string): Promise<string> {
 
     let stdout = "";
     let stderr = "";
+    let isSettled = false;
+
+    const timer = setTimeout(() => {
+      if (!isSettled) {
+        isSettled = true;
+        child.kill("SIGKILL");
+        reject(new Error(`opencode process timed out after ${timeoutMs}ms`));
+      }
+    }, timeoutMs);
 
     child.stdout.on("data", (chunk: Buffer) => {
       stdout += chunk.toString("utf-8");
@@ -81,10 +90,18 @@ function runOpenCodeAgent(prompt: string): Promise<string> {
     });
 
     child.on("error", (err) => {
-      reject(err);
+      if (!isSettled) {
+        isSettled = true;
+        clearTimeout(timer);
+        reject(err);
+      }
     });
 
     child.on("close", (code) => {
+      if (isSettled) return;
+      isSettled = true;
+      clearTimeout(timer);
+
       if (code !== 0) {
         return reject(new Error(`opencode process exited with code ${code}: ${stderr || stdout}`));
       }
@@ -190,7 +207,7 @@ async function main(): Promise<void> {
 
     console.log(`📋 Found ${candidates.length} candidate(s) to process.\n`);
 
-    const CONCURRENCY = 8;
+    const CONCURRENCY = 16;
     let completedCount = 0;
 
     async function processCandidate(candidate: ProfessorCandidate) {
@@ -229,7 +246,14 @@ async function main(): Promise<void> {
       const prompt = `A continuación tienes las reseñas reales aprobadas del profesor ${candidate.full_name} (ID: ${candidate.professor_id}):\n\n${reviewsTextList}\n\nRedacta la síntesis pedagógica siguiendo estrictamente todas tus directrices de estilo (preferiblemente 1 solo párrafo continuo de unas 100 palabras, máximo 2 breves, sin dos puntos, sin punto y coma, sin guiones largos, oraciones bien articuladas con comas y conectores en español, sin introducciones ni conclusiones genéricas, pudiendo usar negritas, itálicas o subrayados solo si aportan valor visual sin sobrecargar). Devuelve únicamente el texto en Markdown del resumen.`;
 
       try {
-        const summary = await runOpenCodeAgent(prompt);
+        let summary: string;
+        try {
+          summary = await runOpenCodeAgent(prompt);
+        } catch {
+          // Retry once on failure/timeout
+          summary = await runOpenCodeAgent(prompt);
+        }
+
         completedCount++;
         console.log(
           `   [${completedCount}/${candidates.length}] Generated summary for ${candidate.full_name} (${summary.length} chars).`,

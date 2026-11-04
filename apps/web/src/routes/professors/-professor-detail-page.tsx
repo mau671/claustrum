@@ -414,7 +414,7 @@ export function ProfessorDetailPage() {
 
       <Card className="overflow-hidden py-0">
         <CardContent className="p-0">
-          <div className="grid grid-cols-[2fr_1fr] md:grid-cols-[25%_auto_15%_auto_1fr]">
+          <div className="grid grid-cols-[2fr_1fr] md:grid-cols-[minmax(140px,20%)_auto_minmax(160px,20%)_auto_1fr]">
             <div className="flex min-h-36 flex-col items-center justify-center p-5 text-center md:min-h-52 md:p-6">
               <span className="text-muted-foreground text-sm font-semibold tracking-wide uppercase md:text-base">
                 Calidad general
@@ -426,7 +426,7 @@ export function ProfessorDetailPage() {
 
             <Separator orientation="vertical" className="hidden md:block" />
 
-            <div className="grid min-h-36 gap-4 border-l p-5 md:min-h-52 md:items-center md:gap-5 md:border-l-0 md:p-6">
+            <div className="grid min-h-36 gap-4 border-l p-5 md:min-h-52 md:items-center md:justify-items-center md:gap-5 md:border-l-0 md:px-4 md:py-6">
               <SummaryMetric
                 label="Facilidad"
                 value={metricLabel(summary?.average_ease_score ?? null)}

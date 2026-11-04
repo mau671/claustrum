@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Combobox,
   ComboboxCollection,
@@ -82,6 +84,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -94,6 +97,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -103,7 +107,6 @@ import {
   groupTermsByYear,
   sortTermsLogical,
 } from "@/lib/academic-terms";
-import { formatEvaluationFileName, type EvaluationType } from "@/lib/evaluations/types";
 import { useCourseEvaluations } from "@/lib/hooks/use-evaluations";
 import {
   useCourseAttempts,
@@ -536,18 +539,71 @@ function ScheduleGroupCard({
   );
 }
 
+function getEvaluationTitle(ev: {
+  evaluation_type: string;
+  evaluation_number: number | null;
+  custom_name: string | null;
+}): string {
+  if (ev.custom_name && ev.custom_name.trim() !== "") {
+    return ev.custom_name.trim();
+  }
+  if (ev.evaluation_type === "parcial" && ev.evaluation_number) {
+    return `Parcial ${ev.evaluation_number}`;
+  }
+  if (ev.evaluation_type === "reposicion") {
+    return "Reposición";
+  }
+  if (ev.evaluation_type === "final") {
+    return "Examen Final";
+  }
+  if (ev.evaluation_type === "quiz" && ev.evaluation_number) {
+    return `Quiz ${ev.evaluation_number}`;
+  }
+  return "Evaluación";
+}
+
+function getEvaluationCategoryKey(ev: {
+  evaluation_type: string;
+  evaluation_number: number | null;
+  custom_name: string | null;
+}): string {
+  if (ev.evaluation_type === "parcial") {
+    return ev.evaluation_number ? `parcial_${ev.evaluation_number}` : "parcial";
+  }
+  if (ev.evaluation_type === "reposicion") {
+    return "reposicion";
+  }
+  if (ev.custom_name) {
+    const pMatch = ev.custom_name.match(/Parcial\s*(\d+)/i);
+    if (pMatch) {
+      return `parcial_${pMatch[1]}`;
+    }
+    if (/Reposici[oó]n/i.test(ev.custom_name)) {
+      return "reposicion";
+    }
+  }
+  return "otro";
+}
+
+function getCategoryLabel(key: string): string {
+  if (key.startsWith("parcial_")) {
+    return `Parcial ${key.replace("parcial_", "")}`;
+  }
+  if (key === "reposicion") return "Reposición";
+  if (key === "otro") return "Otros";
+  return key;
+}
+
 function EvaluationDocument({
-  courseCode,
   evaluation,
   onPreview,
 }: {
-  courseCode: string;
   evaluation: {
     id: number;
     course_code?: string;
     course_name?: string;
     file_key: string;
-    evaluation_type: EvaluationType;
+    evaluation_type: string;
     evaluation_number: number | null;
     custom_name: string | null;
     term_display_name: string | null;
@@ -558,50 +614,59 @@ function EvaluationDocument({
     file_size: number;
     status: string;
   };
-  onPreview: (payload: { id: number }) => void;
+  onPreview: (payload: { id: number; isAnswers?: boolean }) => void;
 }) {
-  const fileName = formatEvaluationFileName(
-    evaluation.course_code ?? courseCode,
-    evaluation.evaluation_type,
-    evaluation.evaluation_number,
-    evaluation.custom_name,
-  );
+  const title = getEvaluationTitle(evaluation);
 
   return (
-    <div className="group border-border bg-card hover:bg-accent/30 flex items-start gap-3 rounded-xl border p-3 transition-colors">
-      <div className="bg-primary/5 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg">
-        <FileText className="size-5" />
+    <div className="group border-border bg-card hover:bg-accent/30 flex flex-col gap-2 rounded-xl border p-3 transition-colors sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="bg-primary/5 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <FileText className="size-4.5" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <button
+              type="button"
+              onClick={() => onPreview({ id: evaluation.id })}
+              className="cursor-pointer text-left text-sm font-medium underline-offset-4 hover:underline"
+            >
+              {title}
+            </button>
+            {evaluation.includes_answers ? (
+              <span className="text-muted-foreground text-xs">· Con respuestas</span>
+            ) : null}
+            {evaluation.has_separate_answers ? (
+              <span className="text-muted-foreground text-xs">· Respuestas aparte</span>
+            ) : null}
+          </div>
+
+          <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
+            {evaluation.term_display_name ? (
+              <span>{evaluation.term_display_name.replace(" - ", ": ")}</span>
+            ) : null}
+            <span>·</span>
+            <span>{evaluation.is_catedra ? "Cátedra" : evaluation.professor_name}</span>
+            <span>·</span>
+            <span className="font-mono">{formatFileSize(evaluation.file_size)}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <button
-            type="button"
-            onClick={() =>
-              onPreview({
-                id: evaluation.id,
-              })
-            }
-            className="min-w-0 cursor-pointer truncate text-left text-sm font-medium underline-offset-4 hover:underline"
+      <div className="flex shrink-0 items-center gap-1.5 self-end sm:self-center">
+        {evaluation.has_separate_answers ? (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={() => onPreview({ id: evaluation.id, isAnswers: true })}
           >
-            {fileName}
-          </button>
-          <div className="text-muted-foreground shrink-0 text-right text-xs">
-            {evaluation.term_display_name ? (
-              <div>{evaluation.term_display_name.replace(" - ", ": ")}</div>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="text-muted-foreground mt-0.5 flex items-center justify-between gap-3 text-xs">
-          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5">
-            {evaluation.is_catedra ? <span>Cátedra</span> : null}
-            {evaluation.professor_name ? (
-              <span className="truncate">{evaluation.professor_name}</span>
-            ) : null}
-          </div>
-          <span className="shrink-0 font-mono">{formatFileSize(evaluation.file_size)}</span>
-        </div>
+            Solución
+          </Button>
+        ) : null}
+        <Button variant="ghost" size="xs" onClick={() => onPreview({ id: evaluation.id })}>
+          Ver examen
+        </Button>
       </div>
     </div>
   );
@@ -780,7 +845,76 @@ export function CourseDetails({
     offeringTerms.find((term) => String(term.id) === offeringTermId) ?? null;
   const academicTermGroups = useMemo(() => groupTermsByYear(academicTerms), [academicTerms]);
   const offeringTermGroups = useMemo(() => groupTermsByYear(offeringTerms), [offeringTerms]);
-  const evaluations = evaluationsQuery.data ?? [];
+  const evaluations = useMemo(() => evaluationsQuery.data ?? [], [evaluationsQuery.data]);
+  const [selectedEvaluationTab, setSelectedEvaluationTab] = useState<string>("all");
+
+  const evaluationTabs = useMemo(() => {
+    if (evaluations.length === 0) return [];
+    const categoryCounts = new Map<string, number>();
+    for (const ev of evaluations) {
+      const key = getEvaluationCategoryKey(ev);
+      categoryCounts.set(key, (categoryCounts.get(key) || 0) + 1);
+    }
+    const order = ["parcial_1", "parcial_2", "parcial_3", "parcial_4", "reposicion", "otro"];
+    const sortedKeys = [...categoryCounts.keys()].sort((a, b) => {
+      const idxA = order.indexOf(a);
+      const idxB = order.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    return [
+      { key: "all", label: "Todos", count: evaluations.length },
+      ...sortedKeys.map((key) => ({
+        key,
+        label: getCategoryLabel(key),
+        count: categoryCounts.get(key)!,
+      })),
+    ];
+  }, [evaluations]);
+
+  useEffect(() => {
+    if (
+      selectedEvaluationTab !== "all" &&
+      !evaluationTabs.some((t) => t.key === selectedEvaluationTab)
+    ) {
+      setSelectedEvaluationTab("all");
+    }
+  }, [evaluationTabs, selectedEvaluationTab]);
+
+  const filteredEvaluations = useMemo(() => {
+    if (selectedEvaluationTab === "all") return evaluations;
+    return evaluations.filter((ev) => getEvaluationCategoryKey(ev) === selectedEvaluationTab);
+  }, [evaluations, selectedEvaluationTab]);
+
+  const evaluationsByYear = useMemo(() => {
+    const groups = new Map<string, typeof evaluations>();
+    for (const ev of filteredEvaluations) {
+      let year = "Otros";
+      if (ev.term_display_name) {
+        const match = ev.term_display_name.match(/^(\d{4})/);
+        if (match) year = match[1];
+      } else if (ev.created_at) {
+        const match = ev.created_at.match(/^(\d{4})/);
+        if (match) year = match[1];
+      }
+      if (!groups.has(year)) {
+        groups.set(year, []);
+      }
+      groups.get(year)!.push(ev);
+    }
+
+    return [...groups.entries()].sort((a, b) => {
+      const numA = parseInt(a[0], 10);
+      const numB = parseInt(b[0], 10);
+      if (!Number.isNaN(numA) && !Number.isNaN(numB)) return numB - numA;
+      if (!Number.isNaN(numA)) return -1;
+      if (!Number.isNaN(numB)) return 1;
+      return a[0].localeCompare(b[0]);
+    });
+  }, [filteredEvaluations]);
 
   useEffect(() => {
     if (!offeringTermId && offeringTerms.length > 0) {
@@ -1513,20 +1647,73 @@ export function CourseDetails({
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
-            {evaluations.map((evaluation) => (
-              <EvaluationDocument
-                key={evaluation.id}
-                courseCode={course.code}
-                evaluation={evaluation}
-                onPreview={({ id }) =>
-                  void navigate({
-                    to: "/evaluations/view/$evaluationSlug",
-                    params: { evaluationSlug: `${id}.pdf` },
-                  })
-                }
-              />
-            ))}
+          <div className="space-y-3">
+            {evaluationTabs.length > 2 ? (
+              <Tabs
+                value={selectedEvaluationTab}
+                onValueChange={(val) => setSelectedEvaluationTab(val as string)}
+                className="w-full"
+              >
+                <div className="overflow-x-auto pb-1">
+                  <TabsList size="sm" className="w-auto">
+                    {evaluationTabs.map((tab) => (
+                      <TabsTab key={tab.key} value={tab.key} className="gap-1.5 whitespace-nowrap">
+                        <span>{tab.label}</span>
+                        <span className="text-muted-foreground/80 font-mono text-[11px]">
+                          ({tab.count})
+                        </span>
+                      </TabsTab>
+                    ))}
+                  </TabsList>
+                </div>
+              </Tabs>
+            ) : null}
+
+            {filteredEvaluations.length === 0 ? (
+              <div className="text-muted-foreground py-6 text-center text-sm">
+                No hay evaluaciones en esta categoría.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {evaluationsByYear.map(([year, yearItems], yearIndex) => (
+                  <Frame key={year} className="w-full">
+                    <Collapsible defaultOpen={yearIndex < 2}>
+                      <FrameHeader className="flex-row items-center justify-between px-3 py-1.5">
+                        <CollapsibleTrigger
+                          className="flex cursor-pointer items-center gap-2 text-sm font-semibold data-panel-open:[&_svg]:rotate-180"
+                          render={<Button variant="ghost" size="sm" />}
+                        >
+                          <ChevronDown className="size-4 transition-transform duration-200" />
+                          <span>{year}</span>
+                          <span className="text-muted-foreground text-xs font-normal">
+                            ({yearItems.length}{" "}
+                            {yearItems.length === 1 ? "evaluación" : "evaluaciones"})
+                          </span>
+                        </CollapsibleTrigger>
+                      </FrameHeader>
+                      <CollapsiblePanel>
+                        <FramePanel className="space-y-2 p-2">
+                          {yearItems.map((evaluation) => (
+                            <EvaluationDocument
+                              key={evaluation.id}
+                              evaluation={evaluation}
+                              onPreview={({ id, isAnswers }) =>
+                                void navigate({
+                                  to: "/evaluations/view/$evaluationSlug",
+                                  params: {
+                                    evaluationSlug: isAnswers ? `${id}_answers.pdf` : `${id}.pdf`,
+                                  },
+                                })
+                              }
+                            />
+                          ))}
+                        </FramePanel>
+                      </CollapsiblePanel>
+                    </Collapsible>
+                  </Frame>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

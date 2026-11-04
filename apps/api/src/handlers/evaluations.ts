@@ -114,7 +114,12 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.course_id IN (SELECT course_id FROM target_courses)
                 AND e.status = 'approved'
-              ORDER BY e.evaluation_type, e.evaluation_number NULLS LAST
+              ORDER BY
+                e.evaluation_type,
+                e.evaluation_number NULLS LAST,
+                at.year DESC NULLS LAST,
+                at.period_number DESC NULLS LAST,
+                e.created_at DESC
             `.pipe(
             Effect.mapError(
               (e) =>

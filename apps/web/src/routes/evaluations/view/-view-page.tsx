@@ -6,13 +6,14 @@ import { PdfDocumentViewer } from "@/components/pdf-document-viewer";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
-import { getEvaluationDocument } from "@/lib/evaluations/api";
+import { getEvaluationAnswersDocument, getEvaluationDocument } from "@/lib/evaluations/api";
 import { useBlobUrl } from "@/lib/hooks/use-blob-url";
 
 export function EvaluationViewPage() {
   const { evaluationSlug } = useParams({ from: "/evaluations/view/$evaluationSlug" });
-  const match = evaluationSlug.match(/^(\d+)\.pdf$/);
+  const match = evaluationSlug.match(/^(\d+)(_answers)?\.pdf$/);
   const evaluationId = match ? parseInt(match[1], 10) : null;
+  const isAnswers = Boolean(match?.[2]);
 
   const [blob, setBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState<string>("evaluacion.pdf");
@@ -34,7 +35,9 @@ export function EvaluationViewPage() {
 
     async function load() {
       try {
-        const result = await getEvaluationDocument(id);
+        const result = isAnswers
+          ? await getEvaluationAnswersDocument(id)
+          : await getEvaluationDocument(id);
         if (cancelled) return;
         setBlob(result.blob);
         setFileName(result.fileName);
@@ -52,7 +55,7 @@ export function EvaluationViewPage() {
     return () => {
       cancelled = true;
     };
-  }, [evaluationId]);
+  }, [evaluationId, isAnswers]);
 
   if (isLoading) {
     return (

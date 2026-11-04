@@ -8,10 +8,12 @@ import {
   ChevronRight,
   Clock,
   FileText,
+  FileUp,
   GraduationCap,
   Minus,
   Pencil,
   Plus,
+  ShieldCheck,
   Trash2,
   MoreVertical,
   User,
@@ -1282,67 +1284,75 @@ export function CourseDetails({
       </div>
 
       {/* ========== ATTEMPTS TIMELINE ========== */}
-      {userId ? (
-        <section>
-          <SectionHeader
-            title="Historial de intentos"
-            action={
-              !attemptsQuery.isLoading && (attempts.length > 0 || isStatusFromAnotherSource) ? (
-                <Button type="button" size="sm" variant="outline" onClick={handleOpenProgressSheet}>
-                  Registrar progreso
-                </Button>
-              ) : null
-            }
-          />
-          {attemptsQuery.isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex gap-4">
-                  <div className="bg-muted size-8 shrink-0 animate-pulse rounded-full" />
-                  <div className="flex-1 space-y-2 py-1">
-                    <div className="bg-muted h-4 w-32 animate-pulse rounded" />
-                    <div className="bg-muted h-3 w-48 animate-pulse rounded" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : attempts.length === 0 && !isStatusFromAnotherSource ? (
-            <div className="border-border flex flex-col items-center justify-center rounded-2xl border border-dashed py-12 text-center">
-              <GraduationCap className="text-muted-foreground/50 mb-3 size-8" />
-              <p className="text-foreground text-sm font-medium">Aún no hay intentos registrados</p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                Registra tu primera nota para iniciar el historial
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-4"
-                onClick={handleOpenProgressSheet}
-              >
+      <section>
+        <SectionHeader
+          title="Historial de intentos"
+          action={
+            !attemptsQuery.isLoading && (attempts.length > 0 || isStatusFromAnotherSource) ? (
+              <Button type="button" size="sm" variant="outline" onClick={handleOpenProgressSheet}>
                 Registrar progreso
               </Button>
+            ) : null
+          }
+        />
+        {attemptsQuery.isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex gap-4">
+                <div className="bg-muted size-8 shrink-0 animate-pulse rounded-full" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+                  <div className="bg-muted h-3 w-48 animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : attempts.length === 0 && !isStatusFromAnotherSource ? (
+          <div className="border-border/80 bg-card/50 flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 text-center transition-colors">
+            <div className="bg-primary/10 text-primary ring-primary/20 mb-3.5 flex size-12 items-center justify-center rounded-2xl ring-1">
+              <GraduationCap className="size-6" />
             </div>
-          ) : (
-            <div className="pl-1">
-              {showOriginItem ? <TimelineOriginItem course={course} /> : null}
-              {attempts.map((attempt: CourseAttempt) => (
-                <TimelineItem
-                  key={attempt.id}
-                  attempt={attempt}
-                  onEdit={openEditAttempt}
-                  onDelete={setDeletingAttempt}
-                  termLabel={
-                    attempt.academicTermId
-                      ? (termLabelById.get(attempt.academicTermId) ?? `#${attempt.academicTermId}`)
-                      : "Sin periodo"
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      ) : null}
+            <h3 className="text-foreground text-sm font-semibold tracking-tight">
+              Comenzá tu historial académico
+            </h3>
+            <p className="text-muted-foreground mt-1 max-w-sm text-xs leading-relaxed">
+              Registrá si ya aprobaste, estás cursando o retiraste este curso para actualizar tus
+              créditos y ver tu avance en la malla.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              className="mt-4 gap-1.5 font-medium shadow-xs"
+              onClick={handleOpenProgressSheet}
+            >
+              <Plus className="size-4" />
+              <span>Registrar progreso</span>
+            </Button>
+            <p className="text-muted-foreground/80 mt-3 text-[11px]">
+              {userId
+                ? "Podés registrar notas numéricas o marcar aprobación directa sin calificación."
+                : "Se guardará localmente en tu navegador. Podés iniciar sesión para sincronizarlo en la nube."}
+            </p>
+          </div>
+        ) : (
+          <div className="pl-1">
+            {showOriginItem ? <TimelineOriginItem course={course} /> : null}
+            {attempts.map((attempt: CourseAttempt) => (
+              <TimelineItem
+                key={attempt.id}
+                attempt={attempt}
+                onEdit={openEditAttempt}
+                onDelete={setDeletingAttempt}
+                termLabel={
+                  attempt.academicTermId
+                    ? (termLabelById.get(attempt.academicTermId) ?? `#${attempt.academicTermId}`)
+                    : "Sin periodo"
+                }
+              />
+            ))}
+          </div>
+        )}
+      </section>
 
       {(() => {
         const confirmProgressDialog = (
@@ -1477,22 +1487,30 @@ export function CourseDetails({
             ))}
           </div>
         ) : evaluations.length === 0 ? (
-          <div className="border-border flex flex-col items-center justify-center rounded-2xl border border-dashed py-12 text-center">
-            <FileText className="text-muted-foreground/50 mb-3 size-8" />
-            <p className="text-foreground text-sm font-medium">
-              Aún no hay evaluaciones publicadas
-            </p>
-            <p className="text-muted-foreground mt-1 text-xs">
-              Sé el primero en subir material de estudio
+          <div className="border-border/80 bg-card/50 flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 text-center transition-colors">
+            <div className="bg-primary/10 text-primary ring-primary/20 mb-3.5 flex size-12 items-center justify-center rounded-2xl ring-1">
+              <FileUp className="size-6" />
+            </div>
+            <h3 className="text-foreground text-sm font-semibold tracking-tight">
+              Sé el primero en compartir material
+            </h3>
+            <p className="text-muted-foreground mt-1 max-w-sm text-xs leading-relaxed">
+              Subí exámenes, parciales, quices o proyectos anteriores en PDF para apoyar a la
+              comunidad estudiantil a prepararse mejor.
             </p>
             <Button
               variant="outline"
               size="sm"
-              className="mt-4"
+              className="mt-4 gap-1.5 font-medium shadow-xs"
               onClick={() => setIsExamUploadOpen(true)}
             >
-              Subir evaluación
+              <Plus className="size-4" />
+              <span>Subir evaluación en PDF</span>
             </Button>
+            <div className="text-muted-foreground/80 mt-3.5 flex items-center justify-center gap-1.5 text-[11px] font-medium">
+              <ShieldCheck className="size-3.5 text-emerald-500" />
+              <span>Aporte 100% anónimo para la comunidad</span>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">
@@ -1598,11 +1616,16 @@ export function CourseDetails({
             ))}
           </div>
         ) : latestTermGroups.length === 0 ? (
-          <div className="border-border flex flex-col items-center justify-center rounded-2xl border border-dashed py-12 text-center">
-            <Clock className="text-muted-foreground/50 mb-3 size-8" />
-            <p className="text-foreground text-sm font-medium">No hay grupos registrados</p>
-            <p className="text-muted-foreground mt-1 text-xs">
-              No se encontraron horarios para este curso en el periodo actual
+          <div className="border-border/80 bg-card/50 flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 text-center transition-colors">
+            <div className="bg-muted text-muted-foreground ring-border mb-3.5 flex size-12 items-center justify-center rounded-2xl ring-1">
+              <Clock className="size-6" />
+            </div>
+            <h3 className="text-foreground text-sm font-semibold tracking-tight">
+              Sin horarios en este período
+            </h3>
+            <p className="text-muted-foreground mt-1 max-w-sm text-xs leading-relaxed">
+              No se encontraron grupos ofertados para el ciclo seleccionado. Podés consultar otro
+              período académico en el selector superior.
             </p>
           </div>
         ) : (

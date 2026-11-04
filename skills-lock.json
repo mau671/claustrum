@@ -51,6 +51,12 @@
       "skillPath": "apps/ui/skills/coss-particles/SKILL.md",
       "computedHash": "a3448e835713342e4625d1f97a38265fea03cf840723ad23eeef0b53dcc21609"
     },
+    "design-empty-states": {
+      "source": "gnurio/refactoring-ui-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/07-design-empty-states/SKILL.md",
+      "computedHash": "c60267b57bd4dc677dbc27dae5f469623f77a95789f63a5bb0610203dcec3e4a"
+    },
     "effect-ts": {
       "source": "effect-ts/skills",
       "sourceType": "github",
@@ -62,6 +68,12 @@
       "sourceType": "github",
       "skillPath": "skills/emil-design-eng/SKILL.md",
       "computedHash": "8bdf9e4e6de7a4969147bf4828a4ad2c5aacd9fba4b690b250a85e0467ca387d"
+    },
+    "empty-state": {
+      "source": "aladicf/better-web-ui",
+      "sourceType": "github",
+      "skillPath": "skills/empty-state/SKILL.md",
+      "computedHash": "90a8a8c06bcaa0457391070d70d9f53e6863ddd6942a2cc5d1350a5dea913724"
     },
     "migrate-to-vinext": {
       "source": "cloudflare/vinext",
@@ -97,6 +109,12 @@
       "source": "wshobson/agents",
       "sourceType": "autoskills-registry",
       "computedHash": "5ca0e177c6aaaba1889255691224daafdb7d71f317cc70bede1590d3907ded42"
+    },
+    "ux-empty-states": {
+      "source": "uxcel-lab/product-skills",
+      "sourceType": "github",
+      "skillPath": "ux/screens/empty-states/SKILL.md",
+      "computedHash": "82c55ab7d5d7622ff0d59e9ab36fd207325d54381526c5cac066ab338d046732"
     },
     "vite": {
       "source": "antfu/skills",

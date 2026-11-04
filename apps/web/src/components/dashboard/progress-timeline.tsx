@@ -1,11 +1,13 @@
 /* oxlint-disable prefer-tag-over-role -- role="progressbar" on a div is intentional: a native <progress> element cannot be themed per semester status */
 "use client";
 
+import { GraduationCapIcon } from "@hugeicons/core-free-icons";
 import { useMemo } from "react";
 
 import type { SemesterProgress } from "@/lib/types";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { Stepper, type StepperStatus, type StepperStep } from "@/components/ui/stepper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -180,9 +182,16 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
       </CardHeader>
       <CardContent>
         {semesters.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-center text-sm">
-            No hay semestres para mostrar.
-          </p>
+          <div className="border-border/60 bg-muted/20 flex flex-col items-center justify-center rounded-xl border border-dashed px-4 py-8 text-center">
+            <div className="bg-muted text-muted-foreground mb-3 flex size-10 items-center justify-center rounded-xl">
+              <Icon icon={GraduationCapIcon} className="size-5" />
+            </div>
+            <p className="text-foreground text-sm font-medium">Sin semestres registrados</p>
+            <p className="text-muted-foreground mt-1 max-w-xs text-xs">
+              Configurá tu plan de estudios para visualizar tu línea de tiempo y avance por
+              semestre.
+            </p>
+          </div>
         ) : (
           <Stepper steps={steps} orientation="vertical" label="Progreso por semestre" />
         )}

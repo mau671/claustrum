@@ -661,7 +661,7 @@ function EvaluationDocument({
             size="xs"
             onClick={() => onPreview({ id: evaluation.id, isAnswers: true })}
           >
-            Solución
+            Ver solucionario
           </Button>
         ) : null}
         <Button variant="ghost" size="xs" onClick={() => onPreview({ id: evaluation.id })}>
@@ -846,17 +846,16 @@ export function CourseDetails({
   const academicTermGroups = useMemo(() => groupTermsByYear(academicTerms), [academicTerms]);
   const offeringTermGroups = useMemo(() => groupTermsByYear(offeringTerms), [offeringTerms]);
   const evaluations = useMemo(() => evaluationsQuery.data ?? [], [evaluationsQuery.data]);
-  const [selectedEvaluationTab, setSelectedEvaluationTab] = useState<string>("all");
+  const [selectedEvaluationTab, setSelectedEvaluationTab] = useState<string>("");
 
   const evaluationTabs = useMemo(() => {
     if (evaluations.length === 0) return [];
-    const categoryCounts = new Map<string, number>();
+    const categoryKeys = new Set<string>();
     for (const ev of evaluations) {
-      const key = getEvaluationCategoryKey(ev);
-      categoryCounts.set(key, (categoryCounts.get(key) || 0) + 1);
+      categoryKeys.add(getEvaluationCategoryKey(ev));
     }
     const order = ["parcial_1", "parcial_2", "parcial_3", "parcial_4", "reposicion", "otro"];
-    const sortedKeys = [...categoryCounts.keys()].sort((a, b) => {
+    const sortedKeys = [...categoryKeys].sort((a, b) => {
       const idxA = order.indexOf(a);
       const idxB = order.indexOf(b);
       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -865,29 +864,26 @@ export function CourseDetails({
       return a.localeCompare(b);
     });
 
-    return [
-      { key: "all", label: "Todos", count: evaluations.length },
-      ...sortedKeys.map((key) => ({
-        key,
-        label: getCategoryLabel(key),
-        count: categoryCounts.get(key)!,
-      })),
-    ];
+    return sortedKeys.map((key) => ({
+      key,
+      label: getCategoryLabel(key),
+    }));
   }, [evaluations]);
 
   useEffect(() => {
-    if (
-      selectedEvaluationTab !== "all" &&
-      !evaluationTabs.some((t) => t.key === selectedEvaluationTab)
-    ) {
-      setSelectedEvaluationTab("all");
+    if (evaluationTabs.length > 0) {
+      if (!selectedEvaluationTab || !evaluationTabs.some((t) => t.key === selectedEvaluationTab)) {
+        setSelectedEvaluationTab(evaluationTabs[0].key);
+      }
     }
   }, [evaluationTabs, selectedEvaluationTab]);
 
+  const activeTabKey = selectedEvaluationTab || (evaluationTabs[0]?.key ?? "");
+
   const filteredEvaluations = useMemo(() => {
-    if (selectedEvaluationTab === "all") return evaluations;
-    return evaluations.filter((ev) => getEvaluationCategoryKey(ev) === selectedEvaluationTab);
-  }, [evaluations, selectedEvaluationTab]);
+    if (!activeTabKey) return evaluations;
+    return evaluations.filter((ev) => getEvaluationCategoryKey(ev) === activeTabKey);
+  }, [evaluations, activeTabKey]);
 
   const evaluationsByYear = useMemo(() => {
     const groups = new Map<string, typeof evaluations>();
@@ -1648,20 +1644,17 @@ export function CourseDetails({
           </div>
         ) : (
           <div className="space-y-3">
-            {evaluationTabs.length > 2 ? (
+            {evaluationTabs.length > 1 ? (
               <Tabs
-                value={selectedEvaluationTab}
+                value={activeTabKey}
                 onValueChange={(val) => setSelectedEvaluationTab(val as string)}
                 className="w-full"
               >
                 <div className="overflow-x-auto pb-1">
                   <TabsList size="sm" className="w-auto">
                     {evaluationTabs.map((tab) => (
-                      <TabsTab key={tab.key} value={tab.key} className="gap-1.5 whitespace-nowrap">
-                        <span>{tab.label}</span>
-                        <span className="text-muted-foreground/80 font-mono text-[11px]">
-                          ({tab.count})
-                        </span>
+                      <TabsTab key={tab.key} value={tab.key} className="whitespace-nowrap">
+                        {tab.label}
                       </TabsTab>
                     ))}
                   </TabsList>
@@ -1685,10 +1678,6 @@ export function CourseDetails({
                         >
                           <ChevronDown className="size-4 transition-transform duration-200" />
                           <span>{year}</span>
-                          <span className="text-muted-foreground text-xs font-normal">
-                            ({yearItems.length}{" "}
-                            {yearItems.length === 1 ? "evaluación" : "evaluaciones"})
-                          </span>
                         </CollapsibleTrigger>
                       </FrameHeader>
                       <CollapsiblePanel>

@@ -155,26 +155,27 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
             )
             .pipe(Effect.orDie);
 
-          const aiSummaryRows = yield* sql
+          const communitySummaryRows = yield* sql
             .unsafe<{
               summary: string;
               reviews_analyzed_count: number | string;
               updated_at: string;
             }>(
               `SELECT summary, reviews_analyzed_count, updated_at
-               FROM public.professor_review_ai_summary
+               FROM public.professor_review_summary
                WHERE professor_id = CASE WHEN $1 ~ '^[0-9]+$' THEN $1::BIGINT ELSE NULL END`,
               [params.id],
             )
             .pipe(Effect.orDie);
 
-          const aiSummary =
-            aiSummaryRows.length > 0
+          const communitySummary =
+            communitySummaryRows.length > 0
               ? {
-                  summary: aiSummaryRows[0].summary,
-                  reviews_analyzed_count: Number(aiSummaryRows[0].reviews_analyzed_count),
+                  summary: communitySummaryRows[0].summary,
+                  reviews_analyzed_count: Number(communitySummaryRows[0].reviews_analyzed_count),
                   updated_at:
-                    toIsoString(aiSummaryRows[0].updated_at) ?? String(aiSummaryRows[0].updated_at),
+                    toIsoString(communitySummaryRows[0].updated_at) ??
+                    String(communitySummaryRows[0].updated_at),
                 }
               : null;
 
@@ -189,7 +190,7 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
               average_fairness_score: null,
               would_take_again_percentage: null,
               tag_counts: [],
-              ai_summary: aiSummary,
+              community_summary: communitySummary,
             };
           }
 
@@ -209,7 +210,7 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
             would_take_again_percentage:
               r.would_take_again_percentage !== null ? Number(r.would_take_again_percentage) : null,
             tag_counts: r.tag_counts ?? [],
-            ai_summary: aiSummary,
+            community_summary: communitySummary,
           };
         }),
 

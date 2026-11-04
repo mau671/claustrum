@@ -172,7 +172,7 @@ async function main(): Promise<void> {
         s.last_review_id_analyzed
       FROM public.professor p
       JOIN public.professor_review pr ON pr.professor_id = p.id AND pr.status = 'approved'
-      LEFT JOIN public.professor_review_ai_summary s ON s.professor_id = p.id
+      LEFT JOIN public.professor_review_summary s ON s.professor_id = p.id
       ${targetProfId ? `WHERE p.id = ${targetProfId}` : ""}
       GROUP BY p.id, p.full_name, s.last_review_id_analyzed
       HAVING COUNT(pr.id) > 10
@@ -190,21 +190,12 @@ async function main(): Promise<void> {
 
     console.log(`📋 Found ${candidates.length} candidate(s) to process.\n`);
 
-    const summaryEntries: Array<{
-      professorId: number;
-      fullName: string;
-      summary: string;
-      approvedCount: number;
-      maxReviewId: number;
-    }> = [];
+    const CONCURRENCY = 4;
+    let completedCount = 0;
 
-    for (const [index, candidate] of candidates.entries()) {
-      console.log(
-        `[${index + 1}/${candidates.length}] Processing Professor ${candidate.professor_id} (${candidate.full_name}) - ${candidate.approved_count} reviews...`,
-      );
-
-      // Fetch reviews
-      const { rows: reviews } = await client.query<ReviewRow>(
+    async function processCandidate(candidate: ProfessorCandidate) {
+      // Fetch reviews using pool directly
+      const { rows: reviews } = await pool.query<ReviewRow>(
         `
           SELECT id, comment, tags, ease_score, quality_score
           FROM public.professor_review
@@ -223,9 +214,9 @@ async function main(): Promise<void> {
 
       if (usefulReviews.length < 5) {
         console.log(
-          `   ⚠️ Skipping: only ${usefulReviews.length} useful descriptive reviews found.`,
+          `   ⚠️ [Prof ${candidate.professor_id}] Skipping: only ${usefulReviews.length} useful descriptive reviews found.`,
         );
-        continue;
+        return null;
       }
 
       const reviewsTextList = usefulReviews
@@ -239,24 +230,56 @@ async function main(): Promise<void> {
 
       try {
         const summary = await runOpenCodeAgent(prompt);
-        console.log(`   Generated summary (${summary.length} chars).`);
+        completedCount++;
+        console.log(
+          `   [${completedCount}/${candidates.length}] Generated summary for ${candidate.full_name} (${summary.length} chars).`,
+        );
         if (isDryRun) {
-          console.log(`\n--- PREVIEW ---\n${summary}\n---------------\n`);
+          console.log(
+            `\n--- PREVIEW (Prof ${candidate.professor_id}) ---\n${summary}\n---------------\n`,
+          );
         }
-        summaryEntries.push({
+        return {
           professorId: candidate.professor_id,
           fullName: candidate.full_name,
           summary,
           approvedCount: candidate.approved_count,
           maxReviewId: candidate.max_review_id,
-        });
+        };
       } catch (agentErr) {
         console.error(
           `   ❌ Failed to generate summary for professor ${candidate.professor_id}:`,
           agentErr,
         );
+        return null;
       }
     }
+
+    // Run with worker pool
+    const summaryEntries: Array<{
+      professorId: number;
+      fullName: string;
+      summary: string;
+      approvedCount: number;
+      maxReviewId: number;
+    }> = [];
+
+    let candidateIndex = 0;
+    async function worker() {
+      while (candidateIndex < candidates.length) {
+        const index = candidateIndex++;
+        const candidate = candidates[index];
+        const res = await processCandidate(candidate);
+        if (res) {
+          summaryEntries.push(res);
+        }
+      }
+    }
+
+    const workers = Array.from({ length: Math.min(CONCURRENCY, candidates.length) }, () =>
+      worker(),
+    );
+    await Promise.all(workers);
 
     if (summaryEntries.length === 0) {
       console.log("⚠️ No summaries were successfully generated.");
@@ -297,7 +320,7 @@ async function main(): Promise<void> {
 BEGIN;
 SET LOCAL search_path = public;
 
-INSERT INTO public.professor_review_ai_summary (
+INSERT INTO public.professor_review_summary (
   professor_id,
   summary,
   reviews_analyzed_count,

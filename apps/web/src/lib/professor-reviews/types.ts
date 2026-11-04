@@ -160,7 +160,7 @@ export type ProfessorTeachingHistoryTerm = {
   courses: ProfessorTeachingHistoryCourse[];
 };
 
-export type ProfessorAiSummary = {
+export type ProfessorCommunitySummary = {
   summary: string;
   reviews_analyzed_count: number;
   updated_at: string;
@@ -176,7 +176,7 @@ export type ProfessorReviewSummary = {
   average_fairness_score: number | null;
   would_take_again_percentage: number | null;
   tag_counts: ProfessorReviewTagCount[];
-  ai_summary?: ProfessorAiSummary | null;
+  community_summary?: ProfessorCommunitySummary | null;
 };
 
 export type SearchProfessorReviewStatsParams = {

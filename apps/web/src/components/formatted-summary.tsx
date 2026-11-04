@@ -30,7 +30,7 @@ function renderFormattedText(text: string): ReactNode {
   });
 }
 
-export function FormattedAiSummary({ summary }: { summary: string }) {
+export function FormattedSummary({ summary }: { summary: string }) {
   const paragraphs = summary.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
 
   return (

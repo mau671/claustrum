@@ -3,10 +3,10 @@ import { useNavigate, useParams, useRouter, getRouteApi } from "@tanstack/react-
 const routeApi = getRouteApi("/professors/$professorId");
 import {
   Add01Icon,
-  AiSparklesIcon,
   ArrowLeft02Icon,
   ChevronDownIcon,
   ChevronUpIcon,
+  Comment01Icon,
   PencilLineIcon,
 } from "@hugeicons/core-free-icons";
 import { lazy, Suspense, useMemo, useState } from "react";
@@ -14,7 +14,7 @@ import { z } from "zod";
 
 import type { ProfessorReviewCourseOption } from "@/lib/professor-reviews/types";
 
-import { FormattedAiSummary } from "@/components/formatted-ai-summary";
+import { FormattedSummary } from "@/components/formatted-summary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -450,17 +450,21 @@ export function ProfessorDetailPage() {
             <Separator orientation="vertical" className="hidden md:block" />
 
             <div className="col-span-2 flex min-h-32 flex-col justify-start p-5 md:col-auto md:min-h-52 md:p-6">
-              {summary?.ai_summary?.summary ? (
+              {summary?.community_summary?.summary ? (
                 <div className="mb-4 flex flex-col gap-2">
                   <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
-                    <Icon icon={AiSparklesIcon} size={14} className="text-primary size-3.5" />
+                    <Icon
+                      icon={Comment01Icon}
+                      size={14}
+                      className="text-muted-foreground size-3.5"
+                    />
                     <span>Resumen de la comunidad</span>
                     <span>•</span>
                     <span className="tabular-nums">
-                      {summary.ai_summary.reviews_analyzed_count} reseñas analizadas
+                      {summary.community_summary.reviews_analyzed_count} reseñas analizadas
                     </span>
                   </div>
-                  <FormattedAiSummary summary={summary.ai_summary.summary} />
+                  <FormattedSummary summary={summary.community_summary.summary} />
                   <Separator className="my-2" />
                 </div>
               ) : null}

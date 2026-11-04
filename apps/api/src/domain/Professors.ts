@@ -54,12 +54,12 @@ export const ProfessorDetail = Schema.Struct({
 });
 export type ProfessorDetail = typeof ProfessorDetail.Type;
 
-export const ProfessorAiSummary = Schema.Struct({
+export const ProfessorCommunitySummary = Schema.Struct({
   summary: Schema.String,
   reviews_analyzed_count: Schema.Number,
   updated_at: Schema.String,
 });
-export type ProfessorAiSummary = typeof ProfessorAiSummary.Type;
+export type ProfessorCommunitySummary = typeof ProfessorCommunitySummary.Type;
 
 export const ProfessorReviewSummary = Schema.Struct({
   professor_id: Schema.String,
@@ -71,7 +71,7 @@ export const ProfessorReviewSummary = Schema.Struct({
   average_fairness_score: Schema.NullOr(Schema.Number),
   would_take_again_percentage: Schema.NullOr(Schema.Number),
   tag_counts: Schema.Unknown,
-  ai_summary: Schema.NullOr(ProfessorAiSummary),
+  community_summary: Schema.NullOr(ProfessorCommunitySummary),
 });
 export type ProfessorReviewSummary = typeof ProfessorReviewSummary.Type;
 

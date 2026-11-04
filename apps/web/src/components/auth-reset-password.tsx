@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient } from "@/lib/auth/client";
 
@@ -192,9 +191,8 @@ function RequestState({
             />
           </Field>
 
-          <Button type="submit" size="lg" disabled={pending} className="mt-1">
-            {pending ? <Spinner className="size-4" /> : null}
-            {pending ? "Enviando..." : "Enviar enlace"}
+          <Button type="submit" size="lg" loading={pending} className="mt-1">
+            Enviar enlace
           </Button>
         </form>
       </div>
@@ -319,11 +317,11 @@ function UpdateState({
           <Button
             type="submit"
             size="lg"
-            disabled={pending || passwordMismatch || !isPasswordValid}
+            loading={pending}
+            disabled={passwordMismatch || !isPasswordValid}
             className="mt-1"
           >
-            {pending ? <Spinner className="size-4" /> : null}
-            {pending ? "Actualizando..." : "Guardar nueva contraseña"}
+            Guardar nueva contraseña
           </Button>
         </form>
       </div>

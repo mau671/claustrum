@@ -1,10 +1,11 @@
-import { ArrowLeft01Icon, Loading03Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { PdfDocumentViewer } from "@/components/pdf-document-viewer";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import { getEvaluationDocument } from "@/lib/evaluations/api";
 import { useBlobUrl } from "@/lib/hooks/use-blob-url";
 
@@ -56,7 +57,7 @@ export function EvaluationViewPage() {
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <Icon icon={Loading03Icon} className="text-muted-foreground size-8 animate-spin" />
+        <Spinner className="text-muted-foreground size-8" />
         <p className="text-muted-foreground text-sm">Cargando documento…</p>
       </div>
     );

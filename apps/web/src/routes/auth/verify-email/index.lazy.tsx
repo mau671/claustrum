@@ -1,15 +1,11 @@
-import {
-  CheckmarkCircle02Icon,
-  Loading02Icon,
-  Mail01Icon,
-  RefreshCwIcon,
-} from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon, Mail01Icon, RefreshCwIcon } from "@hugeicons/core-free-icons";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { CardDescription } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import { authClient, getSession } from "@/lib/auth/client";
 
 const VERIFY_EMAIL_KEY = "claustrum.auth.verify_email";
@@ -116,11 +112,7 @@ function VerifyEmailPage() {
           }`}
         >
           {isLoading ? (
-            <Icon
-              icon={Loading02Icon}
-              size={28}
-              className="text-muted-foreground size-7 animate-spin"
-            />
+            <Spinner className="text-muted-foreground size-7" />
           ) : isSuccess ? (
             <Icon
               icon={CheckmarkCircle02Icon}
@@ -159,13 +151,9 @@ function VerifyEmailPage() {
                   variant="outline"
                   className="w-full"
                   onClick={handleResendEmail}
-                  disabled={resending}
+                  loading={resending}
                 >
-                  <Icon
-                    icon={RefreshCwIcon}
-                    size={16}
-                    className={`mr-2 size-4 ${resending ? "animate-spin" : ""}`}
-                  />
+                  <Icon icon={RefreshCwIcon} size={16} className="mr-2 size-4" />
                   Reenviar correo de verificación
                 </Button>
                 {resending && (

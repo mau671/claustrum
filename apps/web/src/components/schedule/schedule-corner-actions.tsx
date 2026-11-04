@@ -4,7 +4,6 @@ import {
   FloppyDiskIcon,
   ImageDownload02Icon,
   Link01Icon,
-  Loading02Icon,
   MoreHorizontalIcon,
   ZoomInIcon,
   ZoomOutIcon,
@@ -257,14 +256,11 @@ export function ScheduleCornerActions({
                       <Button
                         type="button"
                         onClick={handleSave}
-                        disabled={!scheduleName.trim() || !hasSelectedGroups || isSavingSchedule}
+                        loading={isSavingSchedule}
+                        disabled={!scheduleName.trim() || !hasSelectedGroups}
                         className="h-9 shrink-0 gap-1.5 px-3"
                       >
-                        {isSavingSchedule ? (
-                          <HugeiconsIcon icon={Loading02Icon} size={16} className="animate-spin" />
-                        ) : (
-                          <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
-                        )}
+                        <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
                         <span>Guardar</span>
                       </Button>
                     </div>
@@ -376,14 +372,11 @@ export function ScheduleCornerActions({
                       <Button
                         type="button"
                         onClick={handleSave}
-                        disabled={!scheduleName.trim() || !hasSelectedGroups || isSavingSchedule}
+                        loading={isSavingSchedule}
+                        disabled={!scheduleName.trim() || !hasSelectedGroups}
                         className="h-9 shrink-0 gap-1.5 px-3"
                       >
-                        {isSavingSchedule ? (
-                          <HugeiconsIcon icon={Loading02Icon} size={16} className="animate-spin" />
-                        ) : (
-                          <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
-                        )}
+                        <HugeiconsIcon icon={FloppyDiskIcon} size={16} />
                         <span>Guardar</span>
                       </Button>
                     </div>

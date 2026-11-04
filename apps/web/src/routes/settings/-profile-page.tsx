@@ -299,9 +299,9 @@ function ProfilePage() {
           <div className="flex justify-end pt-2">
             <Button
               onClick={() => void handleSaveIdentity()}
-              disabled={isSavingIdentity || !hasIdentityChanges}
+              loading={isSavingIdentity}
+              disabled={!hasIdentityChanges}
             >
-              {isSavingIdentity && <Spinner className="mr-2 size-4" />}
               Guardar
             </Button>
           </div>
@@ -542,8 +542,11 @@ function ProfilePage() {
           </Field>
 
           <div className="flex justify-end pt-2">
-            <Button onClick={() => void handleSave()} disabled={isSaving || !hasUnsavedChanges}>
-              {isSaving && <Spinner className="mr-2 size-4" />}
+            <Button
+              onClick={() => void handleSave()}
+              loading={isSaving}
+              disabled={!hasUnsavedChanges}
+            >
               Guardar
             </Button>
           </div>

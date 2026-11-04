@@ -6,7 +6,6 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { Spinner } from "@/components/ui/spinner";
 import { authClient, getSession } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
 
@@ -163,9 +162,13 @@ export function AuthTwoFactorPage() {
         ))}
       </fieldset>
 
-      <Button type="submit" size="lg" disabled={!canVerify || isVerifying || isLoadingFactor}>
-        {isVerifying && <Spinner className="mr-2 size-4" />}
-        {isLoadingFactor ? "Cargando..." : "Verificar"}
+      <Button
+        type="submit"
+        size="lg"
+        loading={isVerifying || isLoadingFactor}
+        disabled={!canVerify}
+      >
+        Verificar
       </Button>
 
       <p className="text-muted-foreground flex items-center justify-center gap-1.5 text-xs">

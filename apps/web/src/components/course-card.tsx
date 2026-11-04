@@ -57,18 +57,18 @@ const statusConfig: Record<
 const relationConfig: Record<string, { ringClass: string; icon: React.ReactNode; label: string }> =
   {
     prerequisite: {
-      ringClass: "ring-2 ring-amber-500 shadow-md",
-      icon: <Icon icon={LockKeyholeIcon} className="size-3 text-amber-600" />,
+      ringClass: "ring-2 ring-amber-500",
+      icon: <Icon icon={LockKeyholeIcon} className="size-3.5 text-amber-600" />,
       label: "Requisito",
     },
     corequisite: {
-      ringClass: "ring-2 ring-blue-500 shadow-md",
-      icon: <Icon icon={Link01Icon} className="size-3 text-blue-600" />,
+      ringClass: "ring-2 ring-blue-500",
+      icon: <Icon icon={Link01Icon} className="size-3.5 text-blue-600" />,
       label: "Correquisito",
     },
     postrequisite: {
-      ringClass: "ring-2 ring-emerald-500 shadow-md",
-      icon: <Icon icon={LockKeyholeOpenIcon} className="size-3 text-emerald-600" />,
+      ringClass: "ring-2 ring-emerald-500",
+      icon: <Icon icon={LockKeyholeOpenIcon} className="size-3.5 text-emerald-600" />,
       label: "Desbloquea",
     },
   };
@@ -97,12 +97,6 @@ export function CourseCard({
         !isHovered && !relationType && "hover:border-primary/50",
       )}
     >
-      {relation && (
-        <div className="pointer-events-none absolute top-1.5 right-1.5 z-20 flex items-center justify-center">
-          {relation.icon}
-        </div>
-      )}
-
       <div className="bg-card border-border border-b px-3 py-2">
         <div className="text-muted-foreground grid grid-cols-[1fr_auto_1fr] items-center font-mono text-xs">
           <span className="truncate text-left">{course.credits} cr</span>
@@ -131,8 +125,8 @@ export function CourseCard({
         </h3>
 
         {relation && (
-          <div className="absolute right-2 bottom-1 text-[10px] font-medium opacity-80">
-            {/* Optional: Show label if needed, or just rely on color/icon */}
+          <div className="pointer-events-none absolute right-1.5 bottom-1.5 z-20 flex items-center justify-center">
+            {relation.icon}
           </div>
         )}
       </div>

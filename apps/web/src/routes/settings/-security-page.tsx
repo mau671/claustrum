@@ -3,7 +3,6 @@ import {
   Copy01Icon,
   Globe02Icon,
   Link01Icon,
-  Loading02Icon,
   Logout01Icon,
   Mail01Icon,
   Shield01Icon,
@@ -26,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon, MorphIcon } from "@/components/ui/icon";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { Spinner } from "@/components/ui/spinner";
 import { StatefulButton } from "@/components/ui/stateful-button";
 import { toast } from "@/components/ui/toast";
 import { authClient, signOut } from "@/lib/auth/client";
@@ -338,11 +338,7 @@ export function SecurityPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Icon
-          icon={Loading02Icon}
-          size={24}
-          className="text-muted-foreground size-6 animate-spin"
-        />
+        <Spinner className="text-muted-foreground size-6" />
       </div>
     );
   }
@@ -632,11 +628,9 @@ export function SecurityPage() {
             <div className="flex justify-end">
               <Button
                 onClick={() => void handlePasswordChange()}
-                disabled={!hasCredentialAccount || isSavingPassword || !canSavePassword}
+                loading={isSavingPassword}
+                disabled={!hasCredentialAccount || !canSavePassword}
               >
-                {isSavingPassword && (
-                  <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-                )}
                 Guardar contraseña
               </Button>
             </div>
@@ -772,7 +766,7 @@ export function SecurityPage() {
           )}
           {isLoadingMfa ? (
             <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Icon icon={Loading02Icon} size={16} className="size-4 animate-spin" />
+              <Spinner className="size-4" />
               Cargando configuración de 2FA…
             </div>
           ) : verifiedTotpFactorId ? (
@@ -781,11 +775,9 @@ export function SecurityPage() {
                 <Button
                   variant="outline"
                   onClick={handleDisableMfa}
-                  disabled={isDisablingMfa || (hasCredentialAccount && !mfaPassword.trim())}
+                  loading={isDisablingMfa}
+                  disabled={hasCredentialAccount && !mfaPassword.trim()}
                 >
-                  {isDisablingMfa && (
-                    <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-                  )}
                   Desactivar
                 </Button>
               </div>
@@ -902,21 +894,18 @@ export function SecurityPage() {
             <Button
               variant="ghost"
               onClick={handleRevokeOtherSessions}
-              disabled={isRevokingOtherSessions || isLoadingSessions || activeSessions.length <= 1}
+              loading={isRevokingOtherSessions}
+              disabled={isLoadingSessions || activeSessions.length <= 1}
               className="text-destructive hover:text-destructive/90 hover:bg-destructive/5"
             >
-              {isRevokingOtherSessions ? (
-                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-              ) : (
-                <Icon icon={Logout01Icon} size={16} className="mr-2 size-4" />
-              )}
+              <Icon icon={Logout01Icon} size={16} className="mr-2 size-4" />
               Revocar todas las demás sesiones
             </Button>
           </div>
           <div className="space-y-2">
             {isLoadingSessions ? (
               <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <Icon icon={Loading02Icon} size={16} className="size-4 animate-spin" />
+                <Spinner className="size-4" />
                 Cargando sesiones activas...
               </div>
             ) : activeSessions.length === 0 ? (
@@ -956,11 +945,7 @@ export function SecurityPage() {
                             className="text-muted-foreground hover:text-destructive focus-visible:ring-ring/40 cursor-pointer rounded p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {revokingSessionToken === session.token ? (
-                              <Icon
-                                icon={Loading02Icon}
-                                size={16}
-                                className="size-4 animate-spin"
-                              />
+                              <Spinner className="size-4" />
                             ) : (
                               <Icon icon={Logout01Icon} size={16} className="size-4" />
                             )}

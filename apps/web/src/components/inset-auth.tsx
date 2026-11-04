@@ -20,7 +20,6 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient, getSession, signIn, signUp } from "@/lib/auth/client";
 import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
@@ -493,7 +492,7 @@ function GoogleOAuthButton() {
       size="lg"
       className="relative w-full"
       onClick={onGoogleSignIn}
-      disabled={pending}
+      loading={pending}
     >
       <span className="size-4 shrink-0 [&_svg]:size-4">
         <GoogleIcon />
@@ -662,7 +661,6 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
     const { data: session } = await getSession();
     await invalidateAuthFlowQueries(queryClient, session?.user.id);
     void navigate({ to: await getPostSignInRedirect(), replace: true });
-    setPending(false);
   };
 
   return (
@@ -719,9 +717,8 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
         />
       </Field>
 
-      <Button type="submit" size="lg" className="mt-2" disabled={pending}>
-        {pending ? <Spinner className="size-4" /> : null}
-        {pending ? "Iniciando sesión..." : "Iniciar sesión"}
+      <Button type="submit" size="lg" className="mt-2" loading={pending}>
+        Iniciar sesión
       </Button>
     </form>
   );
@@ -850,7 +847,6 @@ function SignUpForm() {
     if (data?.user.id) await invalidateAuthFlowQueries(queryClient, data.user.id);
     window.sessionStorage.setItem(VERIFY_EMAIL_KEY, normalizedEmail);
     void navigate({ to: "/auth/verify-email", replace: true });
-    setPending(false);
   };
 
   return (
@@ -965,9 +961,8 @@ function SignUpForm() {
         <PasswordMatchIndicator password={password} confirmPassword={confirmPassword} />
       </Field>
 
-      <Button type="submit" size="lg" className="mt-2" disabled={pending}>
-        {pending ? <Spinner className="size-4" /> : null}
-        {pending ? "Creando cuenta..." : "Crear cuenta"}
+      <Button type="submit" size="lg" className="mt-2" loading={pending}>
+        Crear cuenta
       </Button>
     </form>
   );

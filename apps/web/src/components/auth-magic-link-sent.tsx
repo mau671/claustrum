@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { signIn } from "@/lib/auth/client";
 import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
@@ -226,9 +225,8 @@ function RequestState({
             ) : null}
           </Field>
 
-          <Button type="submit" size="lg" disabled={isSending} className="mt-1">
-            {isSending ? <Spinner className="size-4" /> : null}
-            {isSending ? "Enviando enlace..." : "Enviar enlace mágico"}
+          <Button type="submit" size="lg" loading={isSending} className="mt-1">
+            Enviar enlace mágico
           </Button>
         </form>
       </div>

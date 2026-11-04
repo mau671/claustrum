@@ -1,4 +1,3 @@
-import { Loading02Icon } from "@hugeicons/core-free-icons";
 import { useForm } from "@tanstack/react-form";
 import { lazy, Suspense, useState } from "react";
 import { z } from "zod";
@@ -20,7 +19,6 @@ import {
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -234,12 +232,10 @@ export function FeedbackDialog({
           {([canSubmit, isSubmitting]) => (
             <Button
               type="submit"
-              disabled={!canSubmit || isSubmitting || (!!turnstileSiteKey && !turnstileToken)}
+              loading={isSubmitting}
+              disabled={!canSubmit || (!!turnstileSiteKey && !turnstileToken)}
               className="w-full shrink-0 sm:w-auto"
             >
-              {isSubmitting && (
-                <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-              )}
               Enviar
             </Button>
           )}

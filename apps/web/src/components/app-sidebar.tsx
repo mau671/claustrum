@@ -4,7 +4,6 @@ import {
   File01Icon,
   GraduationCapIcon,
   Home01Icon,
-  Loading02Icon,
   Login01Icon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
@@ -15,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Button } from "@/components/ui/button";
 import { createFilledIcon } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { UserMenuDropdown } from "@/components/user-menu-dropdown";
 import { useAppAuth } from "@/lib/auth/app-auth-context";
@@ -292,11 +292,7 @@ export function AppSidebar() {
         ) : isAuthLoading ? (
           <div className="text-muted-foreground flex h-12 w-full items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap">
             <span className="flex size-12 shrink-0 items-center justify-center">
-              <HugeiconsIcon
-                icon={Loading02Icon}
-                size={20}
-                className="size-5 shrink-0 animate-spin"
-              />
+              <Spinner className="size-5 shrink-0" />
             </span>
             <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
               Cargando sesión

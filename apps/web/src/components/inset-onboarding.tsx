@@ -1,4 +1,4 @@
-import { Loading02Icon, Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/combobox";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { Stepper, type StepperStep } from "@/components/ui/stepper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth/client";
@@ -481,11 +482,7 @@ export function InsetOnboardingPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Icon
-          icon={Loading02Icon}
-          size={24}
-          className="text-muted-foreground size-6 animate-spin"
-        />
+        <Spinner className="text-muted-foreground size-6" />
       </div>
     );
   }
@@ -550,12 +547,9 @@ export function InsetOnboardingPage() {
               ) : (
                 <Button
                   onClick={finishOnboarding}
-                  disabled={isSaving}
+                  loading={isSaving}
                   className="!h-10 px-5 text-sm"
                 >
-                  {isSaving ? (
-                    <Icon icon={Loading02Icon} size={16} className="mr-2 size-4 animate-spin" />
-                  ) : null}
                   Finalizar
                 </Button>
               )}

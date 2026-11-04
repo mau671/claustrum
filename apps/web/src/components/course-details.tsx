@@ -202,14 +202,28 @@ const statusConfig: Record<CourseStatus, { color: string; bg: string; ring: stri
     },
   };
 
-const WEEKDAYS = ["", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+const WEEKDAYS = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+  "Domingo",
+];
+const WEEKDAYS_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+const formatWeekday = (weekday: number): string => WEEKDAYS[weekday] ?? `Día ${weekday}`;
+const formatWeekdayShort = (weekday: number): string => WEEKDAYS_SHORT[weekday] ?? `Día ${weekday}`;
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
 function formatTime(value: string) {
-  return value.slice(0, 5);
+  const [hours, minutes] = value.split(":");
+  return `${hours.padStart(2, "0")}:${minutes}`;
 }
 
 function formatFileSize(bytes: number): string {
@@ -477,9 +491,10 @@ function ScheduleGroupCard({
                     <span
                       key={`${meeting.weekday}-${meeting.starts_at}`}
                       className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums"
+                      title={`${formatWeekday(meeting.weekday)} ${formatTime(meeting.starts_at)}-${formatTime(meeting.ends_at)}`}
                     >
-                      {WEEKDAYS[meeting.weekday] ?? `Día ${meeting.weekday}`}{" "}
-                      {formatTime(meeting.starts_at)}-{formatTime(meeting.ends_at)}
+                      {formatWeekdayShort(meeting.weekday)} {formatTime(meeting.starts_at)}-
+                      {formatTime(meeting.ends_at)}
                     </span>
                   ))}
                 </div>
@@ -491,9 +506,12 @@ function ScheduleGroupCard({
               <div className="grid min-w-0 grid-cols-[auto_auto] items-center gap-x-2.5 gap-y-1">
                 {meetings.map((meeting) => (
                   <div key={`${meeting.weekday}-${meeting.starts_at}`} className="contents">
-                    <span className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums">
-                      {WEEKDAYS[meeting.weekday] ?? `Día ${meeting.weekday}`}{" "}
-                      {formatTime(meeting.starts_at)}-{formatTime(meeting.ends_at)}
+                    <span
+                      className="text-foreground font-mono text-xs leading-tight whitespace-nowrap tabular-nums"
+                      title={`${formatWeekday(meeting.weekday)} ${formatTime(meeting.starts_at)}-${formatTime(meeting.ends_at)}`}
+                    >
+                      {formatWeekdayShort(meeting.weekday)} {formatTime(meeting.starts_at)}-
+                      {formatTime(meeting.ends_at)}
                     </span>
                     <span className="text-muted-foreground text-right font-mono text-xs whitespace-nowrap">
                       {meeting.classroom ?? ""}

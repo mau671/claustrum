@@ -190,7 +190,7 @@ async function main(): Promise<void> {
 
     console.log(`📋 Found ${candidates.length} candidate(s) to process.\n`);
 
-    const CONCURRENCY = 4;
+    const CONCURRENCY = 8;
     let completedCount = 0;
 
     async function processCandidate(candidate: ProfessorCandidate) {

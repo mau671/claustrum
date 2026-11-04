@@ -76,15 +76,18 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2).filter((arg) => arg !== "--");
   const isProd = args.includes("--prod");
   const isReviews = args.includes("--reviews");
+  const isSummaries = args.includes("--summaries");
   const isDryRun = args.includes("--dry-run");
 
   const dirArgIndex = args.indexOf("--dir");
   let targetDir =
     dirArgIndex !== -1 && args[dirArgIndex + 1]
       ? args[dirArgIndex + 1]
-      : isReviews
-        ? "data/seeds/reviews"
-        : "data/seeds/itcr";
+      : isSummaries
+        ? "data/seeds/review_summaries"
+        : isReviews
+          ? "data/seeds/reviews"
+          : "data/seeds/itcr";
 
   let connectionString = process.env.DATABASE_URL;
 
@@ -187,7 +190,7 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const defaultScope = isReviews ? "reviews" : "all";
+      const defaultScope = isSummaries ? "review_summaries" : isReviews ? "reviews" : "all";
       const { scope, years, termExternalKeys } = parseSeedMetadata(content, defaultScope);
 
       console.log(`  [apply] ${file} (scope: ${scope})...`);

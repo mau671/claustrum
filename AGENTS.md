@@ -38,6 +38,8 @@ This document provides guidelines for AI agents operating in this repository.
 - Seed database locally: `pnpm run db:seed`
 - Seed database in production: `pnpm run db:seed -- --prod`
 - Seed reviews: `pnpm run db:seed -- --reviews` (add `-- --prod` for production)
+- Seed AI review summaries: `pnpm run db:seed -- --summaries` (add `-- --prod` for production)
+- Generate AI review summaries: `pnpm run generate:summaries` (supports `--prod`, `--professor-id <ID>`, `--limit <N>`, `--dry-run`)
 - Open Drizzle Studio: `pnpm run db:studio` (add `-- --prod` for production)
 - Full local setup: `pnpm run db:setup`
 - **NEVER run destructive database commands**. Do not drop databases or run manual DELETE/UPDATE queries without explicit confirmation.

@@ -36,7 +36,9 @@ playwright-debug-*.png
 lighthouse-*.json
 supabase-es256-signing-key.json
 error.log
-.opencode/
+.opencode/*
+!.opencode/agents/
+!.opencode/commands/
 .codebase-memory/
 
 # Scratch & planning

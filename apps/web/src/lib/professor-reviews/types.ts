@@ -160,6 +160,12 @@ export type ProfessorTeachingHistoryTerm = {
   courses: ProfessorTeachingHistoryCourse[];
 };
 
+export type ProfessorAiSummary = {
+  summary: string;
+  reviews_analyzed_count: number;
+  updated_at: string;
+};
+
 export type ProfessorReviewSummary = {
   professor_id: string;
   approved_review_count: number;
@@ -170,6 +176,7 @@ export type ProfessorReviewSummary = {
   average_fairness_score: number | null;
   would_take_again_percentage: number | null;
   tag_counts: ProfessorReviewTagCount[];
+  ai_summary?: ProfessorAiSummary | null;
 };
 
 export type SearchProfessorReviewStatsParams = {

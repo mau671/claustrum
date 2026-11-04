@@ -41,6 +41,7 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
+  DrawerPanel,
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -866,10 +867,7 @@ export function EvaluationUploadDialog({
           else onOpenChange(true);
         }}
       >
-        <DrawerPopup
-          showBar
-          className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
-        >
+        <DrawerPopup showBar className="max-h-[90dvh]">
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
           <DrawerHeader className="px-4 pt-4 pb-2">
             <DrawerTitle>Subir evaluación</DrawerTitle>
@@ -877,10 +875,10 @@ export function EvaluationUploadDialog({
               Comparte material de estudio con otros estudiantes.
             </DrawerDescription>
           </DrawerHeader>
-          <ScrollArea className="min-h-0">
-            <div className="space-y-5 px-4 pb-4">{formFields}</div>
-          </ScrollArea>
-          <DrawerFooter>{footerActions}</DrawerFooter>
+          <DrawerPanel className="space-y-5 px-4 pb-4">{formFields}</DrawerPanel>
+          <DrawerFooter variant="bare" className="px-4 pt-2">
+            {footerActions}
+          </DrawerFooter>
         </DrawerPopup>
         {confirmDialog}
       </Drawer>

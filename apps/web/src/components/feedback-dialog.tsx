@@ -16,6 +16,7 @@ import {
   Drawer,
   DrawerDescription,
   DrawerHeader,
+  DrawerPanel,
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -256,10 +257,7 @@ export function FeedbackDialog({
           if (!nextOpen) onCloseReset();
         }}
       >
-        <DrawerPopup
-          showBar
-          className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
-        >
+        <DrawerPopup showBar className="max-h-[90dvh]">
           <DrawerHeader className="px-4 pt-4 pb-2 text-left">
             <DrawerTitle>Retroalimentación</DrawerTitle>
             <DrawerDescription>
@@ -267,7 +265,7 @@ export function FeedbackDialog({
               deseas, puedes hacerlo de forma anónima.
             </DrawerDescription>
           </DrawerHeader>
-          <ScrollArea className="min-h-0">{formContent}</ScrollArea>
+          <DrawerPanel className="p-0">{formContent}</DrawerPanel>
         </DrawerPopup>
       </Drawer>
     );

@@ -17,6 +17,7 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
+  DrawerPanel,
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -142,18 +143,15 @@ export function ScheduleExportDialog({
             </Button>
           ))}
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-          <DrawerPopup
-            showBar
-            className="grid max-h-[90dvh] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
-          >
+          <DrawerPopup showBar className="max-h-[90dvh]">
             <DrawerHeader className="px-4 pt-4 pb-2 text-left">
               <DrawerTitle>Exportar calendario</DrawerTitle>
               <DrawerDescription>
                 Descarga el horario como imagen o archivo de calendario.
               </DrawerDescription>
             </DrawerHeader>
-            <div className="min-h-0 overflow-y-auto px-4 pb-4">{formFields}</div>
-            <DrawerFooter className="px-4 pt-2 pb-6">
+            <DrawerPanel className="px-4 pb-4">{formFields}</DrawerPanel>
+            <DrawerFooter variant="bare" className="px-4 pt-2">
               <Button onClick={handleExport} disabled={isExporting} className="w-full">
                 {isExporting ? "Exportando..." : format === "ics" ? "Descargar" : "Exportar"}
               </Button>

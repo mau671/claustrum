@@ -32,6 +32,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
+  DrawerPanel,
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { Icon } from "@/components/ui/icon";
@@ -481,10 +482,7 @@ export function QuickRegisterDialog({
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerPopup
-          showBar
-          className="grid max-h-[90dvh] w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
-        >
+        <DrawerPopup showBar className="max-h-[90dvh]">
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
           <DrawerHeader className="px-4 pt-4 pb-2">
             <DrawerTitle>Registrar progreso</DrawerTitle>
@@ -492,10 +490,8 @@ export function QuickRegisterDialog({
               Guarda el estado de este curso para el periodo seleccionado.
             </DrawerDescription>
           </DrawerHeader>
-          <ScrollArea className="min-h-0 w-full max-w-full min-w-0">
-            <div className="w-full max-w-full min-w-0 space-y-6 px-4 pb-4">{progressForm}</div>
-          </ScrollArea>
-          <DrawerFooter className="border-t px-4 pt-3 pb-4">
+          <DrawerPanel className="space-y-6 px-4 pb-4">{progressForm}</DrawerPanel>
+          <DrawerFooter variant="bare" className="px-4 pt-2">
             <Button
               type="button"
               onClick={handleCreateAttempt}

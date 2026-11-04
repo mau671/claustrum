@@ -70,6 +70,7 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
+  DrawerPanel,
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -1357,7 +1358,7 @@ export function CourseDetails({
               <DrawerPopup
                 showBar
                 className={cn(
-                  "grid max-h-[90dvh] w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden transition-opacity",
+                  "max-h-[90dvh] transition-opacity",
                   confirmProgressOpen && "pointer-events-none invisible opacity-0",
                 )}
               >
@@ -1368,12 +1369,8 @@ export function CourseDetails({
                     Guarda el estado de este curso para el periodo seleccionado.
                   </DrawerDescription>
                 </DrawerHeader>
-                <ScrollArea className="min-h-0 w-full max-w-full min-w-0">
-                  <div className="w-full max-w-full min-w-0 space-y-6 px-4 pb-4">
-                    {progressForm}
-                  </div>
-                </ScrollArea>
-                <DrawerFooter className="border-t px-4 pt-3 pb-4">
+                <DrawerPanel className="space-y-6 px-4 pb-4">{progressForm}</DrawerPanel>
+                <DrawerFooter variant="bare" className="px-4 pt-2">
                   <Button
                     type="button"
                     onClick={handleSaveProgress}

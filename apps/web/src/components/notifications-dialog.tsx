@@ -4,7 +4,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardPanel } from "@/components/ui/card";
 import { Dialog, DialogHeader, DialogPopup, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerHeader, DrawerPopup, DrawerTitle } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -90,10 +96,7 @@ export function NotificationsDialog({ userId, open, onOpenChange }: Notification
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerPopup
-          showBar
-          className="grid max-h-[85dvh] grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
-        >
+        <DrawerPopup showBar className="max-h-[85dvh]">
           <DrawerHeader className="flex flex-row items-center justify-between gap-2 px-4 pt-3 pb-2 text-left">
             <div className="flex items-center gap-2">
               <DrawerTitle className="text-base font-semibold">Notificaciones</DrawerTitle>
@@ -119,7 +122,7 @@ export function NotificationsDialog({ userId, open, onOpenChange }: Notification
               <span>Marcar leído</span>
             </Button>
           </DrawerHeader>
-          <ScrollArea className="min-h-0">{content}</ScrollArea>
+          <DrawerPanel className="p-0">{content}</DrawerPanel>
         </DrawerPopup>
       </Drawer>
     );

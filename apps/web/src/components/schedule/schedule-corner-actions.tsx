@@ -32,6 +32,7 @@ import {
   Drawer,
   DrawerDescription,
   DrawerHeader,
+  DrawerPanel,
   DrawerPopup,
   DrawerTitle,
 } from "@/components/ui/drawer";
@@ -220,14 +221,14 @@ export function ScheduleCornerActions({
       {/* Controlled saved schedules dialog / drawer */}
       {isMobile ? (
         <Drawer open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
-          <DrawerPopup showBar className="max-h-[90dvh] overflow-hidden">
+          <DrawerPopup showBar className="max-h-[90dvh]">
             <DrawerHeader className="px-4 pt-4 pb-2 text-left">
               <DrawerTitle>Mis horarios</DrawerTitle>
               <DrawerDescription>
                 Guarda tus combinaciones de cursos o carga un horario guardado.
               </DrawerDescription>
             </DrawerHeader>
-            <div className="min-h-0 overflow-y-auto px-4 pb-6">
+            <DrawerPanel className="px-4 pb-6">
               {isAuthenticated ? (
                 <div className="space-y-5 pt-1">
                   <div className="space-y-2">
@@ -333,7 +334,7 @@ export function ScheduleCornerActions({
                   </div>
                 </div>
               )}
-            </div>
+            </DrawerPanel>
           </DrawerPopup>
         </Drawer>
       ) : (

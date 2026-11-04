@@ -1688,12 +1688,12 @@ export function CourseDetails({
                   className="border-border bg-card hover:border-primary/40 overflow-hidden rounded-lg border-2 shadow-sm transition-all duration-200"
                 >
                   <div className="border-border bg-card border-b px-3 py-2">
-                    <div className="text-muted-foreground flex items-center justify-between font-mono text-xs">
-                      <span className="min-w-[3ch] text-right">{eq.credits ?? 0} cr</span>
-                      <span className="flex-1 px-2 text-center font-semibold">
+                    <div className="text-muted-foreground grid grid-cols-[1fr_auto_1fr] items-center font-mono text-xs">
+                      <span className="truncate text-left">{eq.credits ?? 0} cr</span>
+                      <span className="truncate px-1.5 text-center font-semibold">
                         {eq.code || "SIN-CODIGO"}
                       </span>
-                      <span className="min-w-[4ch] text-left">{eq.weeklyHours ?? 0} h</span>
+                      <span className="truncate text-right">{eq.weeklyHours ?? 0} h</span>
                     </div>
                   </div>
                   <div className="bg-muted flex min-h-16 items-center justify-center px-3 py-2 text-center">

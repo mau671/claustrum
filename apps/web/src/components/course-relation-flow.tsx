@@ -97,22 +97,22 @@ const RELATION_LEGEND = [
   {
     relation: "prerequisite",
     icon: LockKeyholeIcon,
-    className: "border-amber-500 text-amber-600",
+    colorClass: "text-amber-600",
   },
   {
     relation: "corequisite",
     icon: Link01Icon,
-    className: "border-blue-500 text-blue-600",
+    colorClass: "text-blue-600",
   },
   {
     relation: "postrequisite",
     icon: LockKeyholeOpenIcon,
-    className: "border-emerald-500 text-emerald-600",
+    colorClass: "text-emerald-600",
   },
 ] satisfies Array<{
   relation: RelationType;
   icon: typeof LockKeyholeIcon;
-  className: string;
+  colorClass: string;
 }>;
 
 function CourseFlowNode({ data }: { data: CourseNodeData }) {
@@ -1294,16 +1294,9 @@ export function CourseRelationFlow({
                 Relaciones
               </h3>
               <div className="flex flex-wrap gap-x-3 gap-y-2 sm:gap-4">
-                {RELATION_LEGEND.map(({ relation, icon, className }) => (
+                {RELATION_LEGEND.map(({ relation, icon, colorClass }) => (
                   <div key={relation} className="flex items-center gap-1.5 sm:gap-2">
-                    <div
-                      className={cn(
-                        "bg-background flex size-4 shrink-0 items-center justify-center rounded-full border shadow-sm sm:size-6 sm:border-2",
-                        className,
-                      )}
-                    >
-                      <Icon icon={icon} className="size-2.5 shrink-0 sm:size-3" />
-                    </div>
+                    <Icon icon={icon} className={cn("size-3.5 shrink-0 sm:size-4", colorClass)} />
                     <span className="text-muted-foreground text-xs sm:text-sm">
                       {RELATION_LABELS[relation]}
                     </span>

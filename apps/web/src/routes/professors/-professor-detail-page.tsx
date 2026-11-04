@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Icon, MorphIcon } from "@/components/ui/icon";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatTermNameWithoutYear } from "@/lib/academic-terms";
@@ -125,34 +126,6 @@ function ProfessorTeachingHistoryCard({ professorId }: { professorId: string | n
     return termsForActiveYear[0] ?? null;
   }, [termsForActiveYear, selectedTermId]);
 
-  if (historyQuery.isLoading) {
-    return (
-      <Card className="overflow-hidden">
-        <div className="border-border/60 flex items-center justify-between px-5 py-3">
-          <h3 className="text-foreground text-base leading-none font-semibold">
-            Cursos impartidos
-          </h3>
-        </div>
-        <div className="text-muted-foreground p-5 text-sm">Cargando historial de cursos…</div>
-      </Card>
-    );
-  }
-
-  if (history.length === 0) {
-    return (
-      <Card className="overflow-hidden">
-        <div className="border-border/60 flex items-center justify-between px-5 py-3">
-          <h3 className="text-foreground text-base leading-none font-semibold">
-            Cursos impartidos
-          </h3>
-        </div>
-        <div className="text-muted-foreground p-5 text-sm">
-          No hay registros de cursos o grupos impartidos para este profesor.
-        </div>
-      </Card>
-    );
-  }
-
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <Card className="overflow-hidden">
@@ -171,93 +144,108 @@ function ProfessorTeachingHistoryCard({ professorId }: { professorId: string | n
         </CollapsibleTrigger>
 
         <CollapsiblePanel>
-          {/* Barra horizontal de Años */}
-          <div className="border-border/50 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto border-b px-3.5 py-2 sm:px-5 [&::-webkit-scrollbar]:hidden">
-            {years.map((year) => {
-              const isSelected = year === activeYear;
-              return (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => {
-                    setSelectedYear(year);
-                    const termsInYear = sortTermsAlphabetical(
-                      history.filter((t) => t.year === year),
-                    );
-                    setSelectedTermId(termsInYear[0]?.term_id ?? null);
-                  }}
-                  className={cn(
-                    "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium tabular-nums transition-colors sm:text-sm",
-                    isSelected
-                      ? "bg-muted text-foreground shadow-2xs"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                  )}
-                >
-                  {year}
-                </button>
-              );
-            })}
-          </div>
+          {historyQuery.isLoading ? (
+            <div className="text-muted-foreground flex items-center gap-2 p-5 text-sm">
+              <Spinner className="size-4" />
+              <span>Cargando historial de cursos…</span>
+            </div>
+          ) : history.length === 0 ? (
+            <div className="text-muted-foreground p-5 text-sm">
+              No hay registros de cursos o grupos impartidos para este profesor.
+            </div>
+          ) : (
+            <>
+              {/* Barra horizontal de Años */}
+              <div className="border-border/50 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto border-b px-3.5 py-2 sm:px-5 [&::-webkit-scrollbar]:hidden">
+                {years.map((year) => {
+                  const isSelected = year === activeYear;
+                  return (
+                    <button
+                      key={year}
+                      type="button"
+                      onClick={() => {
+                        setSelectedYear(year);
+                        const termsInYear = sortTermsAlphabetical(
+                          history.filter((t) => t.year === year),
+                        );
+                        setSelectedTermId(termsInYear[0]?.term_id ?? null);
+                      }}
+                      className={cn(
+                        "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium tabular-nums transition-colors sm:text-sm",
+                        isSelected
+                          ? "bg-muted text-foreground shadow-2xs"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                      )}
+                    >
+                      {year}
+                    </button>
+                  );
+                })}
+              </div>
 
-          {/* Barra horizontal de Periodos del año seleccionado */}
-          <div className="border-border/50 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto border-b px-3.5 py-2 sm:px-5 [&::-webkit-scrollbar]:hidden">
-            {termsForActiveYear.map((term) => {
-              const isSelected = term.term_id === activeTerm?.term_id;
-              const periodName = formatTermNameWithoutYear(term.term_display_name).toUpperCase();
+              {/* Barra horizontal de Periodos del año seleccionado */}
+              <div className="border-border/50 flex [scrollbar-width:none] items-center gap-1.5 overflow-x-auto border-b px-3.5 py-2 sm:px-5 [&::-webkit-scrollbar]:hidden">
+                {termsForActiveYear.map((term) => {
+                  const isSelected = term.term_id === activeTerm?.term_id;
+                  const periodName = formatTermNameWithoutYear(
+                    term.term_display_name,
+                  ).toUpperCase();
 
-              return (
-                <button
-                  key={term.term_id}
-                  type="button"
-                  onClick={() => setSelectedTermId(term.term_id)}
-                  className={cn(
-                    "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm",
-                    isSelected
-                      ? "bg-muted text-foreground shadow-2xs"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                  )}
-                >
-                  {periodName}
-                </button>
-              );
-            })}
-          </div>
+                  return (
+                    <button
+                      key={term.term_id}
+                      type="button"
+                      onClick={() => setSelectedTermId(term.term_id)}
+                      className={cn(
+                        "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm",
+                        isSelected
+                          ? "bg-muted text-foreground shadow-2xs"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                      )}
+                    >
+                      {periodName}
+                    </button>
+                  );
+                })}
+              </div>
 
-          {/* Cursos y Grupos del periodo activo */}
-          <div className="max-h-80 overflow-y-auto px-3.5 py-2 sm:max-h-96 sm:px-5">
-            {activeTerm && activeTerm.courses.length > 0 ? (
-              <div className="flex flex-col gap-2">
-                {activeTerm.courses.map((course) => (
-                  <div
-                    key={course.id}
-                    className="flex flex-col justify-between gap-1.5 sm:flex-row sm:items-center"
-                  >
-                    <div className="min-w-0 flex-1 leading-snug break-words">
-                      <span className="text-muted-foreground mr-1.5 text-xs font-normal">
-                        {course.code}:
-                      </span>
-                      <span className="text-foreground text-sm font-medium">{course.name}</span>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                      {course.groups.map((group) => (
-                        <Badge
-                          key={group}
-                          variant="secondary"
-                          className="px-1.5 py-0.5 text-xs font-normal tabular-nums"
-                        >
-                          {formatGroupCode(group)}
-                        </Badge>
-                      ))}
-                    </div>
+              {/* Cursos y Grupos del periodo activo */}
+              <div className="max-h-80 overflow-y-auto px-3.5 py-2 sm:max-h-96 sm:px-5">
+                {activeTerm && activeTerm.courses.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {activeTerm.courses.map((course) => (
+                      <div
+                        key={course.id}
+                        className="flex flex-col justify-between gap-1.5 sm:flex-row sm:items-center"
+                      >
+                        <div className="min-w-0 flex-1 leading-snug break-words">
+                          <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+                            {course.code}:
+                          </span>
+                          <span className="text-foreground text-sm font-medium">{course.name}</span>
+                        </div>
+                        <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+                          {course.groups.map((group) => (
+                            <Badge
+                              key={group}
+                              variant="secondary"
+                              className="px-1.5 py-0.5 text-xs font-normal tabular-nums"
+                            >
+                              {formatGroupCode(group)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="text-muted-foreground py-4 text-center text-sm">
+                    No hay cursos registrados para este periodo.
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-muted-foreground py-4 text-center text-sm">
-                No hay cursos registrados para este periodo.
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </CollapsiblePanel>
       </Card>
     </Collapsible>

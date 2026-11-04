@@ -721,7 +721,13 @@ export function ReviewComposer({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerPopup showBar className="max-h-[90dvh]">
+        <DrawerPopup
+          showBar
+          className={cn(
+            "max-h-[90dvh] transition-opacity",
+            confirmOpen && "pointer-events-none invisible opacity-0",
+          )}
+        >
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
           <DrawerHeader className="px-4 pt-4 pb-2">
             <DrawerTitle>Enviar reseña</DrawerTitle>
@@ -759,7 +765,10 @@ export function ReviewComposer({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
+        className={cn(
+          "max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden transition-opacity",
+          confirmOpen && "pointer-events-none invisible opacity-0",
+        )}
         initialFocus={false}
       >
         <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />

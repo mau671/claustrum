@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowRight01Icon, GraduationCapIcon } from "@hugeicons/core-free-icons";
+import {
+  ArrowRight01Icon,
+  Book02Icon,
+  Calendar03Icon,
+  GraduationCapIcon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -14,66 +21,89 @@ interface EmptyDashboardProps {
 
 export function EmptyDashboard({ isAuthenticated, hasProfile }: EmptyDashboardProps) {
   const title = !isAuthenticated
-    ? "Bienvenido a Claustrum"
+    ? "Tu espacio académico en un solo lugar"
     : hasProfile
-      ? "Aún no tienes un plan de estudios configurado"
-      : "Completa tu perfil académico";
+      ? "Comenzá a registrar tu avance"
+      : "Configurá tu carrera y plan de estudios";
 
   const description = !isAuthenticated
-    ? "Explora el creador de horarios TEC, planes de estudio y reseñas de profes antes de iniciar sesión."
+    ? "Organizá tu carrera universitaria: calculá tu promedio ponderado, planificá tus horarios sin choques y descubrí opiniones de profesores."
     : hasProfile
-      ? "Selecciona tu universidad, sede, carrera y plan de estudios para ver tu progreso académico."
-      : "Agrega tu universidad, sede, carrera y plan para que podamos armar tu dashboard.";
+      ? "Tu plan de estudios está listo. Ingresá a la malla curricular y marcá tus cursos aprobados o en curso para activar tus estadísticas y proyecciones."
+      : "Seleccioná tu universidad, sede, carrera y plan de estudios para desbloquear tu dashboard personalizado, estadísticas y sugerencias de matrícula.";
 
-  const actionHref = hasProfile ? "/curriculum" : "/onboarding";
+  const actionTo = hasProfile ? "/curriculum" : "/onboarding";
   const actionLabel = hasProfile ? "Ir al Plan de Estudios" : "Completar perfil académico";
+
   return (
-    <div className="flex min-h-[calc(100svh-var(--header-height)-6rem)] flex-col items-center justify-center px-4 py-12 md:min-h-[calc(100svh-var(--header-height)-3rem)]">
-      <div className="bg-primary/10 mb-4 rounded-full p-4">
-        <Icon icon={GraduationCapIcon} className="text-primary size-12" />
+    <div className="flex min-h-[calc(100svh-var(--header-height)-6rem)] flex-col items-center justify-center px-4 py-12 text-center md:min-h-[calc(100svh-var(--header-height)-3rem)]">
+      <div className="bg-primary/10 text-primary ring-primary/20 mb-4 flex size-16 items-center justify-center rounded-3xl ring-1">
+        <Icon icon={GraduationCapIcon} className="size-8" />
       </div>
-      <h1 className="mb-2 text-xl font-semibold">{title}</h1>
-      <p className="text-muted-foreground mb-6 max-w-md text-center">{description}</p>
+
+      <h1 className="text-foreground text-xl font-semibold tracking-tight md:text-2xl">{title}</h1>
+      <p className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed md:text-base">
+        {description}
+      </p>
+
       {isAuthenticated ? (
-        <a href={actionHref}>
-          <Button>
-            {actionLabel}
-            <Icon icon={ArrowRight01Icon} className="ml-2 size-4" />
-          </Button>
-        </a>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <Link to={actionTo}>
+            <Button size="lg" className="gap-2 font-medium shadow-xs">
+              <span>{actionLabel}</span>
+              <Icon icon={ArrowRight01Icon} className="size-4" />
+            </Button>
+          </Link>
+
+          <p className="text-muted-foreground/80 text-xs">
+            {hasProfile
+              ? "💡 Tip: Podés marcar materias aprobadas directamente haciendo clic en los cursos del plan."
+              : "Solo toma 1 minuto configurar tu carrera y plan de estudios."}
+          </p>
+        </div>
       ) : (
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-3">
-            <a href="/auth/signin">
-              <Button>Iniciar sesión</Button>
-            </a>
-            <a href="/auth/signup">
-              <Button variant="outline">Registrarse</Button>
-            </a>
+        <div className="mt-6 flex flex-col items-center gap-6">
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link to="/auth/signin">
+              <Button size="default" className="font-medium shadow-xs">
+                Iniciar sesión
+              </Button>
+            </Link>
+            <Link to="/auth/signup">
+              <Button variant="outline" size="default" className="font-medium">
+                Registrarse
+              </Button>
+            </Link>
           </div>
-          <nav
-            aria-label="Explorar Claustrum"
-            className="flex flex-wrap justify-center gap-3 text-sm"
-          >
-            <a
-              className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-              href="/schedule/"
-            >
-              Creador de horarios TEC
-            </a>
-            <a
-              className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-              href="/curriculum/"
-            >
-              Plan de estudios TEC
-            </a>
-            <a
-              className="text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-              href="/professors/"
-            >
-              Reseñas de profes TEC
-            </a>
-          </nav>
+
+          <div className="flex flex-col items-center gap-2 pt-2">
+            <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              O explorá libremente como invitado
+            </span>
+            <nav aria-label="Explorar Claustrum" className="flex flex-wrap justify-center gap-2">
+              <Link
+                to="/schedule"
+                className="bg-muted/60 hover:bg-muted hover:text-foreground text-muted-foreground inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              >
+                <Icon icon={Calendar03Icon} className="size-3.5" />
+                <span>Horarios</span>
+              </Link>
+              <Link
+                to="/curriculum"
+                className="bg-muted/60 hover:bg-muted hover:text-foreground text-muted-foreground inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              >
+                <Icon icon={Book02Icon} className="size-3.5" />
+                <span>Plan de estudios</span>
+              </Link>
+              <Link
+                to="/professors"
+                className="bg-muted/60 hover:bg-muted hover:text-foreground text-muted-foreground inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              >
+                <Icon icon={UserGroupIcon} className="size-3.5" />
+                <span>Profesores</span>
+              </Link>
+            </nav>
+          </div>
         </div>
       )}
     </div>

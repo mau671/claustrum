@@ -33,10 +33,10 @@ function CourseCard({ course, searchParams }: CourseCardProps) {
   const card = (
     <div className="border-border bg-card hover:border-primary/40 overflow-hidden rounded-lg border-2 shadow-sm transition-all duration-200">
       <div className="border-border bg-card border-b px-2 py-1.5">
-        <div className="text-muted-foreground flex items-center justify-between font-mono text-xs">
-          <span className="min-w-[3ch] text-right">{course.credits} cr</span>
-          <span className="flex-1 truncate px-1.5 text-center font-semibold">{course.code}</span>
-          <span className="min-w-[4ch] text-left" title={course.levelLabel}>
+        <div className="text-muted-foreground grid grid-cols-[1fr_auto_1fr] items-center font-mono text-xs">
+          <span className="truncate text-left">{course.credits} cr</span>
+          <span className="truncate px-1.5 text-center font-semibold">{course.code}</span>
+          <span className="truncate text-right" title={course.levelLabel}>
             {shortLevelLabel(course.levelLabel)}
           </span>
         </div>

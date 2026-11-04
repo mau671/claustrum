@@ -54,24 +54,26 @@ const statusConfig: Record<
   },
 };
 
-const relationConfig: Record<string, { ringClass: string; icon: React.ReactNode; label: string }> =
-  {
-    prerequisite: {
-      ringClass: "ring-2 ring-amber-500",
-      icon: <Icon icon={LockKeyholeIcon} className="size-3.5 text-amber-600" />,
-      label: "Requisito",
-    },
-    corequisite: {
-      ringClass: "ring-2 ring-blue-500",
-      icon: <Icon icon={Link01Icon} className="size-3.5 text-blue-600" />,
-      label: "Correquisito",
-    },
-    postrequisite: {
-      ringClass: "ring-2 ring-emerald-500",
-      icon: <Icon icon={LockKeyholeOpenIcon} className="size-3.5 text-emerald-600" />,
-      label: "Desbloquea",
-    },
-  };
+const relationConfig: Record<
+  string,
+  { borderClass: string; icon: React.ReactNode; label: string }
+> = {
+  prerequisite: {
+    borderClass: "border-amber-500",
+    icon: <Icon icon={LockKeyholeIcon} className="size-3.5 text-amber-600" />,
+    label: "Requisito",
+  },
+  corequisite: {
+    borderClass: "border-blue-500",
+    icon: <Icon icon={Link01Icon} className="size-3.5 text-blue-600" />,
+    label: "Correquisito",
+  },
+  postrequisite: {
+    borderClass: "border-emerald-500",
+    icon: <Icon icon={LockKeyholeOpenIcon} className="size-3.5 text-emerald-600" />,
+    label: "Desbloquea",
+  },
+};
 
 export function CourseCard({
   course,
@@ -84,16 +86,21 @@ export function CourseCard({
   const config = statusConfig[course.status];
   const relation = relationType ? relationConfig[relationType] : null;
 
+  const borderClass = isHovered
+    ? "border-primary"
+    : relation
+      ? relation.borderClass
+      : course.isAvailable
+        ? "border-purple-500/30 hover:border-purple-500/50"
+        : config.borderClassName;
+
   return (
     <div
       id={id}
       className={cn(
         "relative cursor-pointer overflow-hidden rounded-lg border-2 shadow-sm transition-all duration-200",
-        course.isAvailable
-          ? "border-purple-500/30 hover:border-purple-500/50"
-          : config.borderClassName,
-        isHovered && "ring-primary z-10 scale-105 shadow-lg ring-2",
-        relation?.ringClass,
+        borderClass,
+        isHovered && "z-10 scale-105 shadow-lg",
         !isHovered && !relationType && "hover:border-primary/50",
       )}
     >

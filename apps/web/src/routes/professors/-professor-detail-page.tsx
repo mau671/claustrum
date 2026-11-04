@@ -36,12 +36,10 @@ import { REVIEW_TAG_OPTIONS, type ReviewTag } from "@/lib/professor-reviews/type
 import { cn } from "@/lib/utils";
 import { getProfessorNameTransitionName } from "@/lib/utils/view-transition";
 
+import { ProfessorReviewsList } from "./-professor-reviews-list";
+
 const ReviewComposer = lazy(() =>
   import("./-review-composer").then((module) => ({ default: module.ReviewComposer })),
-);
-
-const ProfessorReviewsList = lazy(() =>
-  import("./-professor-reviews-list").then((module) => ({ default: module.ProfessorReviewsList })),
 );
 
 const courseCodeSchema = z
@@ -482,18 +480,16 @@ export function ProfessorDetailPage() {
 
       <ProfessorTeachingHistoryCard professorId={professorIdText} />
 
-      <Suspense fallback={<div className="bg-muted/20 h-[260px] w-full rounded-lg border" />}>
-        <ProfessorReviewsList
-          reviewRows={reviewRows}
-          isLoading={reviewsQuery.isLoading}
-          isFetching={reviewsQuery.isFetching}
-          page={page}
-          totalCount={totalCount}
-          totalPages={totalPages}
-          hasMore={hasMore}
-          onPageChange={setPage}
-        />
-      </Suspense>
+      <ProfessorReviewsList
+        reviewRows={reviewRows}
+        isLoading={reviewsQuery.isLoading}
+        isFetching={reviewsQuery.isFetching}
+        page={page}
+        totalCount={totalCount}
+        totalPages={totalPages}
+        hasMore={hasMore}
+        onPageChange={setPage}
+      />
 
       {isComposerOpen ? (
         <Suspense fallback={null}>

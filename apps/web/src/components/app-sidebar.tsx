@@ -146,7 +146,7 @@ export function AppSidebar() {
       className="peer/sidebar group/sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out data-[state=expanded]:w-72 md:flex"
     >
       <Link
-        to="/overview"
+        to={user ? "/overview" : "/schedule"}
         preload="intent"
         aria-label="Claustrum"
         className="text-foreground hover:bg-background/70 flex h-12 items-center gap-3 overflow-hidden rounded-full whitespace-nowrap transition-colors"
@@ -168,6 +168,7 @@ export function AppSidebar() {
               key={item.title}
               to={item.url}
               preload="intent"
+              rel={item.url === "/overview" ? "nofollow" : undefined}
               activeOptions={{
                 exact: false,
                 includeSearch: false,
@@ -301,6 +302,7 @@ export function AppSidebar() {
         ) : (
           <Link
             to="/auth/signin"
+            rel="nofollow"
             aria-label="Iniciar sesión"
             className={cn(
               "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",

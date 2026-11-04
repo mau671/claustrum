@@ -167,6 +167,7 @@ export function MobileBottomNav() {
               >
                 <Link
                   to={item.url}
+                  rel={item.url === "/overview" ? "nofollow" : undefined}
                   search={
                     (item.url === "/schedule" || item.url === "/curriculum") && activePlan
                       ? {
@@ -351,7 +352,7 @@ export function MobileBottomNav() {
                       </DropdownMenuLinkItem>
                     )}
 
-                    <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>
+                    <DropdownMenuLinkItem render={<Link to="/settings/profile" rel="nofollow" />}>
                       <Icon icon={Settings01Icon} size={16} className="size-4" />
                       Configuración
                     </DropdownMenuLinkItem>
@@ -406,6 +407,7 @@ export function MobileBottomNav() {
             ) : (
               <Link
                 to="/auth/signin"
+                rel="nofollow"
                 aria-label="Iniciar sesión"
                 aria-current={isProfileActive ? "page" : undefined}
                 className="relative flex h-11 items-center justify-start overflow-hidden rounded-full select-none"

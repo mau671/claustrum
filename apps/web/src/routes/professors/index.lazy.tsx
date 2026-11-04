@@ -1,20 +1,7 @@
-import { createLazyFileRoute, ClientOnly } from "@tanstack/react-router";
-import { Suspense, lazy } from "react";
+import { createLazyFileRoute } from "@tanstack/react-router";
 
-const ProfessorsReviewsPage = lazy(() =>
-  import("./-professors-page").then((module) => ({ default: module.ProfessorsReviewsPage })),
-);
+import { ProfessorsReviewsPage } from "./-professors-page";
 
 export const Route = createLazyFileRoute("/professors/")({
-  component: ProfessorsRoute,
+  component: ProfessorsReviewsPage,
 });
-
-function ProfessorsRoute() {
-  return (
-    <ClientOnly fallback={<div className="bg-background min-h-[50vh] flex-1" />}>
-      <Suspense fallback={<div className="bg-background min-h-[50vh] flex-1" />}>
-        <ProfessorsReviewsPage />
-      </Suspense>
-    </ClientOnly>
-  );
-}

@@ -9,9 +9,9 @@ Disallow: /settings/
 Disallow: /overview
 Disallow: /onboarding
 
-Allow: /schedule/
-Allow: /curriculum/
-Allow: /professors/
-Allow: /policies/
+Allow: /schedule
+Allow: /curriculum
+Allow: /professors
+Allow: /policies
 
 Sitemap: https://claustrum.maugp.com/sitemap.xml

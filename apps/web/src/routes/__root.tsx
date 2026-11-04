@@ -296,7 +296,7 @@ function NotFound() {
 
           <EmptyDescription>
             ¿Necesitas ayuda?{" "}
-            <Link to="/auth/signin" className="underline underline-offset-4">
+            <Link to="/auth/signin" rel="nofollow" className="underline underline-offset-4">
               Contactar soporte
             </Link>
           </EmptyDescription>

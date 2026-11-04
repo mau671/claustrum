@@ -298,7 +298,9 @@ export function SiteHeader() {
               variant="ghost"
               size="icon"
               className="relative rounded-full"
-              render={<Link to="/moderation" aria-label="Moderación" title="Moderación" />}
+              render={
+                <Link to="/moderation" rel="nofollow" aria-label="Moderación" title="Moderación" />
+              }
             >
               <HugeiconsIcon icon={Shield01Icon} size={20} />
               {totalPending > 0 && (
@@ -456,7 +458,12 @@ export function SiteHeader() {
             size="icon"
             className="hidden rounded-full sm:inline-flex"
             render={
-              <Link to="/settings/appearance" aria-label="Configuración" title="Configuración" />
+              <Link
+                to="/settings/appearance"
+                rel="nofollow"
+                aria-label="Configuración"
+                title="Configuración"
+              />
             }
           >
             <HugeiconsIcon icon={Settings01Icon} size={20} />

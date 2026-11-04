@@ -13,7 +13,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         while (true) {
           try {
             const data = await apiClient<Array<{ id: number }>>(
-              `/professors?limit=${limit}&offset=${offset}`,
+              `/professors?limit=${limit}&offset=${offset}&onlyWithApprovedReviews=true`,
             );
 
             if (!data || data.length === 0) {
@@ -35,9 +35,9 @@ export const Route = createFileRoute("/sitemap.xml")({
         const baseUrl = "https://claustrum.maugp.com";
 
         // Static routes
+        // Notice: `https://claustrum.maugp.com/` is omitted as it 301 redirects to `/schedule`
         const urls = [
-          { loc: `${baseUrl}/`, priority: 1.0, changefreq: "weekly" },
-          { loc: `${baseUrl}/schedule`, priority: 0.9, changefreq: "weekly" },
+          { loc: `${baseUrl}/schedule`, priority: 1.0, changefreq: "weekly" },
           { loc: `${baseUrl}/curriculum`, priority: 0.9, changefreq: "weekly" },
           { loc: `${baseUrl}/professors`, priority: 0.9, changefreq: "weekly" },
           { loc: `${baseUrl}/policies`, priority: 0.6, changefreq: "monthly" },

@@ -6,7 +6,6 @@ import {
   ArrowLeft02Icon,
   ChevronDownIcon,
   ChevronUpIcon,
-  Comment01Icon,
   PencilLineIcon,
 } from "@hugeicons/core-free-icons";
 import { lazy, Suspense, useMemo, useState } from "react";
@@ -452,18 +451,7 @@ export function ProfessorDetailPage() {
             <div className="col-span-2 flex min-h-32 flex-col justify-start p-5 md:col-auto md:min-h-52 md:p-6">
               {summary?.community_summary?.summary ? (
                 <div className="mb-4 flex flex-col gap-2">
-                  <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
-                    <Icon
-                      icon={Comment01Icon}
-                      size={14}
-                      className="text-muted-foreground size-3.5"
-                    />
-                    <span>Resumen de la comunidad</span>
-                    <span>•</span>
-                    <span className="tabular-nums">
-                      {summary.community_summary.reviews_analyzed_count} reseñas analizadas
-                    </span>
-                  </div>
+                  <p className="text-base font-semibold">Resumen</p>
                   <FormattedSummary summary={summary.community_summary.summary} />
                   <Separator className="my-2" />
                 </div>

@@ -13,6 +13,7 @@ import {
 
 import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const TOAST_ICONS = {
@@ -72,9 +73,11 @@ function Toasts({
       <Toast.Viewport
         className={cn(
           "fixed z-60 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-90 [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]",
+          "[--toast-inset-top:max(var(--toast-inset),calc(env(safe-area-inset-top,0px)+--spacing(2)))]",
+          "[--toast-inset-bottom:max(var(--toast-inset),calc(env(safe-area-inset-bottom,0px)+--spacing(2)))]",
           // Vertical positioning
-          "data-[position*=top]:top-(--toast-inset)",
-          "data-[position*=bottom]:bottom-(--toast-inset)",
+          "data-[position*=top]:top-(--toast-inset-top)",
+          "data-[position*=bottom]:bottom-(--toast-inset-bottom)",
           // Horizontal positioning
           "data-[position*=left]:left-(--toast-inset)",
           "data-[position*=right]:right-(--toast-inset)",
@@ -116,21 +119,21 @@ function Toasts({
                 "data-expanded:h-(--toast-height)",
                 "data-position:data-expanded:transform-[translateX(var(--toast-swipe-movement-x))_translateY(var(--toast-calc-offset-y))]",
                 // Starting and ending animations
-                "data-[position*=top]:data-starting-style:transform-[translateY(calc(-100%-var(--toast-inset)))]",
-                "data-[position*=bottom]:data-starting-style:transform-[translateY(calc(100%+var(--toast-inset)))]",
+                "data-[position*=top]:data-starting-style:transform-[translateY(calc(-100%-var(--toast-inset-top)))]",
+                "data-[position*=bottom]:data-starting-style:transform-[translateY(calc(100%+var(--toast-inset-bottom)))]",
                 "data-ending-style:opacity-0",
                 // Ending animations (direction-aware)
-                "data-[position*=top]:data-ending-style:not-data-limited:not-data-swipe-direction:transform-[translateY(calc(-100%-var(--toast-inset)))]",
-                "data-[position*=bottom]:data-ending-style:not-data-limited:not-data-swipe-direction:transform-[translateY(calc(100%+var(--toast-inset)))]",
+                "data-[position*=top]:data-ending-style:not-data-limited:not-data-swipe-direction:transform-[translateY(calc(-100%-var(--toast-inset-top)))]",
+                "data-[position*=bottom]:data-ending-style:not-data-limited:not-data-swipe-direction:transform-[translateY(calc(100%+var(--toast-inset-bottom)))]",
                 "data-ending-style:data-[swipe-direction=left]:transform-[translateX(calc(var(--toast-swipe-movement-x)-100%-var(--toast-inset)))_translateY(var(--toast-calc-offset-y))]",
                 "data-ending-style:data-[swipe-direction=right]:transform-[translateX(calc(var(--toast-swipe-movement-x)+100%+var(--toast-inset)))_translateY(var(--toast-calc-offset-y))]",
-                "data-ending-style:data-[swipe-direction=up]:transform-[translateY(calc(var(--toast-swipe-movement-y)-100%-var(--toast-inset)))]",
-                "data-ending-style:data-[swipe-direction=down]:transform-[translateY(calc(var(--toast-swipe-movement-y)+100%+var(--toast-inset)))]",
+                "data-ending-style:data-[swipe-direction=up]:transform-[translateY(calc(var(--toast-swipe-movement-y)-100%-var(--toast-inset-top)))]",
+                "data-ending-style:data-[swipe-direction=down]:transform-[translateY(calc(var(--toast-swipe-movement-y)+100%+var(--toast-inset-bottom)))]",
                 // Ending animations (expanded)
                 "data-expanded:data-ending-style:data-[swipe-direction=left]:transform-[translateX(calc(var(--toast-swipe-movement-x)-100%-var(--toast-inset)))_translateY(var(--toast-calc-offset-y))]",
                 "data-expanded:data-ending-style:data-[swipe-direction=right]:transform-[translateX(calc(var(--toast-swipe-movement-x)+100%+var(--toast-inset)))_translateY(var(--toast-calc-offset-y))]",
-                "data-expanded:data-ending-style:data-[swipe-direction=up]:transform-[translateY(calc(var(--toast-swipe-movement-y)-100%-var(--toast-inset)))]",
-                "data-expanded:data-ending-style:data-[swipe-direction=down]:transform-[translateY(calc(var(--toast-swipe-movement-y)+100%+var(--toast-inset)))]",
+                "data-expanded:data-ending-style:data-[swipe-direction=up]:transform-[translateY(calc(var(--toast-swipe-movement-y)-100%-var(--toast-inset-top)))]",
+                "data-expanded:data-ending-style:data-[swipe-direction=down]:transform-[translateY(calc(var(--toast-swipe-movement-y)+100%+var(--toast-inset-bottom)))]",
                 upsertReplayClassName(toast),
               )}
               {...toastData?.rootProps}
@@ -285,10 +288,13 @@ export interface ToastProviderProps extends Toast.Provider.Props {
 
 export function ToastProvider({
   children,
-  position = "bottom-right",
+  position: positionProp,
   portalProps,
   ...props
 }: ToastProviderProps): React.ReactElement {
+  const isMobile = useIsMobile();
+  const position = positionProp ?? (isMobile ? "top-center" : "bottom-right");
+
   return (
     <Toast.Provider toastManager={toastManager} {...props}>
       {children}

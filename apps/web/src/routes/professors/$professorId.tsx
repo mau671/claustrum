@@ -147,7 +147,7 @@ export const Route = createFileRoute("/professors/$professorId")({
       description,
       breadcrumbName: name,
       urlPath: `/professors/${ctx.params.professorId}`,
-      image: "/og/og-professors.png",
+      image: `/og/professor/${ctx.params.professorId}`,
       ogType: "profile",
       robots,
       jsonLd,

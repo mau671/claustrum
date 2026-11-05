@@ -115,9 +115,9 @@ export async function getProfessorReviewSummary(
 
 export async function getProfessorById(
   professorId: string,
-): Promise<{ id: number; full_name: string } | null> {
+): Promise<{ id: number; full_name: string; academic_unit?: string | null } | null> {
   try {
-    return await apiClient<{ id: number; full_name: string }>(
+    return await apiClient<{ id: number; full_name: string; academic_unit?: string | null }>(
       `/professors/${encodeURIComponent(professorId)}`,
     );
   } catch (error) {

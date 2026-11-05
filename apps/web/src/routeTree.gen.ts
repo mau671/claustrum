@@ -37,6 +37,7 @@ import { Route as ScheduleIndexRouteImport } from './routes/schedule/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as CurriculumPlanIdCourseIdRouteImport } from './routes/curriculum/$planId/$courseId'
 import { Route as EvaluationsViewEvaluationSlugRouteImport } from './routes/evaluations/view/$evaluationSlug'
+import { Route as OgProfessorProfessorIdRouteImport } from './routes/og/professor/$professorId'
 
 const SettingsAppearanceLazyRouteImport = createFileRoute(
   '/settings/appearance',
@@ -280,6 +281,11 @@ const EvaluationsViewEvaluationSlugRoute =
       (d) => d.Route,
     ),
   )
+const OgProfessorProfessorIdRoute = OgProfessorProfessorIdRouteImport.update({
+  id: '/og/professor/$professorId',
+  path: '/og/professor/$professorId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof SettingsIndexRoute
   '/curriculum/$planId/$courseId': typeof CurriculumPlanIdCourseIdRoute
   '/evaluations/view/$evaluationSlug': typeof EvaluationsViewEvaluationSlugRoute
+  '/og/professor/$professorId': typeof OgProfessorProfessorIdRoute
   '/auth/2fa/': typeof Auth2faIndexLazyRoute
   '/auth/magic-link/': typeof AuthMagicLinkIndexLazyRoute
   '/auth/reset-password/': typeof AuthResetPasswordIndexLazyRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsIndexRoute
   '/curriculum/$planId/$courseId': typeof CurriculumPlanIdCourseIdRoute
   '/evaluations/view/$evaluationSlug': typeof EvaluationsViewEvaluationSlugRoute
+  '/og/professor/$professorId': typeof OgProfessorProfessorIdRoute
   '/auth/2fa': typeof Auth2faIndexLazyRoute
   '/auth/magic-link': typeof AuthMagicLinkIndexLazyRoute
   '/auth/reset-password': typeof AuthResetPasswordIndexLazyRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/settings/': typeof SettingsIndexRoute
   '/curriculum/$planId/$courseId': typeof CurriculumPlanIdCourseIdRoute
   '/evaluations/view/$evaluationSlug': typeof EvaluationsViewEvaluationSlugRoute
+  '/og/professor/$professorId': typeof OgProfessorProfessorIdRoute
   '/auth/2fa/': typeof Auth2faIndexLazyRoute
   '/auth/magic-link/': typeof AuthMagicLinkIndexLazyRoute
   '/auth/reset-password/': typeof AuthResetPasswordIndexLazyRoute
@@ -423,6 +432,7 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/curriculum/$planId/$courseId'
     | '/evaluations/view/$evaluationSlug'
+    | '/og/professor/$professorId'
     | '/auth/2fa/'
     | '/auth/magic-link/'
     | '/auth/reset-password/'
@@ -458,6 +468,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/curriculum/$planId/$courseId'
     | '/evaluations/view/$evaluationSlug'
+    | '/og/professor/$professorId'
     | '/auth/2fa'
     | '/auth/magic-link'
     | '/auth/reset-password'
@@ -495,6 +506,7 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/curriculum/$planId/$courseId'
     | '/evaluations/view/$evaluationSlug'
+    | '/og/professor/$professorId'
     | '/auth/2fa/'
     | '/auth/magic-link/'
     | '/auth/reset-password/'
@@ -524,6 +536,7 @@ export interface RootRouteChildren {
   ScheduleIndexRoute: typeof ScheduleIndexRoute
   CurriculumPlanIdCourseIdRoute: typeof CurriculumPlanIdCourseIdRoute
   EvaluationsViewEvaluationSlugRoute: typeof EvaluationsViewEvaluationSlugRoute
+  OgProfessorProfessorIdRoute: typeof OgProfessorProfessorIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -773,6 +786,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EvaluationsViewEvaluationSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/og/professor/$professorId': {
+      id: '/og/professor/$professorId'
+      path: '/og/professor/$professorId'
+      fullPath: '/og/professor/$professorId'
+      preLoaderRoute: typeof OgProfessorProfessorIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -857,6 +877,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScheduleIndexRoute: ScheduleIndexRoute,
   CurriculumPlanIdCourseIdRoute: CurriculumPlanIdCourseIdRoute,
   EvaluationsViewEvaluationSlugRoute: EvaluationsViewEvaluationSlugRoute,
+  OgProfessorProfessorIdRoute: OgProfessorProfessorIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

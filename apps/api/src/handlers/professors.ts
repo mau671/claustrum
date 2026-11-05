@@ -26,6 +26,7 @@ interface RawProfessorSearchRow {
 interface RawProfessorDetailRow {
   id: number | string;
   full_name: string;
+  academic_unit?: string | null;
 }
 
 interface RawProfessorSummaryRow {
@@ -130,7 +131,10 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
 
           const rows = yield* sql
             .unsafe<RawProfessorDetailRow>(
-              "SELECT id, full_name FROM public.professor WHERE id = $1",
+              `SELECT p.id, p.full_name, ps.academic_unit
+               FROM public.professor p
+               LEFT JOIN public.professor_stats ps ON ps.professor_id = p.id
+               WHERE p.id = $1`,
               [profId],
             )
             .pipe(Effect.orDie);
@@ -143,6 +147,7 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
           return {
             id: Number(row.id),
             full_name: row.full_name,
+            academic_unit: row.academic_unit ?? null,
           };
         }),
 

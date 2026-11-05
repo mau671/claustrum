@@ -51,6 +51,7 @@ export class ProfessorIdParam extends Schema.Class<ProfessorIdParam>("ProfessorI
 export const ProfessorDetail = Schema.Struct({
   id: Schema.Number,
   full_name: Schema.String,
+  academic_unit: Schema.optional(Schema.NullOr(Schema.String)),
 });
 export type ProfessorDetail = typeof ProfessorDetail.Type;
 

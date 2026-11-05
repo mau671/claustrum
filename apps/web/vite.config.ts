@@ -49,6 +49,9 @@ function copyTakumiWasm(): Plugin {
 
 export default defineConfig({
   envDir: "../../",
+  define: {
+    "import.meta.url": JSON.stringify("https://claustrum.maugp.com/worker.js"),
+  },
   plugins: [
     copyPdfiumWasm(),
     copyTakumiWasm(),
@@ -64,8 +67,8 @@ export default defineConfig({
         return null;
       },
     },
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
     tanstackStart(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
     viteReact(),
     tailwindcss(),
     mdx(),

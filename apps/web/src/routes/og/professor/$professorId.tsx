@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { render } from "takumi-js";
 
 import { getGeistSemiBoldFont } from "@/lib/fonts/geist-sans-600";
 import {
@@ -26,10 +25,29 @@ function truncate(text: string, maxLen: number): string {
   return text.slice(0, maxLen).trim() + "…";
 }
 
+let wasmModulePromise: Promise<WebAssembly.Module> | null = null;
+
+function getTakumiWasmModule(origin: string): Promise<WebAssembly.Module> {
+  if (!wasmModulePromise) {
+    const wasmUrl = origin.startsWith("http")
+      ? `${origin}/takumi_wasm_bg.wasm`
+      : "https://claustrum.maugp.com/takumi_wasm_bg.wasm";
+    wasmModulePromise = fetch(wasmUrl)
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load takumi wasm: ${res.status}`);
+        }
+        return res.arrayBuffer();
+      })
+      .then((bytes) => WebAssembly.compile(bytes));
+  }
+  return wasmModulePromise;
+}
+
 export const Route = createFileRoute("/og/professor/$professorId")({
   server: {
     handlers: {
-      GET: async ({ params: { professorId } }) => {
+      GET: async ({ request, params: { professorId } }) => {
         if (!/^\d+$/.test(professorId)) {
           return new Response("Invalid professor ID", { status: 400 });
         }
@@ -209,10 +227,15 @@ export const Route = createFileRoute("/og/professor/$professorId")({
             </div>
           );
 
+          const { render } = await import("takumi-js");
+          const origin = new URL(request.url).origin;
+          const wasmModule = await getTakumiWasmModule(origin);
+
           const imageBuffer = await render(card, {
             width: 1200,
             height: 630,
             format: "png",
+            module: wasmModule,
             fonts: [
               {
                 name: "Geist",

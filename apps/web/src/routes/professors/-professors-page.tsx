@@ -1,5 +1,5 @@
 import { Cancel01Icon, ChevronDownIcon, ChevronUpIcon } from "@hugeicons/core-free-icons";
-import { useDebouncedValue } from "@tanstack/react-pacer";
+import { useDebouncedCallback, useDebouncedValue } from "@tanstack/react-pacer";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, getRouteApi } from "@tanstack/react-router";
 import {
@@ -9,7 +9,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 
 import type { ProfessorReviewStatsRow } from "@/lib/professor-reviews/types";
 
@@ -147,8 +147,23 @@ export function ProfessorsReviewsPage() {
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 
-  const searchInput = search.q ?? "";
-  const [debouncedSearch] = useDebouncedValue(searchInput, { wait: 300 });
+  const [searchTerm, setSearchTerm] = useState(search.q ?? "");
+
+  useEffect(() => {
+    setSearchTerm(search.q ?? "");
+  }, [search.q]);
+
+  const updateSearchUrl = useDebouncedCallback(
+    (query: string) => {
+      void navigate({
+        search: (prev) => ({ ...prev, q: query.trim() || undefined, page: undefined }),
+        replace: true,
+      });
+    },
+    { wait: 300 },
+  );
+
+  const [debouncedSearch] = useDebouncedValue(searchTerm, { wait: 300 });
 
   const minAverageScoreInput = search.ms ?? "";
   const setMinAverageScoreInput = (val: string) =>
@@ -454,11 +469,10 @@ export function ProfessorsReviewsPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 py-6 lg:px-6">
       <header className="sr-only">
-        <h1>Reseñas de profes TEC</h1>
+        <h1>Reseñas y opiniones de profesores del TEC</h1>
         <p>
-          Busca reseñas de profes del TEC, filtra por curso y compara experiencias academicas de
-          estudiantes. Esta seccion tambien ayuda a encontrar referencias relacionadas con mis
-          profes TEC, profesores TEC y opiniones de cursos.
+          Explora calificaciones, opiniones y evaluaciones de docentes del Tecnológico de Costa Rica
+          para planificar tu matrícula y horario.
         </p>
       </header>
 
@@ -472,13 +486,23 @@ export function ProfessorsReviewsPage() {
                 className="h-9 w-full sm:h-9"
                 placeholder="Ej: María González"
                 aria-label="Buscar por nombre de profesor"
-                value={searchInput}
+                value={searchTerm}
                 onChange={(event) => {
-                  const newSearch = event.target.value;
-                  void navigate({
-                    search: (prev) => ({ ...prev, q: newSearch || undefined, page: undefined }),
-                    replace: true,
-                  });
+                  const next = event.target.value;
+                  setSearchTerm(next);
+                  updateSearchUrl(next);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    void navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        q: searchTerm.trim() || undefined,
+                        page: undefined,
+                      }),
+                      replace: true,
+                    });
+                  }
                 }}
               />
             </div>

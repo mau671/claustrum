@@ -27,13 +27,31 @@ function copyPdfiumWasm(): Plugin {
   };
 }
 
+function copyTakumiWasm(): Plugin {
+  const publicDir = resolve(import.meta.dirname, "public");
+  const target = resolve(publicDir, "takumi_wasm_bg.wasm");
+
+  return {
+    name: "copy-takumi-wasm",
+    buildStart() {
+      if (existsSync(target)) return;
+      try {
+        const source = fileURLToPath(
+          new URL("../pkg/takumi_wasm_bg.wasm", import.meta.resolve("@takumi-rs/wasm")),
+        );
+        copyFileSync(source, target);
+      } catch {
+        // ignore if not resolved
+      }
+    },
+  };
+}
+
 export default defineConfig({
   envDir: "../../",
-  define: {
-    "import.meta.url": JSON.stringify("file:///worker.js"),
-  },
   plugins: [
     copyPdfiumWasm(),
+    copyTakumiWasm(),
     {
       name: "fix-cloudflare-create-require",
       renderChunk(code) {

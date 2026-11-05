@@ -7,6 +7,9 @@ import {
   getProfessorTeachingHistory,
 } from "@/lib/professor-reviews/api";
 
+// @ts-ignore
+import wasmModule from "./takumi_wasm_bg.wasm";
+
 function toTitleCase(text: string): string {
   return text.toLowerCase().replace(/(?:^|\s|-|\/)\S/g, (char) => char.toUpperCase());
 }
@@ -25,29 +28,10 @@ function truncate(text: string, maxLen: number): string {
   return text.slice(0, maxLen).trim() + "…";
 }
 
-let wasmModulePromise: Promise<WebAssembly.Module> | null = null;
-
-function getTakumiWasmModule(origin: string): Promise<WebAssembly.Module> {
-  if (!wasmModulePromise) {
-    const wasmUrl = origin.startsWith("http")
-      ? `${origin}/takumi_wasm_bg.wasm`
-      : "https://claustrum.maugp.com/takumi_wasm_bg.wasm";
-    wasmModulePromise = fetch(wasmUrl)
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to load takumi wasm: ${res.status}`);
-        }
-        return res.arrayBuffer();
-      })
-      .then((bytes) => WebAssembly.compile(bytes));
-  }
-  return wasmModulePromise;
-}
-
 export const Route = createFileRoute("/og/professor/$professorId")({
   server: {
     handlers: {
-      GET: async ({ request, params: { professorId } }) => {
+      GET: async ({ params: { professorId } }) => {
         if (!/^\d+$/.test(professorId)) {
           return new Response("Invalid professor ID", { status: 400 });
         }
@@ -228,14 +212,16 @@ export const Route = createFileRoute("/og/professor/$professorId")({
           );
 
           const { render } = await import("takumi-js");
-          const origin = new URL(request.url).origin;
-          const wasmModule = await getTakumiWasmModule(origin);
+          const resolvedWasm =
+            wasmModule && typeof wasmModule === "object" && "default" in wasmModule
+              ? (wasmModule as { default: WebAssembly.Module }).default
+              : (wasmModule as WebAssembly.Module);
 
           const imageBuffer = await render(card, {
             width: 1200,
             height: 630,
             format: "png",
-            module: wasmModule,
+            module: resolvedWasm,
             fonts: [
               {
                 name: "Geist",
@@ -252,8 +238,14 @@ export const Route = createFileRoute("/og/professor/$professorId")({
                 "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
             },
           });
-        } catch {
-          return Response.redirect("https://claustrum.maugp.com/og/og-professors.png", 302);
+        } catch (error) {
+          const message = error instanceof Error ? error.stack || error.message : String(error);
+          return new Response(`OG generation error: ${message}`, {
+            status: 500,
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8",
+            },
+          });
         }
       },
     },

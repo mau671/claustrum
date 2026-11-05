@@ -44,6 +44,31 @@ function copyTakumiWasm(): Plugin {
         // ignore if not resolved
       }
     },
+    resolveId(id) {
+      if (id.includes("takumi_wasm_bg.wasm")) {
+        return {
+          id: "./takumi_wasm_bg.wasm",
+          external: true,
+        };
+      }
+    },
+    closeBundle() {
+      try {
+        const source = fileURLToPath(
+          new URL("../pkg/takumi_wasm_bg.wasm", import.meta.resolve("@takumi-rs/wasm")),
+        );
+        const distServer = resolve(import.meta.dirname, "dist/server");
+        const distServerAssets = resolve(distServer, "assets");
+        if (existsSync(distServer)) {
+          copyFileSync(source, resolve(distServer, "takumi_wasm_bg.wasm"));
+        }
+        if (existsSync(distServerAssets)) {
+          copyFileSync(source, resolve(distServerAssets, "takumi_wasm_bg.wasm"));
+        }
+      } catch {
+        // ignore if not resolved
+      }
+    },
   };
 }
 

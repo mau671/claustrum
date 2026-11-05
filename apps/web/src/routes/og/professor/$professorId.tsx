@@ -48,9 +48,6 @@ export const Route = createFileRoute("/og/professor/$professorId")({
           }
 
           const professorName = professor.full_name.trim().toUpperCase();
-          const academicUnit = professor.academic_unit
-            ? `${professor.academic_unit.trim().toUpperCase()} • TEC`
-            : "TECNOLÓGICO DE COSTA RICA (ITCR)";
 
           const hasReviews = (summary?.approved_review_count ?? 0) > 0;
           const overallScore = summary?.average_overall_score?.toFixed(1) ?? null;
@@ -64,7 +61,7 @@ export const Route = createFileRoute("/og/professor/$professorId")({
 
           // Clean & truncate summary
           const rawSummary = summary?.community_summary?.summary;
-          const summaryText = rawSummary ? truncate(cleanMarkdownText(rawSummary), 240) : null;
+          const summaryText = rawSummary ? truncate(cleanMarkdownText(rawSummary), 280) : null;
 
           // Tags logic: up to 3 badges in a single line, plus +N badge if there are more
           const allTags = summary?.tag_counts ?? [];
@@ -117,7 +114,6 @@ export const Route = createFileRoute("/og/professor/$professorId")({
               {/* Professor identity */}
               <div tw="flex flex-col">
                 <h1 tw="text-5xl font-extrabold tracking-tight text-zinc-100">{professorName}</h1>
-                <p tw="text-lg font-semibold text-zinc-400 mt-2 tracking-wide">{academicUnit}</p>
               </div>
 
               {/* Metrics row or courses fallback */}
@@ -127,21 +123,21 @@ export const Route = createFileRoute("/og/professor/$professorId")({
                     <span tw="text-xs uppercase font-bold text-zinc-400 tracking-wider">
                       Calidad General
                     </span>
-                    <span tw="text-4xl font-black text-orange-500 mt-1">{overallScore ?? "-"}</span>
+                    <span tw="text-4xl font-bold text-zinc-100 mt-1">{overallScore ?? "-"}</span>
                   </div>
 
                   <div tw="flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl p-4 w-44">
                     <span tw="text-xs uppercase font-bold text-zinc-400 tracking-wider">
                       Facilidad
                     </span>
-                    <span tw="text-3xl font-bold text-zinc-200 mt-1">{easeScore ?? "-"}</span>
+                    <span tw="text-4xl font-bold text-zinc-100 mt-1">{easeScore ?? "-"}</span>
                   </div>
 
                   <div tw="flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl p-4 w-44">
                     <span tw="text-xs uppercase font-bold text-zinc-400 tracking-wider">
                       Calidad
                     </span>
-                    <span tw="text-3xl font-bold text-zinc-200 mt-1">{qualityScore ?? "-"}</span>
+                    <span tw="text-4xl font-bold text-zinc-100 mt-1">{qualityScore ?? "-"}</span>
                   </div>
 
                   {wouldTakeAgain ? (
@@ -149,7 +145,7 @@ export const Route = createFileRoute("/og/professor/$professorId")({
                       <span tw="text-xs uppercase font-bold text-zinc-400 tracking-wider">
                         Lo llevarían otra vez
                       </span>
-                      <span tw="text-3xl font-bold text-emerald-400 mt-1">{wouldTakeAgain}</span>
+                      <span tw="text-4xl font-bold text-zinc-100 mt-1">{wouldTakeAgain}</span>
                     </div>
                   ) : null}
                 </div>

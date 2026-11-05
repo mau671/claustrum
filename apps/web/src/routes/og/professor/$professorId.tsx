@@ -47,10 +47,10 @@ export const Route = createFileRoute("/og/professor/$professorId")({
             return Response.redirect("https://claustrum.maugp.com/og/og-professors.png", 302);
           }
 
-          const professorName = toTitleCase(professor.full_name);
+          const professorName = professor.full_name.trim().toUpperCase();
           const academicUnit = professor.academic_unit
-            ? `${toTitleCase(professor.academic_unit)} • TEC`
-            : "Tecnológico de Costa Rica (ITCR)";
+            ? `${professor.academic_unit.trim().toUpperCase()} • TEC`
+            : "TECNOLÓGICO DE COSTA RICA (ITCR)";
 
           const hasReviews = (summary?.approved_review_count ?? 0) > 0;
           const overallScore = summary?.average_overall_score?.toFixed(1) ?? null;
@@ -109,20 +109,15 @@ export const Route = createFileRoute("/og/professor/$professorId")({
           const card = (
             <div tw="flex w-[1200px] h-[630px] flex-col justify-between bg-zinc-950 text-white p-14 font-sans">
               {/* Header / Brand */}
-              <div tw="flex items-center justify-between w-full border-b border-zinc-800/80 pb-4">
-                <div tw="flex items-center gap-3">
-                  {logoSvg}
-                  <span tw="text-2xl font-bold tracking-tight text-white">Claustrum</span>
-                </div>
-                <span tw="text-sm font-semibold tracking-wider text-zinc-500 uppercase">
-                  claustrum.maugp.com
-                </span>
+              <div tw="flex items-center gap-3">
+                {logoSvg}
+                <span tw="text-2xl font-bold tracking-tight text-white">Claustrum</span>
               </div>
 
               {/* Professor identity */}
-              <div tw="flex flex-col mt-1">
+              <div tw="flex flex-col">
                 <h1 tw="text-5xl font-extrabold tracking-tight text-zinc-100">{professorName}</h1>
-                <p tw="text-xl font-medium text-zinc-400 mt-2">{academicUnit}</p>
+                <p tw="text-lg font-semibold text-zinc-400 mt-2 tracking-wide">{academicUnit}</p>
               </div>
 
               {/* Metrics row or courses fallback */}
@@ -181,9 +176,9 @@ export const Route = createFileRoute("/og/professor/$professorId")({
                 </div>
               )}
 
-              {/* Community summary (without title) */}
+              {/* Community summary (without title or box) */}
               {summaryText ? (
-                <div tw="flex bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-5 text-zinc-300 text-lg leading-relaxed">
+                <div tw="flex text-zinc-300 text-2xl leading-relaxed">
                   <p tw="m-0">{summaryText}</p>
                 </div>
               ) : null}
@@ -200,7 +195,7 @@ export const Route = createFileRoute("/og/professor/$professorId")({
                     </span>
                   ))}
                   {remainingCount > 0 ? (
-                    <span tw="bg-orange-950 text-orange-400 border border-orange-800/60 text-sm font-bold px-3 py-1.5 rounded-lg">
+                    <span tw="bg-zinc-800 text-zinc-200 text-sm font-medium px-3.5 py-1.5 rounded-lg">
                       +{remainingCount}
                     </span>
                   ) : null}
@@ -238,14 +233,8 @@ export const Route = createFileRoute("/og/professor/$professorId")({
                 "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
             },
           });
-        } catch (error) {
-          const message = error instanceof Error ? error.stack || error.message : String(error);
-          return new Response(`OG generation error: ${message}`, {
-            status: 500,
-            headers: {
-              "Content-Type": "text/plain; charset=utf-8",
-            },
-          });
+        } catch {
+          return Response.redirect("https://claustrum.maugp.com/og/og-professors.png", 302);
         }
       },
     },

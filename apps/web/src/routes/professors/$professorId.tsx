@@ -83,9 +83,9 @@ export const Route = createFileRoute("/professors/$professorId")({
     let description: string;
     if (reviewCount > 0 && avgScore !== null) {
       const reviewWord = reviewCount === 1 ? "reseña" : "reseñas";
-      description = `Opiniones y calificaciones de ${name}, docente del TEC (ITCR). Calificación promedio de ${avgScore}/10 basada en ${reviewCount} ${reviewWord}. Resumen de la comunidad y materias impartidas.`;
+      description = `Calificación promedio de ${avgScore}/10 basada en ${reviewCount} ${reviewWord} de estudiantes del TEC. Consulta el nivel de dificultad, metodología y recomendaciones sobre sus cursos.`;
     } else {
-      description = `Opiniones, calificaciones y materias impartidas de ${name}, docente del Tecnológico de Costa Rica (TEC, ITCR). Consulta su historial docente en Claustrum.`;
+      description = `Historial docente y cursos impartidos en el TEC. Consulta grupos, horarios y experiencias de estudiantes en Claustrum.`;
     }
 
     const hasReviews = reviewCount > 0;
@@ -143,7 +143,7 @@ export const Route = createFileRoute("/professors/$professorId")({
     jsonLd.push(personSchema);
 
     return buildSeoMeta({
-      title: `Opiniones y calificaciones de ${name} - TEC | Claustrum`,
+      title: `Opiniones sobre ${name} | Claustrum`,
       description,
       breadcrumbName: name,
       urlPath: `/professors/${ctx.params.professorId}`,

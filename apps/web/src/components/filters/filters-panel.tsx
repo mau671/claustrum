@@ -117,7 +117,7 @@ export function FiltersPanel({
         <div
           className={cn(
             "flex items-center justify-between gap-2",
-            isPlain ? "py-1.5" : "bg-muted/30 rounded-lg px-3 py-2",
+            isPlain ? "px-0.5 py-1.5" : "bg-muted/30 rounded-lg px-3 py-2",
           )}
         >
           <div className="text-muted-foreground flex shrink-0 items-center gap-2">
@@ -140,7 +140,7 @@ export function FiltersPanel({
 
         {isExpanded && (
           <div className="pt-2">
-            <div className={cn("space-y-2.5", isPlain ? "" : "bg-muted/30 rounded-lg p-3")}>
+            <div className={cn("space-y-2.5", isPlain ? "px-0.5" : "bg-muted/30 rounded-lg p-3")}>
               {children}
             </div>
           </div>

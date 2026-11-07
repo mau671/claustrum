@@ -1389,7 +1389,7 @@ export function SchedulePage() {
                                   <Button
                                     type="button"
                                     variant="ghost"
-                                    className="h-9 w-9 rounded-md"
+                                    size="icon-sm"
                                     onClick={() =>
                                       handleViewModeChange(viewMode === "card" ? "table" : "card")
                                     }
@@ -1405,7 +1405,7 @@ export function SchedulePage() {
                                 <Button
                                   type="button"
                                   variant="ghost"
-                                  className="h-9 w-9 rounded-md"
+                                  size="icon-sm"
                                   aria-label={
                                     isCourseListOpen
                                       ? "Contraer cursos disponibles"
@@ -1495,7 +1495,7 @@ export function SchedulePage() {
                                   <Button
                                     type="button"
                                     variant="ghost"
-                                    className="h-9 w-9 rounded-md"
+                                    size="icon-sm"
                                     onClick={() =>
                                       handleViewModeChange(viewMode === "card" ? "table" : "card")
                                     }

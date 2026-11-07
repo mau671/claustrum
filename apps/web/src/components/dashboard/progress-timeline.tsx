@@ -97,8 +97,9 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
                 aria-valuenow={completedCourses + inProgressCourses}
               >
                 {completedPercentage > 0 ? (
-                  <Tooltip>
+                  <Tooltip trackCursorAxis="x">
                     <TooltipTrigger
+                      closeOnClick={false}
                       render={
                         <button
                           type="button"
@@ -121,8 +122,9 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
                 ) : null}
 
                 {inProgressPercentage > 0 ? (
-                  <Tooltip>
+                  <Tooltip trackCursorAxis="x">
                     <TooltipTrigger
+                      closeOnClick={false}
                       render={
                         <button
                           type="button"
@@ -145,8 +147,9 @@ export function ProgressTimeline({ semesters }: ProgressTimelineProps) {
                 ) : null}
 
                 {pendingPercentage > 0 ? (
-                  <Tooltip>
+                  <Tooltip trackCursorAxis="x">
                     <TooltipTrigger
+                      closeOnClick={false}
                       render={
                         <button
                           type="button"

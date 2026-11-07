@@ -171,10 +171,19 @@ erDiagram
     INT period_number
     TEXT external_key UK
     TEXT display_name
-    DATE starts_on
-    DATE ends_on
     BOOLEAN is_active
     TIMESTAMPTZ deactivated_at
+  }
+
+  ACADEMIC_TERM_EVENT {
+    BIGSERIAL id PK
+    BIGINT academic_term_id FK
+    TEXT type
+    TEXT name
+    DATE starts_on
+    DATE ends_on
+    TIMESTAMPTZ created_at
+    TIMESTAMPTZ updated_at
   }
 
   STUDY_PLAN {

@@ -54,8 +54,6 @@ interface RawProfessorTermRow {
   period_number: number | string;
   external_key: string;
   display_name: string;
-  starts_on: string | null;
-  ends_on: string | null;
 }
 
 interface RawProfessorHistoryRow {
@@ -250,8 +248,6 @@ export const ProfessorsApiHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: toIsoString(r.starts_on),
-            ends_on: toIsoString(r.ends_on),
           }));
         }),
 

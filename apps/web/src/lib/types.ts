@@ -244,8 +244,6 @@ export interface AcademicTerm {
   period_number: number;
   external_key: string;
   display_name: string;
-  starts_on: string | null;
-  ends_on: string | null;
 }
 
 export interface ScheduleSession {

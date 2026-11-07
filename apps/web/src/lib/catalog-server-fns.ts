@@ -40,8 +40,6 @@ export interface AcademicTermItem {
   period_number: number;
   external_key: string;
   display_name: string;
-  starts_on: string;
-  ends_on: string;
 }
 
 const cache = new Map<string, { data: unknown; timestamp: number }>();

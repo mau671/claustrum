@@ -120,8 +120,6 @@ export const coursesHandlers = HttpApiBuilder.group(
               period_number: string | number;
               external_key: string;
               display_name: string;
-              starts_on: string;
-              ends_on: string;
             }>("SELECT * FROM public.get_course_offering_terms($1, $2, $3, $4)", [
               params.id,
               query.campusId ?? null,
@@ -137,8 +135,6 @@ export const coursesHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: String(r.starts_on),
-            ends_on: String(r.ends_on),
           }));
         }),
 

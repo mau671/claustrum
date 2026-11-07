@@ -7,8 +7,6 @@ export const AcademicTerm = Schema.Struct({
   period_number: Schema.Number,
   external_key: Schema.String,
   display_name: Schema.String,
-  starts_on: Schema.NullOr(Schema.String),
-  ends_on: Schema.NullOr(Schema.String),
 });
 export type AcademicTerm = typeof AcademicTerm.Type;
 

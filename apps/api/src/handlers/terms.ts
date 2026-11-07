@@ -24,8 +24,6 @@ export const termsHandlers = HttpApiBuilder.group(
               period_number: string | number;
               external_key: string;
               display_name: string;
-              starts_on: string;
-              ends_on: string;
             }>("SELECT * FROM public.get_active_academic_terms()")
             .pipe(Effect.orDie);
 
@@ -36,8 +34,6 @@ export const termsHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: r.starts_on ? String(r.starts_on) : null,
-            ends_on: r.ends_on ? String(r.ends_on) : null,
           }));
         }),
 
@@ -65,8 +61,6 @@ export const termsHandlers = HttpApiBuilder.group(
                 period_number: string | number;
                 external_key: string;
                 display_name: string;
-                starts_on: string;
-                ends_on: string;
               }>("SELECT * FROM public.get_academic_terms_by_plan($1, $2)", [
                 query.studyPlanId,
                 query.campusId,
@@ -80,8 +74,6 @@ export const termsHandlers = HttpApiBuilder.group(
               period_number: Number(r.period_number),
               external_key: r.external_key,
               display_name: r.display_name,
-              starts_on: String(r.starts_on),
-              ends_on: String(r.ends_on),
             }));
           }
 
@@ -94,8 +86,6 @@ export const termsHandlers = HttpApiBuilder.group(
                 period_number: string | number;
                 external_key: string;
                 display_name: string;
-                starts_on: string;
-                ends_on: string;
               }>("SELECT * FROM public.get_academic_terms_by_plan($1, NULL)", [query.studyPlanId])
               .pipe(Effect.orDie);
 
@@ -106,8 +96,6 @@ export const termsHandlers = HttpApiBuilder.group(
               period_number: Number(r.period_number),
               external_key: r.external_key,
               display_name: r.display_name,
-              starts_on: String(r.starts_on),
-              ends_on: String(r.ends_on),
             }));
           }
 
@@ -119,8 +107,6 @@ export const termsHandlers = HttpApiBuilder.group(
               period_number: string | number;
               external_key: string;
               display_name: string;
-              starts_on: string;
-              ends_on: string;
             }>("SELECT * FROM public.academic_term ORDER BY year DESC, period_number DESC")
             .pipe(Effect.orDie);
 
@@ -131,8 +117,6 @@ export const termsHandlers = HttpApiBuilder.group(
             period_number: Number(r.period_number),
             external_key: r.external_key,
             display_name: r.display_name,
-            starts_on: r.starts_on ? String(r.starts_on) : null,
-            ends_on: r.ends_on ? String(r.ends_on) : null,
           }));
         }),
     });

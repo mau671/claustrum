@@ -63,8 +63,9 @@ function buildLocation(event: CalendarEvent): string {
 export function buildScheduleIcs(params: {
   events: CalendarEvent[];
   term?: AcademicTerm | null;
+  termRange?: { startsOn?: string | null; endsOn?: string | null } | null;
 }): string {
-  const { events, term } = params;
+  const { events } = params;
   const nowStamp = formatIcsDate(new Date());
   const lines: string[] = [
     "BEGIN:VCALENDAR",
@@ -74,8 +75,8 @@ export function buildScheduleIcs(params: {
     "METHOD:PUBLISH",
   ];
 
-  const termStart = term?.starts_on ? parseISO(term.starts_on) : null;
-  const termEnd = term?.ends_on ? parseISO(term.ends_on) : null;
+  const termStart = params.termRange?.startsOn ? parseISO(params.termRange.startsOn) : null;
+  const termEnd = params.termRange?.endsOn ? parseISO(params.termRange.endsOn) : null;
   const hasTermRange = termStart && termEnd && isValid(termStart) && isValid(termEnd);
 
   events.forEach((event, index) => {

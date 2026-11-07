@@ -162,18 +162,18 @@ def build_db_url_from_env(env_file: Path) -> str:
         return direct.group(1).strip()
 
     match_url = re.search(r"^VITE_SUPABASE_URL=(.+)$", env_content, flags=re.M)
-    match_password = re.search(r"^SUPABASE_PASSWORD=(.+)$", env_content, flags=re.M)
-    if not match_url or not match_password:
+    match_token = re.search(r"^SUPABASE_PASSWORD=(.+)$", env_content, flags=re.M)
+    if not match_url or not match_token:
         raise ValueError(
             f"Missing DATABASE_URL (or legacy VITE_SUPABASE_URL + SUPABASE_PASSWORD) "
             f"in {env_file}"
         )
 
     supabase_url = match_url.group(1).strip()
-    password = match_password.group(1).strip()
+    db_token = match_token.group(1).strip()
     project_ref = re.sub(r"^https://([^.]+)\.supabase\.co$", r"\1", supabase_url)
     return (
-        f"postgresql://postgres:{password}@db.{project_ref}.supabase.co:5432/"
+        f"postgresql://postgres:{db_token}@db.{project_ref}.supabase.co:5432/"
         "postgres?sslmode=require"
     )
 

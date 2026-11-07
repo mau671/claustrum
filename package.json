@@ -22,6 +22,10 @@
     "generate:og": "tsx scripts/generate-og.ts",
     "generate:summaries": "tsx scripts/generate-review-summaries.ts"
   },
+  "overrides": {
+    "seroval": "^1.6.11",
+    "seroval-plugins": "^1.6.11"
+  },
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.85",
     "@effect/platform": "^0.97.2",
@@ -38,9 +42,9 @@
     "oxlint": "^1.66.0",
     "oxlint-tsgolint": "^0.22.1",
     "pg": "^8.21.0",
-    "simple-git-hooks": "^2.13.1",
-    "tsx": "^4.22.3",
-    "turbo": "^2.11.7",
+    "simple-git-hooks": "^2.14.0",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.10",
     "typescript": "^7.0.2"
   },
   "simple-git-hooks": {

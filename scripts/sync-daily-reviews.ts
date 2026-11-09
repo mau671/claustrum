@@ -38,6 +38,31 @@ interface DailySyncOutput {
   message?: string;
 }
 
+function parseEnvFile(filePath: string): Record<string, string> {
+  if (!fs.existsSync(filePath)) {
+    return {};
+  }
+  const content = fs.readFileSync(filePath, "utf-8");
+  const env: Record<string, string> = {};
+  for (const rawLine of content.split("\n")) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const eqIdx = line.indexOf("=");
+    if (eqIdx !== -1) {
+      const key = line.slice(0, eqIdx).trim();
+      let val = line.slice(eqIdx + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      env[key] = val;
+    }
+  }
+  return env;
+}
+
 function runProcess(
   command: string,
   args: string[],
@@ -94,6 +119,24 @@ async function main(): Promise<void> {
     console.log("Mode:   DRY-RUN (preview only, no files downloaded or written to DB)");
   }
   console.log();
+
+  if (isProd) {
+    const prodEnvPath = path.resolve(process.cwd(), ".env.prod");
+    const prodEnv = parseEnvFile(prodEnvPath);
+    if (!prodEnv.DATABASE_URL && !process.env.DATABASE_URL) {
+      console.error("❌ Error: No DATABASE_URL found in .env.prod");
+      process.exit(1);
+    }
+    if (prodEnv.DATABASE_URL) {
+      process.env.DATABASE_URL = prodEnv.DATABASE_URL;
+    }
+  } else {
+    const devEnvPath = path.resolve(process.cwd(), ".env.dev");
+    const devEnv = parseEnvFile(devEnvPath);
+    if (devEnv.DATABASE_URL && !process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = devEnv.DATABASE_URL;
+    }
+  }
 
   const pythonArgs = ["run", "--directory", "data/reviews", "reviews-sync-daily", "--json"];
 

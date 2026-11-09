@@ -319,7 +319,7 @@ export function ScheduleCornerActions({
                     dispositivos.
                   </p>
                   <div className="flex items-center gap-2">
-                    <Button render={<Link to="/auth/signin" />} className="flex-1">
+                    <Button render={<Link to="/auth/signin" rel="nofollow" />} className="flex-1">
                       Iniciar sesión
                     </Button>
                     {onSaveLocalPlan && (
@@ -435,7 +435,7 @@ export function ScheduleCornerActions({
                     dispositivos.
                   </p>
                   <div className="flex items-center gap-2">
-                    <Button render={<Link to="/auth/signin" />} className="flex-1">
+                    <Button render={<Link to="/auth/signin" rel="nofollow" />} className="flex-1">
                       Iniciar sesión
                     </Button>
                     {onSaveLocalPlan && (

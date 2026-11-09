@@ -64,12 +64,12 @@ export function EmptyDashboard({ isAuthenticated, hasProfile }: EmptyDashboardPr
       ) : (
         <div className="mt-6 flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/auth/signin">
+            <Link to="/auth/signin" rel="nofollow">
               <Button size="default" className="font-medium shadow-xs">
                 Iniciar sesión
               </Button>
             </Link>
-            <Link to="/auth/signup">
+            <Link to="/auth/signup" rel="nofollow">
               <Button variant="outline" size="default" className="font-medium">
                 Registrarse
               </Button>

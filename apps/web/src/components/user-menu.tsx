@@ -47,7 +47,7 @@ export function UserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuLinkItem render={<Link to="/settings/profile" />}>
+          <DropdownMenuLinkItem render={<Link to="/settings/profile" rel="nofollow" />}>
             <Icon icon={Settings01Icon} size={16} />
             Configuración
           </DropdownMenuLinkItem>

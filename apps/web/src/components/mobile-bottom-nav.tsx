@@ -337,7 +337,7 @@ export function MobileBottomNav() {
                     </DropdownMenuItem>
 
                     {canModerate && (
-                      <DropdownMenuLinkItem render={<Link to="/moderation" />}>
+                      <DropdownMenuLinkItem render={<Link to="/moderation" rel="nofollow" />}>
                         <div className="flex w-full items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Icon icon={Shield01Icon} size={16} className="size-4" />

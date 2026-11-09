@@ -27,7 +27,7 @@ export function NavUser({
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
-            render={<Link to="/auth/signin" />}
+            render={<Link to="/auth/signin" rel="nofollow" />}
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
@@ -37,7 +37,7 @@ export function NavUser({
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            render={<Link to="/settings/appearance" />}
+            render={<Link to="/settings/appearance" rel="nofollow" />}
             size="lg"
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >

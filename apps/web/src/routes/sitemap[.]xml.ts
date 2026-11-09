@@ -8,7 +8,7 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async () => {
         let allProfessors: { id: string | number }[] = [];
         let offset = 0;
-        const limit = 1000;
+        const limit = 200;
 
         while (true) {
           try {

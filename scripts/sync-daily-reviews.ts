@@ -82,6 +82,7 @@ async function main(): Promise<void> {
   const isDryRun = rawArgs.includes("--dry-run");
   const isNoOpenRouter = rawArgs.includes("--no-openrouter");
   const isSkipSummaries = rawArgs.includes("--skip-summaries");
+  const isGitPush = rawArgs.includes("--git-push");
 
   console.log("================================================================================");
   console.log("🚀 MisProfesores Unified Daily Sync, Seeding & Summaries");
@@ -241,6 +242,45 @@ async function main(): Promise<void> {
           console.log("✅ AI Summary seeds applied successfully to database.");
         }
       }
+    }
+  }
+
+  // Phase: Git Commit & Push (if requested)
+  if (!isDryRun && isGitPush) {
+    const statusRes = await runProcess("git", [
+      "status",
+      "--porcelain",
+      "data/seeds/reviews",
+      "data/seeds/review_summaries",
+      "data/state/downloads/school_snapshot.json",
+      "data/state/matching",
+    ]);
+
+    if (statusRes.stdout.trim().length > 0) {
+      console.log("\n📦 Staging and committing newly generated seeds and snapshot...");
+      await runProcess("git", [
+        "add",
+        "data/seeds/reviews",
+        "data/seeds/review_summaries",
+        "data/state/downloads/school_snapshot.json",
+        "data/state/matching",
+      ]);
+      const commitRes = await runProcess("git", [
+        "commit",
+        "-m",
+        "chore(reviews): sync daily reviews and summaries [skip ci]",
+      ]);
+      if (commitRes.code === 0) {
+        console.log("🚀 Pushing changes to origin development...");
+        const pushRes = await runProcess("git", ["push", "origin", "development"]);
+        if (pushRes.code === 0) {
+          console.log("✅ Changes successfully pushed to origin development.");
+        } else {
+          console.error("⚠️ Failed to push changes to remote repository:", pushRes.stderr);
+        }
+      }
+    } else {
+      console.log("\nℹ️  No new seed files or state changes to commit to git.");
     }
   }
 

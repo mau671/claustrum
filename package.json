@@ -20,11 +20,8 @@
     "db:studio": "tsx scripts/studio.ts",
     "db:setup": "pnpm run db:start && pnpm run db:migrate && pnpm run db:seed",
     "generate:og": "tsx scripts/generate-og.ts",
-    "generate:summaries": "tsx scripts/generate-review-summaries.ts"
-  },
-  "overrides": {
-    "seroval": "^1.6.11",
-    "seroval-plugins": "^1.6.11"
+    "generate:summaries": "tsx scripts/generate-review-summaries.ts",
+    "sync:reviews": "tsx scripts/sync-daily-reviews.ts"
   },
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.85",
@@ -46,6 +43,10 @@
     "tsx": "^4.23.15",
     "turbo": "^2.11.10",
     "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "seroval": "^1.6.11",
+    "seroval-plugins": "^1.6.11"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm exec lint-staged"

@@ -12,6 +12,7 @@ interface ProfessorCandidate {
   approved_count: number;
   max_review_id: number;
   last_review_id_analyzed: number | null;
+  new_since_last: number;
 }
 
 interface ReviewRow {
@@ -186,14 +187,15 @@ async function main(): Promise<void> {
         p.full_name,
         COUNT(pr.id)::int AS approved_count,
         MAX(pr.id)::bigint AS max_review_id,
-        s.last_review_id_analyzed
+        s.last_review_id_analyzed,
+        COUNT(CASE WHEN pr.id > s.last_review_id_analyzed THEN 1 END)::int AS new_since_last
       FROM public.professor p
       JOIN public.professor_review pr ON pr.professor_id = p.id AND pr.status = 'approved'
       LEFT JOIN public.professor_review_summary s ON s.professor_id = p.id
       ${targetProfId ? `WHERE p.id = ${targetProfId}` : ""}
       GROUP BY p.id, p.full_name, s.last_review_id_analyzed
       HAVING COUNT(pr.id) > 10
-         ${isForce ? "" : "AND (s.last_review_id_analyzed IS NULL OR MAX(pr.id) > s.last_review_id_analyzed + 4)"}
+         ${isForce ? "" : "AND (s.last_review_id_analyzed IS NULL OR COUNT(CASE WHEN pr.id > s.last_review_id_analyzed THEN 1 END) >= 5)"}
       ORDER BY COUNT(pr.id) DESC
       ${limit ? `LIMIT ${limit}` : ""};
     `;

@@ -23,6 +23,7 @@ reviews-match = "reviews.professors.matching:main"
 reviews-process = "reviews.processing.pipeline:main"
 reviews-refresh-matches = "reviews.cli:refresh_matches_command"
 reviews-sync = "reviews.cli:sync_command"
+reviews-sync-daily = "reviews.daily:main"
 
 [build-system]
 requires = ["uv_build>=0.11.19,<0.12"]

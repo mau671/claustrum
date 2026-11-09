@@ -90,6 +90,16 @@ uv run reviews-sync --include-unmatched --write-sql
 
 Ejecuta el flujo completo: matching, evidencia unmatched, rematch, descarga, procesamiento y auditoría.
 
+```bash
+uv run reviews-sync-daily               # Python directo
+pnpm run sync:reviews                   # Tarea diaria unificada (detecta, descarga, procesa y aplica seeds)
+pnpm run sync:reviews -- --dry-run      # Vista previa sin descargar ni alterar la base
+pnpm run sync:reviews -- --prod         # Aplica a base de datos en producción
+pnpm run sync:reviews -- --summaries    # Dispara actualización de AI summaries si hubo reseñas nuevas
+```
+
+Sincronización diaria rápida basada en snapshot del directorio de ITCR. En una única llamada HTTP (~1.5s) calcula si hubo incremento en el contador de reseñas de algún profesor (`m`), descarga y procesa únicamente los perfiles con cambios, y aplica los seeds generados.
+
 ## Idempotencia
 
 Cada reseña cruda incluye `source_review_id`, derivado de `Reportar-Comentario_*` cuando existe. Si no existe, se usa un hash estable de fecha, curso, comentario y scores. El índice global está en `data/state/downloads/index.json`, mientras que cada perfil tiene su propio `data/raw/.../index.json`.

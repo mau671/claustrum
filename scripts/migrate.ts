@@ -4,32 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 
-const { Pool } = pg;
+import { loadDatabaseEnv } from "./env.ts";
 
-function parseEnvFile(filePath: string): Record<string, string> {
-  if (!fs.existsSync(filePath)) {
-    return {};
-  }
-  const content = fs.readFileSync(filePath, "utf-8");
-  const env: Record<string, string> = {};
-  for (const rawLine of content.split("\n")) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-    const eqIdx = line.indexOf("=");
-    if (eqIdx !== -1) {
-      const key = line.slice(0, eqIdx).trim();
-      let val = line.slice(eqIdx + 1).trim();
-      if (
-        (val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))
-      ) {
-        val = val.slice(1, -1);
-      }
-      env[key] = val;
-    }
-  }
-  return env;
-}
+const { Pool } = pg;
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2).filter((arg) => arg !== "--");
@@ -38,21 +15,18 @@ async function main(): Promise<void> {
 
   let connectionString = process.env.DATABASE_URL;
 
+  const dbEnv = loadDatabaseEnv(isProd);
   if (isProd) {
-    const prodEnvPath = path.resolve(process.cwd(), ".env.prod");
-    const prodEnv = parseEnvFile(prodEnvPath);
-    connectionString = connectionString || prodEnv.DATABASE_URL;
+    connectionString = connectionString || dbEnv.connectionString;
     if (!connectionString) {
       console.error("❌ Error: No DATABASE_URL found in .env.prod");
       process.exit(1);
     }
     console.log("🚀 Targeting PRODUCTION database (.env.prod)");
   } else {
-    const devEnvPath = path.resolve(process.cwd(), ".env.dev");
-    const devEnv = parseEnvFile(devEnvPath);
     connectionString =
       connectionString ||
-      devEnv.DATABASE_URL ||
+      dbEnv.connectionString ||
       "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
     console.log("💻 Targeting LOCAL database (127.0.0.1:54322 from .env.dev)");
   }

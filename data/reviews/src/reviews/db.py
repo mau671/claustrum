@@ -17,11 +17,34 @@ from .paths import (
 
 LOCAL_DB_URL = "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
-ENV_FILE_CANDIDATES = (
-    WORKSPACE_ROOT / ".env.dev",
-    WORKSPACE_ROOT / ".env",
-    WORKSPACE_ROOT / ".env.prod",
-)
+
+def get_env_file_candidates() -> list[Path]:
+    candidates = [
+        WORKSPACE_ROOT / ".env.dev",
+        WORKSPACE_ROOT / ".env",
+        WORKSPACE_ROOT / ".env.prod",
+    ]
+    try:
+        common_dir = subprocess.check_output(
+            ["git", "rev-parse", "--git-common-dir"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if common_dir:
+            common_path = Path(common_dir)
+            main_repo = (
+                common_path.parent
+                if common_path.is_absolute()
+                else (Path.cwd() / common_path).resolve().parent
+            )
+            candidates.extend([
+                main_repo / ".env.dev",
+                main_repo / ".env",
+                main_repo / ".env.prod",
+            ])
+    except Exception:
+        pass
+    return candidates
 
 
 def load_env_file(path: Path) -> None:
@@ -46,7 +69,7 @@ def resolve_database_url() -> str:
     if explicit:
         return explicit
 
-    for candidate in ENV_FILE_CANDIDATES:
+    for candidate in get_env_file_candidates():
         load_env_file(candidate)
         resolved = os.environ.get("DATABASE_URL") or os.environ.get("LOCAL_DB_URL")
         if resolved:

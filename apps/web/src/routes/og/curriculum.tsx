@@ -56,7 +56,7 @@ function OgCurriculumRoute() {
       </div>
 
       <div className="border-border bg-card flex-1 overflow-hidden rounded-t-2xl border border-b-0 shadow-xs">
-        <div className="pointer-events-none h-full w-full">
+        <div className="pointer-events-none h-full w-full [&_[data-slot=card]]:rounded-b-none [&_[data-slot=card]]:border-b-0 [&_[data-slot=frame]]:rounded-b-none [&_[data-slot=frame]]:pb-0">
           <AppAuthProvider>
             <MemoizedCurriculumBoard
               planDetail={{

@@ -61,10 +61,10 @@ function OgCurriculumRoute() {
             <MemoizedCurriculumBoard
               planDetail={{
                 ...demoStudyPlanDetail,
-                periods: demoStudyPlanDetail.periods.filter((p: any) => p.levelNumber < 6),
+                periods: demoStudyPlanDetail.periods.filter((p: any) => p.levelNumber < 5),
               }}
               readOnly={true}
-              zoom={1.05}
+              zoom={0.98}
               mockStatusMap={mockStatusMap}
             />
           </AppAuthProvider>

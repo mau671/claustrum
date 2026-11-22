@@ -130,16 +130,23 @@ uv run tec-data sync \
   --no-apply
 ```
 
-`seed-history` reconstruye el estado esperado aplicando las migraciones SQL (`data/migrations/`) y
-replayeando los seeds históricos en una base PostgreSQL efímera. En CI el workflow
-declara un service container `postgres:17`; localmente, si no se pasa
-`--seed-history-db-url`, se levanta un contenedor temporal con Docker. Este modo no
-escribe en `sync_seed_run` porque su propósito es producir un nuevo delta
-versionado para revisar o subir en PR.
+`seed-history` reconstruye el estado esperado replayando migraciones y seeds como una
+sola línea de tiempo en la base apuntada por `--seed-history-db-url`. Esa base debe
+estar vacía (sin tablas de usuario en `public`, `auth` ni `better_auth`, y sin
+`public.__drizzle_migrations`); el comando falla en vez de replayar sobre datos
+existentes y deja el estado final en la misma base para que CI o el llamador lo
+inspeccione. Cada seed declara la revisión de esquema con la que fue generado
+(`-- TEC-DATA-META schema_revision=...`); el replay aplica las migraciones pendientes
+hasta esa revisión, ejecuta el seed y continúa. Después del último seed aplica las
+migraciones restantes y verifica el ledger completo. En CI el workflow declara un
+service container `postgres:17`; localmente, si no se pasa `--seed-history-db-url`, se
+levanta un contenedor temporal con Docker. Este modo no escribe en `sync_seed_run`
+porque su propósito es producir un nuevo delta versionado para revisar o subir en PR.
 
-Durante el replay, las filas de `sync_seed_run` y los `setval` de secuencias que ya
-no existen en el esquema actual se descartan automáticamente. Sin ese filtro, el
-baseline histórico importaría SHAs de otro entorno y podría producir falsos NOOP.
+El replay solo descarta las filas de `sync_seed_run` que un seed histórico pudiera
+traer: importar SHAs de otro entorno podría producir falsos NOOP. No reescribe casts,
+`setval` ni otros artefactos del esquema: cada seed se ejecuta contra la revisión para
+la que fue generado.
 
 El replay no se puede omitir aunque los datos no hayan cambiado: para
 `scope=offering` el catálogo se exporta desde esa base reconstruida, y el generador

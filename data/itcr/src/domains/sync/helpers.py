@@ -206,22 +206,43 @@ def parse_seed_timestamp(path: Path) -> str:
     return match.group(1)
 
 
-def collect_seed_history(
-    seed_dir: Path, baseline_seed: str | None = None
-) -> list[Path]:
+def collect_seed_history(seed_dir: Path) -> list[Path]:
     candidates = [p for p in seed_dir.glob("seed_*.sql") if p.is_file()]
     if not candidates:
         raise ValueError(f"No seed_*.sql files found in {seed_dir}")
 
-    ordered = sorted(candidates, key=parse_seed_timestamp)
-    if baseline_seed is None:
-        return ordered
+    return sorted(candidates, key=parse_seed_timestamp)
 
-    baseline_path = seed_dir / baseline_seed
-    if baseline_path not in ordered:
-        raise ValueError(f"Baseline seed not found in {seed_dir}: {baseline_seed}")
-    baseline_idx = ordered.index(baseline_path)
-    return ordered[baseline_idx:]
+
+def migration_names(migrations_dir: Path) -> list[str]:
+    """Return the ordered basenames of the migrations in a directory."""
+    names = sorted(p.name for p in migrations_dir.glob("*.sql") if p.is_file())
+    if not names:
+        raise ValueError(f"No migrations found in {migrations_dir}")
+    return names
+
+
+def schema_revision_for_names(names: list[str]) -> str:
+    """Hash a migration filename list into a seed schema revision.
+
+    Revision hashes deliberately use filenames only. Migration contents are not
+    immutable in this repository (0148 was restored byte-for-byte later), so
+    content hashing would make historical revisions impossible to reach.
+    """
+    return hashlib.sha256("\n".join(names).encode("utf-8")).hexdigest()
+
+
+def current_schema_revision(migrations_dir: Path) -> str:
+    return schema_revision_for_names(migration_names(migrations_dir))
+
+
+def schema_revision_prefix_counts(migrations_dir: Path) -> dict[str, int]:
+    """Map every prefix of the migration list to its revision digest."""
+    names = migration_names(migrations_dir)
+    return {
+        schema_revision_for_names(names[:count]): count
+        for count in range(len(names) + 1)
+    }
 
 
 def infer_environment_id(db_url: str) -> str:

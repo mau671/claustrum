@@ -1,6 +1,7 @@
 -- ============================================================================
 -- TEC-DATA DELTA SEED
 -- ============================================================================
+-- TEC-DATA-META schema_revision=7f5dce46a393c006dd1172f4dd8686ebaadab641b85f8180afb30ef04ebfe602
 -- TEC-DATA-META environment_id=127.0.0.1|postgres
 -- TEC-DATA-META scope=offering
 -- TEC-DATA-META years=2026

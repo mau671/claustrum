@@ -1,5 +1,6 @@
 {
   "seed_file": "seed_20260707T075306Z.sql",
+  "schema_revision": "21fc444fc09c89a92c422d073db7cb3c8805b6fb2092ee84b1d381fa21aa66d6",
   "generated_at_utc": "2026-07-07T07:53:06.903395+00:00",
   "scope": "catalog",
   "years": [

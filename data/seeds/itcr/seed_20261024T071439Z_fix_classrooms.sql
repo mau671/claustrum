@@ -1,6 +1,7 @@
 -- ============================================================================
 -- TEC-DATA CLASSROOM CORRECTION (historical repair)
 -- ============================================================================
+-- TEC-DATA-META schema_revision=05eee9e6d73a75d8c025202e020c403c4f5e61ecdc8f672cb80257681073b8f4
 -- TEC-DATA-META scope=offering
 -- TEC-DATA-META years=2023,2024,2025,2026
 -- TEC-DATA-META kind=classroom-repair

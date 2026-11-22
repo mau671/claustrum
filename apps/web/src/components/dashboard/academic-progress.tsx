@@ -41,20 +41,20 @@ export function AcademicProgress() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           {isAuthLoading ? (
-            <div className="px-4 py-6 lg:px-6" />
+            <div className="py-6" />
           ) : isDataLoading ? (
             <DashboardSkeleton />
           ) : !isAuthenticated || !dashboardData?.stats ? (
             <EmptyDashboard isAuthenticated={isAuthenticated} hasProfile={hasProfile} />
           ) : (
             <>
-              <div className="px-4 lg:px-6">
+              <div>
                 <Suspense fallback={<DashboardStatsSkeleton />}>
                   <DashboardStatsCards stats={dashboardData.stats} />
                 </Suspense>
               </div>
 
-              <div className="grid gap-4 px-4 md:grid-cols-2 lg:grid-cols-7 lg:px-6">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <div className="w-full min-w-0 lg:col-span-4">
                   <Suspense fallback={<CourseStatusChartSkeleton />}>
                     <CourseStatusChart stats={dashboardData.stats} />
@@ -71,7 +71,7 @@ export function AcademicProgress() {
                 </div>
               </div>
 
-              <div className="px-4 lg:px-6">
+              <div>
                 <ProgressTimeline semesters={dashboardData.semesters} />
               </div>
             </>

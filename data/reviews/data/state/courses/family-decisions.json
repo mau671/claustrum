@@ -1,0 +1,1438 @@
+{
+  "722:RESIDUOS SOLIDOS:generic:RESIDUOS SOLIDOS": {
+    "family": "RESIDUOS SOLIDOS",
+    "preferred_course_ids": [
+      3198,
+      3199
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "RESIDUOS SOLIDOS",
+    "reason": "La profesora tiene historial registrado en las variantes de Gesti\u00f3n y Dise\u00f1o en Tratamiento(s) de Residuos S\u00f3lidos (AI4101 y AI4204), que corresponden a mallas curriculares de la misma asignatura."
+  },
+  "666:INTELIGENCIA NEGOCIOS BI:generic:INTELIGENCIA NEGOCIOS BI": {
+    "family": "INTELIGENCIA NEGOCIOS BI",
+    "preferred_course_ids": [
+      2544
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Inteligencia de Negocios (BI)",
+    "reason": "Ambos nombres coinciden, pero el historial de prefijo del profesor favorece claramente TI (TI6900), por lo que se elige el curso 2544 para esta familia."
+  },
+  "666:ELEMENTOS COMPUTACION:generic:ELEMENTOS COMPUTACION": {
+    "family": "ELEMENTOS COMPUTACION",
+    "preferred_course_ids": [
+      1249
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ELEMENTOS DE COMPUTACI\u00d3N",
+    "reason": "El nombre coincide exactamente; entre las opciones hom\u00f3nimas, el historial de prefijos del profesor favorece claramente CA y el ID 1249 (CA2125) es el \u00fanico con afinidad de prefijo."
+  },
+  "347:LABORATORIO CONCRETO:generic:LABORATORIO CONCRETO": {
+    "family": "LABORATORIO CONCRETO",
+    "preferred_course_ids": [
+      1199
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO DE CONCRETO",
+    "reason": "El nombre coincide exactamente con ambas opciones, pero CO3404 tiene afinidad de prefijo CO registrada para este profesor; sin nivel expl\u00edcito en el alias, se prefiere esa variante sobre CO4104."
+  },
+  "249:EQUIPOS AUXILIARES PLANTA:generic:EQUIPOS AUXILIARES PLANTA": {
+    "family": "EQUIPOS AUXILIARES PLANTA",
+    "preferred_course_ids": [
+      2783
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "EQUIPOS AUXILIARES DE PLANTA",
+    "reason": "Ambos t\u00edtulos coinciden exactamente; se prefiere CM5302 por la afinidad de prefijo CM registrada para este profesor, mientras que ME8113 no muestra afinidad."
+  },
+  "59:MATEMATICA FINANCIERA:generic:MATEMATICA FINANCIERA": {
+    "family": "MATEMATICA FINANCIERA",
+    "preferred_course_ids": [
+      1708
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA FINANCIERA",
+    "reason": "El nombre coincide exactamente y el profesor tiene afinidad hist\u00f3rica con el prefijo AE; se prefiere AE2125 frente al hom\u00f3nimo sin historial."
+  },
+  "150:COMU TECNICA:generic:COMU TECNICA": {
+    "family": "COMU TECNICA",
+    "preferred_course_ids": [
+      556
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Comunicaci\u00f3n T\u00e9cnica",
+    "reason": "El alias 'Comu tecnica' coincide exactamente con 'Comunicaci\u00f3n T\u00e9cnica' (CI1403); la otra opci\u00f3n trata sobre medios de comunicaci\u00f3n masiva y no corresponde."
+  },
+  "93:MODELOS SISTEMAS PRESENCIAL:generic:MODELOS SISTEMAS PRESENCIAL": {
+    "family": "MODELOS SISTEMAS PRESENCIAL",
+    "preferred_course_ids": [
+      1386,
+      1297,
+      3556
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MODELOS SISTEMAS",
+    "reason": "Las tres opciones corresponden a la misma materia 'Modelos de Sistemas' con c\u00f3digo EL (diferentes planes de estudio/niveles) y la rese\u00f1a no especifica el c\u00f3digo ni el nivel exacto."
+  },
+  "93:MAQUINAS ELECTRICAS:generic:MAQUINAS ELECTRICAS": {
+    "family": "MAQUINAS ELECTRICAS",
+    "preferred_course_ids": [
+      959,
+      962
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "M\u00e1quinas El\u00e9ctricas",
+    "reason": "El class_name coincide literalmente con 'M\u00e1quinas El\u00e9ctricas' y hay dos opciones con ese t\u00edtulo exacto (MI3210 y MI5203) sin nivel expl\u00edcito; por ello conviene devolver ambas. Se descartan laboratorios, variantes con 'Transformadores' y la de Mecatr\u00f3nica porque a\u00f1aden materia o calificador no solicitado."
+  },
+  "93:MAQUINAS ELECTRICAS ELECTRONICA:generic:MAQUINAS ELECTRICAS ELECTRONICA": {
+    "family": "MAQUINAS ELECTRICAS ELECTRONICA",
+    "preferred_course_ids": [
+      1371,
+      1337
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TRANSFORMADORES Y MAQUINAS ELECTRICAS",
+    "reason": "El nombre especifica 'Electr\u00f3nica', diferenciando la materia de las versiones de Mecatr\u00f3nica o Mantenimiento. Corresponde al curso te\u00f3rico de Transformadores y M\u00e1quinas El\u00e9ctricas (EL3109/EL3111)."
+  },
+  "264:DISENNO SOFTWARE:generic:DISENNO SOFTWARE": {
+    "family": "DISENNO SOFTWARE",
+    "preferred_course_ids": [
+      1047
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Dise\u00f1o de Software",
+    "reason": "El class_name coincide exactamente con 'DISE\u00d1O DE SOFTWARE' y el historial de prefijos del profesor favorece fuertemente a IC6821 (afinidad IC: 16). Las otras variantes son hom\u00f3nimas de otros prefijos o agregan 'Especificaci\u00f3n'/'Desarrollo', sin respaldo en el comentario."
+  },
+  "278:BASES DATOA:generic:BASES DATOA": {
+    "family": "BASES DATOA",
+    "preferred_course_ids": [
+      1037,
+      1043
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Bases de Datos",
+    "reason": "El alias no especifica nivel y la familia dominante es IC; por ello se prefieren las variantes expl\u00edcitas Bases de Datos I y II para cubrir la ambig\u00fcedad sin a\u00f1adir el curso gen\u00e9rico."
+  },
+  "264:ADMINISTRACION PROYECTOS:generic:ADMINISTRACION PROYECTOS": {
+    "family": "ADMINISTRACION PROYECTOS",
+    "preferred_course_ids": [
+      1052
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Administraci\u00f3n de Proyectos",
+    "reason": "El curso IC4810 coincide exactamente con el nombre gen\u00e9rico no nivelado y es el \u00fanico con dominant_prefix_match y alta afinidad al prefijo IC para este profesor; los dem\u00e1s son hom\u00f3nimos de otros prefijos o variantes con nivel."
+  },
+  "892:EUACIONES DIFERENCIALES:generic:EUACIONES DIFERENCIALES": {
+    "family": "EUACIONES DIFERENCIALES",
+    "preferred_course_ids": [
+      935
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Ecuaciones Diferenciales",
+    "reason": "El nombre coincide exactamente con ECUACIONES DIFERENCIALES; entre los hom\u00f3nimos, MA2105 tiene afinidad de prefijo dominante y mayor historial para este profesor."
+  },
+  "241:LABORATORIO CIRCUITOS:generic:LABORATORIO CIRCUITOS": {
+    "family": "LABORATORIO CIRCUITOS",
+    "preferred_course_ids": [
+      1261
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Laboratorio de Circuitos El\u00e9ctricos",
+    "reason": "El alias 'Lab de Circuitos' coincide con Laboratorio de Circuitos El\u00e9ctricos; en el historial del profesor, EL2111 tiene t\u00edtulo exacto y alta afinidad de prefijo EL, por encima de CE2201 y de las variantes espec\u00edficas de corriente continua/alterna."
+  },
+  "386:LABORATORIO CORRIENTE CONTINUA:generic:LABORATORIO CORRIENTE CONTINUA": {
+    "family": "LABORATORIO CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      927
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CORRIENTE CONTINUA",
+    "reason": "El alias 'Lab CC' coincide exactamente con el laboratorio de circuitos en corriente continua (EL2107). Aunque MT2002 tiene afinidad hist\u00f3rica, su t\u00edtulo incluye tambi\u00e9n corriente alterna, por lo que no es el match sem\u00e1ntico exacto para 'Lab CC'."
+  },
+  "298:INTRO PROGRAMACION:generic:INTRO PROGRAMACION": {
+    "family": "INTRO PROGRAMACION",
+    "preferred_course_ids": [
+      1020
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRO PROGRAMACION",
+    "reason": "IC1802 es el curso est\u00e1ndar de Introducci\u00f3n a la Programaci\u00f3n con mayor afinidad de prefijo en la escuela del profesor."
+  },
+  "436:PRODUCCION INDUSTRIAL:generic:PRODUCCION INDUSTRIAL": {
+    "family": "PRODUCCION INDUSTRIAL",
+    "preferred_course_ids": [
+      1791
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Producci\u00f3n Industrial (PI)",
+    "reason": "El alias coincide mejor con PI5712 \"Producci\u00f3n Industrial M\u00e1s Limpia\": comparte prefijo PI y la base exacta sin ser un seminario. Se descarta el seminario y el curso de procesos industriales por no ajustarse al nombre solicitado."
+  },
+  "389:CORRIENTE ALTERNA:generic:CORRIENTE ALTERNA": {
+    "family": "CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1262
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Circuitos El\u00e9ctricos en Corriente Alterna",
+    "reason": "CA se interpreta como Circuitos El\u00e9ctricos en Corriente Alterna. Entre las variantes exactas, se elige EL2114 por su afinidad hist\u00f3rica; se descartan laboratorio y el curso combinado CC/CA por no coincidir con el alias."
+  },
+  "389:CORRIENTE CONTINUA:generic:CORRIENTE CONTINUA": {
+    "family": "CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      1257
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE CONTINUA",
+    "reason": "CC corresponde a Circuitos El\u00e9ctricos en Corriente Continua; entre las variantes exactas, EL2113 (1257) tiene mayor afinidad de prefijo EL para este profesor. Se descartan laboratorio y variantes CC/CA por no coincidir con la familia solicitada."
+  },
+  "487:ALGEBRA LINEAL:generic:ALGEBRA LINEAL": {
+    "family": "ALGEBRA LINEAL",
+    "preferred_course_ids": [
+      1641
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "\u00c1LGEBRA LINEAL",
+    "reason": "El nombre coincide exactamente con \u00c1lgebra Lineal; entre las dos variantes exactas, EM3607 tiene afinidad de prefijo/historial para este profesor, mientras que las otras opciones a\u00f1aden C\u00e1lculo o Computaci\u00f3n."
+  },
+  "523:INTRODUCCION PEDAGOGIA:generic:INTRODUCCION PEDAGOGIA": {
+    "family": "INTRODUCCION PEDAGOGIA",
+    "preferred_course_ids": [
+      1620
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRODUCCION PEDAGOGIA",
+    "reason": "Ambos cursos tienen el mismo t\u00edtulo exacto, pero 1620 (EM1401) muestra afinidad de prefijo EM para este profesor, por lo que es la opci\u00f3n m\u00e1s consistente para futuras rese\u00f1as similares."
+  },
+  "399:LABORATORIO CIRCUITOS INTEGRADOS:generic:LABORATORIO CIRCUITOS INTEGRADOS": {
+    "family": "LABORATORIO CIRCUITOS INTEGRADOS",
+    "preferred_course_ids": [
+      1300,
+      1376
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CIRCUITOS INTEGRADOS LINEALES",
+    "reason": "Ambas opciones corresponden a la misma materia en diferentes planes de estudio (EL3214 y EL3209), sin informaci\u00f3n adicional para distinguir cu\u00e1l c\u00f3digo imparti\u00f3 el profesor."
+  },
+  "522:MATE BASICA:generic:MATE BASICA": {
+    "family": "MATE BASICA",
+    "preferred_course_ids": [
+      2439
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Matem\u00e1tica B\u00e1sica para Administraci\u00f3n",
+    "reason": "El alias 'Mate b\u00e1sica' coincide con Matem\u00e1tica B\u00e1sica para Administraci\u00f3n; entre los c\u00f3digos hom\u00f3nimos, MA1303 (2439) muestra afinidad hist\u00f3rica de prefijos para este profesor, mientras que MA1301 no tiene historial asociado."
+  },
+  "491:MATE DISCRETA:generic:MATE DISCRETA": {
+    "family": "MATE DISCRETA",
+    "preferred_course_ids": [
+      1018
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Matem\u00e1tica Discreta",
+    "reason": "El nombre coincide exactamente con Matem\u00e1tica Discreta y, para este profesor, el historial de prefijos favorece claramente MA (MA1403) sobre EM."
+  },
+  "436:PROYECTO GRADUACION:generic:PROYECTO GRADUACION": {
+    "family": "PROYECTO GRADUACION",
+    "preferred_course_ids": [
+      4838
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "PROYECTO DE GRADUACI\u00d3N",
+    "reason": "El nombre coincide exactamente y la afinidad de prefijo AU (4) es la se\u00f1al espec\u00edfica m\u00e1s fuerte para este profesor; las dem\u00e1s opciones son hom\u00f3nimas de otros prefijos."
+  },
+  "399:LABORATORIO INTEGRADO:generic:LABORATORIO INTEGRADO": {
+    "family": "LABORATORIO INTEGRADO",
+    "preferred_course_ids": [
+      1300,
+      1376
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO DE CIRCUITOS INTEGRADOS LINEALES",
+    "reason": "'Lab. Integrado' se refiere coloquialmente al Laboratorio de Circuitos Integrados Lineales en Electr\u00f3nica, correspondiente a los c\u00f3digos EL3209 y EL3214."
+  },
+  "399:LABORATORIO INTEGRADOS:generic:LABORATORIO INTEGRADOS": {
+    "family": "LABORATORIO INTEGRADOS",
+    "preferred_course_ids": [
+      1300,
+      1376
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CIRCUITOS INTEGRADOS LINEALES",
+    "reason": "Ambos c\u00f3digos corresponden a Laboratorio de Circuitos Integrados Lineales en la misma escuela sin distinci\u00f3n en la rese\u00f1a."
+  },
+  "513:MATE PARA ADMINISTRACION:generic:MATE PARA ADMINISTRACION": {
+    "family": "MATE PARA ADMINISTRACION",
+    "preferred_course_ids": [
+      2439
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Matem\u00e1tica B\u00e1sica para Administraci\u00f3n",
+    "reason": "El alias coincide con Matem\u00e1tica B\u00e1sica para Administraci\u00f3n; entre c\u00f3digos hom\u00f3nimos, se prefiere MA1303 por la afinidad hist\u00f3rica de prefijo MA registrada para este profesor."
+  },
+  "664:ATI:acronym:ATI": {
+    "family": "ATI",
+    "preferred_course_ids": [
+      553,
+      2525
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INGL\u00c9S (ATI)",
+    "reason": "El alias ATI no especifica nivel; los \u00fanicos cursos disponibles son variantes de Ingl\u00e9s (ATI) en nivel 1 y 2, y el comentario no permite distinguir cu\u00e1l corresponde."
+  },
+  "582:PRINCIPIOS SISTEMAS OPERATIVOS:generic:PRINCIPIOS SISTEMAS OPERATIVOS": {
+    "family": "PRINCIPIOS SISTEMAS OPERATIVOS",
+    "preferred_course_ids": [
+      1154
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Principios de Sistemas Operativos",
+    "reason": "El curso coincide exactamente con 'Principios de Sistemas Operativos'. Entre los hom\u00f3nimos, el historial de prefijos favorece claramente IC (IC6600) sobre CE; MC1005 es de seguridad y no corresponde."
+  },
+  "789:SUELOS FORESTALES:generic:SUELOS FORESTALES": {
+    "family": "SUELOS FORESTALES",
+    "preferred_course_ids": [
+      2166,
+      2161,
+      2160,
+      2162
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "SUELOS FORESTALES",
+    "reason": "El nombre de la rese\u00f1a coincide exactamente con varias variantes de SUELOS FORESTALES y no indica nivel; se prefieren esas variantes exactas y se excluye el laboratorio."
+  },
+  "616:TEORIAS DISENO:generic:TEORIAS DISENO": {
+    "family": "TEORIAS DISENO",
+    "preferred_course_ids": [
+      1925,
+      1929,
+      1933
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TEOR\u00cdA DEL DISE\u00d1O I-III",
+    "reason": "El alias 'teor\u00edas del dise\u00f1o' coincide con la familia TEOR\u00cdA DEL DISE\u00d1O; como no se indica nivel, se devuelven las variantes I-III y se excluyen t\u00edtulos con sufijos distintos como Informaci\u00f3n o Integraci\u00f3n de Sistemas."
+  },
+  "574:FORMULACION PROYECTOS CE:generic:FORMULACION PROYECTOS CE": {
+    "family": "FORMULACION PROYECTOS CE",
+    "preferred_course_ids": [
+      1329
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "FORMULACION PROYECTOS",
+    "reason": "El profesor imparte en la Escuela de Ingenier\u00eda Electr\u00f3nica (EL), donde el curso activo y est\u00e1ndar de Formulaci\u00f3n de Proyectos (cursado tambi\u00e9n por Computadores, CE) corresponde a EL5609 (ID 1329)."
+  },
+  "789:LABORATORIO SUELOS:generic:LABORATORIO SUELOS": {
+    "family": "LABORATORIO SUELOS",
+    "preferred_course_ids": [
+      1209
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO DE MEC\u00c1NICA DE SUELOS",
+    "reason": "El nombre no indica nivel ni especialidad forestal; 'Laboratorio de Suelos' se asocia mejor con el laboratorio de mec\u00e1nica de suelos sin nivel (1209), m\u00e1s que con la variante con nivel I (1208) o la de suelos forestales (2159)."
+  },
+  "87:METODOS NUMERICOS:generic:METODOS NUMERICOS": {
+    "family": "METODOS NUMERICOS",
+    "preferred_course_ids": [
+      968
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "M\u00c9TODOS NUM\u00c9RICOS",
+    "reason": "El profesor tiene afinidad dominante con el departamento de Ciencia de Materiales (CM), donde se imparte CM3207 (M\u00e9todos Num\u00e9ricos para Ingenier\u00eda), com\u00fanmente abreviado por los estudiantes como M\u00e9todos Num\u00e9ricos."
+  },
+  "576:TI:acronym:TI": {
+    "family": "TI",
+    "preferred_course_ids": [],
+    "confidence": "none",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TI",
+    "reason": "La sigla 'TI' corresponde \u00fanicamente al prefijo o \u00e1rea de Tecnolog\u00edas de Informaci\u00f3n y no brinda informaci\u00f3n suficiente para distinguir entre los m\u00faltiples cursos disponibles."
+  },
+  "378:CIRCUITOS EN CORRIENTE ALTERNA:generic:CIRCUITOS EN CORRIENTE ALTERNA": {
+    "family": "CIRCUITOS EN CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1262
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "reason": "El nombre de clase coincide exactamente con Circuitos El\u00e9ctricos en Corriente Alterna; 1262 tiene adem\u00e1s fuerte afinidad hist\u00f3rica del prefijo EL para este profesor. 1265 es un duplicado exacto sin esa afinidad y 3049 incluye CC y CA, por lo que es menos espec\u00edfico."
+  },
+  "378:LABORATORIO MAQUINAS:generic:LABORATORIO MAQUINAS": {
+    "family": "LABORATORIO MAQUINAS",
+    "preferred_course_ids": [
+      1380,
+      1351
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO DE TRANSFORMADORES Y MAQUINAS ELECTRICAS",
+    "reason": "El prefijo dominante del profesor corresponde a la escuela de Ingenier\u00eda Electr\u00f3nica/El\u00e9ctrica (EL). El curso abreviado por los estudiantes como 'Laboratorio de M\u00e1quinas' corresponde a Laboratorio de Transformadores y M\u00e1quinas El\u00e9ctricas (EL3110 / EL4105 seg\u00fan el plan de estudios)."
+  },
+  "378:LABORATORIO MAQUINAS ELECTRICAS:generic:LABORATORIO MAQUINAS ELECTRICAS": {
+    "family": "LABORATORIO MAQUINAS ELECTRICAS",
+    "preferred_course_ids": [
+      958
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO DE M\u00c1QUINAS EL\u00c9CTRICAS",
+    "reason": "El nombre coincide exactamente con 'Laboratorio de M\u00e1quinas El\u00e9ctricas'; entre las variantes hom\u00f3nimas, la afinidad hist\u00f3rica del profesor apunta a MI3206 (958). Se excluyen las de transformadores y mecatr\u00f3nica por no coincidir con el nombre solicitado."
+  },
+  "378:MAQUINAS ELECTRICAS:generic:MAQUINAS ELECTRICAS": {
+    "family": "MAQUINAS ELECTRICAS",
+    "preferred_course_ids": [
+      959,
+      962
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "M\u00e1quinas El\u00e9ctricas (MI)",
+    "reason": "El class_name coincide exactamente con MI3210 y MI5203, ambas llamadas \u201cM\u00e1quinas El\u00e9ctricas\u201d. Al no indicarse nivel ni laboratorio, se mantienen las variantes exactas y se descartan opciones con transformadores, laboratorio o enfoque de mecatr\u00f3nica."
+  },
+  "60:TEORIA ADMINISTRATIVA:generic:TEORIA ADMINISTRATIVA": {
+    "family": "TEORIA ADMINISTRATIVA",
+    "preferred_course_ids": [
+      96,
+      2359,
+      2363,
+      98
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TEOR\u00cdA ADMINISTRATIVA",
+    "reason": "El nombre no indica nivel ni c\u00f3digo; hay variantes I y II, cada una con dos c\u00f3digos equivalentes, as\u00ed que no se puede distinguir y se prefieren todas las variantes leveladas de la misma familia."
+  },
+  "89:DIBUJO TECNICO:generic:DIBUJO TECNICO": {
+    "family": "DIBUJO TECNICO",
+    "preferred_course_ids": [
+      610
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DIBUJO T\u00c9CNICO",
+    "reason": "El nombre no indica nivel y coincide exactamente con MI2101; adem\u00e1s, el historial de prefijo del profesor favorece claramente MI frente a otras opciones. Por eso se prefiere el curso no nivelado de esa familia."
+  },
+  "80:ANALISIS ESTADISTICO:generic:ANALISIS ESTADISTICO": {
+    "family": "ANALISIS ESTADISTICO",
+    "preferred_course_ids": [
+      1446
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ANALISIS ESTADISTICO",
+    "reason": "La profesora tiene afinidad con el departamento de Producci\u00f3n Industrial (prefijo PI) y el nombre rese\u00f1ado coincide exactamente con el curso no numerado PI2608 (An\u00e1lisis Estad\u00edstico)."
+  },
+  "126:SEMINARIO ETICA:generic:SEMINARIO ETICA": {
+    "family": "SEMINARIO ETICA",
+    "preferred_course_ids": [
+      980,
+      2460
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "SEMINARIO ETICA",
+    "reason": "La rese\u00f1a menciona \u00fanicamente 'Seminario de \u00e9tica' sin especificar si corresponde a la variante para Ingenier\u00eda o para Administraci\u00f3n de Empresas."
+  },
+  "131:INTRO CIENCIA:generic:INTRO CIENCIA": {
+    "family": "INTRO CIENCIA",
+    "preferred_course_ids": [
+      559
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRODUCCI\u00d3N A LA T\u00c9CNICA CIENCIA Y TECNOLOG\u00cdA",
+    "reason": "El prefijo dominante del profesor coincide con CS (Ciencias Sociales) para el curso CS1502, el cual es frecuentemente abreviado de forma informal."
+  },
+  "60:TEORIA ADMINISITRATIV:generic:TEORIA ADMINISITRATIV": {
+    "family": "TEORIA ADMINISITRATIV",
+    "preferred_course_ids": [
+      96,
+      2359,
+      2363,
+      98
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TEOR\u00cdA ADMINISTRATIVA",
+    "reason": "El alias no especifica nivel y no hay comentario ni historial que distinga entre I y II; los cuatro IDs son variantes de Teor\u00eda Administrativa, as\u00ed que se conservan como familia probable para este profesor."
+  },
+  "60:TEORIIA ADMINISTRATIVA:generic:TEORIIA ADMINISTRATIVA": {
+    "family": "TEORIIA ADMINISTRATIVA",
+    "preferred_course_ids": [
+      96,
+      2359,
+      2363,
+      98
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TEOR\u00cdA ADMINISTRATIVA",
+    "reason": "El class_name no especifica nivel (I/II); adem\u00e1s hay c\u00f3digos equivalentes por nivel. Como no hay historial que desambig\u00fce, se devuelven las variantes del cat\u00e1logo para Teor\u00eda Administrativa I y II."
+  },
+  "199:LABORATORIO FISICA:generic:LABORATORIO FISICA": {
+    "family": "LABORATORIO FISICA",
+    "preferred_course_ids": [
+      607,
+      631
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Laboratorio de F\u00edsica General (F\u00edsica General I/II)",
+    "reason": "El nombre gen\u00e9rico \"Laboratorio de F\u00edsica\" no especifica nivel y coincide mejor con los laboratorios de F\u00edsica General I y II; se excluye Metalurgia F\u00edsica por no ser la misma familia, aunque comparta la palabra F\u00edsica."
+  },
+  "282:FUNDAMENTOS COMPUTACION:generic:FUNDAMENTOS COMPUTACION": {
+    "family": "FUNDAMENTOS COMPUTACION",
+    "preferred_course_ids": [
+      2918
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "FUNDAMENTOS DE COMPUTACI\u00d3N",
+    "reason": "El class_name coincide exactamente con el t\u00edtulo del curso 2918 (FUNDAMENTOS DE COMPUTACI\u00d3N); la opci\u00f3n CE1104 es una materia distinta de sistemas computacionales, aunque tenga afinidad de prefijo para este profesor."
+  },
+  "307:ELEMENTOS COMPUTACION:generic:ELEMENTOS COMPUTACION": {
+    "family": "ELEMENTOS COMPUTACION",
+    "preferred_course_ids": [
+      1249
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ELEMENTOS DE COMPUTACI\u00d3N",
+    "reason": "El nombre coincide exactamente y la opci\u00f3n CA2125 tiene la mayor afinidad hist\u00f3rica de prefijo para este profesor; las dem\u00e1s opciones no muestran afinidad relevante."
+  },
+  "300:SISTEMAS INFO GEOGRAFICA:generic:SISTEMAS INFO GEOGRAFICA": {
+    "family": "SISTEMAS INFO GEOGRAFICA",
+    "preferred_course_ids": [
+      1129
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "SISTEMAS DE INFORMACI\u00d3N GEOGR\u00c1FICA",
+    "reason": "El alias coincide con la asignatura gen\u00e9rica y el historial de prefijo del profesor apunta claramente a IC8058; no se eligen variantes II ni especializadas porque el nombre no indica nivel ni aplicaci\u00f3n."
+  },
+  "342:INTRO PROGRA:generic:INTRO PROGRA": {
+    "family": "INTRO PROGRA",
+    "preferred_course_ids": [
+      1020
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Introducci\u00f3n a la Programaci\u00f3n",
+    "reason": "El alias no especifica nivel ni carrera; entre las variantes exactas, IC1802 coincide con el prefijo dominante del profesor y tiene la mayor afinidad hist\u00f3rica. BL1130 es espec\u00edfica de biotecnolog\u00eda, y CE/TI no son prefijos dominantes."
+  },
+  "384:TALLER DISENO SISTEMAS DIGITALES:generic:TALLER DISENO SISTEMAS DIGITALES": {
+    "family": "TALLER DISENO SISTEMAS DIGITALES",
+    "preferred_course_ids": [
+      2050
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Taller de Dise\u00f1o de Sistemas Digitales",
+    "reason": "Las opciones son hom\u00f3nimas y no hay un t\u00edtulo exacto de 'sistemas digitales'; para este profesor, IA4408 tiene la mayor afinidad de prefijo (IA: 2), as\u00ed que es la opci\u00f3n m\u00e1s consistente para reutilizar en rese\u00f1as similares."
+  },
+  "219:MATEMATICA DISCRETA:generic:MATEMATICA DISCRETA": {
+    "family": "MATEMATICA DISCRETA",
+    "preferred_course_ids": [
+      1018
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA DISCRETA",
+    "reason": "Ambos cursos tienen el mismo t\u00edtulo; se prefiere MA1403 por la fuerte afinidad del prefijo MA en el historial del profesor, coherente con la escuela de matem\u00e1tica."
+  },
+  "393:PROYECTO FINAL:generic:PROYECTO FINAL": {
+    "family": "PROYECTO FINAL",
+    "preferred_course_ids": [
+      281,
+      89,
+      4925
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "PROYECTO FINAL",
+    "reason": "El nombre de clase coincide exactamente con 'PROYECTO FINAL'; no hay nivel ni historial de prefijo que distinga entre las variantes hom\u00f3nimas AA2000, MC0700 y SP5000, as\u00ed que se prefieren esas y se excluyen 'de graduaci\u00f3n' e 'informe final'."
+  },
+  "401:ARQUITECTURA COMPUTADORES PRESENCIAL:generic:ARQUITECTURA COMPUTADORES PRESENCIAL": {
+    "family": "ARQUITECTURA COMPUTADORES PRESENCIAL",
+    "preferred_course_ids": [
+      1032
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ARQUITECTURA DE COMPUTADORES (presencial)",
+    "reason": "El nombre de la clase coincide exactamente con 'ARQUITECTURA DE COMPUTADORES' (IC3101), y su afinidad de prefijo IC es claramente la m\u00e1s fuerte para este profesor; las opciones con 'COMPUTADORAS' son variantes menos exactas."
+  },
+  "342:ARQUITECTURA COMPUTADORAS:generic:ARQUITECTURA COMPUTADORAS": {
+    "family": "ARQUITECTURA COMPUTADORAS",
+    "preferred_course_ids": [
+      1032
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ARQUITECTURA DE COMPUTADORAS",
+    "reason": "El historial del profesor muestra una afinidad dominante por el prefijo IC (IC:10) y IC3101 coincide sem\u00e1nticamente con la familia solicitada; las dem\u00e1s opciones son hom\u00f3nimas de otros prefijos sin esa afinidad."
+  },
+  "387:CORRIENTE ALTERNA:generic:CORRIENTE ALTERNA": {
+    "family": "CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1262
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "reason": "CA corresponde a Circuitos El\u00e9ctricos en Corriente Alterna. Entre las variantes hom\u00f3nimas, se elige 1262 por su afinidad hist\u00f3rica EL y t\u00edtulo exacto; se descartan el laboratorio y los cursos mixtos CC/CA."
+  },
+  "421:DIBUJO TECNICO:generic:DIBUJO TECNICO": {
+    "family": "DIBUJO TECNICO",
+    "preferred_course_ids": [
+      610
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DIBUJO T\u00c9CNICO",
+    "reason": "Coincide exactamente con el nombre sin nivel y el historial del profesor muestra fuerte afinidad por el prefijo MI (MI2101); las variantes I/II no est\u00e1n solicitadas expl\u00edcitamente."
+  },
+  "403:LABORATORIO ELECTRONICA ANALOGICA:generic:LABORATORIO ELECTRONICA ANALOGICA": {
+    "family": "LABORATORIO ELECTRONICA ANALOGICA",
+    "preferred_course_ids": [
+      3052
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO ELECTR\u00d3NICA ANAL\u00d3GICA",
+    "reason": "El nombre coincide exactamente con ambas opciones, pero para este profesor el prefijo dominante es MT; por eso se prefiere MT3002 sobre la variante EL."
+  },
+  "342:ARQUITECTURA COMPUTADOR:generic:ARQUITECTURA COMPUTADOR": {
+    "family": "ARQUITECTURA COMPUTADOR",
+    "preferred_course_ids": [
+      1032
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ARQUITECTURA DE COMPUTADORES",
+    "reason": "El class_name no indica nivel y coincide con la variante gen\u00e9rica de arquitectura de computadores; adem\u00e1s, IC3101 tiene el t\u00edtulo equivalente y afinidad de prefijo dominante para este profesor."
+  },
+  "393:LABORATORIO CORRIENTE CONTINUA:generic:LABORATORIO CORRIENTE CONTINUA": {
+    "family": "LABORATORIO CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      927
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE CONTINUA",
+    "reason": "El alias \u201cLab de CC\u201d corresponde a laboratorio de corriente continua; la opci\u00f3n 927 coincide exactamente con la familia y el t\u00edtulo sin incluir corriente alterna, adem\u00e1s de tener el prefijo dominante."
+  },
+  "387:CIRCUITOS EN CORRIENTE ALTERNA:generic:CIRCUITOS EN CORRIENTE ALTERNA": {
+    "family": "CIRCUITOS EN CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1262
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "reason": "El alias 'Circuitos en CA' coincide exactamente con CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA. Entre las opciones hom\u00f3nimas, EL2114 (1262) tiene afinidad hist\u00f3rica de prefijo EL para este profesor, mientras que EL2104 no muestra afinidad. Se descarta MT2001 por incluir CC y CA."
+  },
+  "403:LABORATORIO MAQUINAS ELECTRICAS:generic:LABORATORIO MAQUINAS ELECTRICAS": {
+    "family": "LABORATORIO MAQUINAS ELECTRICAS",
+    "preferred_course_ids": [
+      958,
+      960
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Laboratorio de M\u00e1quinas El\u00e9ctricas",
+    "reason": "El alias coincide exactamente con las dos variantes MI de Laboratorio de M\u00e1quinas El\u00e9ctricas; al no indicarse nivel ni distinguir el comentario, se prefieren ambas. Las opciones EL incluyen Transformadores y la MT es espec\u00edfica para Mecatr\u00f3nica, por lo que no son el match exacto."
+  },
+  "671:INFRAESTRUCTURA TECNOLOGICA:generic:INFRAESTRUCTURA TECNOLOGICA": {
+    "family": "INFRAESTRUCTURA TECNOLOGICA",
+    "preferred_course_ids": [
+      2534,
+      2543
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INFRAESTRUCTURA TECNOL\u00d3GICA",
+    "reason": "El nombre de clase no especifica nivel y los comentarios no permiten distinguir entre Infraestructura Tecnol\u00f3gica I y 2; por ello se prefieren ambas variantes de la misma familia para este profesor."
+  },
+  "671:INTRO PROGRA:generic:INTRO PROGRA": {
+    "family": "INTRO PROGRA",
+    "preferred_course_ids": [
+      2510
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Introducci\u00f3n a la Programaci\u00f3n",
+    "reason": "TI1400 coincide exactamente con 'Introducci\u00f3n a la Programaci\u00f3n' y es la \u00fanica opci\u00f3n con dominant_prefix_match=true para este profesor; BL1130 es espec\u00edfica de Biotecnolog\u00eda y las dem\u00e1s son hom\u00f3nimas sin afinidad dominante."
+  },
+  "316:INTODUCCION PROGRAMACION FUNCIONAL:generic:INTODUCCION PROGRAMACION FUNCIONAL": {
+    "family": "INTODUCCION PROGRAMACION FUNCIONAL",
+    "preferred_course_ids": [],
+    "confidence": "none",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Introducci\u00f3n a la Programaci\u00f3n Funcional",
+    "reason": "Ninguna opci\u00f3n corresponde a Programaci\u00f3n Funcional; todas son Introducci\u00f3n a la Programaci\u00f3n gen\u00e9ricas. No hay coincidencia exacta en course_options."
+  },
+  "297:ARQUITECTURA COMPUTADORAS:generic:ARQUITECTURA COMPUTADORAS": {
+    "family": "ARQUITECTURA COMPUTADORAS",
+    "preferred_course_ids": [
+      1032
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ARQUITECTURA COMPUTADORAS",
+    "reason": "El profesor tiene afinidad dominante con la escuela de Computaci\u00f3n (IC), donde el curso est\u00e1ndar sin nivel es IC3101 Arquitectura de Computadores."
+  },
+  "316:ANALISIS NUMERICO:generic:ANALISIS NUMERICO": {
+    "family": "ANALISIS NUMERICO",
+    "preferred_course_ids": [
+      2978,
+      3003
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "AN\u00c1LISIS NUM\u00c9RICO PARA INGENIER\u00cdA",
+    "reason": "El alias \"An\u00e1lisis Num\u00e9rico\" no especifica nivel y ambas opciones tienen el mismo t\u00edtulo base para ingenier\u00eda con c\u00f3digos distintos; sin historial suficiente, no se puede desambiguar entre CE1111 y CE3102."
+  },
+  "382:CORRIENTE CONTINUA:generic:CORRIENTE CONTINUA": {
+    "family": "CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      1257
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE CONTINUA",
+    "reason": "El alias 'CC' corresponde a Corriente Continua. Entre las opciones exactas, 1257 tiene mayor afinidad hist\u00f3rica con el prefijo EL del profesor; 929 es el mismo t\u00edtulo pero sin esa afinidad. Se descartan el laboratorio y el curso combinado de CC y CA."
+  },
+  "297:ARQUITECTURA COMPUTADORES:generic:ARQUITECTURA COMPUTADORES": {
+    "family": "ARQUITECTURA COMPUTADORES",
+    "preferred_course_ids": [
+      1032
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ARQUITECTURA DE COMPUTADORES",
+    "reason": "El alias coincide exactamente con Arquitectura de Computadores sin nivel; adem\u00e1s, el historial de prefijo IC es dominante para este profesor y las variantes CE/EL con nivel I/II no fueron solicitadas."
+  },
+  "408:INTRODUCCION RECONOCIMIENTO PATRONES:generic:INTRODUCCION RECONOCIMIENTO PATRONES": {
+    "family": "INTRODUCCION RECONOCIMIENTO PATRONES",
+    "preferred_course_ids": [
+      1336,
+      1117
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRODUCCION RECONOCIMIENTO PATRONES",
+    "reason": "El class_name coincide exactamente con ambas opciones, que comparten t\u00edtulo y base; no hay nivel ni historial que distinga el prefijo, as\u00ed que se conservan ambas variantes para este profesor."
+  },
+  "385:POTENCIA ELECTRONICA:generic:POTENCIA ELECTRONICA": {
+    "family": "POTENCIA ELECTRONICA",
+    "preferred_course_ids": [
+      3029,
+      1389,
+      1338
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ELECTR\u00d3NICA DE POTENCIA",
+    "reason": "'Potencia Electronica' corresponde exactamente a la materia te\u00f3rica 'Electr\u00f3nica de Potencia', la cual tiene m\u00faltiples c\u00f3digos en el cat\u00e1logo para el prefijo EL (EL2310, EL4206, EL4210)."
+  },
+  "297:DESARROLLO WEB:generic:DESARROLLO WEB": {
+    "family": "DESARROLLO WEB",
+    "preferred_course_ids": [
+      1128
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DESARROLLO WEB",
+    "reason": "El alias 'Desarrollo WEB' coincide mejor con el curso introductorio de desarrollo de p\u00e1ginas web, que adem\u00e1s tiene afinidad de prefijo dominante (IC). La opci\u00f3n de desarrollo \u00e1gil de aplicaciones web a\u00f1ade una metodolog\u00eda espec\u00edfica no mencionada."
+  },
+  "382:CIRCUITOS EN CORRIENTE CONTINUA:generic:CIRCUITOS EN CORRIENTE CONTINUA": {
+    "family": "CIRCUITOS EN CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      1257
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE CONTINUA",
+    "reason": "El nombre calza exactamente con EL2113 y adem\u00e1s tiene fuerte afinidad hist\u00f3rica con el prefix EL; EL2103 no muestra esa afinidad y MT2001 incluye tambi\u00e9n corriente alterna."
+  },
+  "385:ELECTRONICA POTENCIA APLICADA:generic:ELECTRONICA POTENCIA APLICADA": {
+    "family": "ELECTRONICA POTENCIA APLICADA",
+    "preferred_course_ids": [
+      3059
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Electr\u00f3nica de Potencia Aplicada",
+    "reason": "El class_name coincide exactamente con MT5003 ELECTR\u00d3NICA DE POTENCIA APLICADA. Las opciones EL son electr\u00f3nica de potencia sin 'Aplicada' y MT5004 es expl\u00edcitamente un laboratorio, no el curso solicitado."
+  },
+  "410:LABORATORIO CONTROL AUTOMATICO:generic:LABORATORIO CONTROL AUTOMATICO": {
+    "family": "LABORATORIO CONTROL AUTOMATICO",
+    "preferred_course_ids": [
+      1321
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Laboratorio de Control Autom\u00e1tico",
+    "reason": "Ambas opciones tienen el mismo t\u00edtulo, pero se prefiere EL5409 por la mayor afinidad hist\u00f3rica con el prefijo EL para este profesor."
+  },
+  "413:LABORATORIO CORRIENTE CONTINUA:generic:LABORATORIO CORRIENTE CONTINUA": {
+    "family": "LABORATORIO CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      927
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE CONTINUA",
+    "reason": "La abreviatura 'Lab CC' corresponde de manera exacta y espec\u00edfica a Laboratorio de Circuitos El\u00e9ctricos en Corriente Continua (EL2107), a diferencia de MT2002 que abarca tambi\u00e9n Corriente Alterna."
+  },
+  "446:COSTOS INDUSTRIALES:generic:COSTOS INDUSTRIALES": {
+    "family": "COSTOS INDUSTRIALES",
+    "preferred_course_ids": [
+      1719,
+      1722
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "COSTOS INDUSTRIALES",
+    "reason": "El nombre no indica nivel. Para esta profesora, el historial y la afinidad de prefijo favorecen la familia PI35 (PI3501/PI3502); se incluyen ambos niveles porque la rese\u00f1a no permite distinguir entre Costos Industriales I y II."
+  },
+  "385:ELECTRONICA POTENCIA:generic:ELECTRONICA POTENCIA": {
+    "family": "ELECTRONICA POTENCIA",
+    "preferred_course_ids": [
+      1338,
+      1389,
+      3029
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ELECTRONICA POTENCIA",
+    "reason": "La materia 'Electronica Potencia' coincide exactamente con 'ELECTR\u00d3NICA DE POTENCIA', la cual tiene m\u00faltiples c\u00f3digos bajo el prefijo EL (EL4210, EL4206, EL2310) correspondientes a distintos planes de estudio indistinguibles a partir de la rese\u00f1a."
+  },
+  "34:CONTABILIDAD GERENCIAL:generic:CONTABILIDAD GERENCIAL": {
+    "family": "CONTABILIDAD GERENCIAL",
+    "preferred_course_ids": [
+      1515
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CONTABILIDAD GERENCIAL",
+    "reason": "El curso 1515 coincide exactamente con el nombre y tiene mayor afinidad hist\u00f3rica de prefijo AM para este profesor; el 205 es hom\u00f3nimo sin afinidad y el 406 agrega 'para proyectos'."
+  },
+  "55:TEORIA ORGANIZACIONES:generic:TEORIA ORGANIZACIONES": {
+    "family": "TEORIA ORGANIZACIONES",
+    "preferred_course_ids": [
+      2509
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TEOR\u00cdA DE LAS ORGANIZACIONES",
+    "reason": "El nombre de la clase coincide en plural con \"TEOR\u00cdA DE LAS ORGANIZACIONES Y SUS PROCESOS\" (TI1100); las opciones AM usan el singular y no son el match exacto."
+  },
+  "94:MATEMATICA BASICA PARA ADMINISTRACION:generic:MATEMATICA BASICA PARA ADMINISTRACION": {
+    "family": "MATEMATICA BASICA PARA ADMINISTRACION",
+    "preferred_course_ids": [
+      2439
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEMATICA BASICA PARA ADMINISTRACION",
+    "reason": "El alias MBA coincide exactamente con Matem\u00e1tica B\u00e1sica para Administraci\u00f3n. Entre las dos opciones con el mismo t\u00edtulo, se prefiere 2439 por su fuerte afinidad hist\u00f3rica con el prefijo MA; 260 no muestra esa evidencia."
+  },
+  "31:GESTION INNOVACION:generic:GESTION INNOVACION": {
+    "family": "GESTION INNOVACION",
+    "preferred_course_ids": [
+      2473,
+      1777
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "GESTION INNOVACION",
+    "reason": "El nombre ingresado coincide de manera exacta con los cursos PI1401 y PI4803 ('GESTI\u00d3N DE LA INNOVACI\u00d3N'). Al no especificarse el c\u00f3digo o nivel en la rese\u00f1a, se seleccionan ambas opciones correspondientes."
+  },
+  "100:METODOS NUMERICOS:generic:METODOS NUMERICOS": {
+    "family": "METODOS NUMERICOS",
+    "preferred_course_ids": [
+      103
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "M\u00e9todos Num\u00e9ricos",
+    "reason": "El nombre de la clase coincide exactamente con MA3106 y, entre los hom\u00f3nimos, es el que muestra mayor afinidad de prefijo MA/EM. No hay nivel ni contexto que justifique las variantes 'para ingenier\u00eda' o 'para materiales'."
+  },
+  "68:TEORIA ADMINISTRATIVA:generic:TEORIA ADMINISTRATIVA": {
+    "family": "TEORIA ADMINISTRATIVA",
+    "preferred_course_ids": [
+      96,
+      2359,
+      2363,
+      98
+    ],
+    "confidence": "low",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TEOR\u00cdA ADMINISTRATIVA",
+    "reason": "El nombre no especifica nivel ni c\u00f3digo; existen variantes I y II con c\u00f3digos duplicados, as\u00ed que se conservan todas las opciones de la familia."
+  },
+  "94:ECUACIONES DIFERENCIALES:generic:ECUACIONES DIFERENCIALES": {
+    "family": "ECUACIONES DIFERENCIALES",
+    "preferred_course_ids": [
+      935
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ECUACIONES DIFERENCIALES",
+    "reason": "MA2105 es el curso general y est\u00e1ndar de Ecuaciones Diferenciales ofrecido por el departamento de matem\u00e1ticas."
+  },
+  "254:MAQUINAS ELECTRICAS MECA:generic:MAQUINAS ELECTRICAS MECA": {
+    "family": "MAQUINAS ELECTRICAS MECA",
+    "preferred_course_ids": [
+      3053
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "M\u00e1quinas El\u00e9ctricas para Mecatr\u00f3nica",
+    "reason": "El alias \u00abMeca\u00bb y el nombre coinciden exactamente con MT3003; el laboratorio es un curso separado y no el solicitado."
+  },
+  "261:DESENO LOGICO:generic:DESENO LOGICO": {
+    "family": "DESENO LOGICO",
+    "preferred_course_ids": [
+      1282
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DISE\u00d1O L\u00d3GICO",
+    "reason": "El class_name coincide exactamente con DISE\u00d1O L\u00d3GICO, no con el laboratorio. Entre las dos variantes de c\u00e1tedra, se prefiere 1282 (EL3307) porque tiene afinidad de prefijo/historial para este profesor; 1286 no presenta esa evidencia."
+  },
+  "94:MATE GENERAL:generic:MATE GENERAL": {
+    "family": "MATE GENERAL",
+    "preferred_course_ids": [
+      563
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA GENERAL",
+    "reason": "Ambas opciones son hom\u00f3nimas, pero se prefiere MA0101 (id 563) por la mayor afinidad hist\u00f3rica del profesor con el prefijo MA y la ausencia de evidencia para MA1101."
+  },
+  "261:DISENO LOGICO:generic:DISENO LOGICO": {
+    "family": "DISENO LOGICO",
+    "preferred_course_ids": [
+      1282
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DISE\u00d1O L\u00d3GICO",
+    "reason": "El nombre coincide exactamente con Dise\u00f1o L\u00f3gico te\u00f3rico, no con el laboratorio. Entre las variantes hom\u00f3nimas, EL3307/1282 tiene afinidad hist\u00f3rica del profesor, as\u00ed que es la opci\u00f3n preferida para este profesor."
+  },
+  "224:FISICA GENERAL:generic:FISICA GENERAL": {
+    "family": "FISICA GENERAL",
+    "preferred_course_ids": [
+      604,
+      630,
+      922,
+      1369
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "FISICA GENERAL",
+    "reason": "El alias no especifica nivel ni laboratorio; se prefieren las variantes te\u00f3ricas de F\u00edsica General I-IV y se excluyen los laboratorios porque el comentario destaca un enfoque te\u00f3rico."
+  },
+  "94:ALGEBRA LINEAL:generic:ALGEBRA LINEAL": {
+    "family": "ALGEBRA LINEAL",
+    "preferred_course_ids": [
+      1641
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "\u00c1lgebra Lineal",
+    "reason": "El class_name coincide exactamente con '\u00c1lgebra Lineal'. Entre las dos variantes hom\u00f3nimas, 1641 tiene afinidad de prefijo EM/MA, mientras que 1642 no muestra afinidad. Se descartan la combinada con C\u00e1lculo y la versi\u00f3n para Computaci\u00f3n por no coincidir con el nombre solicitado."
+  },
+  "94:MATEMATICA GENERAL:generic:MATEMATICA GENERAL": {
+    "family": "MATEMATICA GENERAL",
+    "preferred_course_ids": [
+      563
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA GENERAL",
+    "reason": "El nombre coincide exactamente con MATEM\u00c1TICA GENERAL; entre las opciones hom\u00f3nimas, la afinidad hist\u00f3rica con el prefijo MA favorece MA0101 (563). No hay nivel en class_name para distinguir otra variante."
+  },
+  "254:DIBUJO INSDUTRIAL:generic:DIBUJO INSDUTRIAL": {
+    "family": "DIBUJO INSDUTRIAL",
+    "preferred_course_ids": [
+      933
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DIBUJO INDUSTRIAL",
+    "reason": "El nombre coincide con 'Dibujo Industrial' (error tipogr\u00e1fico). Ambos cursos tienen el mismo t\u00edtulo, pero el historial de prefijo MI favorece claramente a MI3124 (933) para este profesor."
+  },
+  "340:BASES DATOS:generic:BASES DATOS": {
+    "family": "BASES DATOS",
+    "preferred_course_ids": [
+      1037,
+      1043
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Bases de Datos I/II (IC)",
+    "reason": "El nombre 'Bases de Datos' no especifica nivel; para este profesor la mayor afinidad hist\u00f3rica est\u00e1 en las variantes niveladas de IC (Bases de Datos I y II). Como la rese\u00f1a no distingue nivel, conviene preferir ambas y no una gen\u00e9rica de otro prefijo."
+  },
+  "411:INTRO INGENIERIA:generic:INTRO INGENIERIA": {
+    "family": "INTRO INGENIERIA",
+    "preferred_course_ids": [
+      1252
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRODUCCI\u00d3N A LA INGENIER\u00cdA",
+    "reason": "El nombre de clase coincide exactamente con el curso gen\u00e9rico EL1100 y no hay disciplina ni nivel espec\u00edfico en el comentario; adem\u00e1s, es el \u00fanico con t\u00edtulo base 'INTRODUCCI\u00d3N A LA INGENIER\u00cdA'."
+  },
+  "412:CORRIENTE ALTERNA:generic:CORRIENTE ALTERNA": {
+    "family": "CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1262
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "reason": "CA se interpreta como Circuitos El\u00e9ctricos en Corriente Alterna. Se prefiere la variante te\u00f3rica exacta con afinidad de prefijo EL (EL2114) y se descartan el laboratorio y los cursos combinados CC/CA."
+  },
+  "417:INTRO INGENIERIA FISICA:generic:INTRO INGENIERIA FISICA": {
+    "family": "INTRO INGENIERIA FISICA",
+    "preferred_course_ids": [
+      4120
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRO INGENIERIA FISICA",
+    "reason": "El nombre de la clase y la familia coinciden exactamente con \u00abIntroducci\u00f3n a la Ingenier\u00eda F\u00edsica\u00bb (IF1101), por lo que es un match sem\u00e1ntico m\u00e1s preciso que el curso gen\u00e9rico de introducci\u00f3n a la ingenier\u00eda."
+  },
+  "417:LABORATORIO CORRIENTE ALTERNA:generic:LABORATORIO CORRIENTE ALTERNA": {
+    "family": "LABORATORIO CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1263
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "reason": "\u00abLab CA\u00bb se refiere expl\u00edcitamente al laboratorio de corriente alterna; el curso 1263 coincide exactamente con esa familia, mientras que 3050 combina continua y alterna."
+  },
+  "416:DISENO DIGITAL:generic:DISENO DIGITAL": {
+    "family": "DISENO DIGITAL",
+    "preferred_course_ids": [
+      1301
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TALLER DE DISE\u00d1O DIGITAL",
+    "reason": "'Dise\u00f1o Digital' coincide directamente con 'Taller de Dise\u00f1o Digital'; entre las variantes hom\u00f3nimas CE3201 y EL3313, el historial de prefijo del profesor favorece claramente EL3313. No se prefiere 'Dise\u00f1o de Sistemas Digitales' porque el alias no incluye 'Sistemas'."
+  },
+  "417:LABORATORIO CORRIENTE CONTINUA:generic:LABORATORIO CORRIENTE CONTINUA": {
+    "family": "LABORATORIO CORRIENTE CONTINUA",
+    "preferred_course_ids": [
+      927
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "LABORATORIO CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE CONTINUA",
+    "reason": "\u201cLab de CC\u201d corresponde exactamente a laboratorio de corriente continua; la opci\u00f3n 927 coincide en t\u00edtulo y familia, mientras que 3050 incluye adem\u00e1s corriente alterna y es una variante m\u00e1s amplia."
+  },
+  "452:CONTROL CALIDAD:generic:CONTROL CALIDAD": {
+    "family": "CONTROL CALIDAD",
+    "preferred_course_ids": [
+      1757
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CONTROL DE CALIDAD",
+    "reason": "El nombre coincide exactamente con varias hom\u00f3nimas; la afinidad hist\u00f3rica del profesor se concentra claramente en PI (PI4307), por lo que se prefiere esa variante sobre otros prefijos y sobre t\u00edtulos m\u00e1s largos."
+  },
+  "340:BASE DATOS:generic:BASE DATOS": {
+    "family": "BASE DATOS",
+    "preferred_course_ids": [
+      1037,
+      1043
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "BASES DE DATOS",
+    "reason": "El comentario evidencia un curso de grado ('malla', 'progras de la sede'), descartando los cursos de posgrado de MC. Al no especificarse el nivel entre Bases de Datos I y II de IC, se asignan ambas variantes niveladas."
+  },
+  "412:ELEMENTOS ACTIVOS:generic:ELEMENTOS ACTIVOS": {
+    "family": "ELEMENTOS ACTIVOS",
+    "preferred_course_ids": [
+      1267
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ELEMENTOS ACTIVOS",
+    "reason": "El alias corresponde a ELEMENTOS ACTIVOS y no al laboratorio. Entre las variantes hom\u00f3nimas, EL2207 (1267) tiene afinidad fuerte de prefijo EL para este profesor, por lo que debe preferirse en revisiones similares."
+  },
+  "412:CIRCUITOS EN CORRIENTE ALTERNA:generic:CIRCUITOS EN CORRIENTE ALTERNA": {
+    "family": "CIRCUITOS EN CORRIENTE ALTERNA",
+    "preferred_course_ids": [
+      1262
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "reason": "El nombre de la clase coincide de forma exacta con la asignatura de corriente alterna (EL2114). La otra opci\u00f3n incluye tambi\u00e9n corriente continua, por lo que es menos espec\u00edfica para esta rese\u00f1a."
+  },
+  "517:ALGEBRA LINEAL:generic:ALGEBRA LINEAL": {
+    "family": "ALGEBRA LINEAL",
+    "preferred_course_ids": [
+      1641
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ALGEBRA LINEAL",
+    "reason": "El nombre coincide exactamente con \u00c1LGEBRA LINEAL; entre las opciones hom\u00f3nimas, EM3607 es la que muestra afinidad de prefijo para este profesor, mientras EM3908 no presenta historial. Se descartan las variantes con C\u00e1lculo o Computaci\u00f3n por a\u00f1adir contenido ajeno al nombre."
+  },
+  "754:CALCULO PARA ADMNISTRACION:generic:CALCULO PARA ADMNISTRACION": {
+    "family": "CALCULO PARA ADMNISTRACION",
+    "preferred_course_ids": [
+      2444
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "C\u00c1LCULO PARA ADMINISTRACI\u00d3N",
+    "reason": "Ambas opciones tienen el mismo t\u00edtulo exacto, pero el curso 2444 (MA1304) muestra afinidad hist\u00f3rica fuerte con el prefijo MA para este profesor, por lo que es la opci\u00f3n preferida para futuras rese\u00f1as similares."
+  },
+  "967:METODOLOGIA INVESTIGACION:generic:METODOLOGIA INVESTIGACION": {
+    "family": "METODOLOGIA INVESTIGACION",
+    "preferred_course_ids": [
+      2442
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Metodolog\u00eda de la Investigaci\u00f3n",
+    "reason": "El nombre coincide exactamente con AE3505 y el historial de prefijos del profesor muestra alta afinidad con AE; las otras opciones son hom\u00f3nimas de otras carreras o variantes m\u00e1s espec\u00edficas."
+  },
+  "985:SEGURIDAD LABORAL:generic:SEGURIDAD LABORAL": {
+    "family": "SEGURIDAD LABORAL",
+    "preferred_course_ids": [
+      4053
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "SEGURIDAD LABORAL",
+    "reason": "El nombre coincide exactamente con 'Seguridad Laboral'; se prefiere MS1112 (4053) por afinidad de prefijo MS, descartando la variante de 'Introducci\u00f3n a la Seguridad Laboral'."
+  },
+  "985:TALLER AGENTES FISICOS:generic:TALLER AGENTES FISICOS": {
+    "family": "TALLER AGENTES FISICOS",
+    "preferred_course_ids": [
+      1462
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "TALLER AGENTES FISICOS",
+    "reason": "El nombre de clase coincide exactamente con 'TALLER AGENTES F\u00cdSICOS'; la opci\u00f3n 1461 a\u00f1ade 'AMBIENTALES' y corresponde a otra variante."
+  },
+  "754:CALCULO PARA ADMINISTRACION:generic:CALCULO PARA ADMINISTRACION": {
+    "family": "CALCULO PARA ADMINISTRACION",
+    "preferred_course_ids": [
+      2444
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "CALCULO PARA ADMINISTRACION",
+    "reason": "Ambos cursos tienen el mismo nombre exacto bajo el c\u00f3digo MA, pero MA1304 (curso 2444) es el c\u00f3digo vigente con historial y afinidad de impartici\u00f3n en la instituci\u00f3n."
+  },
+  "871:LABORATORIO VI:generic:LABORATORIO VI": {
+    "family": "LABORATORIO VI",
+    "preferred_course_ids": [
+      4792
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Laboratorio de Arquitectura VI",
+    "reason": "\u00abLaboratorio VI\u00bb coincide mejor con \u00abLaboratorio de Arquitectura VI\u00bb; entre los c\u00f3digos hom\u00f3nimos, 4792 tiene afinidad de prefijo AU/DC para este profesor y 4849 no. Se descarta 4790 por ser de Proyectos/Sostenibilidad."
+  },
+  "967:MATE FINANCIERA:generic:MATE FINANCIERA": {
+    "family": "MATE FINANCIERA",
+    "preferred_course_ids": [
+      1708,
+      2368
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA FINANCIERA",
+    "reason": "El alias 'Mate financiera' coincide exactamente con Matem\u00e1tica Financiera; no indica nivel y hay dos c\u00f3digos AE del mismo curso base, por lo que conviene preferir ambos mientras no se distinga el nivel."
+  },
+  "967:MATEMATICA FINANCIERA:generic:MATEMATICA FINANCIERA": {
+    "family": "MATEMATICA FINANCIERA",
+    "preferred_course_ids": [
+      1708,
+      2368
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA FINANCIERA",
+    "reason": "El nombre coincide exactamente con dos cursos del cat\u00e1logo global (AE2125 y AE3108), sin nivel expl\u00edcito ni historial espec\u00edfico que permita distinguirlos; por tanto, se conservan ambos como variantes relacionadas."
+  },
+  "710:DIBUJO TECNICO:generic:DIBUJO TECNICO": {
+    "family": "DIBUJO TECNICO",
+    "preferred_course_ids": [
+      610
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "DIBUJO T\u00c9CNICO",
+    "reason": "El nombre coincide exactamente con 'DIBUJO T\u00c9CNICO' sin nivel y el historial del profesor se concentra claramente en el prefijo MI (19), por lo que MI2101 es la opci\u00f3n m\u00e1s probable para futuras rese\u00f1as similares de este profesor."
+  },
+  "157:INGLES PARA BIOTEC:generic:INGLES PARA BIOTEC": {
+    "family": "INGLES PARA BIOTEC",
+    "preferred_course_ids": [
+      541,
+      3263
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INGL\u00c9S PARA BIOTECNOLOG\u00cdA",
+    "reason": "El alias 'Ingl\u00e9s para biotec' coincide exactamente con la base 'INGL\u00c9S PARA BIOTECNOLOG\u00cdA', no con 'DESTREZAS COMUNICATIVAS...'. Al no indicarse nivel, se mantienen las variantes I y II de esa misma base."
+  },
+  "490:METODOLOGIA SEMI:generic:METODOLOGIA SEMI": {
+    "family": "METODOLOGIA SEMI",
+    "preferred_course_ids": [
+      403,
+      393,
+      378
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "Seminario de Metodolog\u00eda de Investigaci\u00f3n",
+    "reason": "El class_name solo indica Metodolog\u00eda semivirtual, sin \u00e9nfasis; los tres seminarios comparten la base de metodolog\u00eda de investigaci\u00f3n y no hay evidencia para distinguir el \u00e9nfasis, por lo que se prefieren las variantes relacionadas."
+  },
+  "490:MATE BASICA PARA ADMINISTRACION:generic:MATE BASICA PARA ADMINISTRACION": {
+    "family": "MATE BASICA PARA ADMINISTRACION",
+    "preferred_course_ids": [
+      2439
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "MATEM\u00c1TICA B\u00c1SICA PARA ADMINISTRACI\u00d3N",
+    "reason": "El class_name coincide exactamente con Matem\u00e1tica B\u00e1sica para Administraci\u00f3n. Entre los c\u00f3digos duplicados, MA1303 (2439) tiene afinidad de prefijo/historial para este profesor, por lo que se prefiere sobre MA1301; no hay comentario que distinga m\u00e1s."
+  },
+  "626:ANALISIS ALGORTIMOS:generic:ANALISIS ALGORTIMOS": {
+    "family": "ANALISIS ALGORTIMOS",
+    "preferred_course_ids": [
+      1035
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "An\u00e1lisis de Algoritmos",
+    "reason": "El nombre coincide exactamente con AN\u00c1LISIS DE ALGORITMOS, sin 'y dise\u00f1o'. Entre los hom\u00f3nimos, IC3002 es la opci\u00f3n dominante para este profesor y tiene mayor afinidad de prefijo/historial."
+  },
+  "626:ANALISIS ALGORITMOS:generic:ANALISIS ALGORITMOS": {
+    "family": "ANALISIS ALGORITMOS",
+    "preferred_course_ids": [
+      1035
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "AN\u00c1LISIS DE ALGORITMOS",
+    "reason": "El alias coincide exactamente con IC3002 'An\u00e1lisis de Algoritmos', que adem\u00e1s tiene dominancia de prefijo para este profesor. CA3125 agrega 'Dise\u00f1o' y MC6102 es un hom\u00f3nimo de otro prefijo."
+  },
+  "579:INTRODUCCION PROGRAMACION:generic:INTRODUCCION PROGRAMACION": {
+    "family": "INTRODUCCION PROGRAMACION",
+    "preferred_course_ids": [
+      1020
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "INTRODUCCION PROGRAMACION",
+    "reason": "IC1802 es el curso est\u00e1ndar con nombre exacto y cuenta con la mayor afinidad hist\u00f3rica de estudiantes/carreras para este profesor."
+  },
+  "501:ALGEBRA LINEAL COMPUTACION:generic:ALGEBRA LINEAL COMPUTACION": {
+    "family": "ALGEBRA LINEAL COMPUTACION",
+    "preferred_course_ids": [
+      1041
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "\u00c1LGEBRA LINEAL PARA COMPUTACI\u00d3N",
+    "reason": "El alias \"Algebra Lineal Computaci\u00f3n\" coincide directamente con \"\u00c1LGEBRA LINEAL PARA COMPUTACI\u00d3N\" (MA2405); las otras opciones son \u00c1lgebra Lineal gen\u00e9rica y no especifican computaci\u00f3n."
+  },
+  "579:COMPUTACIONY SOCIEDAD:generic:COMPUTACIONY SOCIEDAD": {
+    "family": "COMPUTACIONY SOCIEDAD",
+    "preferred_course_ids": [
+      1156
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "COMPUTACI\u00d3N Y SOCIEDAD",
+    "reason": "Las tres opciones comparten el t\u00edtulo exacto; ante la ambig\u00fcedad de prefijos, IC7900 concentra la mayor afinidad hist\u00f3rica (IC:13 frente a CA/TI), por lo que es la variante m\u00e1s probable para este profesor."
+  },
+  "514:ANPI:acronym:ANPI": {
+    "family": "ANPI",
+    "preferred_course_ids": [
+      2978,
+      3003
+    ],
+    "confidence": "medium",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "An\u00e1lisis Num\u00e9rico para Ingenier\u00eda",
+    "reason": "ANPI corresponde a An\u00e1lisis Num\u00e9rico para Ingenier\u00eda; ambas opciones comparten el mismo t\u00edtulo exacto y el alias no especifica nivel, por lo que no se puede distinguir entre CE1111 y CE3102."
+  }
+}

@@ -5,7 +5,9 @@ __pycache__/
 *.txt
 .env
 
-# Local working data (raw snapshots, state, processed output)
+# Local working data (raw snapshots, processed output)
 data/*
+!data/state/
+!data/state/**
 
 # Generated review seeds live in the shared data/seeds tree, not here.

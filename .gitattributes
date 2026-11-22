@@ -4,3 +4,6 @@ src/routeTree.gen.ts linguist-generated=true
 data/seeds/itcr/*.sql linguist-generated=true
 data/seeds/itcr/*.json linguist-generated=true
 data/reviews/data/processed/sql/*.sql linguist-generated=true
+data/reviews/data/state/** linguist-generated=true
+data/seeds/reviews/** linguist-generated=true
+data/seeds/review_summaries/** linguist-generated=true

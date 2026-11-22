@@ -1,0 +1,44 @@
+[
+  {
+    "professor_id": 296,
+    "misprofesores_url": "https://costarica.misprofesores.com/profesores/Adriana-Alvarez_13334",
+    "site_name": "Alvarez Adriana",
+    "db_full_name": "ALVAREZ FIGUEROA ADRIANA",
+    "match_reason": "manual_verified_summer_2026"
+  },
+  {
+    "professor_id": 438,
+    "misprofesores_url": "https://costarica.misprofesores.com/profesores/Luis-Ignacio-Garces-Monje_35536",
+    "site_name": "Garcés Monje Luis Ignacio",
+    "db_full_name": "GARCES MONGE LUIS IGNACIO",
+    "match_reason": "manual_verified_summer_2026"
+  },
+  {
+    "professor_id": 308,
+    "misprofesores_url": "https://costarica.misprofesores.com/profesores/Victor-Garro_13354",
+    "site_name": "Garro Victor",
+    "db_full_name": "GARRO ABARCA VICTOR",
+    "match_reason": "manual_verified_summer_2026"
+  },
+  {
+    "professor_id": 242,
+    "misprofesores_url": "https://costarica.misprofesores.com/profesores/Carlos-Otarola_35275",
+    "site_name": "Otarola Carlos",
+    "db_full_name": "OTAROLA ZUÑIGA CARLOS",
+    "match_reason": "manual_verified_summer_2026"
+  },
+  {
+    "professor_id": 210,
+    "misprofesores_url": "https://costarica.misprofesores.com/profesores/Jerry-Soto-Chinchilla_49481",
+    "site_name": "Soto Chinchilla Jerry",
+    "db_full_name": "SOTO CHINCHILLA YERRY",
+    "match_reason": "manual_verified_summer_2026"
+  },
+  {
+    "professor_id": 514,
+    "misprofesores_url": "https://costarica.misprofesores.com/profesores/Juan-Pablo-Soto_36715",
+    "site_name": "Soto Juan Pablo",
+    "db_full_name": "SOTO QUIROS JUAN PABLO",
+    "match_reason": "manual_verified_summer_2026"
+  }
+]

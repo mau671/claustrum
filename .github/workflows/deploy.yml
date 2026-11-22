@@ -15,7 +15,10 @@ env:
 
 jobs:
   deploy:
-    if: github.event.action != 'closed'
+    if: >-
+      github.event.action != 'closed' &&
+      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.fork != true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -67,6 +70,8 @@ jobs:
   destroy:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Check out repository
         uses: actions/checkout@v6

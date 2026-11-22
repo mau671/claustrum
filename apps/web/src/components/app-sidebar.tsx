@@ -131,186 +131,193 @@ export function AppSidebar() {
     : null;
 
   return (
-    <aside
-      data-state={isExpanded ? "expanded" : "collapsed"}
-      data-user-menu={isUserMenuOpen ? "open" : "closed"}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="peer/sidebar group/sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out data-[state=expanded]:w-72 md:flex"
-    >
-      <Link
-        to={user ? "/curriculum" : "/schedule"}
-        preload="intent"
-        aria-label="Claustrum"
-        className="text-foreground hover:bg-background/70 flex h-12 items-center gap-3 overflow-hidden rounded-full whitespace-nowrap transition-colors"
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <aside
+        data-state={isExpanded ? "expanded" : "collapsed"}
+        data-user-menu={isUserMenuOpen ? "open" : "closed"}
+        className="peer/sidebar group/sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out data-[state=expanded]:w-72 md:flex"
       >
-        <span className="flex size-12 shrink-0 items-center justify-center">
-          <span className="flex size-9 items-center justify-center rounded-full">
-            <ClaustrumLogo className="size-8" />
-          </span>
-        </span>
-        <span className="truncate text-sm font-semibold opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-          Claustrum
-        </span>
-      </Link>
-
-      <nav className="flex flex-1 flex-col justify-center gap-2 py-8">
-        {data.navMain.map((item) => {
-          return (
-            <Link
-              key={item.title}
-              to={item.url}
-              preload="intent"
-              activeOptions={{
-                exact: false,
-                includeSearch: false,
-                includeHash: false,
-              }}
-              search={
-                (item.url === "/schedule" || item.url === "/curriculum") && activePlan
-                  ? {
-                      university: activePlan.universityId ?? undefined,
-                      campus: activePlan.campusId ?? undefined,
-                      career: activePlan.academicUnitId ?? undefined,
-                      plan: activePlan.studyPlanId ?? undefined,
-                      ...(item.url === "/schedule" ? { term: activePlan.termId ?? undefined } : {}),
-                    }
-                  : undefined
-              }
-              aria-label={item.title}
-              className={cn(
-                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                "data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-sm",
-                "data-[status=pending]:text-muted-foreground data-[status=pending]:bg-transparent data-[status=pending]:shadow-none",
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  <span className="flex size-12 shrink-0 items-center justify-center">
-                    <HugeiconsIcon
-                      icon={item.icon}
-                      altIcon={item.filledIcon}
-                      showAlt={isActive}
-                      size={20}
-                    />
-                  </span>
-                  <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-                    {item.title}
-                  </span>
-                </>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="flex flex-col gap-3">
-        <button
-          onClick={() => setIsFeedbackOpen(true)}
-          aria-label="Retroalimentación"
-          className={cn(
-            "group/nav-item hover:bg-background/70 hover:text-foreground focus-visible:ring-ring flex h-12 w-full cursor-pointer items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2",
-          )}
+        <Link
+          to={user ? "/curriculum" : "/schedule"}
+          preload="intent"
+          aria-label="Claustrum"
+          className="text-foreground hover:bg-background/70 flex h-12 items-center gap-3 overflow-hidden rounded-full whitespace-nowrap transition-colors"
         >
           <span className="flex size-12 shrink-0 items-center justify-center">
-            <HugeiconsIcon icon={BubbleChatUserIcon} size={20} />
+            <span className="flex size-9 items-center justify-center rounded-full">
+              <ClaustrumLogo className="size-8" />
+            </span>
           </span>
-          <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-            Retroalimentación
+          <span className="truncate text-sm font-semibold opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+            Claustrum
           </span>
-        </button>
+        </Link>
 
-        {data.navSecondary.map((item) => {
-          return (
-            <Link
-              key={item.title}
-              to={item.url}
-              preload="intent"
-              activeOptions={{
-                exact: false,
-                includeSearch: false,
-                includeHash: false,
-              }}
-              aria-label={item.title}
-              className={cn(
-                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                "data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-sm",
-                "data-[status=pending]:text-muted-foreground data-[status=pending]:bg-transparent data-[status=pending]:shadow-none",
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  <span className="flex size-12 shrink-0 items-center justify-center">
-                    <HugeiconsIcon
-                      icon={item.icon}
-                      altIcon={item.filledIcon}
-                      showAlt={isActive}
-                      size={20}
-                    />
-                  </span>
-                  <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-                    {item.title}
-                  </span>
-                </>
-              )}
-            </Link>
-          );
-        })}
-
-        {user ? (
-          <UserMenuDropdown
-            user={user}
-            open={isUserMenuOpen}
-            onOpenChange={setIsUserMenuOpen}
-            trigger={
-              <Button
-                type="button"
-                variant="ghost"
-                className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 overflow-hidden rounded-full !p-0 text-left whitespace-nowrap"
+        <nav className="flex flex-1 flex-col justify-center gap-2 py-8">
+          {data.navMain.map((item) => {
+            return (
+              <Link
+                key={item.title}
+                to={item.url}
+                preload="intent"
+                activeOptions={{
+                  exact: false,
+                  includeSearch: false,
+                  includeHash: false,
+                }}
+                search={
+                  (item.url === "/schedule" || item.url === "/curriculum") && activePlan
+                    ? {
+                        university: activePlan.universityId ?? undefined,
+                        campus: activePlan.campusId ?? undefined,
+                        career: activePlan.academicUnitId ?? undefined,
+                        plan: activePlan.studyPlanId ?? undefined,
+                        ...(item.url === "/schedule"
+                          ? { term: activePlan.termId ?? undefined }
+                          : {}),
+                      }
+                    : undefined
+                }
+                aria-label={item.title}
+                className={cn(
+                  "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                  "data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-sm",
+                  "data-[status=pending]:text-muted-foreground data-[status=pending]:bg-transparent data-[status=pending]:shadow-none",
+                )}
               >
-                <span className="flex size-12 shrink-0 items-center justify-center">
-                  <UserAvatar id={user.id} name={user.name} email={user.email} className="size-8" />
-                </span>
-                <span className="grid min-w-0 flex-1 opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-                  <span className="truncate text-sm font-medium">{user.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">{user.email}</span>
-                </span>
-              </Button>
-            }
-            align="start"
-            side="right"
-            sideOffset={8}
-            contentClass="w-56 rounded-lg"
-          />
-        ) : isAuthLoading ? (
-          <div className="text-muted-foreground flex h-12 w-full items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap">
-            <span className="flex size-12 shrink-0 items-center justify-center">
-              <Spinner className="size-5 shrink-0" />
-            </span>
-            <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-              Cargando sesión
-            </span>
-          </div>
-        ) : (
-          <Link
-            to="/auth/signin"
-            rel="nofollow"
-            aria-label="Iniciar sesión"
+                {({ isActive }) => (
+                  <>
+                    <span className="flex size-12 shrink-0 items-center justify-center">
+                      <HugeiconsIcon
+                        icon={item.icon}
+                        altIcon={item.filledIcon}
+                        showAlt={isActive}
+                        size={20}
+                      />
+                    </span>
+                    <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                      {item.title}
+                    </span>
+                  </>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setIsFeedbackOpen(true)}
+            aria-label="Retroalimentación"
             className={cn(
-              "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+              "group/nav-item hover:bg-background/70 hover:text-foreground focus-visible:ring-ring flex h-12 w-full cursor-pointer items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2",
             )}
           >
             <span className="flex size-12 shrink-0 items-center justify-center">
-              <HugeiconsIcon icon={Login01Icon} size={20} className="size-5 shrink-0" />
+              <HugeiconsIcon icon={BubbleChatUserIcon} size={20} />
             </span>
             <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
-              Iniciar sesión
+              Retroalimentación
             </span>
-          </Link>
-        )}
-      </div>
+          </button>
 
-      <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
-    </aside>
+          {data.navSecondary.map((item) => {
+            return (
+              <Link
+                key={item.title}
+                to={item.url}
+                preload="intent"
+                activeOptions={{
+                  exact: false,
+                  includeSearch: false,
+                  includeHash: false,
+                }}
+                aria-label={item.title}
+                className={cn(
+                  "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                  "data-[status=active]:bg-background data-[status=active]:text-foreground data-[status=active]:shadow-sm",
+                  "data-[status=pending]:text-muted-foreground data-[status=pending]:bg-transparent data-[status=pending]:shadow-none",
+                )}
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className="flex size-12 shrink-0 items-center justify-center">
+                      <HugeiconsIcon
+                        icon={item.icon}
+                        altIcon={item.filledIcon}
+                        showAlt={isActive}
+                        size={20}
+                      />
+                    </span>
+                    <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                      {item.title}
+                    </span>
+                  </>
+                )}
+              </Link>
+            );
+          })}
+
+          {user ? (
+            <UserMenuDropdown
+              user={user}
+              open={isUserMenuOpen}
+              onOpenChange={setIsUserMenuOpen}
+              trigger={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="hover:bg-background/80 hover:text-foreground !h-12 w-full justify-start gap-3 overflow-hidden rounded-full !p-0 text-left whitespace-nowrap"
+                >
+                  <span className="flex size-12 shrink-0 items-center justify-center">
+                    <UserAvatar
+                      id={user.id}
+                      name={user.name}
+                      email={user.email}
+                      className="size-8"
+                    />
+                  </span>
+                  <span className="grid min-w-0 flex-1 opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                    <span className="truncate text-sm font-medium">{user.name}</span>
+                    <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+                  </span>
+                </Button>
+              }
+              align="start"
+              side="right"
+              sideOffset={8}
+              contentClass="w-56 rounded-lg"
+            />
+          ) : isAuthLoading ? (
+            <div className="text-muted-foreground flex h-12 w-full items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap">
+              <span className="flex size-12 shrink-0 items-center justify-center">
+                <Spinner className="size-5 shrink-0" />
+              </span>
+              <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                Cargando sesión
+              </span>
+            </div>
+          ) : (
+            <Link
+              to="/auth/signin"
+              rel="nofollow"
+              aria-label="Iniciar sesión"
+              className={cn(
+                "group/nav-item hover:bg-background/70 hover:text-foreground flex h-12 items-center gap-3 overflow-hidden rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+              )}
+            >
+              <span className="flex size-12 shrink-0 items-center justify-center">
+                <HugeiconsIcon icon={Login01Icon} size={20} className="size-5 shrink-0" />
+              </span>
+              <span className="truncate opacity-0 transition-opacity duration-200 ease-in group-data-[state=expanded]/sidebar:opacity-100 group-data-[state=expanded]/sidebar:ease-out">
+                Iniciar sesión
+              </span>
+            </Link>
+          )}
+        </div>
+
+        <FeedbackDialog open={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
+      </aside>
+    </div>
   );
 }

@@ -203,6 +203,11 @@ function AdminUsersPage() {
   const sortDesc = search.sortDesc ?? true;
 
   const [searchInput, setSearchInput] = useState(searchTerm);
+  const [previousSearchTerm, setPreviousSearchTerm] = useState(searchTerm);
+  if (searchTerm !== previousSearchTerm) {
+    setPreviousSearchTerm(searchTerm);
+    setSearchInput(searchTerm);
+  }
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -230,10 +235,6 @@ function AdminUsersPage() {
   const banUser = useBanAdminUser();
   const unbanUser = useUnbanAdminUser();
   const deleteUser = useDeleteAdminUser();
-
-  useEffect(() => {
-    setSearchInput(searchTerm);
-  }, [searchTerm]);
 
   useEffect(() => {
     if (!isAdmin) {

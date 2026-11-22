@@ -23,30 +23,45 @@ export function isModuleNotFoundError(error: unknown): boolean {
   );
 }
 
+export function isStaleChunkReloadThrottled(targetUrl?: string): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const destination = targetUrl || window.location.href;
+
+  try {
+    const raw = sessionStorage.getItem(STALE_CHUNK_RELOAD_KEY);
+    if (!raw) {
+      return false;
+    }
+
+    const data = JSON.parse(raw) as { url?: string; timestamp?: number };
+    return (
+      data.url === destination &&
+      typeof data.timestamp === "number" &&
+      Date.now() - data.timestamp < COOLDOWN_MS
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function handleStaleChunkReload(targetUrl?: string): boolean {
   if (typeof window === "undefined") {
     return false;
   }
 
   const destination = targetUrl || window.location.href;
-  const now = Date.now();
+
+  if (isStaleChunkReloadThrottled(destination)) {
+    return false;
+  }
 
   try {
-    const raw = sessionStorage.getItem(STALE_CHUNK_RELOAD_KEY);
-    if (raw) {
-      const data = JSON.parse(raw) as { url?: string; timestamp?: number };
-      if (
-        data.url === destination &&
-        typeof data.timestamp === "number" &&
-        now - data.timestamp < COOLDOWN_MS
-      ) {
-        return false;
-      }
-    }
-
     sessionStorage.setItem(
       STALE_CHUNK_RELOAD_KEY,
-      JSON.stringify({ url: destination, timestamp: now }),
+      JSON.stringify({ url: destination, timestamp: Date.now() }),
     );
   } catch {
     // sessionStorage access might fail in restricted iframe environments

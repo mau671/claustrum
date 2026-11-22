@@ -52,7 +52,7 @@ export function CurriculumPage() {
   const selectedAcademicUnitId = search.career ?? null;
   const selectedPlanId = search.plan ?? null;
   const hasMeaningfulSearch = isMeaningfulCurriculumSearch(search);
-  const [isUsingProfileDefaults, setIsUsingProfileDefaults] = useState(() => !hasMeaningfulSearch);
+  const [autoSelectRequested, setAutoSelectRequested] = useState(false);
   const shouldAutoSelectPlanRef = useRef(false);
   const lastAppliedPlanRef = useRef<typeof userStudyPlan | null>(null);
 
@@ -86,12 +86,19 @@ export function CurriculumPage() {
   const suggestedTermQuery = useSuggestedAcademicTerm(selectedPlanId, !!selectedPlanId);
   const { activePlan: userStudyPlan, isLoading: isProfileLoading, authUser } = useActiveStudyPlan();
   const isAutoSelectingPlan =
-    shouldAutoSelectPlanRef.current &&
+    autoSelectRequested &&
     !!selectedAcademicUnitId &&
     !selectedPlanId &&
     (plansQuery.isFetching || (plansQuery.data?.length ?? 0) > 0);
   const isPendingFilters = isProfileLoading || isAutoSelectingPlan;
   const userStudyPlanUniversityId = userStudyPlan?.universityId ?? CURRICULUM_DEFAULT_UNIVERSITY_ID;
+  const isUsingProfileDefaults =
+    !hasMeaningfulSearch ||
+    (!!userStudyPlan &&
+      selectedUniversityId === userStudyPlanUniversityId &&
+      selectedCampusId === (userStudyPlan.campusId ?? null) &&
+      selectedAcademicUnitId === (userStudyPlan.academicUnitId ?? null) &&
+      selectedPlanId === (userStudyPlan.studyPlanId ?? null));
 
   const campuses = useMemo(() => campusesQuery.data ?? [], [campusesQuery.data]);
   const academicUnits = useMemo(() => academicUnitsQuery.data ?? [], [academicUnitsQuery.data]);
@@ -102,10 +109,7 @@ export function CurriculumPage() {
     [campuses],
   );
   const isAutoSelectingLatestPlan =
-    shouldAutoSelectPlanRef.current &&
-    !!selectedAcademicUnitId &&
-    !selectedPlanId &&
-    plans.length > 0;
+    autoSelectRequested && !!selectedAcademicUnitId && !selectedPlanId && plans.length > 0;
   const isLoadingPlansForFilters =
     (plansQuery.isFetching && plansQuery.data?.length === 0) || isAutoSelectingLatestPlan;
 
@@ -120,7 +124,6 @@ export function CurriculumPage() {
     // Case 1: no params at all → load full profile
     if (isEmptySearch) {
       lastAppliedPlanRef.current = userStudyPlan;
-      setIsUsingProfileDefaults(true);
       void navigate({
         to: "/curriculum",
         search: {
@@ -151,7 +154,6 @@ export function CurriculumPage() {
 
       if (missingCampus || missingCareer || missingPlan) {
         lastAppliedPlanRef.current = userStudyPlan;
-        setIsUsingProfileDefaults(true);
         void navigate({
           to: "/curriculum",
           search: {
@@ -183,36 +185,10 @@ export function CurriculumPage() {
     userStudyPlanUniversityId,
   ]);
 
-  useEffect(() => {
-    if (!userStudyPlan) return;
-    const hasSearch = hasMeaningfulSearch;
-    if (!hasSearch) {
-      setIsUsingProfileDefaults(true);
-      return;
-    }
-
-    const matchesProfile =
-      selectedUniversityId === userStudyPlanUniversityId &&
-      selectedCampusId === (userStudyPlan.campusId ?? null) &&
-      selectedAcademicUnitId === (userStudyPlan.academicUnitId ?? null) &&
-      selectedPlanId === (userStudyPlan.studyPlanId ?? null);
-
-    setIsUsingProfileDefaults(matchesProfile);
-  }, [
-    search,
-    userStudyPlan,
-    selectedUniversityId,
-    userStudyPlanUniversityId,
-    hasMeaningfulSearch,
-    selectedCampusId,
-    selectedAcademicUnitId,
-    selectedPlanId,
-  ]);
-
   const handleUniversityChange = useCallback(
     (id: number | null) => {
       shouldAutoSelectPlanRef.current = false;
-      setIsUsingProfileDefaults(false);
+      setAutoSelectRequested(false);
       void navigate({
         to: "/curriculum",
         search: (prev) => ({
@@ -229,7 +205,7 @@ export function CurriculumPage() {
   const handleCampusChange = useCallback(
     (id: number | null) => {
       shouldAutoSelectPlanRef.current = false;
-      setIsUsingProfileDefaults(false);
+      setAutoSelectRequested(false);
       void navigate({
         to: "/curriculum",
         search: (prev) => ({
@@ -246,7 +222,7 @@ export function CurriculumPage() {
   const handleAcademicUnitChange = useCallback(
     (id: number | null) => {
       shouldAutoSelectPlanRef.current = id !== null;
-      setIsUsingProfileDefaults(false);
+      setAutoSelectRequested(id !== null);
       void navigate({
         to: "/curriculum",
         search: (prev) => ({
@@ -265,7 +241,7 @@ export function CurriculumPage() {
   const handlePlanChange = useCallback(
     (id: number | null) => {
       shouldAutoSelectPlanRef.current = false;
-      setIsUsingProfileDefaults(false);
+      setAutoSelectRequested(false);
       void navigate({
         to: "/curriculum",
         search: (prev) => ({
@@ -305,7 +281,7 @@ export function CurriculumPage() {
   const handleUseProfileDefaults = useCallback(() => {
     if (!userStudyPlan) return;
     shouldAutoSelectPlanRef.current = false;
-    setIsUsingProfileDefaults(true);
+    setAutoSelectRequested(false);
 
     const newSearch: Record<string, unknown> = {
       ...search,
@@ -379,7 +355,7 @@ export function CurriculumPage() {
     void navigate({
       to: "/curriculum",
       search: validatePlanSearch as never,
-    });
+    }).then(() => setAutoSelectRequested(true));
   }, [selectedPlanId, plans, plansQuery.isFetching, navigate, search]);
 
   useEffect(() => {
@@ -404,7 +380,7 @@ export function CurriculumPage() {
     void navigate({
       to: "/curriculum",
       search: autoPlanSearch as never,
-    });
+    }).then(() => setAutoSelectRequested(false));
   }, [navigate, plans, plansQuery.isFetching, search, selectedAcademicUnitId, selectedPlanId]);
 
   return (

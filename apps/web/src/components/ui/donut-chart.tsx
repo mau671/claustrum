@@ -370,10 +370,11 @@ export function DonutChart({
   emptyLabel = "Sin datos",
   className,
 }: DonutChartProps) {
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const reducedMotion = useReducedMotion();
   const reduced = mounted && !!reducedMotion;

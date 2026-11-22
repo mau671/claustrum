@@ -1,17 +1,14 @@
 import { Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode } from "react";
 
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
 import { useTheme } from "@/components/theme-provider";
 import { MorphIcon } from "@/components/ui/icon";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 export function AuthShell({ children }: { children: ReactNode }) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   return (
     <div className="bg-background text-foreground relative h-dvh overflow-hidden">

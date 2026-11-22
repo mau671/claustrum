@@ -1,6 +1,6 @@
 import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import type {
   CatalogUniversity,
@@ -127,25 +127,18 @@ export function ScheduleFilters({
   );
   const [skipSwitchesAnimation, setSkipSwitchesAnimation] = useState(() => showSwitches);
 
-  useEffect(() => {
-    if (!showUniversityFilter) setSkipUniversityAnimation(false);
-  }, [showUniversityFilter]);
-
-  useEffect(() => {
-    if (!showCampusFilter) setSkipCampusAnimation(false);
-  }, [showCampusFilter]);
-
-  useEffect(() => {
-    if (!(showCareerFilter || showPlanFilter || showTermFilter)) {
-      setSkipGroupsAnimation(false);
-    }
-  }, [showCareerFilter, showPlanFilter, showTermFilter]);
-
-  useEffect(() => {
-    if (!showSwitches) {
-      setSkipSwitchesAnimation(false);
-    }
-  }, [showSwitches]);
+  if (!showUniversityFilter && skipUniversityAnimation) {
+    setSkipUniversityAnimation(false);
+  }
+  if (!showCampusFilter && skipCampusAnimation) {
+    setSkipCampusAnimation(false);
+  }
+  if (!(showCareerFilter || showPlanFilter || showTermFilter) && skipGroupsAnimation) {
+    setSkipGroupsAnimation(false);
+  }
+  if (!showSwitches && skipSwitchesAnimation) {
+    setSkipSwitchesAnimation(false);
+  }
   const isShowAllDisabled = showAllDisabled;
   const termGroups = useMemo(() => groupTermsByYear(terms), [terms]);
   const selectedTerm = terms.find((term) => term.id === selectedTermId) ?? null;

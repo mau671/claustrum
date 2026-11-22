@@ -301,12 +301,11 @@ export function Stepper({
   const hasActiveNumber = typeof current === "number" && !Number.isNaN(current);
   const active = hasActiveNumber ? Math.min(Math.max(Math.round(current), 0), count) : -1;
 
-  // Track previous active step cleanly without setState in render
-  const prevActiveRef = React.useRef(active);
-  const from = prevActiveRef.current;
-  React.useEffect(() => {
-    prevActiveRef.current = active;
-  }, [active]);
+  // Track previous active step without reading a ref during render.
+  const [from, setFrom] = React.useState(active);
+  if (from !== active) {
+    setFrom(active);
+  }
 
   const gap = motionTokens.stagger.line;
 

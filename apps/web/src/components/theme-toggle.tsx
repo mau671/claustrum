@@ -1,17 +1,13 @@
 import { Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
-import { useEffect, useState } from "react";
 
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { MorphIcon } from "@/components/ui/icon";
+import { useMounted } from "@/lib/hooks/use-mounted";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const isDark = theme === "dark";
 

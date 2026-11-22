@@ -37,6 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useModerationCounts } from "@/lib/hooks/use-moderation";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import {
   useNotifications,
   useMarkNotificationAsRead,
@@ -86,7 +87,7 @@ const SHOW_HEADER_SEARCH = false;
 
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -146,10 +147,6 @@ export function SiteHeader() {
 
     return null;
   }, [courseId, coursesQuery.data, planDetailQuery.data]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";

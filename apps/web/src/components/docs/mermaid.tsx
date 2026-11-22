@@ -39,8 +39,9 @@ const viewportTransition = "220ms cubic-bezier(0.22, 1, 0.36, 1)";
 export function Mermaid({ chart }: { chart: string }) {
   const source = chart.replaceAll("\\n", "\n");
 
+  let svg: string | null = null;
   try {
-    const svg = renderMermaidSVG(source, {
+    svg = renderMermaidSVG(source, {
       bg: "var(--color-fd-background)",
       fg: "var(--color-fd-foreground)",
       border: "var(--color-fd-border)",
@@ -49,15 +50,19 @@ export function Mermaid({ chart }: { chart: string }) {
       interactive: true,
       transparent: true,
     });
-
-    return <InteractiveMermaid chart={source} svg={svg} />;
   } catch {
+    svg = null;
+  }
+
+  if (svg === null) {
     return (
       <CodeBlock title="Mermaid">
         <Pre>{chart}</Pre>
       </CodeBlock>
     );
   }
+
+  return <InteractiveMermaid chart={source} svg={svg} />;
 }
 
 function InteractiveMermaid({ chart, svg }: { chart: string; svg: string }) {

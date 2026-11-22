@@ -486,6 +486,8 @@ function VirtualizedCourseList({
   handleGroupToggle,
   showCampus,
 }: VirtualizedCourseListProps) {
+  // TanStack Virtual exposes functions that cannot be safely memoized, so React Compiler skips it.
+  // oxlint-disable-next-line react/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => viewportEl,

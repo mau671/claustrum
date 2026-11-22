@@ -16,7 +16,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { NotificationsDialog } from "@/components/notifications-dialog";
@@ -37,6 +37,7 @@ import { useAppAuth } from "@/lib/auth/app-auth-context";
 import { signOut } from "@/lib/auth/client";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
 import { useModerationCounts } from "@/lib/hooks/use-moderation";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useCanModerate } from "@/lib/hooks/use-roles";
 import { cn } from "@/lib/utils";
@@ -91,10 +92,7 @@ export function MobileBottomNav() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
@@ -120,15 +118,13 @@ export function MobileBottomNav() {
   const isProfileActive = targetPath.startsWith("/settings");
   const matchingRoute = getMatchingMainRoute(targetPath);
   const currentRoute = isProfileActive ? null : matchingRoute;
-  const [activeTab, setActiveTab] = useState<string | null>(currentRoute);
-
-  useEffect(() => {
-    if (currentRoute !== null) {
-      setActiveTab(currentRoute);
-    } else if (isProfileActive) {
-      setActiveTab(null);
-    }
-  }, [currentRoute, isProfileActive]);
+  const [optimisticTab, setOptimisticTab] = useState<string | null>(null);
+  const [previousRoute, setPreviousRoute] = useState<string | null>(currentRoute);
+  if (previousRoute !== currentRoute) {
+    setPreviousRoute(currentRoute);
+    setOptimisticTab(null);
+  }
+  const activeTab = optimisticTab ?? (isProfileActive ? null : currentRoute);
 
   const transition = shouldReduceMotion ? instantTransition : springTransition;
 
@@ -173,7 +169,7 @@ export function MobileBottomNav() {
                   }
                   preload="intent"
                   aria-current={isCurrent ? "page" : undefined}
-                  onClick={() => setActiveTab(item.url)}
+                  onClick={() => setOptimisticTab(item.url)}
                   className="relative flex h-11 items-center justify-start overflow-hidden rounded-full select-none"
                 >
                   {/* Pill sutil como el sidebar de escritorio */}

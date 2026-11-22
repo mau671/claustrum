@@ -1,7 +1,7 @@
 import { Search01Icon, UnfoldMoreIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { AcademicProgress } from "@/components/dashboard/academic-progress";
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
@@ -124,28 +124,25 @@ function ProfilePage() {
     else setCarnetDraft("");
   };
 
-  useEffect(() => {
-    if (
-      profileContext.isSuccess &&
-      profileContext.data &&
-      universityIdDraft === "" &&
-      campusIdDraft === ""
-    ) {
-      setDraftsFromContext(profileContext.data);
-    }
-  }, [profileContext.isSuccess, profileContext.data, universityIdDraft, campusIdDraft]);
+  if (
+    profileContext.isSuccess &&
+    profileContext.data &&
+    universityIdDraft === "" &&
+    campusIdDraft === ""
+  ) {
+    setDraftsFromContext(profileContext.data);
+  }
 
-  useEffect(() => {
-    if (!authUser) return;
+  const [previousAuthUser, setPreviousAuthUser] = useState(authUser);
+  if (authUser && authUser !== previousAuthUser) {
+    setPreviousAuthUser(authUser);
     setNameDraft(authUser.user_metadata?.full_name ?? "");
     setEmailDraft(authUser.email ?? "");
-  }, [authUser]);
+  }
 
-  useEffect(() => {
-    if (universityIdDraft) return;
-    if (!universities || universities.length === 0) return;
+  if (!universityIdDraft && universities && universities.length > 0) {
     setUniversityIdDraft(String(universities[0].id));
-  }, [universities, universityIdDraft]);
+  }
 
   const hasUnsavedChanges =
     authUser &&

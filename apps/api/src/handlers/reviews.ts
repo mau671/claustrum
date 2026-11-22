@@ -57,7 +57,7 @@ interface RawReviewRow {
 
 interface RawReviewDetailRow extends RawReviewRow {
   professor_name: string;
-  reviewed_at: unknown | null;
+  reviewed_at: unknown;
   moderation_note: string | null;
 }
 

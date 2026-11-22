@@ -28,9 +28,7 @@
     ".opencode/**",
     ".agents/**",
     "docs/**",
-    "data/seeds/**",
-    "data/migrations/**",
-    "data/itcr/**",
+    "data/**",
     ".alchemy/**"
   ]
 }

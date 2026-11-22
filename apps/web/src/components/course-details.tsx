@@ -22,7 +22,7 @@ import {
   ChevronsUpDownIcon,
   SearchIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useId } from "react";
+import { useMemo, useRef, useState, useId } from "react";
 
 import type {
   AcademicTerm,
@@ -718,13 +718,15 @@ export function CourseDetails({
 
   const EQUIVALENTS_PER_PAGE = 10;
 
-  useEffect(() => {
+  const [resetForCourseId, setResetForCourseId] = useState(course.id);
+  if (resetForCourseId !== course.id) {
+    setResetForCourseId(course.id);
     setGradeInput("");
     setProgressStatus("approved");
     setIsProgressSheetOpen(false);
     setEquivalentsPage(0);
     setAttemptCourseId(course.id);
-  }, [course.id]);
+  }
 
   const attemptCourseNumericId = Number.parseInt(attemptCourseId, 10);
   const progressCourseId = Number.isNaN(attemptCourseNumericId)
@@ -813,28 +815,20 @@ export function CourseDetails({
   const selectedAttemptCourse =
     attemptCourseOptions.find((option) => String(option.id) === attemptCourseId) ?? null;
 
-  useEffect(() => {
-    if (!isPlaceholderCourse) {
-      if (attemptCourseId !== course.id) setAttemptCourseId(course.id);
-      return;
-    }
+  if (!isPlaceholderCourse) {
+    if (attemptCourseId !== course.id) setAttemptCourseId(course.id);
+  } else if (
+    attemptCourseOptions.length > 0 &&
+    !attemptCourseOptions.some((option) => String(option.id) === attemptCourseId)
+  ) {
+    setAttemptCourseId(String(attemptCourseOptions[0].id));
+  }
 
-    if (attemptCourseOptions.length === 0) return;
-    if (!attemptCourseOptions.some((option) => String(option.id) === attemptCourseId)) {
-      setAttemptCourseId(String(attemptCourseOptions[0].id));
-    }
-  }, [attemptCourseId, attemptCourseOptions, course.id, isPlaceholderCourse]);
-
-  useEffect(() => {
-    if (!academicTermId && academicTerms.length > 0) {
-      setAcademicTermId(String(academicTerms[0].id));
-      return;
-    }
-
-    if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
-      setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
-    }
-  }, [academicTermId, academicTerms]);
+  if (!academicTermId && academicTerms.length > 0) {
+    setAcademicTermId(String(academicTerms[0].id));
+  } else if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
+    setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
+  }
 
   const latestTermGroups = latestGroupsQuery.data ?? [];
   const offeringTerms = useMemo(
@@ -870,13 +864,11 @@ export function CourseDetails({
     }));
   }, [evaluations]);
 
-  useEffect(() => {
-    if (evaluationTabs.length > 0) {
-      if (!selectedEvaluationTab || !evaluationTabs.some((t) => t.key === selectedEvaluationTab)) {
-        setSelectedEvaluationTab(evaluationTabs[0].key);
-      }
+  if (evaluationTabs.length > 0) {
+    if (!selectedEvaluationTab || !evaluationTabs.some((t) => t.key === selectedEvaluationTab)) {
+      setSelectedEvaluationTab(evaluationTabs[0].key);
     }
-  }, [evaluationTabs, selectedEvaluationTab]);
+  }
 
   const activeTabKey = selectedEvaluationTab || (evaluationTabs[0]?.key ?? "");
 
@@ -912,16 +904,11 @@ export function CourseDetails({
     });
   }, [filteredEvaluations]);
 
-  useEffect(() => {
-    if (!offeringTermId && offeringTerms.length > 0) {
-      setOfferingTermId(String(offeringTerms[0].id));
-      return;
-    }
-
-    if (offeringTermId && !offeringTerms.some((term) => String(term.id) === offeringTermId)) {
-      setOfferingTermId(offeringTerms.length > 0 ? String(offeringTerms[0].id) : "");
-    }
-  }, [offeringTermId, offeringTerms]);
+  if (!offeringTermId && offeringTerms.length > 0) {
+    setOfferingTermId(String(offeringTerms[0].id));
+  } else if (offeringTermId && !offeringTerms.some((term) => String(term.id) === offeringTermId)) {
+    setOfferingTermId(offeringTerms.length > 0 ? String(offeringTerms[0].id) : "");
+  }
 
   const prerequisites = (course.prerequisites || []).flatMap((id) => {
     const item = courseById.get(id);
@@ -1162,9 +1149,7 @@ export function CourseDetails({
   const hasOriginInHistory = attempts.some((a) => a.id === Number(course.statusOriginAttemptId));
   const showOriginItem = isStatusFromAnotherSource && !hasOriginInHistory;
 
-  useEffect(() => {
-    if (!requiresProgressGrade) setGradeInput("");
-  }, [requiresProgressGrade]);
+  if (!requiresProgressGrade && gradeInput !== "") setGradeInput("");
 
   const progressForm = (
     <div className="w-full max-w-full min-w-0 space-y-6">

@@ -1,5 +1,5 @@
 import { FileUp, Minus, Plus, X, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import type { AcademicTerm, CourseDetailRelatedCourse, CourseRecentProfessor } from "@/lib/types";
 
@@ -182,25 +182,15 @@ export function EvaluationUploadDialog({
   const selectedEvaluationType =
     EVALUATION_TYPES.find((option) => option.value === evaluationType) ?? EVALUATION_TYPES[0];
 
-  const canSubmit = useMemo(() => {
-    if (!evaluationFile || !evaluationType || uploadMutation.isPending) return false;
-    if (!effectiveCourseId) return false;
-    if (showNumberInput && evaluationNumberInput.trim() === "") return false;
-    if (showCustomNameInput && customName.trim() === "") return false;
-    if (!turnstileSiteKey || !turnstileToken) return false;
-    return true;
-  }, [
-    evaluationFile,
-    effectiveCourseId,
-    evaluationType,
-    uploadMutation.isPending,
-    showNumberInput,
-    evaluationNumberInput,
-    showCustomNameInput,
-    customName,
-    turnstileSiteKey,
-    turnstileToken,
-  ]);
+  const canSubmit =
+    !!evaluationFile &&
+    !!evaluationType &&
+    !uploadMutation.isPending &&
+    !!effectiveCourseId &&
+    !(showNumberInput && evaluationNumberInput.trim() === "") &&
+    !(showCustomNameInput && customName.trim() === "") &&
+    !!turnstileSiteKey &&
+    !!turnstileToken;
 
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -236,13 +226,13 @@ export function EvaluationUploadDialog({
       resetForm();
       onOpenChange(false);
     }
-  }, [isDirty, onOpenChange, resetForm]);
+  }, [isDirty, onOpenChange, resetForm, setConfirmOpen]);
 
   const handleDiscard = useCallback(() => {
     setConfirmOpen(false);
     resetForm();
     onOpenChange(false);
-  }, [onOpenChange, resetForm]);
+  }, [onOpenChange, resetForm, setConfirmOpen]);
 
   const validateFile = (file: File): string | null => {
     if (file.type !== "application/pdf") {
@@ -346,34 +336,23 @@ export function EvaluationUploadDialog({
   const selectedProfessor =
     recentProfessors.find((p) => String(p.professorId) === professorId) ?? null;
 
-  useEffect(() => {
-    if (!isPlaceholderCourse) {
-      if (selectedCourseId !== String(courseId)) setSelectedCourseId(String(courseId));
-      return;
-    }
-
-    if (courseOptions.length === 0) return;
+  if (!isPlaceholderCourse) {
+    if (selectedCourseId !== String(courseId)) setSelectedCourseId(String(courseId));
+  } else if (courseOptions.length > 0) {
     if (!courseOptions.some((option) => String(option.id) === selectedCourseId)) {
       setSelectedCourseId(String(courseOptions[0].id));
     }
-  }, [courseId, courseOptions, isPlaceholderCourse, selectedCourseId]);
+  }
 
-  useEffect(() => {
-    if (!academicTermId && academicTerms.length > 0) {
-      setAcademicTermId(String(academicTerms[0].id));
-      return;
-    }
+  if (!academicTermId && academicTerms.length > 0) {
+    setAcademicTermId(String(academicTerms[0].id));
+  } else if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
+    setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
+  }
 
-    if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
-      setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
-    }
-  }, [academicTermId, academicTerms]);
-
-  useEffect(() => {
-    if (professorId && !recentProfessors.some((p) => String(p.professorId) === professorId)) {
-      setProfessorId("");
-    }
-  }, [professorId, recentProfessors]);
+  if (professorId && !recentProfessors.some((p) => String(p.professorId) === professorId)) {
+    setProfessorId("");
+  }
 
   const formFields = (
     <div className="space-y-5">

@@ -182,7 +182,7 @@ export default {
 
       request.signal.addEventListener("abort", cleanup);
 
-      (async () => {
+      void (async () => {
         try {
           await writer.write(
             encoder.encode(

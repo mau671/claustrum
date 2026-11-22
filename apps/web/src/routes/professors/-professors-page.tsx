@@ -9,7 +9,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback } from "react";
 
 import type { ProfessorReviewStatsRow } from "@/lib/professor-reviews/types";
 
@@ -148,10 +148,11 @@ export function ProfessorsReviewsPage() {
   const navigate = routeApi.useNavigate();
 
   const [searchTerm, setSearchTerm] = useState(search.q ?? "");
-
-  useEffect(() => {
+  const [previousQuery, setPreviousQuery] = useState(search.q ?? "");
+  if ((search.q ?? "") !== previousQuery) {
+    setPreviousQuery(search.q ?? "");
     setSearchTerm(search.q ?? "");
-  }, [search.q]);
+  }
 
   const updateSearchUrl = useDebouncedCallback(
     (query: string) => {

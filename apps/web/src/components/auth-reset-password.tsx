@@ -1,6 +1,6 @@
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState, useSyncExternalStore } from "react";
 
 import {
   PasswordInput,
@@ -18,6 +18,16 @@ import { authClient } from "@/lib/auth/client";
 
 type Mode = "request" | "sent" | "update";
 
+const subscribeToLocation = () => () => {};
+
+function useResetToken(): string | null {
+  return useSyncExternalStore(
+    subscribeToLocation,
+    () => new URLSearchParams(window.location.search).get("token"),
+    () => null,
+  );
+}
+
 export function AuthResetPasswordPage() {
   const [mode, setMode] = useState<Mode>("request");
   const [email, setEmail] = useState("");
@@ -26,15 +36,13 @@ export function AuthResetPasswordPage() {
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [resetToken, setResetToken] = useState<string | null>(null);
+  const resetToken = useResetToken();
+  const [appliedToken, setAppliedToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token");
-    if (token) {
-      setResetToken(token);
-      setMode("update");
-    }
-  }, []);
+  if (resetToken && resetToken !== appliedToken) {
+    setAppliedToken(resetToken);
+    setMode("update");
+  }
 
   const passwordMismatch = useMemo(
     () => confirmPassword.length > 0 && newPassword !== confirmPassword,

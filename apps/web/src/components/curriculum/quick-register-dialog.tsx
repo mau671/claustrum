@@ -1,6 +1,6 @@
 import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useMemo, useRef, useId } from "react";
+import { useState, useMemo, useRef, useId } from "react";
 
 import type { Course, CourseStatus } from "@/lib/types";
 
@@ -126,14 +126,18 @@ export function QuickRegisterDialog({
 
   const createCourseAttempt = useCreateCourseAttempt();
 
-  useEffect(() => {
-    if (isOpen && course) {
-      setAttemptCourseId(course.id);
-      setGradeInput("");
-      setAcademicTermId("");
-      setProgressStatus("approved");
-    }
-  }, [isOpen, course]);
+  const [formCourseId, setFormCourseId] = useState(course?.id ?? null);
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen && course && (isOpen !== wasOpen || course.id !== formCourseId)) {
+    setWasOpen(isOpen);
+    setFormCourseId(course.id);
+    setAttemptCourseId(course.id);
+    setGradeInput("");
+    setAcademicTermId("");
+    setProgressStatus("approved");
+  } else if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
+  }
 
   const courseIdNum = course ? parseInt(course.id) : 0;
 
@@ -178,17 +182,16 @@ export function QuickRegisterDialog({
   const selectedAttemptCourse =
     attemptCourseOptions.find((option) => String(option.id) === attemptCourseId) ?? null;
 
-  useEffect(() => {
-    if (!course) return;
-    if (!isPlaceholderCourse) {
-      if (attemptCourseId !== course.id) setAttemptCourseId(course.id);
-      return;
-    }
-    if (attemptCourseOptions.length === 0) return;
-    if (!attemptCourseOptions.some((option) => String(option.id) === attemptCourseId)) {
-      setAttemptCourseId(String(attemptCourseOptions[0].id));
-    }
-  }, [attemptCourseId, attemptCourseOptions, course, isPlaceholderCourse]);
+  if (course && !isPlaceholderCourse && attemptCourseId !== course.id) {
+    setAttemptCourseId(course.id);
+  } else if (
+    course &&
+    isPlaceholderCourse &&
+    attemptCourseOptions.length > 0 &&
+    !attemptCourseOptions.some((option) => String(option.id) === attemptCourseId)
+  ) {
+    setAttemptCourseId(String(attemptCourseOptions[0].id));
+  }
 
   const attemptCourseNumericId = Number.parseInt(attemptCourseId, 10);
   const progressCourseId = Number.isNaN(attemptCourseNumericId)
@@ -203,15 +206,11 @@ export function QuickRegisterDialog({
 
   const academicTermGroups = useMemo(() => groupTermsByYear(academicTerms), [academicTerms]);
 
-  useEffect(() => {
-    if (!academicTermId && academicTerms.length > 0) {
-      setAcademicTermId(String(academicTerms[0].id));
-      return;
-    }
-    if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
-      setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
-    }
-  }, [academicTermId, academicTerms]);
+  if (!academicTermId && academicTerms.length > 0) {
+    setAcademicTermId(String(academicTerms[0].id));
+  } else if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
+    setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
+  }
 
   const selectedQuickTerm =
     academicTerms.find((term) => String(term.id) === academicTermId) ?? null;
@@ -276,9 +275,7 @@ export function QuickRegisterDialog({
   const requiresProgressGrade = progressStatus === "approved" || progressStatus === "failed";
   const canSaveProgress = !!selectedAttemptCourse;
 
-  useEffect(() => {
-    if (!requiresProgressGrade) setGradeInput("");
-  }, [requiresProgressGrade]);
+  if (!requiresProgressGrade && gradeInput !== "") setGradeInput("");
 
   const formatCourseLabel = (c: { id: number; code: string; name: string }) =>
     `${c.code}: ${c.name}`;

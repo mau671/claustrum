@@ -17,21 +17,27 @@ export function EvaluationViewPage() {
 
   const [blob, setBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState<string>("evaluacion.pdf");
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const blobUrl = useBlobUrl(blob);
 
+  const [requestKey, setRequestKey] = useState(`${evaluationId}:${String(isAnswers)}`);
+  const currentRequestKey = `${evaluationId}:${String(isAnswers)}`;
+  if (requestKey !== currentRequestKey) {
+    setRequestKey(currentRequestKey);
+    setBlob(null);
+    setFileName("evaluacion.pdf");
+    setError(null);
+  }
+
+  const invalidUrl = evaluationId === null;
+  const errorMessage = invalidUrl ? "URL inválida" : error;
+  const isLoading = !invalidUrl && !errorMessage && blob === null;
+
   useEffect(() => {
-    if (!evaluationId) {
-      setError("URL inválida");
-      setIsLoading(false);
-      return;
-    }
+    if (!evaluationId) return;
 
     const id: number = evaluationId;
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
 
     async function load() {
       try {
@@ -45,8 +51,6 @@ export function EvaluationViewPage() {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "No se pudo cargar el PDF");
         }
-      } finally {
-        if (!cancelled) setIsLoading(false);
       }
     }
 
@@ -66,10 +70,12 @@ export function EvaluationViewPage() {
     );
   }
 
-  if (error || !blobUrl) {
+  if (errorMessage || !blobUrl) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
-        <p className="text-destructive text-sm">{error ?? "No se pudo cargar el documento"}</p>
+        <p className="text-destructive text-sm">
+          {errorMessage ?? "No se pudo cargar el documento"}
+        </p>
         <Button variant="outline" onClick={() => window.history.back()}>
           <Icon icon={ArrowLeft01Icon} className="mr-2 size-4" />
           Volver

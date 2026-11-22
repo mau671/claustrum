@@ -10,6 +10,7 @@ import {
   isWithinInterval,
 } from "date-fns";
 import { LazyMotion, m, domAnimation, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -33,7 +34,7 @@ export default function CalendarBodyMonth() {
     end: calendarEnd,
   }).filter((day) => day.getDay() !== 0);
 
-  const today = new Date();
+  const [today] = useState(() => new Date());
 
   const visibleEvents = events.filter(
     (event) =>

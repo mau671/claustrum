@@ -23,12 +23,12 @@ export function CourseSearchInput({
   actionButtons,
 }: CourseSearchInputProps) {
   const [query, setQuery] = useState(initialQuery);
+  const [previousInitialQuery, setPreviousInitialQuery] = useState(initialQuery);
 
-  useEffect(() => {
-    if (initialQuery !== undefined) {
-      setQuery(initialQuery);
-    }
-  }, [initialQuery]);
+  if (initialQuery !== undefined && initialQuery !== previousInitialQuery) {
+    setPreviousInitialQuery(initialQuery);
+    setQuery(initialQuery);
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {

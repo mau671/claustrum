@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
+    "lint": "oxlint --type-aware",
+    "lint:fix": "oxlint --type-aware --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
   },
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261019.1",
     "@types/pg": "^8.20.0",
+    "tsrs": "7.1.0-beta.tsrs4",
     "wrangler": "^4.152.0"
   },
   "packageManager": "pnpm@12.10.1"

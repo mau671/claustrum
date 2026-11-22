@@ -24,7 +24,7 @@ interface RawCourseStatusRow {
   course_id: number | string;
   status: string;
   grade?: number | string | null;
-  recorded_at?: unknown | null;
+  recorded_at?: unknown;
   origin_course_id?: number | string | null;
   origin_course_code?: string | null;
   origin_course_name?: string | null;
@@ -32,7 +32,7 @@ interface RawCourseStatusRow {
   origin_attempt_id?: number | string | null;
   origin_attempt_number?: number | string | null;
   origin_grade?: number | string | null;
-  origin_recorded_at?: unknown | null;
+  origin_recorded_at?: unknown;
   origin_academic_term_id?: number | string | null;
   origin_academic_term_name?: string | null;
   origin_type?: string | null;
@@ -47,7 +47,7 @@ interface RawAttemptRow {
   status: string;
   grade?: number | string | null;
   academic_term_id?: number | string | null;
-  recorded_at?: unknown | null;
+  recorded_at?: unknown;
   equivalent_course_id?: number | string | null;
   equivalent_course_code?: string | null;
   equivalent_course_name?: string | null;

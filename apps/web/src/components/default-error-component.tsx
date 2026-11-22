@@ -11,20 +11,21 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
-import { handleStaleChunkReload, isModuleNotFoundError } from "@/lib/chunk-error";
+import {
+  handleStaleChunkReload,
+  isModuleNotFoundError,
+  isStaleChunkReloadThrottled,
+} from "@/lib/chunk-error";
 
 export function DefaultErrorComponent({ error, reset }: ErrorComponentProps): React.ReactElement {
   const isChunkError = isModuleNotFoundError(error);
-  const [reloadThrottled, setReloadThrottled] = React.useState(false);
+  const [reloadThrottled] = React.useState(() => isChunkError && isStaleChunkReloadThrottled());
 
   React.useEffect(() => {
-    if (isChunkError) {
-      const triggered = handleStaleChunkReload();
-      if (!triggered) {
-        setReloadThrottled(true);
-      }
+    if (isChunkError && !reloadThrottled) {
+      handleStaleChunkReload();
     }
-  }, [isChunkError]);
+  }, [isChunkError, reloadThrottled]);
 
   if (isChunkError) {
     if (reloadThrottled) {

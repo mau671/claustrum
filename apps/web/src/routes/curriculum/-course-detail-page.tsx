@@ -84,7 +84,7 @@ export function CourseDetailPage() {
 
       return "success" as const;
     },
-    [authUser?.id, createCourseAttempt, queryClient, selectedPlanId],
+    [authUser, createCourseAttempt, queryClient, selectedPlanId],
   );
 
   return (

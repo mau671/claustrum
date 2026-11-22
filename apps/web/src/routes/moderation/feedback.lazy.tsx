@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { FeedbackRow } from "@/lib/feedback/api";
 
+import { NumberedPagination } from "@/components/numbered-pagination";
 import { Button } from "@/components/ui/button";
 import { Card, CardPanel } from "@/components/ui/card";
 import { Frame, FrameFooter, FrameHeader, FrameTitle } from "@/components/ui/frame";
@@ -17,8 +18,6 @@ import {
   useReplyToFeedback,
 } from "@/lib/feedback/hooks";
 import { cn } from "@/lib/utils";
-
-import { ModerationPagination } from "./-moderation-components";
 
 const PAGE_SIZE = 20;
 
@@ -155,7 +154,7 @@ function FeedbackModerationPage() {
         </Card>
 
         <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
-          <ModerationPagination
+          <NumberedPagination
             page={queryPage}
             totalPages={hasMore ? queryPage + 2 : queryPage + 1}
             hasMore={hasMore}

@@ -212,7 +212,7 @@ export function ReviewReportSection({
         </Card>
 
         <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
-          <ModerationPagination
+          <NumberedPagination
             page={page}
             totalPages={hasMore ? page + 2 : page + 1}
             hasMore={hasMore}
@@ -352,30 +352,6 @@ export function ModerationStatusTabs<T extends string>({
   );
 }
 
-export function ModerationPagination({
-  page,
-  totalPages,
-  hasMore,
-  isFetching,
-  onPageChange,
-}: {
-  page: number;
-  totalPages: number;
-  hasMore: boolean;
-  isFetching: boolean;
-  onPageChange: (newPage: number) => void;
-}) {
-  return (
-    <NumberedPagination
-      page={page}
-      totalPages={totalPages}
-      hasMore={hasMore}
-      isFetching={isFetching}
-      onPageChange={onPageChange}
-    />
-  );
-}
-
 export function ReviewSection({
   rows,
   selectedReview,
@@ -511,7 +487,7 @@ export function ReviewSection({
         </Card>
 
         <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
-          <ModerationPagination
+          <NumberedPagination
             page={page}
             totalPages={calculatedTotalPages}
             hasMore={hasMore}
@@ -829,7 +805,7 @@ export function EvaluationSection({
         </Card>
 
         <FrameFooter className="flex h-12 shrink-0 items-center justify-center p-1.5 sm:h-13">
-          <ModerationPagination
+          <NumberedPagination
             page={page}
             totalPages={calculatedTotalPages}
             hasMore={hasMore}

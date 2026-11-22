@@ -29,7 +29,6 @@ import { Route as OgCurriculumRouteImport } from './routes/og/curriculum'
 import { Route as OgProfessorsRouteImport } from './routes/og/professors'
 import { Route as OgScheduleRouteImport } from './routes/og/schedule'
 import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
-import { Route as OverviewIndexRouteImport } from './routes/overview/index'
 import { Route as PoliciesIndexRouteImport } from './routes/policies/index'
 import { Route as ProfessorsIndexRouteImport } from './routes/professors/index'
 import { Route as ProfessorsProfessorIdRouteImport } from './routes/professors/$professorId'
@@ -155,13 +154,6 @@ const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() =>
   import('./routes/onboarding/index.lazy').then((d) => d.Route),
-)
-const OverviewIndexRoute = OverviewIndexRouteImport.update({
-  id: '/overview/',
-  path: '/overview/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/overview/index.lazy').then((d) => d.Route),
 )
 const PoliciesIndexRoute = PoliciesIndexRouteImport.update({
   id: '/policies/',
@@ -310,7 +302,6 @@ export interface FileRoutesByFullPath {
   '/docs/': typeof DocsIndexRoute
   '/moderation/': typeof ModerationIndexRoute
   '/onboarding/': typeof OnboardingIndexRoute
-  '/overview/': typeof OverviewIndexRoute
   '/policies/': typeof PoliciesIndexRoute
   '/professors/': typeof ProfessorsIndexRoute
   '/schedule/': typeof ScheduleIndexRoute
@@ -346,7 +337,6 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsIndexRoute
   '/moderation': typeof ModerationIndexRoute
   '/onboarding': typeof OnboardingIndexRoute
-  '/overview': typeof OverviewIndexRoute
   '/policies': typeof PoliciesIndexRoute
   '/professors': typeof ProfessorsIndexRoute
   '/schedule': typeof ScheduleIndexRoute
@@ -385,7 +375,6 @@ export interface FileRoutesById {
   '/docs/': typeof DocsIndexRoute
   '/moderation/': typeof ModerationIndexRoute
   '/onboarding/': typeof OnboardingIndexRoute
-  '/overview/': typeof OverviewIndexRoute
   '/policies/': typeof PoliciesIndexRoute
   '/professors/': typeof ProfessorsIndexRoute
   '/schedule/': typeof ScheduleIndexRoute
@@ -425,7 +414,6 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/moderation/'
     | '/onboarding/'
-    | '/overview/'
     | '/policies/'
     | '/professors/'
     | '/schedule/'
@@ -461,7 +449,6 @@ export interface FileRouteTypes {
     | '/docs'
     | '/moderation'
     | '/onboarding'
-    | '/overview'
     | '/policies'
     | '/professors'
     | '/schedule'
@@ -499,7 +486,6 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/moderation/'
     | '/onboarding/'
-    | '/overview/'
     | '/policies/'
     | '/professors/'
     | '/schedule/'
@@ -530,7 +516,6 @@ export interface RootRouteChildren {
   CurriculumIndexRoute: typeof CurriculumIndexRoute
   DocsIndexRoute: typeof DocsIndexRoute
   OnboardingIndexRoute: typeof OnboardingIndexRoute
-  OverviewIndexRoute: typeof OverviewIndexRoute
   PoliciesIndexRoute: typeof PoliciesIndexRoute
   ProfessorsIndexRoute: typeof ProfessorsIndexRoute
   ScheduleIndexRoute: typeof ScheduleIndexRoute
@@ -665,13 +650,6 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding/'
       preLoaderRoute: typeof OnboardingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview/': {
-      id: '/overview/'
-      path: '/overview'
-      fullPath: '/overview/'
-      preLoaderRoute: typeof OverviewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/policies/': {
@@ -871,7 +849,6 @@ const rootRouteChildren: RootRouteChildren = {
   CurriculumIndexRoute: CurriculumIndexRoute,
   DocsIndexRoute: DocsIndexRoute,
   OnboardingIndexRoute: OnboardingIndexRoute,
-  OverviewIndexRoute: OverviewIndexRoute,
   PoliciesIndexRoute: PoliciesIndexRoute,
   ProfessorsIndexRoute: ProfessorsIndexRoute,
   ScheduleIndexRoute: ScheduleIndexRoute,

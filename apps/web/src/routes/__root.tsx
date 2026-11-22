@@ -125,7 +125,7 @@ export const Route = createRootRouteWithContext<{
           const shouldLeaveOnboarding = completed || hasAcademicSetup;
 
           if (shouldLeaveOnboarding) {
-            throw redirect({ to: "/overview", replace: true });
+            throw redirect({ to: "/schedule", replace: true });
           }
         }
       } catch (err: any) {

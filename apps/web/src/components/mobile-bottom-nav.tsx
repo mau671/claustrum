@@ -3,7 +3,6 @@ import {
   Calendar03Icon,
   File01Icon,
   GraduationCapIcon,
-  Home01Icon,
   Login01Icon,
   Logout01Icon,
   Moon02Icon,
@@ -44,12 +43,6 @@ import { cn } from "@/lib/utils";
 
 const mainNavItems = [
   {
-    title: "Inicio",
-    url: "/overview",
-    icon: Home01Icon,
-    filledIcon: createFilledIcon(Home01Icon),
-  },
-  {
     title: "Horarios",
     url: "/schedule",
     icon: Calendar03Icon,
@@ -81,7 +74,6 @@ const instantTransition = {
 } as const;
 
 function getMatchingMainRoute(pathname: string): string | null {
-  if (pathname === "/overview") return "/overview";
   if (pathname.startsWith("/schedule")) return "/schedule";
   if (pathname.startsWith("/curriculum")) return "/curriculum";
   if (pathname.startsWith("/professors")) return "/professors";
@@ -126,8 +118,7 @@ export function MobileBottomNav() {
   });
 
   const isProfileActive = targetPath.startsWith("/settings");
-  const matchingRoute =
-    getMatchingMainRoute(targetPath) ?? (targetPath === "/" ? "/overview" : null);
+  const matchingRoute = getMatchingMainRoute(targetPath);
   const currentRoute = isProfileActive ? null : matchingRoute;
   const [activeTab, setActiveTab] = useState<string | null>(currentRoute);
 
@@ -167,7 +158,6 @@ export function MobileBottomNav() {
               >
                 <Link
                   to={item.url}
-                  rel={item.url === "/overview" ? "nofollow" : undefined}
                   search={
                     (item.url === "/schedule" || item.url === "/curriculum") && activePlan
                       ? {

@@ -1,4 +1,3 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
 import { Suspense, lazy } from "react";
 
 import {
@@ -23,11 +22,7 @@ const CourseStatusChart = lazy(() =>
   })),
 );
 
-export const Route = createLazyFileRoute("/overview/")({
-  component: DashboardPage,
-});
-
-function DashboardPage() {
+export function AcademicProgress() {
   const { data: authUser, isLoading: isAuthLoading } = useAuthUser();
   const { data: userStudyPlan, isLoading: isLoadingUserPlan } = useUserStudyPlan(
     authUser?.id ?? null,

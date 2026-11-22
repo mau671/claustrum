@@ -2,7 +2,6 @@ import {
   ArrowRight01Icon,
   Calendar03Icon,
   GraduationCapIcon,
-  Home01Icon,
   Moon02Icon,
   Notification03Icon,
   PaintBoardIcon,
@@ -55,7 +54,6 @@ type BreadcrumbItem = {
 };
 
 const quickLinks = [
-  { label: "Inicio", to: "/overview", icon: Home01Icon },
   { label: "Horarios", to: "/schedule", icon: Calendar03Icon },
   { label: "Plan de estudios", to: "/curriculum", icon: GraduationCapIcon },
   { label: "Profesores", to: "/professors", icon: UserMultiple02Icon },
@@ -65,12 +63,12 @@ const quickLinks = [
 ] as const;
 
 const pageTitles: Record<string, string> = {
-  "/overview": "Inicio",
   "/schedule": "Horarios",
   "/curriculum": "Plan de estudios",
   "/professors": "Profesores",
   "/policies": "Reglamento y políticas",
   "/moderation": "Moderación",
+  "/moderation/users": "Usuarios",
   "/settings/profile": "Perfil",
   "/settings/security": "Seguridad",
   "/settings/appearance": "Apariencia",
@@ -215,6 +213,8 @@ export function SiteHeader() {
         items.push({ label: "Reportes" });
       } else if (pathname.startsWith("/moderation/feedback")) {
         items.push({ label: "Retroalimentación" });
+      } else if (pathname.startsWith("/moderation/users")) {
+        items.push({ label: "Usuarios" });
       }
       return items;
     }

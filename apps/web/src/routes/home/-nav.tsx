@@ -65,7 +65,7 @@ export function HomeNav({ starCount }: { starCount: number | null }) {
           <Button
             variant="outline"
             size="sm"
-            render={<a href="/overview" aria-label="Abrir Claustrum" />}
+            render={<a href="/curriculum" aria-label="Abrir Claustrum" />}
           >
             Abrir
           </Button>

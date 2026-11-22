@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { AcademicProgress } from "@/components/dashboard/academic-progress";
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import {
@@ -275,6 +276,13 @@ function ProfilePage() {
 
   return (
     <SettingsPage>
+      <SettingsSection
+        title="Resumen académico"
+        description="Tu avance y proyección según tu plan de estudios."
+      >
+        <AcademicProgress />
+      </SettingsSection>
+
       <SettingsSection title="Identidad" description="Visible en tu cuenta y menú de usuario.">
         <div className="space-y-4">
           <Field>

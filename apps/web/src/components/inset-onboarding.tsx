@@ -62,7 +62,7 @@ export function InsetOnboardingPage() {
       if (!authUser) return;
       await authClient.$fetch("/onboarding/dismiss", { method: "POST" });
       await queryClient.invalidateQueries({ queryKey: ["appState"] });
-      void navigate({ to: "/overview" });
+      void navigate({ to: "/schedule" });
     })();
   };
 
@@ -116,7 +116,7 @@ export function InsetOnboardingPage() {
         queryClient.invalidateQueries({ queryKey: ["appState"] }),
         queryClient.invalidateQueries({ queryKey: ["dashboardStats", authUser.id] }),
       ]);
-      void navigate({ to: "/overview" });
+      void navigate({ to: "/schedule" });
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "No se pudo guardar el onboarding.");
     } finally {

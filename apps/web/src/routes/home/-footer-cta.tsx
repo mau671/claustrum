@@ -16,7 +16,7 @@ export function FooterCTA() {
           <Button
             render={
               <a
-                href="/overview"
+                href="/curriculum"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Abrir Claustrum"

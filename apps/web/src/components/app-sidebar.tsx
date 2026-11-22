@@ -3,7 +3,6 @@ import {
   Calendar03Icon,
   File01Icon,
   GraduationCapIcon,
-  Home01Icon,
   Login01Icon,
   UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
@@ -23,12 +22,6 @@ import { cn } from "@/lib/utils";
 
 const data = {
   navMain: [
-    {
-      title: "Inicio",
-      url: "/overview",
-      icon: Home01Icon,
-      filledIcon: createFilledIcon(Home01Icon),
-    },
     {
       title: "Horarios",
       url: "/schedule",
@@ -146,7 +139,7 @@ export function AppSidebar() {
       className="peer/sidebar group/sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out data-[state=expanded]:w-72 md:flex"
     >
       <Link
-        to={user ? "/overview" : "/schedule"}
+        to={user ? "/curriculum" : "/schedule"}
         preload="intent"
         aria-label="Claustrum"
         className="text-foreground hover:bg-background/70 flex h-12 items-center gap-3 overflow-hidden rounded-full whitespace-nowrap transition-colors"
@@ -168,7 +161,6 @@ export function AppSidebar() {
               key={item.title}
               to={item.url}
               preload="intent"
-              rel={item.url === "/overview" ? "nofollow" : undefined}
               activeOptions={{
                 exact: false,
                 includeSearch: false,

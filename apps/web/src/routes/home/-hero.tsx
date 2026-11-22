@@ -18,7 +18,7 @@ export function HeroSection({ starCount }: { starCount: number | null }) {
           <Button
             render={
               <a
-                href="/overview"
+                href="/curriculum"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Probar la app"

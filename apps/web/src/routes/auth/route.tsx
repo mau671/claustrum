@@ -24,7 +24,7 @@ export const Route = createFileRoute("/auth")({
         const appState = await queryClient.fetchQuery(appStateQueryOptions());
         const authData = appState?.user;
         if (authData?.id) {
-          throw redirect({ to: "/overview", replace: true });
+          throw redirect({ to: "/curriculum", replace: true });
         }
       } catch (err: any) {
         if (err?.isRedirect) throw err;

@@ -27,7 +27,7 @@ export function ModerationLayout() {
       return;
     }
     if (!canModerate) {
-      void navigate({ to: "/overview", replace: true });
+      void navigate({ to: "/curriculum", replace: true });
     }
   }, [authUser, canModerate, isAuthLoading, navigate]);
 

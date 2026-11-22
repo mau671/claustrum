@@ -234,7 +234,7 @@ function LeftPanel() {
               if (typeof window !== "undefined" && window.history.length > 1) {
                 window.history.back();
               } else {
-                window.location.href = "/overview";
+                window.location.href = "/curriculum";
               }
             }}
             className="inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-md bg-black/20 px-2 py-1 font-mono text-[11px] tracking-[0.2em] text-white/65 uppercase backdrop-blur-sm transition-colors hover:text-white"
@@ -749,7 +749,7 @@ function SignUpForm() {
       const { data: session } = await getSession();
       if (session) {
         await queryClient.invalidateQueries({ queryKey: ["appState"] });
-        void navigate({ to: "/overview", replace: true });
+        void navigate({ to: "/curriculum", replace: true });
       }
     };
 

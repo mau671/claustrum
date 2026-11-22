@@ -14,7 +14,6 @@ export const adminRole = ac.newRole({
 });
 
 export const moderatorRole = ac.newRole({
-  user: ["get", "list"],
   moderation: ["reviews", "evaluations", "reports", "feedback"],
 });
 

@@ -7,8 +7,8 @@ import {
   ChevronUpIcon,
   RotateCcwIcon,
   Search01Icon,
-  Shield01Icon,
 } from "@hugeicons/core-free-icons";
+import { useDebouncedCallback } from "@tanstack/react-pacer";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   columnSizingFeature,
@@ -49,9 +49,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Frame, FrameFooter, FrameHeader, FrameTitle } from "@/components/ui/frame";
+import { Frame, FrameFooter, FrameHeader } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -248,6 +248,13 @@ function AdminUsersPage() {
     setIsDetailOpen(true);
   }, []);
 
+  const debouncedSearch = useDebouncedCallback(
+    (value: string) => {
+      goTo({ search: value, page: 1 });
+    },
+    { wait: 300 },
+  );
+
   const columns = useMemo<ColumnDef<typeof userTableFeatures, AdminUser>[]>(
     () => [
       {
@@ -335,10 +342,13 @@ function AdminUsersPage() {
       {
         accessorKey: "createdAt",
         header: "Registro",
-        size: 130,
+        size: 170,
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-xs">
-            {new Date(row.original.createdAt).toLocaleDateString()}
+          <span className="text-muted-foreground text-xs whitespace-nowrap">
+            {new Date(row.original.createdAt).toLocaleString(undefined, {
+              dateStyle: "short",
+              timeStyle: "short",
+            })}
           </span>
         ),
       },
@@ -361,8 +371,6 @@ function AdminUsersPage() {
     ],
     [openDetail],
   );
-
-  if (!isAdmin) return null;
 
   const users = usersQuery.data?.users ?? [];
   const total = usersQuery.data?.total ?? 0;
@@ -408,6 +416,8 @@ function AdminUsersPage() {
       sorting: state.sorting,
     }),
   );
+
+  if (!isAdmin) return null;
 
   function goTo(next: {
     page?: number;
@@ -518,36 +528,20 @@ function AdminUsersPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Frame className="min-h-0 w-full flex-1 flex-col">
-        <FrameHeader className="flex flex-col gap-3 px-4 py-3 sm:h-auto sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div className="flex items-center gap-2">
-            <Icon icon={Shield01Icon} size={18} className="text-muted-foreground size-4.5" />
-            <FrameTitle className="text-base font-semibold">Usuarios</FrameTitle>
-            <Badge variant="secondary" size="sm" className="tabular-nums">
-              {total}
-            </Badge>
-          </div>
-
+        <FrameHeader className="flex flex-col gap-3 px-4 py-3 sm:h-auto sm:flex-row sm:items-center sm:justify-end sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
-            <form
-              className="relative"
-              onSubmit={(event) => {
-                event.preventDefault();
-                goTo({ search: searchInput, page: 1 });
-              }}
-            >
-              <Icon
-                icon={Search01Icon}
-                size={15}
-                className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2"
-              />
-              <Input
+            <InputGroup className="h-8 w-52 sm:w-60">
+              <InputGroupAddon>
+                <Icon icon={Search01Icon} size={16} aria-hidden="true" />
+              </InputGroupAddon>
+              <InputGroupInput
+                type="search"
                 value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
+                onChange={(event) => debouncedSearch(event.target.value)}
                 placeholder="Buscar por nombre o correo"
                 aria-label="Buscar usuarios"
-                className="h-8 w-52 pl-8 text-xs sm:w-60"
               />
-            </form>
+            </InputGroup>
 
             <Select
               items={ROLE_FILTER_ITEMS as unknown as Array<{ value: string; label: string }>}

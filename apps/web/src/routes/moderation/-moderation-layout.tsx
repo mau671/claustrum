@@ -1,4 +1,10 @@
-import { Alert02Icon, BubbleChatIcon, Comment01Icon, File01Icon } from "@hugeicons/core-free-icons";
+import {
+  Alert02Icon,
+  BubbleChatIcon,
+  Comment01Icon,
+  File01Icon,
+  UserMultiple02Icon,
+} from "@hugeicons/core-free-icons";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -6,7 +12,7 @@ import { createFilledIcon, Icon } from "@/components/ui/icon";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useModerationCounts } from "@/lib/hooks/use-moderation";
 import { useAuthUser } from "@/lib/hooks/use-queries";
-import { useCanModerate } from "@/lib/hooks/use-roles";
+import { useCanModerate, useIsAdmin } from "@/lib/hooks/use-roles";
 import { cn } from "@/lib/utils";
 
 const filledCommentIcon = createFilledIcon(Comment01Icon, { invertKeys: ["0"], fillKeys: ["1"] });
@@ -19,6 +25,7 @@ export function ModerationLayout() {
   const location = useLocation();
   const { data: authUser, isLoading: isAuthLoading } = useAuthUser();
   const canModerate = useCanModerate();
+  const isAdmin = useIsAdmin();
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -79,6 +86,17 @@ export function ModerationLayout() {
       filledIcon: filledBubbleIcon,
       count: feedbackPending,
     },
+    ...(isAdmin
+      ? [
+          {
+            label: "Usuarios",
+            path: "/moderation/users",
+            icon: UserMultiple02Icon,
+            filledIcon: UserMultiple02Icon,
+            count: 0,
+          },
+        ]
+      : []),
   ];
 
   return (

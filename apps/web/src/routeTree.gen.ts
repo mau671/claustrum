@@ -25,6 +25,7 @@ import { Route as ModerationEvaluationsRouteImport } from './routes/moderation/e
 import { Route as ModerationFeedbackRouteImport } from './routes/moderation/feedback'
 import { Route as ModerationReportsRouteImport } from './routes/moderation/reports'
 import { Route as ModerationReviewsRouteImport } from './routes/moderation/reviews'
+import { Route as ModerationUsersRouteImport } from './routes/moderation/users'
 import { Route as OgCurriculumRouteImport } from './routes/og/curriculum'
 import { Route as OgProfessorsRouteImport } from './routes/og/professors'
 import { Route as OgScheduleRouteImport } from './routes/og/schedule'
@@ -132,6 +133,13 @@ const ModerationReviewsRoute = ModerationReviewsRouteImport.update({
   getParentRoute: () => ModerationRouteRoute,
 } as any).lazy(() =>
   import('./routes/moderation/reviews.lazy').then((d) => d.Route),
+)
+const ModerationUsersRoute = ModerationUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => ModerationRouteRoute,
+} as any).lazy(() =>
+  import('./routes/moderation/users.lazy').then((d) => d.Route),
 )
 const OgCurriculumRoute = OgCurriculumRouteImport.update({
   id: '/og/curriculum',
@@ -291,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/moderation/feedback': typeof ModerationFeedbackRoute
   '/moderation/reports': typeof ModerationReportsRoute
   '/moderation/reviews': typeof ModerationReviewsRoute
+  '/moderation/users': typeof ModerationUsersRoute
   '/og/curriculum': typeof OgCurriculumRoute
   '/og/professors': typeof OgProfessorsRoute
   '/og/schedule': typeof OgScheduleRoute
@@ -326,6 +335,7 @@ export interface FileRoutesByTo {
   '/moderation/feedback': typeof ModerationFeedbackRoute
   '/moderation/reports': typeof ModerationReportsRoute
   '/moderation/reviews': typeof ModerationReviewsRoute
+  '/moderation/users': typeof ModerationUsersRoute
   '/og/curriculum': typeof OgCurriculumRoute
   '/og/professors': typeof OgProfessorsRoute
   '/og/schedule': typeof OgScheduleRoute
@@ -364,6 +374,7 @@ export interface FileRoutesById {
   '/moderation/feedback': typeof ModerationFeedbackRoute
   '/moderation/reports': typeof ModerationReportsRoute
   '/moderation/reviews': typeof ModerationReviewsRoute
+  '/moderation/users': typeof ModerationUsersRoute
   '/og/curriculum': typeof OgCurriculumRoute
   '/og/professors': typeof OgProfessorsRoute
   '/og/schedule': typeof OgScheduleRoute
@@ -403,6 +414,7 @@ export interface FileRouteTypes {
     | '/moderation/feedback'
     | '/moderation/reports'
     | '/moderation/reviews'
+    | '/moderation/users'
     | '/og/curriculum'
     | '/og/professors'
     | '/og/schedule'
@@ -438,6 +450,7 @@ export interface FileRouteTypes {
     | '/moderation/feedback'
     | '/moderation/reports'
     | '/moderation/reviews'
+    | '/moderation/users'
     | '/og/curriculum'
     | '/og/professors'
     | '/og/schedule'
@@ -475,6 +488,7 @@ export interface FileRouteTypes {
     | '/moderation/feedback'
     | '/moderation/reports'
     | '/moderation/reviews'
+    | '/moderation/users'
     | '/og/curriculum'
     | '/og/professors'
     | '/og/schedule'
@@ -622,6 +636,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/moderation/reviews'
       preLoaderRoute: typeof ModerationReviewsRouteImport
+      parentRoute: typeof ModerationRouteRoute
+    }
+    '/moderation/users': {
+      id: '/moderation/users'
+      path: '/users'
+      fullPath: '/moderation/users'
+      preLoaderRoute: typeof ModerationUsersRouteImport
       parentRoute: typeof ModerationRouteRoute
     }
     '/og/curriculum': {
@@ -801,6 +822,7 @@ interface ModerationRouteRouteChildren {
   ModerationFeedbackRoute: typeof ModerationFeedbackRoute
   ModerationReportsRoute: typeof ModerationReportsRoute
   ModerationReviewsRoute: typeof ModerationReviewsRoute
+  ModerationUsersRoute: typeof ModerationUsersRoute
   ModerationIndexRoute: typeof ModerationIndexRoute
 }
 
@@ -809,6 +831,7 @@ const ModerationRouteRouteChildren: ModerationRouteRouteChildren = {
   ModerationFeedbackRoute: ModerationFeedbackRoute,
   ModerationReportsRoute: ModerationReportsRoute,
   ModerationReviewsRoute: ModerationReviewsRoute,
+  ModerationUsersRoute: ModerationUsersRoute,
   ModerationIndexRoute: ModerationIndexRoute,
 }
 

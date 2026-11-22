@@ -255,40 +255,50 @@ async function main(): Promise<void> {
 
   // Phase: Git Commit & Push (if requested)
   if (!isDryRun && isGitPush) {
-    const statusRes = await runProcess("git", [
-      "status",
-      "--porcelain",
+    const syncPaths = [
+      "data/reviews/data/state",
       "data/seeds/reviews",
       "data/seeds/review_summaries",
-      "data/state/downloads/school_snapshot.json",
-      "data/state/matching",
-    ]);
+    ].filter((relativePath) => {
+      const absolutePath = path.resolve(process.cwd(), relativePath);
+      return fs.existsSync(absolutePath) && fs.readdirSync(absolutePath).length > 0;
+    });
 
-    if (statusRes.stdout.trim().length > 0) {
-      console.log("\n📦 Staging and committing newly generated seeds and snapshot...");
-      await runProcess("git", [
-        "add",
-        "data/seeds/reviews",
-        "data/seeds/review_summaries",
-        "data/state/downloads/school_snapshot.json",
-        "data/state/matching",
-      ]);
-      const commitRes = await runProcess("git", [
-        "commit",
-        "-m",
-        "chore(reviews): sync daily reviews and summaries [skip ci]",
-      ]);
-      if (commitRes.code === 0) {
-        console.log("🚀 Pushing changes to origin development...");
-        const pushRes = await runProcess("git", ["push", "origin", "development"]);
-        if (pushRes.code === 0) {
-          console.log("✅ Changes successfully pushed to origin development.");
+    if (syncPaths.length === 0) {
+      console.log("\nℹ️  No review state or seed files to commit to git.");
+    } else {
+      const statusRes = await runProcess("git", ["status", "--porcelain", "--", ...syncPaths]);
+
+      if (statusRes.stdout.trim().length === 0) {
+        console.log("\nℹ️  No review state or seed files to commit to git.");
+      } else {
+        console.log("\n📦 Staging and committing review state and newly generated seeds...");
+        await runProcess("git", ["add", "--", ...syncPaths]);
+        const commitRes = await runProcess("git", [
+          "commit",
+          "-m",
+          "chore(reviews): sync daily reviews and summaries [skip ci]",
+          "--",
+          ...syncPaths,
+        ]);
+        if (commitRes.code === 0) {
+          console.log("🚀 Pushing changes to origin development...");
+          const pushRes = await runProcess("git", ["push", "origin", "HEAD:development"]);
+          if (pushRes.code === 0) {
+            console.log("✅ Changes successfully pushed to origin development.");
+          } else {
+            console.error(
+              "⚠️ Failed to push changes to remote repository:",
+              pushRes.stderr || pushRes.stdout,
+            );
+          }
         } else {
-          console.error("⚠️ Failed to push changes to remote repository:", pushRes.stderr);
+          console.error(
+            "⚠️ Failed to commit review sync output:",
+            commitRes.stderr || commitRes.stdout,
+          );
         }
       }
-    } else {
-      console.log("\nℹ️  No new seed files or state changes to commit to git.");
     }
   }
 

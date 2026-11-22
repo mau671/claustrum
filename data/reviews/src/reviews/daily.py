@@ -63,7 +63,22 @@ def load_school_snapshot() -> dict[str, Any] | None:
         return None
 
 
+def _snapshot_data(snapshot: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "professors": snapshot.get("professors") or {},
+        "total_professors": snapshot.get("total_professors"),
+        "total_reviews": snapshot.get("total_reviews"),
+    }
+
+
 def save_school_snapshot(snapshot: dict[str, Any]) -> None:
+    if SCHOOL_SNAPSHOT_PATH.exists():
+        try:
+            previous = json.loads(SCHOOL_SNAPSHOT_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            previous = None
+        if isinstance(previous, dict) and _snapshot_data(previous) == _snapshot_data(snapshot):
+            return
     SCHOOL_SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
     SCHOOL_SNAPSHOT_PATH.write_text(
         json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n",

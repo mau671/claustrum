@@ -92,7 +92,7 @@ export function ModerationLayout() {
             label: "Usuarios",
             path: "/moderation/users",
             icon: UserMultiple02Icon,
-            filledIcon: UserMultiple02Icon,
+            filledIcon: createFilledIcon(UserMultiple02Icon),
             count: 0,
           },
         ]

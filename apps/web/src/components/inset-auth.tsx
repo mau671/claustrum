@@ -444,7 +444,7 @@ function MeshShader({ palette }: { palette: Palette }) {
 
 function Heading({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mt-6 flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5">
       <h1 className="font-heading text-2xl font-semibold tracking-tight">{title}</h1>
       <p className="text-muted-foreground text-sm">{subtitle}</p>
     </div>

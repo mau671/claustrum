@@ -488,12 +488,12 @@ export function InsetOnboardingPage() {
   }
 
   return (
-    <div className="bg-background text-foreground relative h-screen overflow-hidden">
+    <div className="bg-background text-foreground relative h-dvh overflow-hidden">
       <AuthPageBackdrop />
-      <div className="relative grid h-screen w-full grid-cols-1 lg:grid-cols-[1fr_minmax(440px,560px)]">
+      <div className="relative grid h-full w-full grid-cols-1 lg:grid-cols-[1fr_minmax(440px,560px)]">
         <AuthLeftPanel />
-        <main className="bg-card text-foreground relative flex h-full flex-col overflow-y-auto">
-          <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-8 lg:py-10">
+        <main className="bg-card text-foreground relative flex h-full flex-col overflow-y-auto overscroll-contain">
+          <div className="mx-auto flex min-h-full w-full max-w-md flex-1 flex-col px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] lg:justify-center lg:py-10">
             <div className="mb-6 flex items-center justify-between gap-3">
               <h1 className="text-xl font-semibold tracking-tight md:text-2xl">Completar perfil</h1>
               <Tooltip>

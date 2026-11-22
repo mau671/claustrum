@@ -1,6 +1,8 @@
 import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/http-api";
 import * as Schema from "effect/Schema";
 
+import { FeedbackItem } from "../domain/Feedback";
+import { NotificationItem } from "../domain/Notifications";
 import {
   BadRequestError,
   BanUserPayload,
@@ -9,11 +11,13 @@ import {
   ListUsersQuery,
   ListUsersResponse,
   NotFoundError,
+  SendNotificationPayload,
   SubmitOnboardingPayload,
   SuccessResponse,
   UnauthorizedError,
   UpdateRolePayload,
   UpdateStudyPlanPayload,
+  UserAcademicProfile,
   UserAdminItem,
   UserProfileResponse,
 } from "../domain/Users";
@@ -68,6 +72,27 @@ export class UsersApiGroup extends HttpApiGroup.make("users").add(
     params: { id: Schema.String },
     success: SuccessResponse,
     error: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, InternalServerError],
+  }),
+  HttpApiEndpoint.get("getUserAcademicProfile", "/users/:id/academic-profile", {
+    params: { id: Schema.String },
+    success: UserAcademicProfile,
+    error: [UnauthorizedError, ForbiddenError, NotFoundError, InternalServerError],
+  }),
+  HttpApiEndpoint.get("getUserFeedback", "/users/:id/feedback", {
+    params: { id: Schema.String },
+    success: Schema.Array(FeedbackItem),
+    error: [UnauthorizedError, ForbiddenError, InternalServerError],
+  }),
+  HttpApiEndpoint.get("getUserNotifications", "/users/:id/notifications", {
+    params: { id: Schema.String },
+    success: Schema.Array(NotificationItem),
+    error: [UnauthorizedError, ForbiddenError, InternalServerError],
+  }),
+  HttpApiEndpoint.post("sendUserNotification", "/users/:id/notifications", {
+    params: { id: Schema.String },
+    payload: SendNotificationPayload,
+    success: SuccessResponse,
+    error: [UnauthorizedError, ForbiddenError, NotFoundError, InternalServerError],
   }),
 ) {}
 

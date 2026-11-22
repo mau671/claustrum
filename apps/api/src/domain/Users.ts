@@ -130,6 +130,32 @@ export const BanUserPayload = Schema.Struct({
 });
 export type BanUserPayload = typeof BanUserPayload.Type;
 
+export const UserAcademicProfile = Schema.Struct({
+  user_id: Schema.String,
+  carnet: Schema.NullOr(Schema.String),
+  university_id: Schema.NullOr(Schema.Number),
+  university_name: Schema.NullOr(Schema.String),
+  campus_id: Schema.NullOr(Schema.Number),
+  campus_name: Schema.NullOr(Schema.String),
+  academic_unit_id: Schema.NullOr(Schema.Number),
+  academic_unit_name: Schema.NullOr(Schema.String),
+  study_plan_id: Schema.NullOr(Schema.Number),
+  study_plan_name: Schema.NullOr(Schema.String),
+  user_study_plan_id: Schema.NullOr(Schema.Number),
+  entry_year: Schema.NullOr(Schema.Number),
+  term_id: Schema.NullOr(Schema.Number),
+  onboarding_completed_at: Schema.NullOr(Schema.String),
+  onboarding_dismissed_at: Schema.NullOr(Schema.String),
+});
+export type UserAcademicProfile = typeof UserAcademicProfile.Type;
+
+export const SendNotificationPayload = Schema.Struct({
+  title: Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(200)),
+  message: Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(1000)),
+  link: Schema.optional(Schema.String),
+});
+export type SendNotificationPayload = typeof SendNotificationPayload.Type;
+
 export const UserProfileResponse = Schema.Struct({
   id: Schema.String,
   email: Schema.String,

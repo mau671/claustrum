@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "@/lib/api/client";
+import { authClient } from "@/lib/auth/client";
 
 export const ADMIN_USER_ROLES = ["admin", "moderator", "user"] as const;
 export type AdminUserRole = (typeof ADMIN_USER_ROLES)[number];
@@ -32,6 +33,56 @@ export interface AdminUser {
 export interface AdminUsersResponse {
   users: AdminUser[];
   total: number;
+}
+
+export interface UserAcademicProfile {
+  user_id: string;
+  carnet: string | null;
+  university_id: number | null;
+  university_name: string | null;
+  campus_id: number | null;
+  campus_name: string | null;
+  academic_unit_id: number | null;
+  academic_unit_name: string | null;
+  study_plan_id: number | null;
+  study_plan_name: string | null;
+  user_study_plan_id: number | null;
+  entry_year: number | null;
+  term_id: number | null;
+  onboarding_completed_at: string | null;
+  onboarding_dismissed_at: string | null;
+}
+
+export interface UserFeedbackItem {
+  id: number;
+  type: "bug" | "feature" | "other";
+  content: string;
+  is_reviewed: boolean;
+  created_at: string;
+  user_id: string | null;
+  admin_notes: string | null;
+}
+
+export interface UserNotificationItem {
+  id: string;
+  user_id: string | null;
+  title: string;
+  message: string;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface UserSessionItem {
+  id: string;
+  token: string;
+  userId: string;
+  expiresAt: Date | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  impersonatedBy?: string | null;
 }
 
 export interface AdminUsersFilters {
@@ -153,5 +204,122 @@ export function useDeleteAdminUser() {
         method: "DELETE",
       }),
     onSuccess: invalidate,
+  });
+}
+
+export function useUpdateAdminUserIdentity() {
+  const invalidate = useInvalidateAdminUsers();
+  return useMutation({
+    mutationFn: async ({ id, name, email }: { id: string; name?: string; email?: string }) => {
+      const data: Record<string, string> = {};
+      if (name !== undefined) data.name = name;
+      if (email !== undefined) data.email = email;
+      const result = await authClient.admin.updateUser({ userId: id, data });
+      if (result.error) {
+        throw new Error(result.error.message ?? "No se pudo actualizar el usuario.");
+      }
+      return result.data;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAdminUserAcademicProfile(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ["adminUserAcademicProfile", id],
+    queryFn: () =>
+      apiClient<UserAcademicProfile>(`/users/${encodeURIComponent(id ?? "")}/academic-profile`),
+    enabled: enabled && Boolean(id),
+    staleTime: 60_000,
+  });
+}
+
+export function useAdminUserFeedback(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ["adminUserFeedback", id],
+    queryFn: () => apiClient<UserFeedbackItem[]>(`/users/${encodeURIComponent(id ?? "")}/feedback`),
+    enabled: enabled && Boolean(id),
+    staleTime: 60_000,
+  });
+}
+
+export function useAdminUserNotifications(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ["adminUserNotifications", id],
+    queryFn: () =>
+      apiClient<UserNotificationItem[]>(`/users/${encodeURIComponent(id ?? "")}/notifications`),
+    enabled: enabled && Boolean(id),
+    staleTime: 30_000,
+  });
+}
+
+export function useSendAdminNotification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      title,
+      message,
+      link,
+    }: {
+      id: string;
+      title: string;
+      message: string;
+      link?: string;
+    }) =>
+      apiClient<{ success: boolean }>(`/users/${encodeURIComponent(id)}/notifications`, {
+        method: "POST",
+        body: JSON.stringify({ title, message, link: link?.trim() || undefined }),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["adminUserNotifications"] });
+    },
+  });
+}
+
+export function useAdminUserSessions(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ["adminUserSessions", id],
+    queryFn: async (): Promise<UserSessionItem[]> => {
+      const result = await authClient.admin.listUserSessions({ userId: id ?? "" });
+      if (result.error) {
+        throw new Error(result.error.message ?? "No se pudieron cargar las sesiones.");
+      }
+      return (result.data?.sessions ?? []) as UserSessionItem[];
+    },
+    enabled: enabled && Boolean(id),
+    staleTime: 30_000,
+  });
+}
+
+export function useRevokeAdminUserSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (sessionToken: string) => {
+      const result = await authClient.admin.revokeUserSession({ sessionToken });
+      if (result.error) {
+        throw new Error(result.error.message ?? "No se pudo revocar la sesión.");
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["adminUserSessions"] });
+    },
+  });
+}
+
+export function useRevokeAllAdminUserSessions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const result = await authClient.admin.revokeUserSessions({ userId });
+      if (result.error) {
+        throw new Error(result.error.message ?? "No se pudieron revocar las sesiones.");
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["adminUserSessions"] });
+    },
   });
 }

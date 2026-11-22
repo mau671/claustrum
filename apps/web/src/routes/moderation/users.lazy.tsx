@@ -1,11 +1,11 @@
 import type { ColumnDef, RowSelectionState, SortingState } from "@tanstack/react-table";
+import type { ReactNode } from "react";
 
 import {
   Cancel01Icon,
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  RotateCcwIcon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 import { useDebouncedCallback } from "@tanstack/react-pacer";
@@ -43,14 +43,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Frame, FrameFooter, FrameHeader } from "@/components/ui/frame";
 import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
@@ -70,15 +72,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   useAdminUser,
+  useAdminUserAcademicProfile,
+  useAdminUserFeedback,
+  useAdminUserNotifications,
   useAdminUsers,
+  useAdminUserSessions,
   useBanAdminUser,
   useDeleteAdminUser,
+  useRevokeAdminUserSession,
+  useRevokeAllAdminUserSessions,
+  useSendAdminNotification,
   useUnbanAdminUser,
+  useUpdateAdminUserIdentity,
   useUpdateAdminUserRole,
 } from "@/lib/hooks/use-admin-users";
 import { useAuthUser } from "@/lib/hooks/use-queries";
@@ -185,6 +197,34 @@ function UsersTableSkeleton() {
   );
 }
 
+function getFeedbackTypeLabel(type: "bug" | "feature" | "other"): string {
+  if (type === "bug") return "Error";
+  if (type === "feature") return "Sugerencia";
+  return "Otro";
+}
+
+function DetailField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1 sm:grid sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-center sm:gap-3">
+      <span className="text-muted-foreground text-xs font-medium sm:text-sm">{label}</span>
+      <div className="min-w-0 text-sm break-words">{children}</div>
+    </div>
+  );
+}
+
+function DetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3">
+          <Skeleton className="h-3.5 w-24 rounded-sm" />
+          <Skeleton className="h-8 flex-1 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export const Route = createLazyFileRoute("/moderation/users")({
   component: AdminUsersPage,
 });
@@ -192,6 +232,7 @@ export const Route = createLazyFileRoute("/moderation/users")({
 function AdminUsersPage() {
   const navigate = useNavigate();
   const isAdmin = useIsAdmin();
+  const isMobile = useIsMobile();
   const { data: authUser } = useAuthUser();
   const search = Route.useSearch();
 
@@ -214,6 +255,18 @@ function AdminUsersPage() {
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState("permanent");
+  const [notificationTitle, setNotificationTitle] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationLink, setNotificationLink] = useState("");
+  const [nameDraft, setNameDraft] = useState("");
+  const [emailDraft, setEmailDraft] = useState("");
+  const [roleDraft, setRoleDraft] = useState<AdminUserRole>("user");
+  const [previousDetail, setPreviousDetail] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  } | null>(null);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const sorting: SortingState = [{ id: sortBy, desc: sortDesc }];
@@ -235,6 +288,14 @@ function AdminUsersPage() {
   const banUser = useBanAdminUser();
   const unbanUser = useUnbanAdminUser();
   const deleteUser = useDeleteAdminUser();
+  const updateIdentity = useUpdateAdminUserIdentity();
+  const academicQuery = useAdminUserAcademicProfile(selectedId, isDetailOpen && isAdmin);
+  const feedbackQuery = useAdminUserFeedback(selectedId, isDetailOpen && isAdmin);
+  const notificationsQuery = useAdminUserNotifications(selectedId, isDetailOpen && isAdmin);
+  const sessionsQuery = useAdminUserSessions(selectedId, isDetailOpen && isAdmin);
+  const sendNotification = useSendAdminNotification();
+  const revokeSession = useRevokeAdminUserSession();
+  const revokeAllSessions = useRevokeAllAdminUserSessions();
 
   useEffect(() => {
     if (!isAdmin) {
@@ -244,6 +305,7 @@ function AdminUsersPage() {
 
   const openDetail = useCallback((id: string) => {
     setSelectedId(id);
+    setPreviousDetail(null);
     setBanReason("");
     setBanDuration("permanent");
     setIsDetailOpen(true);
@@ -378,9 +440,41 @@ function AdminUsersPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasMore = page < totalPages;
   const selectedUser = detailQuery.data ?? null;
+
+  if (selectedUser) {
+    const snapshot = {
+      id: selectedUser.id,
+      name: selectedUser.name,
+      email: selectedUser.email,
+      role: selectedUser.role ?? "user",
+    };
+    if (
+      !previousDetail ||
+      previousDetail.id !== snapshot.id ||
+      previousDetail.name !== snapshot.name ||
+      previousDetail.email !== snapshot.email ||
+      previousDetail.role !== snapshot.role
+    ) {
+      setPreviousDetail(snapshot);
+      setNameDraft(snapshot.name);
+      setEmailDraft(snapshot.email);
+      setRoleDraft(snapshot.role as AdminUserRole);
+    }
+  }
+
+  const hasUnsavedChanges =
+    selectedUser !== null &&
+    (nameDraft.trim() !== selectedUser.name ||
+      emailDraft.trim() !== selectedUser.email ||
+      roleDraft !== (selectedUser.role ?? "user"));
+
   const isSelf = selectedUser?.id === authUser?.id;
   const isMutating =
-    updateRole.isPending || banUser.isPending || unbanUser.isPending || deleteUser.isPending;
+    updateRole.isPending ||
+    updateIdentity.isPending ||
+    banUser.isPending ||
+    unbanUser.isPending ||
+    deleteUser.isPending;
   const selectedCount = Object.keys(rowSelection).length;
 
   const table = useTable(
@@ -449,13 +543,30 @@ function AdminUsersPage() {
     });
   }
 
-  async function handleRoleChange(role: AdminUserRole) {
-    if (!selectedUser) return;
+  async function handleSave() {
+    if (!selectedUser || !hasUnsavedChanges) return;
     try {
-      await updateRole.mutateAsync({ id: selectedUser.id, role });
-      toast.success("Rol del usuario actualizado");
+      const identityChanged =
+        nameDraft.trim() !== selectedUser.name || emailDraft.trim() !== selectedUser.email;
+      const roleChanged = roleDraft !== (selectedUser.role ?? "user");
+
+      const tasks: Promise<unknown>[] = [];
+      if (identityChanged) {
+        tasks.push(
+          updateIdentity.mutateAsync({
+            id: selectedUser.id,
+            name: nameDraft.trim(),
+            email: emailDraft.trim(),
+          }),
+        );
+      }
+      if (roleChanged) {
+        tasks.push(updateRole.mutateAsync({ id: selectedUser.id, role: roleDraft }));
+      }
+      await Promise.all(tasks);
+      toast.success("Cambios guardados");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo actualizar el rol.");
+      toast.error(error instanceof Error ? error.message : "No se pudieron guardar los cambios.");
     }
   }
 
@@ -523,6 +634,43 @@ function AdminUsersPage() {
       setRowSelection({});
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No se pudo eliminar a los usuarios.");
+    }
+  }
+
+  async function handleRevokeSession(token: string) {
+    try {
+      await revokeSession.mutateAsync(token);
+      toast.success("Sesión revocada");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo revocar la sesión.");
+    }
+  }
+
+  async function handleRevokeAllSessions() {
+    if (!selectedId) return;
+    try {
+      await revokeAllSessions.mutateAsync(selectedId);
+      toast.success("Se revocaron todas las sesiones");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudieron revocar las sesiones.");
+    }
+  }
+
+  async function handleSendNotification() {
+    if (!selectedId || !notificationTitle.trim() || !notificationMessage.trim()) return;
+    try {
+      await sendNotification.mutateAsync({
+        id: selectedId,
+        title: notificationTitle.trim(),
+        message: notificationMessage.trim(),
+        link: notificationLink.trim() || undefined,
+      });
+      toast.success("Notificación enviada");
+      setNotificationTitle("");
+      setNotificationMessage("");
+      setNotificationLink("");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo enviar la notificación.");
     }
   }
 
@@ -720,200 +868,417 @@ function AdminUsersPage() {
         </FrameFooter>
       </Frame>
 
-      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2.5">
-              {selectedUser && (
-                <UserAvatar
-                  id={selectedUser.id}
-                  name={selectedUser.name}
-                  email={selectedUser.email}
-                  src={selectedUser.image ?? undefined}
-                  className="size-9"
-                />
-              )}
-              <span className="min-w-0 truncate">
-                {selectedUser?.name ?? "Detalle del usuario"}
-              </span>
-            </DialogTitle>
-            <DialogDescription className="break-all">
-              {selectedUser?.email ?? "Cargando información…"}
-            </DialogDescription>
-          </DialogHeader>
+      <Drawer
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
+        position={isMobile ? "bottom" : "right"}
+      >
+        <DrawerPopup variant="inset" showCloseButton className="sm:max-w-md">
+          <DrawerHeader className="px-5 py-4">
+            <DrawerTitle>Detalles de usuario</DrawerTitle>
+          </DrawerHeader>
 
-          {detailQuery.isLoading ? (
-            <div className="text-muted-foreground flex h-32 items-center justify-center gap-2 text-sm">
-              <Spinner className="size-4" />
-              <span>Cargando detalle…</span>
-            </div>
-          ) : selectedUser ? (
-            <div className="space-y-5">
-              {isSelf && (
-                <p className="bg-muted text-muted-foreground rounded-md p-2.5 text-xs">
-                  Esta es tu cuenta. No puedes cambiar tu propio rol, suspenderte ni eliminarte
-                  desde aquí.
-                </p>
-              )}
-
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                <div>
-                  <p className="text-muted-foreground text-xs">Rol actual</p>
-                  <p className="mt-0.5 font-medium">{getRoleLabel(selectedUser.role)}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Estado</p>
-                  <p className="mt-0.5 font-medium">
-                    {selectedUser.banned ? "Suspendido" : "Activo"}
+          <DrawerPanel className="p-0">
+            {detailQuery.isLoading ? (
+              <div className="text-muted-foreground flex h-32 items-center justify-center gap-2 text-sm">
+                <Spinner className="size-4" />
+                <span>Cargando detalle…</span>
+              </div>
+            ) : selectedUser ? (
+              <div className="flex flex-col gap-5 p-5">
+                {isSelf && (
+                  <p className="bg-muted text-muted-foreground rounded-md p-2.5 text-xs">
+                    Esta es tu cuenta. No puedes cambiar tu propio rol, suspenderte ni eliminarte
+                    desde aquí.
                   </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Correo verificado</p>
-                  <p className="mt-0.5 font-medium">{selectedUser.emailVerified ? "Sí" : "No"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Registro</p>
-                  <p className="mt-0.5 font-medium">
-                    {new Date(selectedUser.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Última actualización</p>
-                  <p className="mt-0.5 font-medium">
-                    {new Date(selectedUser.updatedAt).toLocaleString()}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground text-xs">ID</p>
-                  <p className="mt-0.5 font-mono text-xs break-all">{selectedUser.id}</p>
-                </div>
-                {selectedUser.banned && (
-                  <>
-                    <div className="col-span-2">
-                      <p className="text-muted-foreground text-xs">Motivo de suspensión</p>
-                      <p className="mt-0.5 font-medium">
-                        {selectedUser.banReason ?? "Sin motivo registrado"}
-                      </p>
-                    </div>
-                    {selectedUser.banExpires && (
-                      <div className="col-span-2">
-                        <p className="text-muted-foreground text-xs">Expira el</p>
-                        <p className="mt-0.5 font-medium">
-                          {new Date(selectedUser.banExpires).toLocaleString()}
-                        </p>
-                      </div>
-                    )}
-                  </>
                 )}
-              </div>
 
-              <div className="border-t pt-4">
-                <Label className="text-sm font-medium">Cambiar rol</Label>
-                <div className="mt-2 flex items-center gap-2">
-                  <Select
-                    items={ROLE_ITEMS as unknown as Array<{ value: string; label: string }>}
-                    value={(selectedUser.role as AdminUserRole) ?? "user"}
-                    onValueChange={(value) => void handleRoleChange(value as AdminUserRole)}
-                  >
-                    <SelectTrigger
-                      size="sm"
-                      className="h-8 w-44 text-xs"
+                <div className="flex flex-col gap-4">
+                  <DetailField label="Nombre">
+                    <Input
+                      value={nameDraft}
+                      onChange={(event) => setNameDraft(event.target.value)}
+                      aria-label="Nombre del usuario"
+                      placeholder="Nombre del usuario"
+                      className="h-8 text-xs"
                       disabled={isSelf || isMutating}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROLE_ITEMS.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {updateRole.isPending && <Spinner className="size-4" />}
-                </div>
-              </div>
+                    />
+                  </DetailField>
 
-              {selectedUser.banned ? (
-                <div className="border-t pt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled={isSelf || isMutating}
-                    onClick={() => void handleUnban()}
-                  >
-                    <Icon icon={RotateCcwIcon} size={15} className="mr-1.5 size-3.5" />
-                    Reactivar usuario
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2 border-t pt-4">
-                  <Label htmlFor="ban-reason" className="text-sm font-medium">
-                    Suspender usuario
-                  </Label>
-                  <Textarea
-                    id="ban-reason"
-                    value={banReason}
-                    onChange={(event) => setBanReason(event.target.value)}
-                    placeholder="Motivo de la suspensión (opcional)"
-                    className="min-h-16 text-xs"
-                    disabled={isSelf || isMutating}
-                  />
-                  <div className="flex items-center gap-2">
-                    <Select
-                      items={BAN_DURATION_ITEMS}
-                      value={banDuration}
-                      onValueChange={(value) => setBanDuration(value ?? "permanent")}
-                    >
-                      <SelectTrigger
-                        size="sm"
-                        className="h-8 w-36 text-xs"
+                  <DetailField label="Correo">
+                    <div className="flex flex-col gap-1.5">
+                      <Input
+                        type="email"
+                        value={emailDraft}
+                        onChange={(event) => setEmailDraft(event.target.value)}
+                        aria-label="Correo del usuario"
+                        placeholder="Correo del usuario"
+                        className="h-8 text-xs"
                         disabled={isSelf || isMutating}
+                      />
+                      <Badge
+                        variant={selectedUser.emailVerified ? "success" : "warning"}
+                        size="sm"
+                        className="self-start"
                       >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {BAN_DURATION_ITEMS.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-8"
-                      disabled={isSelf || isMutating}
-                      onClick={() => void handleBan()}
-                    >
-                      <Icon icon={Cancel01Icon} size={15} className="mr-1.5 size-3.5" />
-                      Suspender
-                    </Button>
-                  </div>
-                </div>
-              )}
+                        {selectedUser.emailVerified ? "Verificado" : "Pendiente"}
+                      </Badge>
+                    </div>
+                  </DetailField>
 
-              <div className="border-t pt-4">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="w-full"
-                  disabled={isSelf || isMutating}
-                  onClick={() => setIsDeleteOpen(true)}
-                >
-                  Eliminar usuario
-                </Button>
+                  <DetailField label="Rol">
+                    <div className="flex items-center gap-2">
+                      <Select
+                        items={ROLE_ITEMS as unknown as Array<{ value: string; label: string }>}
+                        value={roleDraft}
+                        onValueChange={(value) => setRoleDraft(value as AdminUserRole)}
+                      >
+                        <SelectTrigger
+                          size="sm"
+                          className="h-8 w-44 text-xs"
+                          disabled={isSelf || isMutating}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ROLE_ITEMS.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {updateRole.isPending && <Spinner className="size-4" />}
+                    </div>
+                  </DetailField>
+
+                  <DetailField label="Estado">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={selectedUser.banned ? "error" : "success"} size="sm">
+                          {selectedUser.banned ? "Suspendido" : "Activo"}
+                        </Badge>
+                        {selectedUser.banned && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs"
+                            disabled={isSelf || isMutating}
+                            onClick={() => void handleUnban()}
+                          >
+                            Reactivar
+                          </Button>
+                        )}
+                      </div>
+                      {selectedUser.banned ? (
+                        <div className="text-muted-foreground text-xs">
+                          <p>{selectedUser.banReason ?? "Sin motivo registrado"}</p>
+                          {selectedUser.banExpires && (
+                            <p>Expira el {new Date(selectedUser.banExpires).toLocaleString()}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          <Textarea
+                            value={banReason}
+                            onChange={(event) => setBanReason(event.target.value)}
+                            placeholder="Motivo de la suspensión (opcional)"
+                            aria-label="Motivo de la suspensión"
+                            className="min-h-16 text-xs"
+                            disabled={isSelf || isMutating}
+                          />
+                          <div className="flex items-center gap-2">
+                            <Select
+                              items={BAN_DURATION_ITEMS}
+                              value={banDuration}
+                              onValueChange={(value) => setBanDuration(value ?? "permanent")}
+                            >
+                              <SelectTrigger
+                                size="sm"
+                                className="h-8 w-36 text-xs"
+                                disabled={isSelf || isMutating}
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {BAN_DURATION_ITEMS.map((item) => (
+                                  <SelectItem key={item.value} value={item.value}>
+                                    {item.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="h-8"
+                              disabled={isSelf || isMutating}
+                              onClick={() => void handleBan()}
+                            >
+                              <Icon icon={Cancel01Icon} size={15} className="mr-1.5 size-3.5" />
+                              Suspender
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </DetailField>
+
+                  <DetailField label="Registro">
+                    {new Date(selectedUser.createdAt).toLocaleString(undefined, {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
+                  </DetailField>
+
+                  <DetailField label="Última actualización">
+                    {new Date(selectedUser.updatedAt).toLocaleString(undefined, {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
+                  </DetailField>
+
+                  <DetailField label="ID">
+                    <span className="font-mono text-xs break-all">{selectedUser.id}</span>
+                  </DetailField>
+                </div>
+
+                <Tabs defaultValue="sesiones" className="flex flex-col gap-3">
+                  <div className="border-b">
+                    <TabsList variant="underline">
+                      <TabsTab value="sesiones">Sesiones</TabsTab>
+                      <TabsTab value="academico">Datos académicos</TabsTab>
+                      <TabsTab value="feedback">Retroalimentación</TabsTab>
+                      <TabsTab value="notificaciones">Notificaciones</TabsTab>
+                    </TabsList>
+                  </div>
+
+                  <TabsPanel value="sesiones" className="flex flex-col gap-2">
+                    {sessionsQuery.isLoading ? (
+                      <div className="text-muted-foreground flex items-center justify-center gap-2 py-6 text-sm">
+                        <Spinner className="size-4" />
+                        <span>Cargando sesiones…</span>
+                      </div>
+                    ) : sessionsQuery.data?.length ? (
+                      <>
+                        {sessionsQuery.data.map((session) => (
+                          <div
+                            key={session.id}
+                            className="bg-muted/40 flex flex-col gap-1 rounded-lg p-3 text-xs"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-medium">
+                                {session.ipAddress ?? "IP desconocida"}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs"
+                                disabled={revokeSession.isPending}
+                                onClick={() => void handleRevokeSession(session.token)}
+                              >
+                                Revocar
+                              </Button>
+                            </div>
+                            <span className="text-muted-foreground break-all">
+                              {session.userAgent ?? "Sin user-agent"}
+                            </span>
+                            <span className="text-muted-foreground">
+                              Inicio:{" "}
+                              {new Date(session.createdAt).toLocaleString(undefined, {
+                                dateStyle: "short",
+                                timeStyle: "short",
+                              })}
+                              {" · Expira: "}
+                              {new Date(session.expiresAt).toLocaleString(undefined, {
+                                dateStyle: "short",
+                                timeStyle: "short",
+                              })}
+                            </span>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          disabled={revokeAllSessions.isPending}
+                          onClick={() => void handleRevokeAllSessions()}
+                        >
+                          Revocar todas las sesiones
+                        </Button>
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        El usuario no tiene sesiones activas.
+                      </p>
+                    )}
+                  </TabsPanel>
+
+                  <TabsPanel value="academico" className="flex flex-col gap-3">
+                    {academicQuery.isLoading ? (
+                      <DetailSkeleton />
+                    ) : academicQuery.data ? (
+                      <>
+                        <DetailField label="Carnet">{academicQuery.data.carnet ?? "—"}</DetailField>
+                        <DetailField label="Universidad">
+                          {academicQuery.data.university_name ?? "—"}
+                        </DetailField>
+                        <DetailField label="Sede">
+                          {academicQuery.data.campus_name ?? "—"}
+                        </DetailField>
+                        <DetailField label="Unidad académica">
+                          {academicQuery.data.academic_unit_name ?? "—"}
+                        </DetailField>
+                        <DetailField label="Carrera">
+                          {academicQuery.data.study_plan_name ?? "—"}
+                        </DetailField>
+                        <DetailField label="Año de ingreso">
+                          {academicQuery.data.entry_year ?? "—"}
+                        </DetailField>
+                        <DetailField label="Período sugerido">
+                          {academicQuery.data.term_id ?? "—"}
+                        </DetailField>
+                        <DetailField label="Onboarding">
+                          {academicQuery.data.onboarding_completed_at
+                            ? `Completado el ${new Date(academicQuery.data.onboarding_completed_at).toLocaleDateString()}`
+                            : "Pendiente"}
+                        </DetailField>
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No hay datos académicos.</p>
+                    )}
+                  </TabsPanel>
+
+                  <TabsPanel value="feedback" className="flex flex-col gap-2">
+                    {feedbackQuery.isLoading ? (
+                      <div className="text-muted-foreground flex items-center justify-center gap-2 py-6 text-sm">
+                        <Spinner className="size-4" />
+                        <span>Cargando retroalimentación…</span>
+                      </div>
+                    ) : feedbackQuery.data?.length ? (
+                      feedbackQuery.data.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-muted/40 flex flex-col gap-1 rounded-lg p-3 text-xs"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <Badge variant="outline" size="sm">
+                              {getFeedbackTypeLabel(item.type)}
+                            </Badge>
+                            <span className="text-muted-foreground">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="break-words">{item.content}</p>
+                          {item.admin_notes && (
+                            <p className="text-muted-foreground">Notas: {item.admin_notes}</p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        El usuario no ha enviado retroalimentación.
+                      </p>
+                    )}
+                  </TabsPanel>
+
+                  <TabsPanel value="notificaciones" className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2 rounded-lg border p-3">
+                      <Label htmlFor="admin-notification-title" className="text-sm font-medium">
+                        Enviar notificación
+                      </Label>
+                      <Input
+                        id="admin-notification-title"
+                        value={notificationTitle}
+                        onChange={(event) => setNotificationTitle(event.target.value)}
+                        placeholder="Título"
+                        className="h-8 text-xs"
+                      />
+                      <Textarea
+                        id="admin-notification-message"
+                        value={notificationMessage}
+                        onChange={(event) => setNotificationMessage(event.target.value)}
+                        placeholder="Mensaje"
+                        aria-label="Mensaje de la notificación"
+                        className="min-h-16 text-xs"
+                      />
+                      <Input
+                        id="admin-notification-link"
+                        value={notificationLink}
+                        onChange={(event) => setNotificationLink(event.target.value)}
+                        placeholder="Enlace (opcional)"
+                        className="h-8 text-xs"
+                      />
+                      <Button
+                        size="sm"
+                        className="text-xs"
+                        disabled={
+                          !notificationTitle.trim() ||
+                          !notificationMessage.trim() ||
+                          sendNotification.isPending
+                        }
+                        onClick={() => void handleSendNotification()}
+                      >
+                        Enviar notificación
+                      </Button>
+                    </div>
+
+                    {notificationsQuery.isLoading ? (
+                      <div className="text-muted-foreground flex items-center justify-center gap-2 py-6 text-sm">
+                        <Spinner className="size-4" />
+                        <span>Cargando notificaciones…</span>
+                      </div>
+                    ) : notificationsQuery.data?.length ? (
+                      notificationsQuery.data.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-muted/40 flex flex-col gap-1 rounded-lg p-3 text-xs"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium">{item.title}</span>
+                            <span className="text-muted-foreground">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="break-words">{item.message}</p>
+                          {item.link && (
+                            <p className="text-muted-foreground break-all">{item.link}</p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        El usuario no tiene notificaciones.
+                      </p>
+                    )}
+                  </TabsPanel>
+                </Tabs>
               </div>
-            </div>
-          ) : (
-            <p className="text-muted-foreground py-6 text-center text-sm">
-              No se pudo cargar la información del usuario.
-            </p>
-          )}
-        </DialogContent>
-      </Dialog>
+            ) : (
+              <p className="text-muted-foreground py-6 text-center text-sm">
+                No se pudo cargar la información del usuario.
+              </p>
+            )}
+          </DrawerPanel>
+
+          <DrawerFooter variant="bare" className="px-5">
+            <Button
+              disabled={!hasUnsavedChanges || isSelf || isMutating}
+              onClick={() => void handleSave()}
+            >
+              {isMutating && <Spinner className="size-4" />}
+              Guardar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isSelf || isMutating}
+              onClick={() => setIsDeleteOpen(true)}
+            >
+              Eliminar usuario
+            </Button>
+          </DrawerFooter>
+        </DrawerPopup>
+      </Drawer>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>

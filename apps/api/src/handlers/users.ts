@@ -4,6 +4,9 @@ import * as Effect from "effect/Effect";
 import { HttpApiBuilder } from "effect/http-api";
 import * as Option from "effect/Option";
 
+import type { FeedbackItem } from "../domain/Feedback";
+import type { NotificationItem } from "../domain/Notifications";
+
 import { ClaustrumApi } from "../api/index";
 import {
   BadRequestError,
@@ -12,6 +15,7 @@ import {
   CurrentUser,
   InternalServerError,
   NotFoundError,
+  type UserAcademicProfile,
   type UserAdminItem,
   type UserProfileResponse,
   type UserSortBy,
@@ -36,6 +40,41 @@ interface ProfileRow {
 interface OnboardingStatusRow {
   readonly onboarding_dismissed_at?: unknown;
   readonly onboarding_completed_at?: unknown;
+}
+
+interface AcademicProfileRow {
+  readonly user_id: string;
+  readonly carnet: string | null;
+  readonly university_id: number | string | null;
+  readonly university_name: string | null;
+  readonly campus_id: number | string | null;
+  readonly campus_name: string | null;
+  readonly academic_unit_id: number | string | null;
+  readonly academic_unit_name: string | null;
+  readonly study_plan_id: number | string | null;
+  readonly study_plan_name: string | null;
+  readonly user_study_plan_id: number | string | null;
+  readonly entry_year: number | string | null;
+  readonly term_id: number | string | null;
+}
+
+interface UserFeedbackDbRow {
+  readonly id: number | string;
+  readonly type: FeedbackItem["type"];
+  readonly content: string;
+  readonly is_reviewed: boolean;
+  readonly created_at: unknown;
+  readonly admin_notes: string | null;
+}
+
+interface UserNotificationDbRow {
+  readonly id: string;
+  readonly user_id: string | null;
+  readonly title: string;
+  readonly message: string;
+  readonly link: string | null;
+  readonly is_read: boolean;
+  readonly created_at: unknown;
 }
 
 interface UserDbRow {
@@ -572,6 +611,146 @@ export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handle
           if (res.length === 0) {
             return yield* new NotFoundError({ error: "User not found" });
           }
+
+          return { success: true };
+        }),
+      )
+      .handle("getUserAcademicProfile", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));
+          yield* checkRole(user, ["admin"]);
+
+          const exists = yield* sql<{ id: string }>`
+            SELECT id FROM better_auth."user" WHERE id = ${params.id}::uuid
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+          if (exists.length === 0) {
+            return yield* new NotFoundError({ error: "User not found" });
+          }
+
+          const rows = yield* sql<AcademicProfileRow>`
+            SELECT * FROM public.get_user_profile_with_context(${params.id}::uuid)
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+          const flags = yield* sql<OnboardingStatusRow>`
+            SELECT onboarding_dismissed_at, onboarding_completed_at
+            FROM public."user"
+            WHERE id = ${params.id}::uuid
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+
+          const r = rows[0];
+          const toNumber = (value: number | string | null) =>
+            value === null || value === undefined ? null : Number(value);
+          const profile: UserAcademicProfile = {
+            user_id: r?.user_id ?? params.id,
+            carnet: r?.carnet ?? null,
+            university_id: toNumber(r?.university_id ?? null),
+            university_name: r?.university_name ?? null,
+            campus_id: toNumber(r?.campus_id ?? null),
+            campus_name: r?.campus_name ?? null,
+            academic_unit_id: toNumber(r?.academic_unit_id ?? null),
+            academic_unit_name: r?.academic_unit_name ?? null,
+            study_plan_id: toNumber(r?.study_plan_id ?? null),
+            study_plan_name: r?.study_plan_name ?? null,
+            user_study_plan_id: toNumber(r?.user_study_plan_id ?? null),
+            entry_year: toNumber(r?.entry_year ?? null),
+            term_id: toNumber(r?.term_id ?? null),
+            onboarding_completed_at: toIsoString(flags[0]?.onboarding_completed_at),
+            onboarding_dismissed_at: toIsoString(flags[0]?.onboarding_dismissed_at),
+          };
+          return profile;
+        }),
+      )
+      .handle("getUserFeedback", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));
+          yield* checkRole(user, ["admin"]);
+
+          const rows = yield* sql<UserFeedbackDbRow>`
+            SELECT id, type, content, is_reviewed, created_at, admin_notes
+            FROM public.user_feedback
+            WHERE user_id = ${params.id}::uuid
+            ORDER BY created_at DESC
+            LIMIT 50
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+
+          return rows.map((r): FeedbackItem => ({
+            id: Number(r.id),
+            type: r.type,
+            content: r.content,
+            is_reviewed: Boolean(r.is_reviewed),
+            created_at: toIsoString(r.created_at) ?? "",
+            user_id: params.id,
+            admin_notes: r.admin_notes ?? null,
+          }));
+        }),
+      )
+      .handle("getUserNotifications", ({ params }) =>
+        Effect.gen(function* () {
+          const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));
+          yield* checkRole(user, ["admin"]);
+
+          const rows = yield* sql<UserNotificationDbRow>`
+            SELECT id, user_id, title, message, link, is_read, created_at
+            FROM public.notifications
+            WHERE user_id = ${params.id}::uuid
+            ORDER BY created_at DESC
+            LIMIT 50
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+
+          return rows.map((r): NotificationItem => ({
+            id: r.id,
+            user_id: r.user_id,
+            title: r.title,
+            message: r.message,
+            link: r.link ?? null,
+            is_read: Boolean(r.is_read),
+            created_at: toIsoString(r.created_at) ?? "",
+          }));
+        }),
+      )
+      .handle("sendUserNotification", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));
+          yield* checkRole(user, ["admin"]);
+
+          const exists = yield* sql<{ id: string }>`
+            SELECT id FROM better_auth."user" WHERE id = ${params.id}::uuid
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+          if (exists.length === 0) {
+            return yield* new NotFoundError({ error: "User not found" });
+          }
+
+          yield* sql`
+            INSERT INTO public.notifications (user_id, title, message, link)
+            VALUES (${params.id}::uuid, ${payload.title}, ${payload.message}, ${payload.link ?? null})
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
 
           return { success: true };
         }),

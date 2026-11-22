@@ -2,7 +2,6 @@ import type { ColumnDef, RowSelectionState, SortingState } from "@tanstack/react
 import type { ReactNode } from "react";
 
 import {
-  Cancel01Icon,
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
@@ -55,6 +54,7 @@ import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -92,6 +92,7 @@ import {
   useUnbanAdminUser,
   useUpdateAdminUserIdentity,
   useUpdateAdminUserRole,
+  useUpdateAdminUserVerification,
 } from "@/lib/hooks/use-admin-users";
 import { useAuthUser } from "@/lib/hooks/use-queries";
 import { useIsAdmin } from "@/lib/hooks/use-roles";
@@ -113,6 +114,16 @@ const ROLE_ITEMS: ReadonlyArray<{ value: AdminUserRole; label: string }> = [
   { value: "admin", label: "Administrador" },
   { value: "moderator", label: "Moderador" },
   { value: "user", label: "Usuario" },
+];
+
+const VERIFICATION_ITEMS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: "true", label: "Verificado" },
+  { value: "false", label: "Pendiente" },
+];
+
+const STATUS_ITEMS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: "active", label: "Activo" },
+  { value: "banned", label: "Suspendido" },
 ];
 
 const BANNED_FILTER_ITEMS: ReadonlyArray<{ value: BannedFilter; label: string }> = [
@@ -261,11 +272,15 @@ function AdminUsersPage() {
   const [nameDraft, setNameDraft] = useState("");
   const [emailDraft, setEmailDraft] = useState("");
   const [roleDraft, setRoleDraft] = useState<AdminUserRole>("user");
+  const [verifiedDraft, setVerifiedDraft] = useState(false);
+  const [statusDraft, setStatusDraft] = useState<"active" | "banned">("active");
   const [previousDetail, setPreviousDetail] = useState<{
     id: string;
     name: string;
     email: string;
     role: string;
+    emailVerified: boolean;
+    banned: boolean;
   } | null>(null);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -289,6 +304,7 @@ function AdminUsersPage() {
   const unbanUser = useUnbanAdminUser();
   const deleteUser = useDeleteAdminUser();
   const updateIdentity = useUpdateAdminUserIdentity();
+  const updateVerification = useUpdateAdminUserVerification();
   const academicQuery = useAdminUserAcademicProfile(selectedId, isDetailOpen && isAdmin);
   const feedbackQuery = useAdminUserFeedback(selectedId, isDetailOpen && isAdmin);
   const notificationsQuery = useAdminUserNotifications(selectedId, isDetailOpen && isAdmin);
@@ -447,18 +463,24 @@ function AdminUsersPage() {
       name: selectedUser.name,
       email: selectedUser.email,
       role: selectedUser.role ?? "user",
+      emailVerified: selectedUser.emailVerified,
+      banned: Boolean(selectedUser.banned),
     };
     if (
       !previousDetail ||
       previousDetail.id !== snapshot.id ||
       previousDetail.name !== snapshot.name ||
       previousDetail.email !== snapshot.email ||
-      previousDetail.role !== snapshot.role
+      previousDetail.role !== snapshot.role ||
+      previousDetail.emailVerified !== snapshot.emailVerified ||
+      previousDetail.banned !== snapshot.banned
     ) {
       setPreviousDetail(snapshot);
       setNameDraft(snapshot.name);
       setEmailDraft(snapshot.email);
       setRoleDraft(snapshot.role as AdminUserRole);
+      setVerifiedDraft(snapshot.emailVerified);
+      setStatusDraft(snapshot.banned ? "banned" : "active");
     }
   }
 
@@ -466,12 +488,15 @@ function AdminUsersPage() {
     selectedUser !== null &&
     (nameDraft.trim() !== selectedUser.name ||
       emailDraft.trim() !== selectedUser.email ||
-      roleDraft !== (selectedUser.role ?? "user"));
+      roleDraft !== (selectedUser.role ?? "user") ||
+      verifiedDraft !== selectedUser.emailVerified ||
+      statusDraft !== (selectedUser.banned ? "banned" : "active"));
 
   const isSelf = selectedUser?.id === authUser?.id;
   const isMutating =
     updateRole.isPending ||
     updateIdentity.isPending ||
+    updateVerification.isPending ||
     banUser.isPending ||
     unbanUser.isPending ||
     deleteUser.isPending;
@@ -549,6 +574,8 @@ function AdminUsersPage() {
       const identityChanged =
         nameDraft.trim() !== selectedUser.name || emailDraft.trim() !== selectedUser.email;
       const roleChanged = roleDraft !== (selectedUser.role ?? "user");
+      const verificationChanged = verifiedDraft !== selectedUser.emailVerified;
+      const statusChanged = statusDraft !== (selectedUser.banned ? "banned" : "active");
 
       const tasks: Promise<unknown>[] = [];
       if (identityChanged) {
@@ -563,35 +590,26 @@ function AdminUsersPage() {
       if (roleChanged) {
         tasks.push(updateRole.mutateAsync({ id: selectedUser.id, role: roleDraft }));
       }
+      if (verificationChanged) {
+        tasks.push(
+          updateVerification.mutateAsync({ id: selectedUser.id, verified: verifiedDraft }),
+        );
+      }
+      if (statusChanged) {
+        tasks.push(
+          statusDraft === "banned"
+            ? banUser.mutateAsync({
+                id: selectedUser.id,
+                reason: banReason,
+                expiresInSeconds: banDuration === "permanent" ? undefined : Number(banDuration),
+              })
+            : unbanUser.mutateAsync(selectedUser.id),
+        );
+      }
       await Promise.all(tasks);
       toast.success("Cambios guardados");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No se pudieron guardar los cambios.");
-    }
-  }
-
-  async function handleBan() {
-    if (!selectedUser) return;
-    try {
-      await banUser.mutateAsync({
-        id: selectedUser.id,
-        reason: banReason,
-        expiresInSeconds: banDuration === "permanent" ? undefined : Number(banDuration),
-      });
-      toast.success("Usuario suspendido");
-      setBanReason("");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo suspender al usuario.");
-    }
-  }
-
-  async function handleUnban() {
-    if (!selectedUser) return;
-    try {
-      await unbanUser.mutateAsync(selectedUser.id);
-      toast.success("Usuario reactivado");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo reactivar al usuario.");
     }
   }
 
@@ -906,24 +924,38 @@ function AdminUsersPage() {
                   </DetailField>
 
                   <DetailField label="Correo">
-                    <div className="flex flex-col gap-1.5">
-                      <Input
-                        type="email"
-                        value={emailDraft}
-                        onChange={(event) => setEmailDraft(event.target.value)}
-                        aria-label="Correo del usuario"
-                        placeholder="Correo del usuario"
-                        className="h-8 text-xs"
-                        disabled={isSelf || isMutating}
-                      />
-                      <Badge
-                        variant={selectedUser.emailVerified ? "success" : "warning"}
+                    <Input
+                      type="email"
+                      value={emailDraft}
+                      onChange={(event) => setEmailDraft(event.target.value)}
+                      aria-label="Correo del usuario"
+                      placeholder="Correo del usuario"
+                      className="h-8 text-xs"
+                      disabled={isSelf || isMutating}
+                    />
+                  </DetailField>
+
+                  <DetailField label="Verificación">
+                    <Select
+                      items={VERIFICATION_ITEMS}
+                      value={verifiedDraft ? "true" : "false"}
+                      onValueChange={(value) => setVerifiedDraft(value === "true")}
+                    >
+                      <SelectTrigger
                         size="sm"
-                        className="self-start"
+                        className="h-8 w-44 text-xs"
+                        disabled={isSelf || isMutating}
                       >
-                        {selectedUser.emailVerified ? "Verificado" : "Pendiente"}
-                      </Badge>
-                    </div>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VERIFICATION_ITEMS.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </DetailField>
 
                   <DetailField label="Rol">
@@ -952,78 +984,6 @@ function AdminUsersPage() {
                     </div>
                   </DetailField>
 
-                  <DetailField label="Estado">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={selectedUser.banned ? "error" : "success"} size="sm">
-                          {selectedUser.banned ? "Suspendido" : "Activo"}
-                        </Badge>
-                        {selectedUser.banned && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs"
-                            disabled={isSelf || isMutating}
-                            onClick={() => void handleUnban()}
-                          >
-                            Reactivar
-                          </Button>
-                        )}
-                      </div>
-                      {selectedUser.banned ? (
-                        <div className="text-muted-foreground text-xs">
-                          <p>{selectedUser.banReason ?? "Sin motivo registrado"}</p>
-                          {selectedUser.banExpires && (
-                            <p>Expira el {new Date(selectedUser.banExpires).toLocaleString()}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2">
-                          <Textarea
-                            value={banReason}
-                            onChange={(event) => setBanReason(event.target.value)}
-                            placeholder="Motivo de la suspensión (opcional)"
-                            aria-label="Motivo de la suspensión"
-                            className="min-h-16 text-xs"
-                            disabled={isSelf || isMutating}
-                          />
-                          <div className="flex items-center gap-2">
-                            <Select
-                              items={BAN_DURATION_ITEMS}
-                              value={banDuration}
-                              onValueChange={(value) => setBanDuration(value ?? "permanent")}
-                            >
-                              <SelectTrigger
-                                size="sm"
-                                className="h-8 w-36 text-xs"
-                                disabled={isSelf || isMutating}
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {BAN_DURATION_ITEMS.map((item) => (
-                                  <SelectItem key={item.value} value={item.value}>
-                                    {item.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-8"
-                              disabled={isSelf || isMutating}
-                              onClick={() => void handleBan()}
-                            >
-                              <Icon icon={Cancel01Icon} size={15} className="mr-1.5 size-3.5" />
-                              Suspender
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </DetailField>
-
                   <DetailField label="Registro">
                     {new Date(selectedUser.createdAt).toLocaleString(undefined, {
                       dateStyle: "short",
@@ -1043,14 +1003,20 @@ function AdminUsersPage() {
                   </DetailField>
                 </div>
 
-                <Tabs defaultValue="sesiones" className="flex flex-col gap-3">
-                  <div className="border-b">
-                    <TabsList variant="underline">
-                      <TabsTab value="sesiones">Sesiones</TabsTab>
-                      <TabsTab value="academico">Datos académicos</TabsTab>
-                      <TabsTab value="feedback">Retroalimentación</TabsTab>
-                      <TabsTab value="notificaciones">Notificaciones</TabsTab>
-                    </TabsList>
+                <Tabs defaultValue="sesiones" className="flex min-w-0 flex-col gap-3">
+                  <div className="min-w-0 border-b">
+                    <ScrollArea
+                      scrollFade
+                      className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden"
+                    >
+                      <TabsList variant="underline" className="w-max min-w-full">
+                        <TabsTab value="sesiones">Sesiones</TabsTab>
+                        <TabsTab value="academico">Datos académicos</TabsTab>
+                        <TabsTab value="feedback">Retroalimentación</TabsTab>
+                        <TabsTab value="notificaciones">Notificaciones</TabsTab>
+                        <TabsTab value="cuenta">Gestión de cuenta</TabsTab>
+                      </TabsList>
+                    </ScrollArea>
                   </div>
 
                   <TabsPanel value="sesiones" className="flex flex-col gap-2">
@@ -1252,6 +1218,95 @@ function AdminUsersPage() {
                       </p>
                     )}
                   </TabsPanel>
+
+                  <TabsPanel value="cuenta" className="flex flex-col gap-3">
+                    <DetailField label="Estado">
+                      <Select
+                        items={STATUS_ITEMS}
+                        value={statusDraft}
+                        onValueChange={(value) => setStatusDraft(value as "active" | "banned")}
+                      >
+                        <SelectTrigger
+                          size="sm"
+                          className="h-8 w-44 text-xs"
+                          disabled={isSelf || isMutating}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATUS_ITEMS.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </DetailField>
+
+                    {selectedUser.banned && (
+                      <div className="bg-muted/40 flex flex-col gap-1 rounded-lg p-3 text-xs">
+                        <p className="break-words">
+                          <span className="text-muted-foreground">Motivo: </span>
+                          {selectedUser.banReason ?? "Sin motivo registrado"}
+                        </p>
+                        {selectedUser.banExpires && (
+                          <p>
+                            <span className="text-muted-foreground">Expira: </span>
+                            {new Date(selectedUser.banExpires).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {statusDraft === "banned" && !selectedUser.banned && (
+                      <div className="flex flex-col gap-2">
+                        <Textarea
+                          value={banReason}
+                          onChange={(event) => setBanReason(event.target.value)}
+                          placeholder="Motivo de la suspensión (opcional)"
+                          aria-label="Motivo de la suspensión"
+                          className="min-h-16 text-xs"
+                          disabled={isSelf || isMutating}
+                        />
+                        <Select
+                          items={BAN_DURATION_ITEMS}
+                          value={banDuration}
+                          onValueChange={(value) => setBanDuration(value ?? "permanent")}
+                        >
+                          <SelectTrigger
+                            size="sm"
+                            className="h-8 w-36 text-xs"
+                            disabled={isSelf || isMutating}
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {BAN_DURATION_ITEMS.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    <p className="text-muted-foreground text-xs">
+                      Los cambios de estado se aplican al guardar.
+                    </p>
+
+                    <div className="border-t pt-3">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full"
+                        disabled={isSelf || isMutating}
+                        onClick={() => setIsDeleteOpen(true)}
+                      >
+                        Eliminar usuario
+                      </Button>
+                    </div>
+                  </TabsPanel>
                 </Tabs>
               </div>
             ) : (
@@ -1268,13 +1323,6 @@ function AdminUsersPage() {
             >
               {isMutating && <Spinner className="size-4" />}
               Guardar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={isSelf || isMutating}
-              onClick={() => setIsDeleteOpen(true)}
-            >
-              Eliminar usuario
             </Button>
           </DrawerFooter>
         </DrawerPopup>

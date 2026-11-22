@@ -615,6 +615,29 @@ export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handle
           return { success: true };
         }),
       )
+      .handle("updateUserVerification", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));
+          yield* checkRole(user, ["admin"]);
+
+          const res = yield* sql<{ id: string }>`
+            UPDATE better_auth."user"
+            SET "emailVerified" = ${payload.verified}, "updatedAt" = NOW()
+            WHERE id = ${params.id}::uuid
+            RETURNING id
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+
+          if (res.length === 0) {
+            return yield* new NotFoundError({ error: "User not found" });
+          }
+
+          return { success: true };
+        }),
+      )
       .handle("getUserAcademicProfile", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));

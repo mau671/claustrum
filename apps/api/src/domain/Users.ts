@@ -130,6 +130,11 @@ export const BanUserPayload = Schema.Struct({
 });
 export type BanUserPayload = typeof BanUserPayload.Type;
 
+export const UpdateVerificationPayload = Schema.Struct({
+  verified: Schema.Boolean,
+});
+export type UpdateVerificationPayload = typeof UpdateVerificationPayload.Type;
+
 export const UserAcademicProfile = Schema.Struct({
   user_id: Schema.String,
   carnet: Schema.NullOr(Schema.String),

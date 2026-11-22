@@ -224,6 +224,18 @@ export function useUpdateAdminUserIdentity() {
   });
 }
 
+export function useUpdateAdminUserVerification() {
+  const invalidate = useInvalidateAdminUsers();
+  return useMutation({
+    mutationFn: ({ id, verified }: { id: string; verified: boolean }) =>
+      apiClient<{ success: boolean }>(`/users/${encodeURIComponent(id)}/verification`, {
+        method: "PATCH",
+        body: JSON.stringify({ verified }),
+      }),
+    onSuccess: invalidate,
+  });
+}
+
 export function useAdminUserAcademicProfile(id: string | null, enabled = true) {
   return useQuery({
     queryKey: ["adminUserAcademicProfile", id],

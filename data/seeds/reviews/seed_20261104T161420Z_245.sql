@@ -1,0 +1,71 @@
+-- ============================================================================
+-- REVIEWS DELTA SEED
+-- ============================================================================
+-- TEC-DATA-META scope=reviews
+-- TEC-DATA-META professor_id=245
+-- TEC-DATA-META years=2015,2016,2017,2020,2021,2022,2023,2024,2026
+-- TEC-DATA-META term_external_keys=
+-- TEC-DATA-META generated_at_utc=2026-11-04T16:14:20.007771+00:00
+
+BEGIN;
+SET LOCAL search_path = public;
+
+WITH review_input (
+  professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+  attendance_required, grade_received, engagement_level, tags, created_at, import_key, course_ids
+) AS (
+  VALUES 
+    (245::BIGINT, 'Ninguno'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Califica con rigor', 'Asistencia obligatoria', 'Clases excelentes']::TEXT[], '2026-05-29T00:00:00+00:00'::TIMESTAMPTZ, '6b40c6361d695ec02c880b15032ff58ee5ac7dab76fb9ff1f7dff51e0bdaaaeb'::TEXT, ARRAY[956]::BIGINT[]),
+    (245::BIGINT, 'Hace comentarios incómodos en clase, no vale la pena asistir porque lo único que hace es leer una presentación y comentar experiencias personales que a nadie le importan. Dura demasiado en calificar trabajos/exámenes. De los peores de la escuela, no debería ser profesor.'::TEXT, 6.0::NUMERIC(3,1), 3.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2024-11-13T00:00:00+00:00'::TIMESTAMPTZ, '4bd69c6e32d9517a3804a9314d048847d180d7a9f578a8e26b42daeca52c1c2b'::TEXT, ARRAY[976]::BIGINT[]),
+    (245::BIGINT, 'Es un viejo verde, no lo recomiendo para nada'::TEXT, 6.0::NUMERIC(3,1), 5.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2024-09-05T00:00:00+00:00'::TIMESTAMPTZ, 'c5dd81e0ddcab68e04bf3fe52fe044884929874ae25b5e07e83ec898dd87f48d'::TEXT, ARRAY[976]::BIGINT[]),
+    (245::BIGINT, 'No sabe usar autocad y es un pésimo profesor, se enoja si uno no entendió algo y es un cp'::TEXT, 6.0::NUMERIC(3,1), 2.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('20','')::SMALLINT, NULL::SMALLINT, ARRAY['Deja trabajos largos']::TEXT[], '2023-11-14T00:00:00+00:00'::TIMESTAMPTZ, '39e31c4b6f2fcdbdc917d3bd25c7d8b1c4a07706dbc42f106020a7a48bb6a911'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Buen inge, mal profe. No da retroalimentación con los examenes y las notas hasta el final, entonces si usted no sabía que el mae quería algo en especifico se lo va a sonar en los 3 examenes. Los quices estándar, muy random lo que pregunta. Una gira o proyecto, 3 tareas, 5 quices.'::TEXT, 6.0::NUMERIC(3,1), 5.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('70','')::SMALLINT, NULL::SMALLINT, ARRAY['Califica con rigor', 'Asistencia obligatoria', 'Clases largas']::TEXT[], '2023-06-25T00:00:00+00:00'::TIMESTAMPTZ, '038a7d9e44adf40a0bf17470de8e4e4f382856b8417ce54caf6a9c767b1be38f'::TEXT, ARRAY[1006]::BIGINT[]),
+    (245::BIGINT, 'Se pasa facil, el profe es relajado, algo exigente con el fromato de informe , pero si cumple con lo que pide no tendra problemas'::TEXT, 10.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Tomaría su clase nuevamente']::TEXT[], '2023-06-23T00:00:00+00:00'::TIMESTAMPTZ, 'a0030805daf6f3811cfadb70d962370290849bd4d0758329b2b8bb882a46cd28'::TEXT, ARRAY[956]::BIGINT[]),
+    (245::BIGINT, 'Los bretes que deja son rudos pero califica suave, dura mucho dando los resultados. Se aprende bastante'::TEXT, 8.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('75','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2022-06-18T00:00:00+00:00'::TIMESTAMPTZ, 'b5cea91dc40c482e9007b2f7536d1bebdba752e189549bbd37f3f720f7aa9151'::TEXT, ARRAY[956]::BIGINT[]),
+    (245::BIGINT, 'Los informes extensos hacen que el curso se sienta como de más de un crédito, las clases algo improvisadas; pero si pregunta algo le responde con respeto.'::TEXT, 6.0::NUMERIC(3,1), 9.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2021-06-24T00:00:00+00:00'::TIMESTAMPTZ, 'e73cdbc8c10ed198fa0634ca817021d3207543058f456d698bb98a96a9e4d2e0'::TEXT, ARRAY[956]::BIGINT[]),
+    (245::BIGINT, 'Se pasa bien pero por bitácora pide un documento muy lleno de varas para ser un curso de 1 crédito. Hace que el curso demande más tiempo del esperado'::TEXT, 4.0::NUMERIC(3,1), 5.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Clases largas', 'Deja trabajos largos']::TEXT[], '2021-02-11T00:00:00+00:00'::TIMESTAMPTZ, '69f3d6ef135daac7bd83d11ab5788bd2e18edd064e694ad7dc766dd4bc1a2c4c'::TEXT, ARRAY[956]::BIGINT[]),
+    (245::BIGINT, 'Es un profesor mediocre. Es superficial en su explicación de la materia. Sumamente irresponsable con entrega de notas, en todo el semestre no da ni la nota de una tarea, uno va completamente a ciegas. De ser posible evítenlo'::TEXT, 8.0::NUMERIC(3,1), 5.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2021-01-14T00:00:00+00:00'::TIMESTAMPTZ, 'ce3ddb0a12a2bc10fb1ed3f19a054853f4cba659da266593c6ee8d0b92353e38'::TEXT, ARRAY[2885]::BIGINT[]),
+    (245::BIGINT, 'Es un buen profesor, es bastante claro y le interesa que aprendan de su curso.'::TEXT, 6.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY['La participación importa', 'Aspectos de calificación claros', 'Tomaría su clase nuevamente']::TEXT[], '2020-08-25T00:00:00+00:00'::TIMESTAMPTZ, '6b20844a73e273eb03e7c53d0419d88c981da13deaa536e94103ce4119f61995'::TEXT, ARRAY[956]::BIGINT[]),
+    (245::BIGINT, 'Es la típica persona que dice que es abierta de mente y cuando uno le dice algo que no le gusta busca mil excusas y argumentos para decirle que él "sabe más" y que lo que usted hace siempre está mal. Revisa todos los trabajos hasta el final. No es la peor opción pero hay mejores alternativas'::TEXT, 6.0::NUMERIC(3,1), 5.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2020-08-20T00:00:00+00:00'::TIMESTAMPTZ, '0a545c3248bf6146591fed5dea7946198078c04abe23d7a4f9d70bd60fae5a27'::TEXT, ARRAY[972]::BIGINT[]),
+    (245::BIGINT, 'Deja mucha tarea pero eso ayuda bastante para las supervisadas'::TEXT, 6.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Muchas tareas']::TEXT[], '2017-06-26T00:00:00+00:00'::TIMESTAMPTZ, 'ae52f4da443a8a84617cd72645d71b4fea91da89dd1681dfe9b5aad2c6a7647d'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Ninguno'::TEXT, 8.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2017-01-18T00:00:00+00:00'::TIMESTAMPTZ, '5d541ef113128cbe3a7f3c45d224b71b73290bda92bd960f880f22da5d5b3e39'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'El mae puede saber bastante, pero a veces se queda corto en las explicaciones... le falta manejo en la forma en que se debe brindar la materia también, ya que al ser un curso totalmente práctico es importante que se dé a entender de la forma mas sencilla y clara para los estudiantes.'::TEXT, 4.0::NUMERIC(3,1), 2.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2016-07-06T00:00:00+00:00'::TIMESTAMPTZ, '2ff14cbefff9e4c99cdef27869f2c2ec9cd09fc76776913cb21bfa13d9f19d48'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Ninguno'::TEXT, 2.0::NUMERIC(3,1), 2.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('65','')::SMALLINT, NULL::SMALLINT, ARRAY['Califica con rigor', 'Muchas tareas', 'Deja trabajos largos']::TEXT[], '2016-06-23T00:00:00+00:00'::TIMESTAMPTZ, 'f7ad3cb032a7fb15878d540d19426e45b19d8069f1825e9cfe3ea1a67b17c741'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Intenta ser buena nota, pero creo que se queda corto de ello, además dura exageradamente DEMASIADO en dar notas, le cuesta mucho Autocad y tras de eso, no sabe calificar, deja mucha tarea que consume demasiado tiempo. Pienso que debería volver a tomar clases, especialmente de pedagogía.'::TEXT, 4.0::NUMERIC(3,1), 4.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2016-06-07T00:00:00+00:00'::TIMESTAMPTZ, '341eefcca97a06cc480edc742eab3d957ff59acfe30a7af8a49058c24428d48b'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Ninguno'::TEXT, 2.0::NUMERIC(3,1), 3.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('55','')::SMALLINT, NULL::SMALLINT, ARRAY['Califica con rigor', 'Muchas tareas', 'Deja trabajos largos']::TEXT[], '2016-06-04T00:00:00+00:00'::TIMESTAMPTZ, '51473e0742d88a03ae2c1495ad6a584bd8ae45ec842de6be7938f1fe5cf06252'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'No sabe las tareas que deja. Le pregunté una vez cual era y no sabía. No está en consulta. No sabe de autoCad. Se nota que sí sabe de lo que enseña, pero no sabe como hacerlo... Duro LITERALMENTE 2 meses en entregar una tarea. La entregué en septiembre y me la dio en noviembre. No lo recomiendo...'::TEXT, 8.0::NUMERIC(3,1), 4.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('35','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-11-07T00:00:00+00:00'::TIMESTAMPTZ, 'f111327049e3878cefc8385d4d84efef05230a862bf26713a7a00c7e383cca13'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Muy buen profe, le pone humor a la clase. Le cuesta un poco autocad, pero ayuda en la medida de lo posible. Recomendado!'::TEXT, 8.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('85','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-11-04T00:00:00+00:00'::TIMESTAMPTZ, 'eb3113068836173c41098b1abcc71e81403f325b47329687a56b548df7a594c1'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Él sabe todo lo que tiene que saber para dar el curso pero no es muy bueno corrigiendo errores. Con frecuencia no califica, entrega o discute los trabajos a tiempo. Si alguna vez están tarde para una clase o lo que sea, no importa él también lo está. Explica con buen tono de voz y atiende dudas.'::TEXT, 2.0::NUMERIC(3,1), 6.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('40','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-06-25T00:00:00+00:00'::TIMESTAMPTZ, 'bf8e0ca48609ca77c61cf0c35c21ef886b6e481d14275cd06b726bd0801952af'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'todo va muy bien hasta que se llega a autocad, le cuesta mucho usarlo y no puede atender dudas importantres ni solucionar problemas relacionados con el examen. al final del semestre se le acumulua todo y se hace un desmadre'::TEXT, 10.0::NUMERIC(3,1), 6.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-06-24T00:00:00+00:00'::TIMESTAMPTZ, '9ad40a3a122dadbd41d46fdf2251e4081c69032df954599c6886b277c0a129b6'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Ninguno'::TEXT, 6.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-06-03T00:00:00+00:00'::TIMESTAMPTZ, '867f5100eae7ecd65c7e23fdb540968a6b5f7f365a7a3715399a826a740f2e5d'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Ninguno'::TEXT, 6.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('85','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-05-29T00:00:00+00:00'::TIMESTAMPTZ, '963ebf3b1ac8356a9639699fb6a2529b0a27cd5015919af6270d6d6b7bb79e1b'::TEXT, ARRAY[610]::BIGINT[]),
+    (245::BIGINT, 'Ninguno'::TEXT, 8.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('80','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-01-17T00:00:00+00:00'::TIMESTAMPTZ, 'b971b448f173994e7b6561ab55dcdce9d92088d6c6b167812c859cc252559401'::TEXT, ARRAY[610, 984]::BIGINT[]),
+    (245::BIGINT, 'Un profe recomendado para dibujo técnico, sin embargo recomendaría mejor a Victor Julio para aquellos que tengan que llevar dibujo industrial, ya que este curso lleva mucha parte a mano y Juan Pablo se orienta 50% a mano y 50% en computadora. Buen profe y buena persona. Ayuda mucho.'::TEXT, 6.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2015-01-11T00:00:00+00:00'::TIMESTAMPTZ, 'f2af1630baffc26fd5f5dacae4029a26689abb4fb4134e4637b743e4ecedc72e'::TEXT, ARRAY[610]::BIGINT[])
+), inserted_review AS (
+  INSERT INTO public.professor_review (
+    professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+    attendance_required, grade_received, engagement_level, tags, status, reviewed_at, created_at, updated_at, import_key
+  )
+  SELECT 
+    professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+    attendance_required, grade_received, engagement_level, tags, 'approved'::public.professor_review_status, now(), created_at, created_at, import_key
+  FROM review_input ri
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.professor_review pr WHERE pr.import_key = ri.import_key
+  )
+  RETURNING id, import_key
+), target_review AS (
+  SELECT id, import_key FROM inserted_review
+  UNION ALL
+  SELECT pr.id, pr.import_key
+  FROM public.professor_review pr
+  JOIN review_input ri ON ri.import_key = pr.import_key
+)
+INSERT INTO public.professor_review_course (review_id, course_id)
+SELECT tr.id, course_id
+FROM target_review tr
+JOIN review_input ri ON ri.import_key = tr.import_key
+CROSS JOIN LATERAL unnest(ri.course_ids) AS course_id
+ON CONFLICT DO NOTHING;
+
+COMMIT;

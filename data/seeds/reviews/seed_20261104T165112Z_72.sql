@@ -1,0 +1,66 @@
+-- ============================================================================
+-- REVIEWS DELTA SEED
+-- ============================================================================
+-- TEC-DATA-META scope=reviews
+-- TEC-DATA-META professor_id=72
+-- TEC-DATA-META years=2022,2023,2024,2025
+-- TEC-DATA-META term_external_keys=
+-- TEC-DATA-META generated_at_utc=2026-11-04T16:51:12.059577+00:00
+
+BEGIN;
+SET LOCAL search_path = public;
+
+WITH review_input (
+  professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+  attendance_required, grade_received, engagement_level, tags, created_at, import_key, course_ids
+) AS (
+  VALUES 
+    (72::BIGINT, 'Es cero comprensivo. Demasiado enredado en as evaluaciones. Las instrucciones nunca son claras y las sube tarde. Primero dice una cosa y luego otra. También, no se aprende nada en el curso.'::TEXT, 4.0::NUMERIC(3,1), 2.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Asistencia obligatoria', 'Deja trabajos largos']::TEXT[], '2025-01-22T00:00:00+00:00'::TIMESTAMPTZ, 'ea7d83cfe614e4fd9fbe1c76f03b213055061b952ba9c9a95e0d85a3b78c8cdf'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Aparenta ser comprensivo, pero cuando se le pide ayuda no le importa. No contesta correos ni mensajes aunque sean importantes. Es desordenado con las evaluaciones y no se aprende nada en el curso.'::TEXT, 10.0::NUMERIC(3,1), 2.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2025-01-19T00:00:00+00:00'::TIMESTAMPTZ, 'd7f9fb228a9c706b8679786c2ff4e4984120a8b23e1ec1483e12e777e3756bf7'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Terminé el curso y siento que no aprendí nada. No se adentra en la materia y todo queda muy en el aire. Hace muchas activ pero no da la materia en sí. Además muy desordenado, a veces no contesta los mensajes. Si, fue súper fácil pasar, y es muy buena gente. Pero con el curso no gané nada.'::TEXT, 8.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2025-01-16T00:00:00+00:00'::TIMESTAMPTZ, '02b638cd836ca7e9f2cfc6b5ab2990be14c191a17a04f3b7c3adb1aa967acd9e'::TEXT, ARRAY[2371]::BIGINT[]),
+    (72::BIGINT, 'Es un profe que ayuda al estudiante. Sí habla mucho, pero los examenes son fáciles al igual que el proyecto. Da muchos ejemplos de cerveza. Cae bien y en realidad es facil pasar. Eso sí, a veces es medio desorganizado.'::TEXT, 10.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Muchos proyectos grupales', 'Tomaría su clase nuevamente']::TEXT[], '2024-12-10T00:00:00+00:00'::TIMESTAMPTZ, 'a5532c16d02eaf53e4e9b821924460681c6d26f745602383822da6ac3e034f96'::TEXT, ARRAY[2371]::BIGINT[]),
+    (72::BIGINT, 'Es un profe vacilón, cae muy bien, da bastante bien el curso. Súper recomendado.'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Da buena retroalimentación', 'Muchos proyectos grupales']::TEXT[], '2024-06-20T00:00:00+00:00'::TIMESTAMPTZ, '41a85a760f812c197ecdf09213f35e04516ae8a36b807e6252aa2ee438638a53'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'El profe es buena gente y explica bien solo que en algunas clases el escucharlo hablar sin parar puede ser tedioso.'::TEXT, 10.0::NUMERIC(3,1), 9.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('85','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Requiere mucha lectura', 'Deja trabajos largos']::TEXT[], '2024-06-20T00:00:00+00:00'::TIMESTAMPTZ, 'ffe60aede3d2f2164398274bda8abe036cf5cea1c502d7700b79003d71cc82cb'::TEXT, ARRAY[2596]::BIGINT[]),
+    (72::BIGINT, 'El profe es una teja como profe y como ser humano. Matricule sin miedo, es el más comprensivo y el mae siempre trata de ayudarlo a uno. No se va a arrepentir de llevar su clase. Calidad de ser humano.'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('85','')::SMALLINT, NULL::SMALLINT, ARRAY['Inspirador', 'Brinda apoyo', 'Tomaría su clase nuevamente']::TEXT[], '2024-01-29T00:00:00+00:00'::TIMESTAMPTZ, 'feb739fcf02219f53bc51318560cdddd5e15fb72e19b57fec7392f45a058d037'::TEXT, ARRAY[2598]::BIGINT[]),
+    (72::BIGINT, 'Muy buen profe de verdad. Super amable, humilde, lleno de calor humano, un profe que de verdad busca ayudar a los estudiantes y enseñar no solo materia sinó también de la vida. Excelente. Tiene una paciencia admirable y para resolver problemas entre el grupo es especial.'::TEXT, 8.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Inspirador', 'Clases excelentes']::TEXT[], '2023-12-05T00:00:00+00:00'::TIMESTAMPTZ, '6d6fcea40d6483b02f1e8f59b2034e29611e54c2029baf9c5c310a58c1ece6c1'::TEXT, ARRAY[2598]::BIGINT[]),
+    (72::BIGINT, 'Es muy comprensivo, no le gusta saturar a los estudiantes y busca que de verdad aprendan. Las tareas y exámenes no son difíciles, van muy acorde a lo que se ve en clase y califica muy justo.'::TEXT, 10.0::NUMERIC(3,1), 9.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Respetado por los estudiantes', 'Tomaría su clase nuevamente']::TEXT[], '2023-12-04T00:00:00+00:00'::TIMESTAMPTZ, '034002821317174d73c4e0a403db9dfbad60d093527d6c68bdb5188a21d41bfb'::TEXT, ARRAY[2598]::BIGINT[]),
+    (72::BIGINT, 'El profesor es desordenado pero muy buena gente. Deja muchos trabajos, casi que todas las semanas y se requiere de un tiempo para sacarlos. Casi que absolutamente todo es grupal, entonces escoja bien a sus compañeros. Dura mucho revisando. El curso es aburrido pero él intenta que no se aburran.'::TEXT, 10.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY['Muchas tareas', 'Asistencia obligatoria', 'Muchos proyectos grupales']::TEXT[], '2023-12-03T00:00:00+00:00'::TIMESTAMPTZ, '4aa27b1784da056f70ec34ae499dd24bd830f559a5bfd9144b92d607c1a2aa2b'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Casi todo es grupal, por lo que con un buen grupo se pasa rápido. El profesor es muy bueno, las clases son entretenidas y los trabajos bastante interesantes. 100% recomendado para este curso. Asistencia obligatoria, pero es bastante flexible cuando uno necesita faltar o retirarse de la clase.'::TEXT, 10.0::NUMERIC(3,1), 9.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Muchos proyectos grupales', 'Tomaría su clase nuevamente']::TEXT[], '2023-11-28T00:00:00+00:00'::TIMESTAMPTZ, '2fa5d40272f46174f1599ddfc2b1ed84e42ec9ee2fdc899d0e63691133f60e0c'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Es un poco desordenado. Pero es buen profe, cae bien, explica las veces que sea necesario. Muy pura vida.'::TEXT, 10.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('85','')::SMALLINT, NULL::SMALLINT, ARRAY['Aspectos de calificación claros', 'Muchos proyectos grupales', 'Tomaría su clase nuevamente']::TEXT[], '2023-11-27T00:00:00+00:00'::TIMESTAMPTZ, '5bcce467ba3a0fc09fb3f1b4956721e26d2260621091fdb6f9e746da9d715668'::TEXT, ARRAY[2598]::BIGINT[]),
+    (72::BIGINT, 'El profe es bastante bueno, con presentar todo a tiempo deberías pasar fácilmente'::TEXT, 10.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY['La participación importa', 'Clases largas', 'Deja trabajos largos']::TEXT[], '2023-06-26T00:00:00+00:00'::TIMESTAMPTZ, '06fe110752c8f854205b4dd6150d47cb147f1d2740161f6fa2e97c6aed42f04a'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Se llevó en modalidad virtual, por lo que fue un curso muy chill, no revisa tan duro y la verdad se ve que se esfuerza por dar una clase amena.'::TEXT, 8.0::NUMERIC(3,1), 7.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY['Clases largas', 'Deja trabajos largos', 'Muchos proyectos grupales']::TEXT[], '2023-06-24T00:00:00+00:00'::TIMESTAMPTZ, 'e203194d8b65586f2385258ac4ea1b74790610573d7793c8608664129298ce08'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Ayuda al estudiante'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY[]::TEXT[], '2023-05-18T00:00:00+00:00'::TIMESTAMPTZ, '6473bfba76d5d05c32c31c4582391278e9793d33246a063169c7b214f61f72a7'::TEXT, ARRAY[267]::BIGINT[]),
+    (72::BIGINT, 'La clase es muy amena y el profe busca que no sea tan pesada, pero si deja muchas asignaciones y las instrucciones no son claras. Aunque si necesitas preguntar, el esta muy atento a contestar. Casi todas las asignaciones se hacen en grupo'::TEXT, 8.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Da buena retroalimentación', 'Muchas tareas', 'La participación importa']::TEXT[], '2022-01-27T00:00:00+00:00'::TIMESTAMPTZ, '42224e5eb21f13959f4edbdc78083e3fb65bf46da584ede22e3009f8846b9dc4'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Realmente es buen profe, es solamente hablar con él para tener claridad sobre las tareas. Tiene enfoque moderno y eso permite mayor comodidad, confianza y mejor forma de aprender. Así mismo la conversación es amena y se puede vacilar. Spiderverse? Confirmed.'::TEXT, 10.0::NUMERIC(3,1), 9.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), TRUE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Da buena retroalimentación', 'Muchas tareas']::TEXT[], '2022-01-26T00:00:00+00:00'::TIMESTAMPTZ, '8cfaf380833b1e0857ea1e7cddfb03297347d963360c3d4f2310693d4bd81d1e'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Ninguno'::TEXT, 10.0::NUMERIC(3,1), 8.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('90','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Muchas tareas', 'La participación importa']::TEXT[], '2022-01-26T00:00:00+00:00'::TIMESTAMPTZ, '20430304526effc5c91bf95ae26d3b02aceaaecd3bca0880e5e38d6b3323ac04'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'Lo llevé en verano, por lo que el curso se vuelve algo intenso. Sin embargo, hace las clases entretenidas y no califica duro. Es muy buen profe, atiende todas las dudas de buena forma.'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('95','')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Muchos proyectos grupales', 'Tomaría su clase nuevamente']::TEXT[], '2022-01-26T00:00:00+00:00'::TIMESTAMPTZ, 'fb0b8855736bb60bafb8a1dfc4686f6c4909131896298a72a0da604694fb4c7d'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'No distribuye muy bien el tiempo de la clase ni los recesos, hay poca/media claridad con las asignaciones, le encanta Spider man'::TEXT, 8.0::NUMERIC(3,1), 5.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY['Muy cómico', 'Deja trabajos largos', 'Muchos proyectos grupales']::TEXT[], '2022-01-13T00:00:00+00:00'::TIMESTAMPTZ, 'f1fcf98adb117cb2c82ff3b3a60361a6cbd103e58bf3e79532b3fd722baec41f'::TEXT, ARRAY[965]::BIGINT[]),
+    (72::BIGINT, 'El profe cae bien pero deja muchos trabajos grupales'::TEXT, 10.0::NUMERIC(3,1), 9.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF(NULL,'')::SMALLINT, NULL::SMALLINT, ARRAY['Muchas tareas', 'Aspectos de calificación claros', 'Brinda apoyo']::TEXT[], '2022-01-13T00:00:00+00:00'::TIMESTAMPTZ, 'a917cfcb2383185c4caf162c3567222f2672fbbb91dcefc25f0cca8990ee073d'::TEXT, ARRAY[965]::BIGINT[])
+), inserted_review AS (
+  INSERT INTO public.professor_review (
+    professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+    attendance_required, grade_received, engagement_level, tags, status, reviewed_at, created_at, updated_at, import_key
+  )
+  SELECT 
+    professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+    attendance_required, grade_received, engagement_level, tags, 'approved'::public.professor_review_status, now(), created_at, created_at, import_key
+  FROM review_input ri
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.professor_review pr WHERE pr.import_key = ri.import_key
+  )
+  RETURNING id, import_key
+), target_review AS (
+  SELECT id, import_key FROM inserted_review
+  UNION ALL
+  SELECT pr.id, pr.import_key
+  FROM public.professor_review pr
+  JOIN review_input ri ON ri.import_key = pr.import_key
+)
+INSERT INTO public.professor_review_course (review_id, course_id)
+SELECT tr.id, course_id
+FROM target_review tr
+JOIN review_input ri ON ri.import_key = tr.import_key
+CROSS JOIN LATERAL unnest(ri.course_ids) AS course_id
+ON CONFLICT DO NOTHING;
+
+COMMIT;

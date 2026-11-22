@@ -1,0 +1,47 @@
+-- ============================================================================
+-- REVIEWS DELTA SEED
+-- ============================================================================
+-- TEC-DATA-META scope=reviews
+-- TEC-DATA-META professor_id=29
+-- TEC-DATA-META years=2021,2022
+-- TEC-DATA-META term_external_keys=
+-- TEC-DATA-META generated_at_utc=2026-11-04T16:18:46.742203+00:00
+
+BEGIN;
+SET LOCAL search_path = public;
+
+WITH review_input (
+  professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+  attendance_required, grade_received, engagement_level, tags, created_at, import_key, course_ids
+) AS (
+  VALUES 
+    (29::BIGINT, 'Sus cursos virtuales son asincrónicos, solo da 1 clase sincrónica. Las clases grabadas duran de 30 min a una hora dependiendo del tema, en su mayoría son cortos. Deja trabajos semanales, cortos y superfáciles. En el curso de computación 10/10 En el curso de metodología 8/10'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY['Da buena retroalimentación', 'Clases excelentes', 'Tomaría su clase nuevamente']::TEXT[], '2022-03-14T00:00:00+00:00'::TIMESTAMPTZ, '475bf32757288d2d8ca75049aebe7afe106b327beb4f334db638f8f08ec86f56'::TEXT, ARRAY[2376, 2442]::BIGINT[]),
+    (29::BIGINT, 'Es un excelente profesor tanto para computación para administración como para metodología, deja tareas grupales durante la semana, brinda vídeos explicativos (elaborados por el mismo) para ayudar orientar a los estudiantes y es sumamente flexible con las fechas.'::TEXT, 10.0::NUMERIC(3,1), 10.0::NUMERIC(3,1), NULL::NUMERIC(3,1), NULL::NUMERIC(3,1), FALSE::BOOLEAN, NULLIF('100','')::SMALLINT, NULL::SMALLINT, ARRAY['Da buena retroalimentación', 'Brinda apoyo', 'Tomaría su clase nuevamente']::TEXT[], '2021-12-21T00:00:00+00:00'::TIMESTAMPTZ, '1334b2424e2ffde77d9603e4ba451b8df4106a00364475d8235464d6feb1cbef'::TEXT, ARRAY[2376]::BIGINT[])
+), inserted_review AS (
+  INSERT INTO public.professor_review (
+    professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+    attendance_required, grade_received, engagement_level, tags, status, reviewed_at, created_at, updated_at, import_key
+  )
+  SELECT 
+    professor_id, comment, ease_score, quality_score, clarity_score, fairness_score,
+    attendance_required, grade_received, engagement_level, tags, 'approved'::public.professor_review_status, now(), created_at, created_at, import_key
+  FROM review_input ri
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.professor_review pr WHERE pr.import_key = ri.import_key
+  )
+  RETURNING id, import_key
+), target_review AS (
+  SELECT id, import_key FROM inserted_review
+  UNION ALL
+  SELECT pr.id, pr.import_key
+  FROM public.professor_review pr
+  JOIN review_input ri ON ri.import_key = pr.import_key
+)
+INSERT INTO public.professor_review_course (review_id, course_id)
+SELECT tr.id, course_id
+FROM target_review tr
+JOIN review_input ri ON ri.import_key = tr.import_key
+CROSS JOIN LATERAL unnest(ri.course_ids) AS course_id
+ON CONFLICT DO NOTHING;
+
+COMMIT;

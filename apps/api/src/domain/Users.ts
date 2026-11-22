@@ -77,12 +77,24 @@ export const SubmitOnboardingPayload = Schema.Struct({
 });
 export type SubmitOnboardingPayload = typeof SubmitOnboardingPayload.Type;
 
+export const UserSortBy = Schema.Literals([
+  "name",
+  "email",
+  "role",
+  "banned",
+  "createdAt",
+  "updatedAt",
+]);
+export type UserSortBy = typeof UserSortBy.Type;
+
 export const ListUsersQuery = Schema.Struct({
   limit: Schema.optional(Schema.NumberFromString),
   offset: Schema.optional(Schema.NumberFromString),
   search: Schema.optional(Schema.String),
   role: Schema.optional(UserRole),
   banned: Schema.optional(Schema.Literals(["true", "false"])),
+  sortBy: Schema.optional(UserSortBy),
+  sortDesc: Schema.optional(Schema.Union([Schema.Boolean, Schema.Literals(["true", "false"])])),
 });
 export type ListUsersQuery = typeof ListUsersQuery.Type;
 

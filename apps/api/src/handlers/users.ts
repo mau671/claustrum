@@ -14,6 +14,7 @@ import {
   NotFoundError,
   type UserAdminItem,
   type UserProfileResponse,
+  type UserSortBy,
 } from "../domain/Users";
 import { toIsoString } from "../lib/date";
 import { Database } from "../services/Database";
@@ -269,23 +270,38 @@ export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handle
           const limit = query.limit ?? 20;
           const offset = query.offset ?? 0;
 
-          const rows = yield* sql<UserDbRow>`
-            SELECT id, name, email, "emailVerified", image, role, banned, "banReason", "banExpires", "createdAt", "updatedAt",
-                   COUNT(*) OVER()::bigint AS total_count
-            FROM better_auth."user"
-            WHERE (${searchTerm}::text IS NULL OR name ILIKE '%' || ${searchTerm} || '%' OR email ILIKE '%' || ${searchTerm} || '%')
-              AND (${roleTerm}::text IS NULL OR role = ${roleTerm})
-              AND (${bannedBool}::boolean IS NULL OR banned = ${bannedBool})
-            ORDER BY "createdAt" DESC
-            LIMIT ${limit} OFFSET ${offset}
-          `.pipe(
-            Effect.mapError(
-              (e) =>
-                new InternalServerError({
-                  error: `Database error: ${e.message}`,
-                }),
-            ),
-          );
+          const sortColumns: Record<UserSortBy, string> = {
+            name: '"name"',
+            email: '"email"',
+            role: '"role"',
+            banned: '"banned"',
+            createdAt: '"createdAt"',
+            updatedAt: '"updatedAt"',
+          };
+          const sortColumn = sortColumns[query.sortBy ?? "createdAt"];
+          const sortDirection =
+            query.sortDesc === false || query.sortDesc === "false" ? "ASC" : "DESC";
+
+          const rows = yield* sql
+            .unsafe<UserDbRow>(
+              `SELECT id, name, email, "emailVerified", image, role, banned, "banReason", "banExpires", "createdAt", "updatedAt",
+                    COUNT(*) OVER()::bigint AS total_count
+             FROM better_auth."user"
+             WHERE ($1::text IS NULL OR name ILIKE '%' || $1 || '%' OR email ILIKE '%' || $1 || '%')
+               AND ($2::text IS NULL OR role = $2)
+               AND ($3::boolean IS NULL OR banned = $3)
+             ORDER BY ${sortColumn} ${sortDirection}, "createdAt" DESC, "id" ASC
+             LIMIT $4 OFFSET $5`,
+              [searchTerm, roleTerm, bannedBool, limit, offset],
+            )
+            .pipe(
+              Effect.mapError(
+                (e) =>
+                  new InternalServerError({
+                    error: `Database error: ${e.message}`,
+                  }),
+              ),
+            );
 
           const total = rows[0]?.total_count ? Number(rows[0].total_count) : 0;
           const users: UserAdminItem[] = rows.map((r) => ({

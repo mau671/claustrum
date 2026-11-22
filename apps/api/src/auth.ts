@@ -78,7 +78,7 @@ export function createAuth(env: AuthEnv, pool: Pool) {
     email: string,
   ): Promise<"missing" | "unverified" | "verified"> => {
     const { rows } = await pool.query<{ emailVerified: boolean }>(
-      `SELECT "emailVerified" FROM public."user" WHERE lower(email) = lower($1) LIMIT 1`,
+      `SELECT "emailVerified" FROM better_auth."user" WHERE lower(email) = $1 LIMIT 1`,
       [email],
     );
     const user = rows[0];

@@ -17,6 +17,7 @@ import {
   UnauthorizedError,
   UpdateRolePayload,
   UpdateStudyPlanPayload,
+  UpdateUserAcademicProfilePayload,
   UpdateVerificationPayload,
   UserAcademicProfile,
   UserAdminItem,
@@ -84,6 +85,12 @@ export class UsersApiGroup extends HttpApiGroup.make("users").add(
     params: { id: Schema.String },
     success: UserAcademicProfile,
     error: [UnauthorizedError, ForbiddenError, NotFoundError, InternalServerError],
+  }),
+  HttpApiEndpoint.patch("updateUserAcademicProfile", "/users/:id/academic-profile", {
+    params: { id: Schema.String },
+    payload: UpdateUserAcademicProfilePayload,
+    success: SuccessResponse,
+    error: [BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError, InternalServerError],
   }),
   HttpApiEndpoint.get("getUserFeedback", "/users/:id/feedback", {
     params: { id: Schema.String },

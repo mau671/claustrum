@@ -6,6 +6,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   Search01Icon,
+  UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { useDebouncedCallback } from "@tanstack/react-pacer";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
@@ -41,6 +42,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
 import {
   Drawer,
   DrawerFooter,
@@ -84,6 +94,7 @@ import {
   useAdminUserNotifications,
   useAdminUsers,
   useAdminUserSessions,
+  useUpdateAdminUserAcademicProfile,
   useBanAdminUser,
   useDeleteAdminUser,
   useRevokeAdminUserSession,
@@ -94,7 +105,7 @@ import {
   useUpdateAdminUserRole,
   useUpdateAdminUserVerification,
 } from "@/lib/hooks/use-admin-users";
-import { useAuthUser } from "@/lib/hooks/use-queries";
+import { useAcademicUnits, useAuthUser, useStudyPlans } from "@/lib/hooks/use-queries";
 import { useIsAdmin } from "@/lib/hooks/use-roles";
 import { cn } from "@/lib/utils";
 
@@ -290,6 +301,17 @@ function AdminUsersPage() {
     emailVerified: boolean;
     banned: boolean;
   } | null>(null);
+  const [carnetDraft, setCarnetDraft] = useState("");
+  const [campusIdDraft, setCampusIdDraft] = useState<number | null>(null);
+  const [academicUnitIdDraft, setAcademicUnitIdDraft] = useState<number | null>(null);
+  const [studyPlanIdDraft, setStudyPlanIdDraft] = useState<number | null>(null);
+  const [previousAcademic, setPreviousAcademic] = useState<{
+    id: string;
+    carnet: string | null;
+    campus_id: number | null;
+    academic_unit_id: number | null;
+    study_plan_id: number | null;
+  } | null>(null);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const sorting: SortingState = [{ id: sortBy, desc: sortDesc }];
@@ -313,7 +335,10 @@ function AdminUsersPage() {
   const deleteUser = useDeleteAdminUser();
   const updateIdentity = useUpdateAdminUserIdentity();
   const updateVerification = useUpdateAdminUserVerification();
+  const updateAcademic = useUpdateAdminUserAcademicProfile();
   const academicQuery = useAdminUserAcademicProfile(selectedId, isDetailOpen && isAdmin);
+  const academicUnitsQuery = useAcademicUnits(campusIdDraft);
+  const studyPlansQuery = useStudyPlans(academicUnitIdDraft);
   const feedbackQuery = useAdminUserFeedback(selectedId, isDetailOpen && isAdmin);
   const notificationsQuery = useAdminUserNotifications(selectedId, isDetailOpen && isAdmin);
   const sessionsQuery = useAdminUserSessions(selectedId, isDetailOpen && isAdmin);
@@ -330,6 +355,7 @@ function AdminUsersPage() {
   const openDetail = useCallback((id: string) => {
     setSelectedId(id);
     setPreviousDetail(null);
+    setPreviousAcademic(null);
     setBanReason("");
     setBanDuration("permanent");
     setIsDetailOpen(true);
@@ -492,19 +518,51 @@ function AdminUsersPage() {
     }
   }
 
+  const academicProfile = academicQuery.data ?? null;
+  if (academicProfile) {
+    const snapshot = {
+      id: academicProfile.user_id,
+      carnet: academicProfile.carnet,
+      campus_id: academicProfile.campus_id,
+      academic_unit_id: academicProfile.academic_unit_id,
+      study_plan_id: academicProfile.study_plan_id,
+    };
+    if (
+      !previousAcademic ||
+      previousAcademic.id !== snapshot.id ||
+      previousAcademic.carnet !== snapshot.carnet ||
+      previousAcademic.campus_id !== snapshot.campus_id ||
+      previousAcademic.academic_unit_id !== snapshot.academic_unit_id ||
+      previousAcademic.study_plan_id !== snapshot.study_plan_id
+    ) {
+      setPreviousAcademic(snapshot);
+      setCarnetDraft(snapshot.carnet ?? "");
+      setCampusIdDraft(snapshot.campus_id);
+      setAcademicUnitIdDraft(snapshot.academic_unit_id);
+      setStudyPlanIdDraft(snapshot.study_plan_id);
+    }
+  }
+
+  const hasAcademicChanges =
+    academicProfile !== null &&
+    (carnetDraft !== (academicProfile.carnet ?? "") ||
+      studyPlanIdDraft !== academicProfile.study_plan_id);
+
   const hasUnsavedChanges =
-    selectedUser !== null &&
-    (nameDraft.trim() !== selectedUser.name ||
-      emailDraft.trim() !== selectedUser.email ||
-      roleDraft !== (selectedUser.role ?? "user") ||
-      verifiedDraft !== selectedUser.emailVerified ||
-      statusDraft !== (selectedUser.banned ? "banned" : "active"));
+    (selectedUser !== null &&
+      (nameDraft.trim() !== selectedUser.name ||
+        emailDraft.trim() !== selectedUser.email ||
+        roleDraft !== (selectedUser.role ?? "user") ||
+        verifiedDraft !== selectedUser.emailVerified ||
+        statusDraft !== (selectedUser.banned ? "banned" : "active"))) ||
+    hasAcademicChanges;
 
   const isSelf = selectedUser?.id === authUser?.id;
   const isMutating =
     updateRole.isPending ||
     updateIdentity.isPending ||
     updateVerification.isPending ||
+    updateAcademic.isPending ||
     banUser.isPending ||
     unbanUser.isPending ||
     deleteUser.isPending;
@@ -578,6 +636,10 @@ function AdminUsersPage() {
 
   async function handleSave() {
     if (!selectedUser || !hasUnsavedChanges) return;
+    if (hasAcademicChanges && (campusIdDraft === null || studyPlanIdDraft === null)) {
+      toast.error("Selecciona una escuela y un plan de estudios.");
+      return;
+    }
     try {
       const identityChanged =
         nameDraft.trim() !== selectedUser.name || emailDraft.trim() !== selectedUser.email;
@@ -612,6 +674,17 @@ function AdminUsersPage() {
                 expiresInSeconds: banDuration === "permanent" ? undefined : Number(banDuration),
               })
             : unbanUser.mutateAsync(selectedUser.id),
+        );
+      }
+      if (hasAcademicChanges) {
+        tasks.push(
+          updateAcademic.mutateAsync({
+            id: selectedUser.id,
+            carnet: carnetDraft.trim() === "" ? null : carnetDraft.trim(),
+            campusId: campusIdDraft ?? undefined,
+            studyPlanId: studyPlanIdDraft ?? undefined,
+            entryYear: carnetDraft ? Number(carnetDraft.slice(0, 4)) : undefined,
+          }),
         );
       }
       await Promise.all(tasks);
@@ -1103,25 +1176,160 @@ function AdminUsersPage() {
                       <DetailSkeleton />
                     ) : academicQuery.data ? (
                       <>
-                        <DetailField label="Carnet">{academicQuery.data.carnet ?? "—"}</DetailField>
+                        <DetailField label="Carnet">
+                          <Input
+                            value={carnetDraft}
+                            onChange={(event) => setCarnetDraft(event.target.value)}
+                            placeholder="2020042209"
+                            aria-label="Carnet"
+                            className="h-8 text-xs"
+                            disabled={isSelf || isMutating}
+                          />
+                        </DetailField>
+
                         <DetailField label="Universidad">
                           {academicQuery.data.university_name ?? "—"}
                         </DetailField>
+
                         <DetailField label="Sede">
                           {academicQuery.data.campus_name ?? "—"}
                         </DetailField>
-                        <DetailField label="Unidad académica">
-                          {academicQuery.data.academic_unit_name ?? "—"}
+
+                        <DetailField label="Escuela">
+                          <Combobox
+                            items={academicUnitsQuery.data ?? []}
+                            value={
+                              (academicUnitsQuery.data ?? []).find(
+                                (item) => item.id === academicUnitIdDraft,
+                              ) ?? null
+                            }
+                            onValueChange={(item) => {
+                              setAcademicUnitIdDraft(item ? item.id : null);
+                              setStudyPlanIdDraft(null);
+                            }}
+                            itemToStringValue={(item) =>
+                              item.code ? `${item.code}: ${item.name}` : item.name
+                            }
+                            disabled={campusIdDraft === null || academicUnitsQuery.isLoading}
+                          >
+                            <ComboboxTrigger
+                              aria-label="Escuela"
+                              render={
+                                <Button
+                                  variant="outline"
+                                  className="h-8 w-full justify-between text-xs font-normal"
+                                />
+                              }
+                            >
+                              <span
+                                className={cn(
+                                  "block min-w-0 flex-1 truncate text-left",
+                                  !academicUnitIdDraft && "text-muted-foreground",
+                                )}
+                              >
+                                {(academicUnitsQuery.data ?? []).find(
+                                  (item) => item.id === academicUnitIdDraft,
+                                )?.name ?? "Sin seleccionar"}
+                              </span>
+                              <Icon
+                                icon={UnfoldMoreIcon}
+                                size={14}
+                                className="-me-1! size-3.5 shrink-0 opacity-60"
+                              />
+                            </ComboboxTrigger>
+                            <ComboboxContent
+                              aria-label="Escuela"
+                              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
+                            >
+                              <div className="border-b p-2">
+                                <ComboboxInput
+                                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                                  placeholder="Buscar escuela..."
+                                  showTrigger={false}
+                                  startAddon={<Icon icon={Search01Icon} size={16} />}
+                                />
+                              </div>
+                              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
+                              <ComboboxList className="max-h-56 scrollbar-none">
+                                {(item) => (
+                                  <ComboboxItem key={item.id} value={item}>
+                                    <span className="block w-full min-w-0 truncate">
+                                      {item.code ? `${item.code}: ${item.name}` : item.name}
+                                    </span>
+                                  </ComboboxItem>
+                                )}
+                              </ComboboxList>
+                            </ComboboxContent>
+                          </Combobox>
                         </DetailField>
-                        <DetailField label="Carrera">
-                          {academicQuery.data.study_plan_name ?? "—"}
+
+                        <DetailField label="Plan de estudios">
+                          <Combobox
+                            items={studyPlansQuery.data ?? []}
+                            value={
+                              (studyPlansQuery.data ?? []).find(
+                                (item) => item.id === studyPlanIdDraft,
+                              ) ?? null
+                            }
+                            onValueChange={(item) => setStudyPlanIdDraft(item ? item.id : null)}
+                            itemToStringValue={(item) => item.name.replace(" - ", ": ")}
+                            disabled={academicUnitIdDraft === null || studyPlansQuery.isLoading}
+                          >
+                            <ComboboxTrigger
+                              aria-label="Plan de estudios"
+                              render={
+                                <Button
+                                  variant="outline"
+                                  className="h-8 w-full justify-between text-xs font-normal"
+                                />
+                              }
+                            >
+                              <span
+                                className={cn(
+                                  "block min-w-0 flex-1 truncate text-left",
+                                  !studyPlanIdDraft && "text-muted-foreground",
+                                )}
+                              >
+                                {(studyPlansQuery.data ?? [])
+                                  .find((item) => item.id === studyPlanIdDraft)
+                                  ?.name.replace(" - ", ": ") ?? "Sin seleccionar"}
+                              </span>
+                              <Icon
+                                icon={UnfoldMoreIcon}
+                                size={14}
+                                className="-me-1! size-3.5 shrink-0 opacity-60"
+                              />
+                            </ComboboxTrigger>
+                            <ComboboxContent
+                              aria-label="Plan de estudios"
+                              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
+                            >
+                              <div className="border-b p-2">
+                                <ComboboxInput
+                                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                                  placeholder="Buscar plan..."
+                                  showTrigger={false}
+                                  startAddon={<Icon icon={Search01Icon} size={16} />}
+                                />
+                              </div>
+                              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
+                              <ComboboxList className="max-h-56 scrollbar-none">
+                                {(item) => (
+                                  <ComboboxItem key={item.id} value={item}>
+                                    <span className="block w-full min-w-0 truncate">
+                                      {item.name.replace(" - ", ": ")}
+                                    </span>
+                                  </ComboboxItem>
+                                )}
+                              </ComboboxList>
+                            </ComboboxContent>
+                          </Combobox>
                         </DetailField>
+
                         <DetailField label="Año de ingreso">
                           {academicQuery.data.entry_year ?? "—"}
                         </DetailField>
-                        <DetailField label="Período sugerido">
-                          {academicQuery.data.term_id ?? "—"}
-                        </DetailField>
+
                         <DetailField label="Onboarding">
                           {academicQuery.data.onboarding_completed_at
                             ? `Completado el ${new Date(academicQuery.data.onboarding_completed_at).toLocaleDateString()}`

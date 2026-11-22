@@ -694,6 +694,70 @@ export const UsersHandlers = HttpApiBuilder.group(ClaustrumApi, "users", (handle
           return profile;
         }),
       )
+      .handle("updateUserAcademicProfile", ({ params, payload }) =>
+        Effect.gen(function* () {
+          const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));
+          yield* checkRole(user, ["admin"]);
+
+          const exists = yield* sql<{ id: string }>`
+            SELECT id FROM better_auth."user" WHERE id = ${params.id}::uuid
+          `.pipe(
+            Effect.mapError(
+              (e) => new InternalServerError({ error: `Database error: ${e.message}` }),
+            ),
+          );
+          if (exists.length === 0) {
+            return yield* new NotFoundError({ error: "User not found" });
+          }
+
+          yield* sql
+            .withTransaction(
+              Effect.gen(function* () {
+                if (payload.carnet !== undefined) {
+                  yield* sql`
+                    UPDATE public."user" SET carnet = ${payload.carnet}
+                    WHERE id = ${params.id}::uuid
+                  `;
+                }
+
+                if (payload.studyPlanId !== undefined && payload.campusId !== undefined) {
+                  const active = yield* sql<{ id: number }>`
+                    SELECT id FROM public.user_study_plan
+                    WHERE user_id = ${params.id}::uuid AND is_active = true
+                  `;
+                  if (active.length > 0) {
+                    yield* sql`
+                      UPDATE public.user_study_plan
+                      SET study_plan_id = ${payload.studyPlanId},
+                          campus_id = ${payload.campusId},
+                          entry_year = COALESCE(${payload.entryYear ?? null}, entry_year)
+                      WHERE id = ${active[0].id}
+                    `;
+                  } else {
+                    yield* sql`
+                      INSERT INTO public.user_study_plan
+                        (user_id, study_plan_id, campus_id, entry_year, is_active)
+                      VALUES (
+                        ${params.id}::uuid,
+                        ${payload.studyPlanId},
+                        ${payload.campusId},
+                        ${payload.entryYear ?? new Date().getFullYear()},
+                        true
+                      )
+                    `;
+                  }
+                }
+              }),
+            )
+            .pipe(
+              Effect.mapError(
+                (e) => new InternalServerError({ error: `Failed to update profile: ${e.message}` }),
+              ),
+            );
+
+          return { success: true };
+        }),
+      )
       .handle("getUserFeedback", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* checkAuth(Option.getOrNull(yield* Effect.serviceOption(CurrentUser)));

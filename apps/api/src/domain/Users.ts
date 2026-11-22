@@ -135,6 +135,14 @@ export const UpdateVerificationPayload = Schema.Struct({
 });
 export type UpdateVerificationPayload = typeof UpdateVerificationPayload.Type;
 
+export const UpdateUserAcademicProfilePayload = Schema.Struct({
+  carnet: Schema.optional(Schema.NullOr(Carnet)),
+  campusId: Schema.optional(Schema.Number),
+  studyPlanId: Schema.optional(Schema.Number),
+  entryYear: Schema.optional(Schema.Number),
+});
+export type UpdateUserAcademicProfilePayload = typeof UpdateUserAcademicProfilePayload.Type;
+
 export const UserAcademicProfile = Schema.Struct({
   user_id: Schema.String,
   carnet: Schema.NullOr(Schema.String),

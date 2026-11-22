@@ -246,6 +246,34 @@ export function useAdminUserAcademicProfile(id: string | null, enabled = true) {
   });
 }
 
+export function useUpdateAdminUserAcademicProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      carnet,
+      campusId,
+      studyPlanId,
+      entryYear,
+    }: {
+      id: string;
+      carnet?: string | null;
+      campusId?: number;
+      studyPlanId?: number;
+      entryYear?: number;
+    }) =>
+      apiClient<{ success: boolean }>(`/users/${encodeURIComponent(id)}/academic-profile`, {
+        method: "PATCH",
+        body: JSON.stringify({ carnet, campusId, studyPlanId, entryYear }),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["adminUserAcademicProfile"] });
+      void queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      void queryClient.invalidateQueries({ queryKey: ["adminUser"] });
+    },
+  });
+}
+
 export function useAdminUserFeedback(id: string | null, enabled = true) {
   return useQuery({
     queryKey: ["adminUserFeedback", id],

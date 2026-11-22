@@ -24,6 +24,7 @@ import {
   ComboboxList,
   ComboboxSeparator,
   ComboboxTrigger,
+  ComboboxTriggerClear,
 } from "@/components/ui/combobox";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -71,6 +72,7 @@ interface ScheduleFiltersProps {
 
 import {
   FilterCombobox,
+  SEARCH_ITEM_THRESHOLD,
   normalizeText,
   removePlanPrefixFromName,
 } from "@/components/filters/shared-filters";
@@ -226,7 +228,7 @@ export function ScheduleFilters({
       {showTermFilter && (
         <div
           className={cn(
-            "min-w-0 shrink-0",
+            "relative min-w-0 shrink-0",
             !skipGroupsAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
           )}
         >
@@ -270,7 +272,10 @@ export function ScheduleFilters({
                         ? `Período académico: ${formatClosedTermLabel(selectedTerm)}`
                         : "Período académico"
                     }
-                    className="h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]"
+                    className={cn(
+                      "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
+                      !!selectedTerm && "pe-9",
+                    )}
                   />
                 }
               >
@@ -288,18 +293,21 @@ export function ScheduleFilters({
                   className="-me-1! shrink-0 opacity-60"
                 />
               </ComboboxTrigger>
+              <ComboboxTriggerClear aria-label="Limpiar período académico" />
               <ComboboxContent
                 aria-label="Período académico"
                 className="w-(--anchor-width) min-w-(--anchor-width)"
               >
-                <div className="border-b p-2">
-                  <ComboboxInput
-                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                    placeholder="Buscar período..."
-                    showTrigger={false}
-                    startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
-                  />
-                </div>
+                {terms.length >= SEARCH_ITEM_THRESHOLD && (
+                  <div className="border-b p-2">
+                    <ComboboxInput
+                      className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                      placeholder="Buscar período..."
+                      showTrigger={false}
+                      startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
+                    />
+                  </div>
+                )}
                 <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
                 <ComboboxList className="max-h-56 scrollbar-none">
                   {(group, index) => (

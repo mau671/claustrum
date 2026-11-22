@@ -11,6 +11,7 @@ import {
   ComboboxList,
   ComboboxPopup,
   ComboboxTrigger,
+  ComboboxTriggerClear,
 } from "@/components/ui/combobox";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,8 @@ export const truncateText = (text: string, maxLength = 35) => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + "...";
 };
+
+export const SEARCH_ITEM_THRESHOLD = 6;
 
 export type FilterItem = {
   id: number;
@@ -139,6 +142,7 @@ export function FilterCombobox({
 
   const isActuallyLoading = isLoading && items.length === 0;
   const selectedItem = items.find((item) => item.id.toString() === value) ?? null;
+  const showSearch = items.length >= SEARCH_ITEM_THRESHOLD;
   const getItemLabel = (item: FilterItem) => {
     const { code, name } = parseItemCodeAndName(item, itemLabel);
     if (code) return `${code}: ${name}`;
@@ -157,7 +161,7 @@ export function FilterCombobox({
   return (
     <div
       className={cn(
-        "min-w-0 shrink-0",
+        "relative min-w-0 shrink-0",
         triggerClassName?.includes("w-full") && "w-full shrink",
         !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
       )}
@@ -178,6 +182,7 @@ export function FilterCombobox({
               disabled={isActuallyLoading}
               className={cn(
                 "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
+                !!selectedItem && "pe-9",
                 triggerClassName,
               )}
             />
@@ -197,19 +202,22 @@ export function FilterCombobox({
             <HugeiconsIcon icon={UnfoldMoreIcon} size={14} className="-me-1! shrink-0 opacity-60" />
           )}
         </ComboboxTrigger>
+        <ComboboxTriggerClear aria-label={`Limpiar ${label?.toLowerCase() ?? placeholder}`} />
         <ComboboxPopup
           anchor={triggerRef}
           aria-label={label ?? placeholder}
           className="w-[var(--anchor-width)] max-w-[calc(var(--available-width)-1rem)] min-w-[var(--anchor-width)]"
         >
-          <div className="border-b p-2">
-            <ComboboxInput
-              className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-              placeholder={label ? `Buscar ${label.toLowerCase()}...` : "Buscar..."}
-              showTrigger={false}
-              startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
-            />
-          </div>
+          {showSearch && (
+            <div className="border-b p-2">
+              <ComboboxInput
+                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
+                placeholder={label ? `Buscar ${label.toLowerCase()}...` : "Buscar..."}
+                showTrigger={false}
+                startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
+              />
+            </div>
+          )}
           <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
           <ComboboxList className="max-h-56 scrollbar-none">
             {(item) => (

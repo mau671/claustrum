@@ -186,7 +186,7 @@ export function ComboboxPopup({
           )}
         >
           <ComboboxPrimitive.Popup
-            className="text-foreground flex max-h-[min(var(--available-height),23rem)] flex-1 flex-col"
+            className="text-foreground flex max-h-[min(var(--available-height),23rem)] flex-1 flex-col overflow-hidden overscroll-contain"
             data-slot="combobox-popup"
             {...props}
           >
@@ -204,34 +204,43 @@ export type ComboboxContentProps = React.ComponentProps<typeof ComboboxPopup>;
 export function ComboboxItem({
   className,
   children,
+  showIndicator,
   ...props
-}: ComboboxPrimitive.Item.Props): React.ReactElement {
+}: ComboboxPrimitive.Item.Props & { showIndicator?: boolean }): React.ReactElement {
+  const { multiple } = React.useContext(ComboboxContext);
+  const withIndicator = showIndicator ?? multiple;
+
   return (
     <ComboboxPrimitive.Item
       className={cn(
-        "data-highlighted:bg-accent data-highlighted:text-accent-foreground grid min-h-8 cursor-default grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 rounded-sm py-1 ps-2 pe-4 text-base outline-none in-data-[side=none]:min-w-[calc(var(--anchor-width)+1.25rem)] data-disabled:pointer-events-none data-disabled:opacity-64 sm:min-h-7 sm:text-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4",
+        "data-highlighted:bg-accent data-highlighted:text-accent-foreground grid min-h-8 cursor-default items-center gap-2 rounded-sm py-1 ps-2 pe-4 text-base outline-none in-data-[side=none]:min-w-[calc(var(--anchor-width)+1.25rem)] data-disabled:pointer-events-none data-disabled:opacity-64 sm:min-h-7 sm:text-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4",
+        withIndicator
+          ? "grid-cols-[1rem_minmax(0,1fr)]"
+          : "data-selected:text-primary grid-cols-1 data-selected:font-medium",
         className,
       )}
       data-slot="combobox-item"
       {...props}
     >
-      <ComboboxPrimitive.ItemIndicator className="col-start-1">
-        <svg
-          aria-hidden="true"
-          fill="none"
-          height="24"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
-        </svg>
-      </ComboboxPrimitive.ItemIndicator>
-      <div className="col-start-2 min-w-0 wrap-anywhere">{children}</div>
+      {withIndicator && (
+        <ComboboxPrimitive.ItemIndicator className="col-start-1">
+          <svg
+            aria-hidden="true"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+          </svg>
+        </ComboboxPrimitive.ItemIndicator>
+      )}
+      <div className={cn("min-w-0 wrap-anywhere", withIndicator && "col-start-2")}>{children}</div>
     </ComboboxPrimitive.Item>
   );
 }
@@ -326,6 +335,27 @@ export function ComboboxClear({
   ...props
 }: ComboboxPrimitive.Clear.Props): React.ReactElement {
   return <ComboboxPrimitive.Clear className={className} data-slot="combobox-clear" {...props} />;
+}
+
+export function ComboboxTriggerClear({
+  className,
+  children,
+  ...props
+}: ComboboxPrimitive.Clear.Props): React.ReactElement {
+  return (
+    <ComboboxPrimitive.Clear
+      aria-label="Limpiar selección"
+      tabIndex={0}
+      className={cn(
+        "hover:bg-accent focus-visible:ring-ring absolute end-0.5 top-1/2 inline-flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md opacity-70 transition-opacity outline-none hover:opacity-100 focus-visible:ring-2 [&_svg]:size-3.5",
+        className,
+      )}
+      data-slot="combobox-trigger-clear"
+      {...props}
+    >
+      {children ?? <Icon icon={Cancel01Icon} size={14} />}
+    </ComboboxPrimitive.Clear>
+  );
 }
 
 export function ComboboxStatus({

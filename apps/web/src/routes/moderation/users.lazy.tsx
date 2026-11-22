@@ -214,10 +214,18 @@ function getFeedbackTypeLabel(type: "bug" | "feature" | "other"): string {
   return "Otro";
 }
 
-function DetailField({ label, children }: { label: string; children: ReactNode }) {
+function DetailField({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="flex flex-col gap-1 sm:grid sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-center sm:gap-3">
-      <span className="text-muted-foreground text-xs font-medium sm:text-sm">{label}</span>
+    <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
+      <span className="text-muted-foreground text-xs font-medium">{label}</span>
       <div className="min-w-0 text-sm break-words">{children}</div>
     </div>
   );
@@ -732,8 +740,8 @@ function AdminUsersPage() {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <InputGroup className="h-8 w-52 sm:w-60">
+          <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+            <InputGroup className="h-8 w-full sm:w-60">
               <InputGroupAddon>
                 <Icon icon={Search01Icon} size={16} aria-hidden="true" />
               </InputGroupAddon>
@@ -746,39 +754,49 @@ function AdminUsersPage() {
               />
             </InputGroup>
 
-            <Select
-              items={ROLE_FILTER_ITEMS as unknown as Array<{ value: string; label: string }>}
-              value={roleFilter}
-              onValueChange={(value) => goTo({ role: value as RoleFilter, page: 1 })}
-            >
-              <SelectTrigger size="sm" className="h-8 w-38 text-xs" aria-label="Filtrar por rol">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLE_FILTER_ITEMS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+              <Select
+                items={ROLE_FILTER_ITEMS as unknown as Array<{ value: string; label: string }>}
+                value={roleFilter}
+                onValueChange={(value) => goTo({ role: value as RoleFilter, page: 1 })}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="h-8 min-w-0 flex-1 text-xs sm:w-38 sm:flex-none"
+                  aria-label="Filtrar por rol"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLE_FILTER_ITEMS.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Select
-              items={BANNED_FILTER_ITEMS as unknown as Array<{ value: string; label: string }>}
-              value={bannedFilter}
-              onValueChange={(value) => goTo({ banned: value as BannedFilter, page: 1 })}
-            >
-              <SelectTrigger size="sm" className="h-8 w-38 text-xs" aria-label="Filtrar por estado">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BANNED_FILTER_ITEMS.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select
+                items={BANNED_FILTER_ITEMS as unknown as Array<{ value: string; label: string }>}
+                value={bannedFilter}
+                onValueChange={(value) => goTo({ banned: value as BannedFilter, page: 1 })}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="h-8 min-w-0 flex-1 text-xs sm:w-38 sm:flex-none"
+                  aria-label="Filtrar por estado"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BANNED_FILTER_ITEMS.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </FrameHeader>
 
@@ -911,8 +929,8 @@ function AdminUsersPage() {
                   </p>
                 )}
 
-                <div className="flex flex-col gap-4">
-                  <DetailField label="Nombre">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                  <DetailField label="Nombre" className="col-span-2">
                     <Input
                       value={nameDraft}
                       onChange={(event) => setNameDraft(event.target.value)}
@@ -923,7 +941,7 @@ function AdminUsersPage() {
                     />
                   </DetailField>
 
-                  <DetailField label="Correo">
+                  <DetailField label="Correo" className="col-span-2">
                     <Input
                       type="email"
                       value={emailDraft}
@@ -943,7 +961,7 @@ function AdminUsersPage() {
                     >
                       <SelectTrigger
                         size="sm"
-                        className="h-8 w-44 text-xs"
+                        className="h-8 w-full text-xs"
                         disabled={isSelf || isMutating}
                       >
                         <SelectValue />
@@ -967,7 +985,7 @@ function AdminUsersPage() {
                       >
                         <SelectTrigger
                           size="sm"
-                          className="h-8 w-44 text-xs"
+                          className="h-8 w-full text-xs"
                           disabled={isSelf || isMutating}
                         >
                           <SelectValue />
@@ -998,7 +1016,7 @@ function AdminUsersPage() {
                     })}
                   </DetailField>
 
-                  <DetailField label="ID">
+                  <DetailField label="ID" className="col-span-2">
                     <span className="font-mono text-xs break-all">{selectedUser.id}</span>
                   </DetailField>
                 </div>
@@ -1007,7 +1025,7 @@ function AdminUsersPage() {
                   <div className="min-w-0 border-b">
                     <ScrollArea
                       scrollFade
-                      className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden"
+                      className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:!h-auto [&_[data-slot=scroll-area-viewport]]:!overflow-y-hidden"
                     >
                       <TabsList variant="underline" className="w-max min-w-full">
                         <TabsTab value="sesiones">Sesiones</TabsTab>
@@ -1228,7 +1246,7 @@ function AdminUsersPage() {
                       >
                         <SelectTrigger
                           size="sm"
-                          className="h-8 w-44 text-xs"
+                          className="h-8 w-full text-xs"
                           disabled={isSelf || isMutating}
                         >
                           <SelectValue />
@@ -1295,11 +1313,14 @@ function AdminUsersPage() {
                       Los cambios de estado se aplican al guardar.
                     </p>
 
-                    <div className="border-t pt-3">
+                    <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-muted-foreground text-xs">
+                        Esta acción no se puede deshacer.
+                      </p>
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="w-full"
+                        className="text-xs"
                         disabled={isSelf || isMutating}
                         onClick={() => setIsDeleteOpen(true)}
                       >

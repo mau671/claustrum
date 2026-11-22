@@ -1,0 +1,230 @@
+name: Seed history replay
+
+on:
+  pull_request:
+    paths:
+      - "data/migrations/**"
+      - "data/seeds/itcr/**"
+      - "data/itcr/**"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    name: Replay seed history
+    runs-on: ubuntu-latest
+    env:
+      SEED_HISTORY_DB_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Replay seed history
+        run: |
+          set -euo pipefail
+          cd data/itcr
+          uv run tec-data sync \
+            --target seed-history \
+            --seed-dir ../seeds/itcr \
+            --scope offering \
+            --years 2026 \
+            --no-apply \
+            --keep-sql \
+            --skip-pipeline \
+            --seed-history-db-url "$SEED_HISTORY_DB_URL"
+
+      - name: Assert seed-history invariants
+        run: |
+          set -euo pipefail
+
+          expected_migrations="$(find data/migrations -maxdepth 1 -type f -name '*.sql' | wc -l | tr -d ' ')"
+          echo "Migration files found: $expected_migrations"
+
+          psql -v ON_ERROR_STOP=1 -v expected_migrations="$expected_migrations" <<'SQL'
+          SELECT set_config('seed_history.expected_migrations', :'expected_migrations', false);
+
+          DO $$
+          DECLARE
+            expected_count INTEGER := current_setting('seed_history.expected_migrations')::INTEGER;
+            ledger_count INTEGER;
+            distinct_count INTEGER;
+          BEGIN
+            IF to_regclass('public.__drizzle_migrations') IS NULL THEN
+              RAISE EXCEPTION 'invariant 1 failed: public.__drizzle_migrations is missing';
+            END IF;
+
+            IF expected_count = 0 THEN
+              RAISE EXCEPTION 'invariant 1 failed: no migration files were found in data/migrations';
+            END IF;
+
+            SELECT count(*), count(DISTINCT hash)
+              INTO ledger_count, distinct_count
+              FROM public.__drizzle_migrations;
+
+            IF ledger_count = 0 THEN
+              RAISE EXCEPTION 'invariant 1 failed: public.__drizzle_migrations is empty';
+            END IF;
+
+            IF ledger_count <> expected_count THEN
+              RAISE EXCEPTION
+                'invariant 1 failed: public.__drizzle_migrations has % rows but % migration files exist',
+                ledger_count, expected_count;
+            END IF;
+
+            IF distinct_count <> ledger_count THEN
+              RAISE EXCEPTION
+                'invariant 1 failed: public.__drizzle_migrations has % duplicate hashes',
+                ledger_count - distinct_count;
+            END IF;
+
+            RAISE NOTICE 'invariant 1 ok: % migrations recorded', ledger_count;
+          END $$;
+
+          DO $$
+          DECLARE
+            offending_columns TEXT;
+          BEGIN
+            IF to_regclass('public.academic_term') IS NULL THEN
+              RAISE EXCEPTION 'invariant 2 failed: public.academic_term is missing';
+            END IF;
+
+            SELECT string_agg(column_name, ', ' ORDER BY column_name)
+              INTO offending_columns
+              FROM information_schema.columns
+              WHERE table_schema = 'public'
+                AND table_name = 'academic_term'
+                AND column_name IN ('starts_on', 'ends_on');
+
+            IF offending_columns IS NOT NULL THEN
+              RAISE EXCEPTION
+                'invariant 2 failed: public.academic_term still has date columns: %',
+                offending_columns;
+            END IF;
+
+            RAISE NOTICE 'invariant 2 ok: academic_term has no starts_on/ends_on columns';
+          END $$;
+
+          DO $$
+          DECLARE
+            oldest_seed_terms BIGINT;
+            newest_seed_events BIGINT;
+          BEGIN
+            IF to_regclass('public.academic_term') IS NULL THEN
+              RAISE EXCEPTION 'invariant 3 failed: public.academic_term is missing';
+            END IF;
+
+            IF to_regclass('public.academic_term_event') IS NULL THEN
+              RAISE EXCEPTION 'invariant 3 failed: public.academic_term_event is missing';
+            END IF;
+
+            SELECT count(*)
+              INTO oldest_seed_terms
+              FROM public.academic_term
+              WHERE external_key LIKE '2026\_%';
+
+            IF oldest_seed_terms = 0 THEN
+              RAISE EXCEPTION
+                'invariant 3 failed: the oldest seed did not land (no academic_term row with external_key LIKE 2026_%%)';
+            END IF;
+
+            SELECT count(*)
+              INTO newest_seed_events
+              FROM public.academic_term_event
+              WHERE starts_on = DATE '2026-01-21';
+
+            IF newest_seed_events = 0 THEN
+              RAISE EXCEPTION
+                'invariant 3 failed: the newest seed did not land (no academic_term_event row with starts_on = 2026-01-21)';
+            END IF;
+
+            RAISE NOTICE
+              'invariant 3 ok: oldest seed contributed % terms and newest seed contributed % events on 2026-01-21',
+              oldest_seed_terms, newest_seed_events;
+          END $$;
+
+          DO $$
+          DECLARE
+            r RECORD;
+            max_id BIGINT;
+            sequence_last_value BIGINT;
+            sequence_is_called BOOLEAN;
+            offenders TEXT := '';
+          BEGIN
+            FOR r IN
+              SELECT c.oid::regclass::text AS table_name,
+                     a.attname AS column_name,
+                     pg_get_serial_sequence(c.oid::regclass::text, a.attname) AS sequence_name
+                FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+                JOIN pg_attribute a
+                  ON a.attrelid = c.oid
+                 AND a.attnum > 0
+                 AND NOT a.attisdropped
+               WHERE n.nspname = 'public'
+                 AND c.relkind = 'r'
+                 AND pg_get_serial_sequence(c.oid::regclass::text, a.attname) IS NOT NULL
+            LOOP
+              EXECUTE format('SELECT COALESCE(MAX(%I), 0) FROM %s', r.column_name, r.table_name)
+                INTO max_id;
+
+              IF max_id > 0 THEN
+                EXECUTE format('SELECT last_value, is_called FROM %s', r.sequence_name)
+                  INTO sequence_last_value, sequence_is_called;
+
+                IF (CASE WHEN sequence_is_called THEN sequence_last_value ELSE sequence_last_value - 1 END) < max_id THEN
+                  offenders := offenders
+                    || format('%s.%s (max id %s, sequence last_value %s, is_called %s)',
+                              r.table_name, r.column_name,
+                              max_id, sequence_last_value, sequence_is_called)
+                    || E'\n';
+                END IF;
+              END IF;
+            END LOOP;
+
+            IF offenders <> '' THEN
+              RAISE EXCEPTION
+                'invariant 4 failed: identity sequences are behind their table max ids:%',
+                E'\n' || offenders;
+            END IF;
+
+            RAISE NOTICE 'invariant 4 ok: every identity sequence is ahead of its table max id';
+          END $$;
+          SQL

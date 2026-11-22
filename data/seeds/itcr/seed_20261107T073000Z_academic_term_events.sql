@@ -1,6 +1,7 @@
 -- ============================================================================
 -- TEC-DATA ACADEMIC TERM EVENTS SEED 2026
 -- ============================================================================
+-- TEC-DATA-META schema_revision=e66c97ef1298e447d86a207977ee3cb74390b96a1e4a567d975b06fb458b3bae
 -- TEC-DATA-META scope=catalog
 -- TEC-DATA-META years=2026
 -- TEC-DATA-META term_external_keys=2026_S_1,2026_S_2,2026_V_1,2026_C_1,2026_C_2,2026_C_3,2026_T_1,2026_T_2,2026_T_3,2026_T_4

@@ -221,11 +221,6 @@ def sync_cli(
         "--seed-dir",
         help="Directory with seed_*.sql history for target=seed-history",
     ),
-    baseline_seed: str | None = typer.Option(
-        None,
-        "--baseline-seed",
-        help="Baseline seed filename in --seed-dir to start replay from",
-    ),
     seed_history_db_url: str = typer.Option(
         SEED_HISTORY_SERVICE_DB_URL,
         "--seed-history-db-url",
@@ -247,7 +242,6 @@ def sync_cli(
         keep_sql=keep_sql,
         scope=scope,
         seed_dir=seed_dir,
-        baseline_seed=baseline_seed,
         seed_history_db_url=seed_history_db_url,
     )
 

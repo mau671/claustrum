@@ -11,7 +11,6 @@ import subprocess
 import tempfile
 import time
 import uuid
-from collections.abc import Iterable
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
@@ -27,12 +26,14 @@ from src.domains.sync.helpers import (
     collect_seed_history,
     collect_term_external_keys,
     compute_sync_fingerprint,
+    current_schema_revision,
     infer_environment_id,
     load_json,
     next_sequential_id,
     parse_seed_metadata,
     quote_literal,
     resolve_db_url,
+    schema_revision_prefix_counts,
     seed_sha256,
     sql_int_array,
     sql_text_array,
@@ -203,7 +204,14 @@ def _stop_seed_history_postgres_container(container_name: str) -> None:
     )
 
 
-def _apply_migrations(db_url: str, migrations_dir: Path) -> None:
+def _migration_files(migrations_dir: Path) -> list[Path]:
+    files = sorted(p for p in migrations_dir.glob("*.sql") if p.is_file())
+    if not files:
+        raise RuntimeError(f"No migrations found in {migrations_dir}")
+    return files
+
+
+def _bootstrap_replay_database(db_url: str) -> None:
     bootstrap_sql = """
     CREATE SCHEMA IF NOT EXISTS auth;
     CREATE SCHEMA IF NOT EXISTS better_auth;
@@ -269,20 +277,46 @@ def _apply_migrations(db_url: str, migrations_dir: Path) -> None:
         env=bootstrap_env,
     )
 
-    migration_files = sorted(p for p in migrations_dir.glob("*.sql") if p.is_file())
-    if not migration_files:
-        raise RuntimeError(f"No migrations found in {migrations_dir}")
+
+def _apply_migrations(
+    db_url: str,
+    migrations_dir: Path,
+    up_to_revision: str | None = None,
+) -> int:
+    """Apply migrations in order, optionally stopping at a schema revision.
+
+    The ledger keeps the same semantics as `drizzle-kit migrate`: one row per
+    applied migration, keyed by the file content hash. The returned count is the
+    number of migrations the ledger covers after this call.
+    """
+    _bootstrap_replay_database(db_url)
+
+    migration_files = _migration_files(migrations_dir)
+    if up_to_revision is None:
+        target_count = len(migration_files)
+    else:
+        prefix_counts = schema_revision_prefix_counts(migrations_dir)
+        target_count = prefix_counts.get(up_to_revision)
+        if target_count is None:
+            raise RuntimeError(
+                f"schema_revision {up_to_revision} does not match any prefix of "
+                f"the {len(migration_files)} migrations in {migrations_dir}"
+            )
 
     migrate_args, migrate_env = psql_connection_args(db_url)
 
-    def run_psql(extra: list[str]) -> None:
-        subprocess.run(
-            [*migrate_args, *extra],
-            check=True,
-            text=True,
-            capture_output=True,
-            env=migrate_env,
-        )
+    def run_psql(extra: list[str], context: str) -> None:
+        try:
+            subprocess.run(
+                [*migrate_args, *extra],
+                check=True,
+                text=True,
+                capture_output=True,
+                env=migrate_env,
+            )
+        except subprocess.CalledProcessError as exc:
+            error_output = redact_db_url((exc.stderr or exc.stdout or "").strip())
+            raise RuntimeError(f"Failed {context}:\n{error_output}") from exc
 
     run_psql(
         [
@@ -297,17 +331,22 @@ def _apply_migrations(db_url: str, migrations_dir: Path) -> None:
                 "  created_at BIGINT"
                 ");"
             ),
-        ]
+        ],
+        "creating the migration ledger",
     )
     applied_hashes = set(
         query_rows(db_url, "SELECT hash FROM public.__drizzle_migrations")
     )
 
-    for migration in migration_files:
+    applied_now = 0
+    for migration in migration_files[:target_count]:
         digest = sha256(migration.read_bytes()).hexdigest()
         if digest in applied_hashes:
             continue
-        run_psql(["-v", "ON_ERROR_STOP=1", "-f", str(migration)])
+        run_psql(
+            ["-v", "ON_ERROR_STOP=1", "-f", str(migration)],
+            f"applying migration {migration.name}",
+        )
         run_psql(
             [
                 "-v",
@@ -315,259 +354,145 @@ def _apply_migrations(db_url: str, migrations_dir: Path) -> None:
                 "-c",
                 "INSERT INTO public.__drizzle_migrations (hash, created_at) "
                 f"VALUES ('{digest}', {int(datetime.now(UTC).timestamp() * 1000)});",
-            ]
+            ],
+            f"recording migration {migration.name} in the ledger",
         )
         applied_hashes.add(digest)
+        applied_now += 1
 
-
-def _sequence_exists(db_url: str, sequence_name: str) -> bool:
-    rows = query_rows(
-        db_url,
-        "SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
-        f"WHERE c.relkind = 'S' AND n.nspname = 'public' "
-        f"AND c.relname = '{quote_literal(sequence_name)}' LIMIT 1",
-    )
-    return bool(rows)
-
-
-SEED_HISTORY_IGNORED_TABLE = "sync_seed_run"
-
-
-def _assert_seed_history_db_is_disposable(db_url: str) -> None:
-    """Refuse to truncate a database that has real application data.
-
-    `seed-history` wipes `public` and replays historical seeds. That is safe for
-    a throwaway container, but catastrophic against a real environment (including
-    a local development database with data). We allow the wipe only when the
-    schema is still empty, or when the caller explicitly opts in via
-    `TEC_SEED_HISTORY_ALLOW_NONEMPTY=1`.
-    """
-    if os.environ.get("TEC_SEED_HISTORY_ALLOW_NONEMPTY") == "1":
+    if applied_now:
         typer.echo(
-            "WARNING: TEC_SEED_HISTORY_ALLOW_NONEMPTY=1, skipping the disposable-database guard."
+            f"Applied {applied_now} migration(s); ledger covers "
+            f"{target_count} of {len(migration_files)}."
         )
-        return
-
-    probes = {
-        "public.sync_seed_run": "SELECT 1 FROM public.sync_seed_run LIMIT 1",
-        "public.course_offering": "SELECT 1 FROM public.course_offering LIMIT 1",
-        'better_auth."user"': 'SELECT 1 FROM better_auth."user" LIMIT 1',
-    }
-    for label, sql in probes.items():
-        try:
-            populated = bool(query_rows(db_url, sql))
-        except subprocess.CalledProcessError:
-            continue
-        if populated:
-            raise RuntimeError(
-                "Refusing to run --target seed-history against a database that "
-                f"already contains data ({label}).\n"
-                "seed-history truncates the public schema and replays the historical "
-                "seeds, which would destroy that data.\n"
-                "Use a disposable database: either omit --seed-history-db-url so a "
-                "temporary container is started, or point it at a CI service "
-                "container. Set TEC_SEED_HISTORY_ALLOW_NONEMPTY=1 only if you are "
-                "certain the target can be wiped."
-            )
+    return target_count
 
 
-def bootstrap_lookups(
-    db_url: str,
-    psql_args: list[str],
-    psql_env: dict[str, str],
+def _assert_full_migration_ledger(db_url: str, migrations_dir: Path) -> None:
+    migration_files = _migration_files(migrations_dir)
+    expected_hashes = [sha256(p.read_bytes()).hexdigest() for p in migration_files]
+    actual_hashes = query_rows(
+        db_url, "SELECT hash FROM public.__drizzle_migrations ORDER BY id"
+    )
+    if actual_hashes != expected_hashes:
+        missing = sorted(set(expected_hashes) - set(actual_hashes))
+        unexpected = sorted(set(actual_hashes) - set(expected_hashes))
+        details: list[str] = [
+            f"expected {len(expected_hashes)} ledger rows, found {len(actual_hashes)}"
+        ]
+        if missing:
+            details.append(f"missing={missing}")
+        if unexpected:
+            details.append(f"unexpected={unexpected}")
+        if not missing and not unexpected:
+            details.append("the ledger rows are out of order")
+        raise RuntimeError(
+            "Seed-history replay finished with an inconsistent migration ledger: "
+            + "; ".join(details)
+        )
+
+
+def _resolve_seed_history_revisions(
     seed_paths: list[Path],
-) -> None:
-    """Populate the lookup catalogues with every value the seeds reference.
-
-    The lookup tables replaced enums that the historical seeds predate. Without
-    this step the first seed that inserts a `course_offering` row fails on the
-    `course_type` foreign key, because the catalogue is empty.
-    """
-    import re as _re
-
-    group_types: set[str] = set()
-    course_types: set[str] = set()
-    degrees: set[str] = set()
-
-    known_group_types = {
-        "REGULAR",
-        "SEMIPRESENCIAL",
-        "VIRTUAL",
-        "ASISTIDA",
-        "TUTORIA",
-        "LABORATORIO",
-        "RN",
-        "ENSEÑANZA REMOTA",
-        "TRABAJO FINAL DE GRADUACIÓN",
-        "TALLER",
-    }
-    known_course_types = {
-        "CURSO UNICO",
-        "CURSO COMUN",
-        "ELECTIVA UNICA",
-        "ELECTIVA COMUN",
-        "LABORATORIO UNICO",
-        "LABORATORIO COMUN",
-        "OPTATIVO UNICO",
-        "CENTROS DE FORMACION",
-        "TRABAJO FINAL DE GRADUACION",
-    }
-    known_degrees = {
-        "ASOCIADO",
-        "BACHILLERATO UNIVERSITARIO",
-        "DIPLOMADO",
-        "DOCTORADO ACADÉMICO",
-        "LICENCIATURA",
-        "MAESTRÍA",
-        "NO OTORGA",
-    }
-
-    # Values are written as plain literals (E'CURSO COMUN'), not casts, so the
-    # only reliable signal is the known catalogue plus what the seed declares.
-    # Start from the canonical sets and add anything a seed casts explicitly.
-    group_types.update(known_group_types)
-    course_types.update(known_course_types)
-    degrees.update(known_degrees)
+    migrations_dir: Path,
+) -> list[tuple[Path, str, int]]:
+    """Resolve and validate the schema revision declared by every seed."""
+    migration_files = _migration_files(migrations_dir)
+    prefix_counts = schema_revision_prefix_counts(migrations_dir)
+    resolved: list[tuple[Path, str, int]] = []
+    previous_count = 0
 
     for seed_path in seed_paths:
-        try:
-            content = seed_path.read_text(encoding="utf-8")
-        except OSError:
-            continue
-        for pattern, target in (
-            (r"(?:E)?'([^']*)'::group_type", group_types),
-            (r"(?:E)?'([^']*)'::course_type", course_types),
-            (r"(?:E)?'([^']*)'::academic_degree", degrees),
-        ):
-            target.update(_re.findall(pattern, content))
+        metadata = parse_seed_metadata(seed_path)
+        revision = metadata.get("schema_revision")
+        if not revision:
+            raise RuntimeError(
+                f"Seed {seed_path.name} is missing the required "
+                "'schema_revision' TEC-DATA-META header"
+            )
 
-    if not (group_types or course_types or degrees):
-        return
+        count = prefix_counts.get(revision)
+        if count is None:
+            first_divergent = (
+                migration_files[previous_count].name
+                if previous_count < len(migration_files)
+                else "<end of migration list>"
+            )
+            raise RuntimeError(
+                "Seed-history replay cannot reach the schema declared by "
+                f"{seed_path.name}.\n"
+                f"  schema_revision: {revision}\n"
+                f"  expected migration count: at least {previous_count}\n"
+                f"  first divergent migration: {first_divergent}\n"
+                f"  current migrations: {len(migration_files)} in {migrations_dir}\n"
+                "The revision is not a prefix of the current migration list. "
+                "Seed provenance and migrations have diverged; refusing to guess."
+            )
 
-    def esc(value: str) -> str:
-        return value.replace("'", "''")
+        if count < previous_count:
+            first_divergent = (
+                migration_files[count].name
+                if count < len(migration_files)
+                else "<end of migration list>"
+            )
+            raise RuntimeError(
+                f"Seed-history replay is not chronological at {seed_path.name}.\n"
+                f"  schema_revision: {revision}\n"
+                f"  expected migration count: at least {previous_count}\n"
+                f"  first divergent migration: {first_divergent}\n"
+                "Seed revisions must be non-decreasing in timestamp order."
+            )
 
-    statements: list[str] = []
-    for table, values in (
-        ("group_type", group_types),
-        ("course_type", course_types),
-        ("academic_degree", degrees),
-    ):
-        if not values:
-            continue
-        tuples = ", ".join(f"('{esc(v)}', '{esc(v.title())}')" for v in sorted(values))
-        statements.append(
-            f"INSERT INTO public.{table} (code, name) VALUES {tuples} "
-            "ON CONFLICT (code) DO NOTHING;"
-        )
+        resolved.append((seed_path, revision, count))
+        previous_count = count
 
-    if not statements:
-        return
-
-    subprocess.run(
-        [*psql_args, "-v", "ON_ERROR_STOP=1", "-c", "\n".join(statements)],
-        check=False,
-        text=True,
-        capture_output=True,
-        env=psql_env,
-    )
+    return resolved
 
 
-def sanitize_seed_for_replay(seed_path: Path, db_url: str, output_dir: Path) -> Path:
-    """Rewrite a historical seed so it can be replayed on a migrations-built schema.
+SEED_LEDGER_TABLE = "sync_seed_run"
 
-    Two classes of statements in `pg_dump`-style baselines cannot be replayed safely:
 
-    - Rows for `public.sync_seed_run`: the ledger describes which seeds were applied
-      to *some* environment. Replaying it would import foreign SHAs and fingerprints
-      into the ephemeral DB and could make `ledger_fingerprint_applied` return a
-      false positive, silently producing NOOP seeds.
-    - `setval` for sequences whose table no longer exists after later migrations
-      (for example `user_role_id_seq`, dropped when roles moved to Better Auth).
+def strip_seed_ledger_rows(seed_path: Path, output_dir: Path) -> Path:
+    """Remove historical `sync_seed_run` rows before a seed is replayed.
+
+    A seed's ledger rows describe the environment that generated it. Importing
+    them would make the replay database claim foreign seed SHAs and fingerprints,
+    which can short-circuit `ledger_fingerprint_applied` and produce false NOOP
+    seeds later in the same run. This is a domain rule, not schema patching.
     """
     content = seed_path.read_text(encoding="utf-8")
-
-    # Seeds written before 0151 cast group_type and academic_degree to their
-    # enum types (`nv.group_type::group_type`). Those names are lookup tables
-    # now, so the cast is a syntax error. Stripping it is safe: the column is
-    # TEXT and the literal is already a plain string.
-    legacy_casts = [
-        ("::group_type", ""),
-        ("::academic_degree", ""),
-    ]
-    cast_rewrites = 0
-    for needle, replacement in legacy_casts:
-        if needle in content:
-            cast_rewrites += content.count(needle)
-            content = content.replace(needle, replacement)
-
-    if (
-        SEED_HISTORY_IGNORED_TABLE not in content
-        and "setval" not in content
-        and cast_rewrites == 0
-    ):
+    ledger_prefix = f'INSERT INTO "public"."{SEED_LEDGER_TABLE}"'
+    if ledger_prefix not in content:
         return seed_path
 
     lines = content.splitlines()
     kept: list[str] = []
-    skipped_ledger = 0
-    skipped_setval: list[str] = []
     index = 0
-    ledger_prefix = f'INSERT INTO "public"."{SEED_HISTORY_IGNORED_TABLE}"'
+    stripped = 0
 
     def drop_dangling_header() -> None:
-        """Remove the comment banner that introduced a skipped statement."""
-        while kept and (
-            not kept[-1].strip() or kept[-1].lstrip().startswith("--")
-        ):
+        while kept and (not kept[-1].strip() or kept[-1].lstrip().startswith("--")):
             kept.pop()
 
     while index < len(lines):
-        line = lines[index]
-
-        if line.startswith(ledger_prefix):
-            skipped_ledger += 1
+        if lines[index].lstrip().startswith(ledger_prefix):
+            stripped += 1
             while index < len(lines) and not lines[index].rstrip().endswith(";"):
                 index += 1
             index += 1
             drop_dangling_header()
             continue
-
-        if "pg_catalog.setval(" in line:
-            for token in line.split("'\"public\".\""):
-                candidate = token.split('"')[0]
-                if candidate.endswith("_seq") and not _sequence_exists(
-                    db_url, candidate
-                ):
-                    skipped_setval.append(candidate)
-                    break
-            else:
-                kept.append(line)
-                index += 1
-                continue
-            index += 1
-            drop_dangling_header()
-            continue
-
-        kept.append(line)
+        kept.append(lines[index])
         index += 1
 
-    if not skipped_ledger and not skipped_setval and cast_rewrites == 0:
-        return seed_path
-
     output_dir.mkdir(parents=True, exist_ok=True)
-    sanitized_path = output_dir / seed_path.name
-    sanitized_path.write_text("\n".join(kept) + "\n", encoding="utf-8")
-    details: list[str] = []
-    if skipped_ledger:
-        details.append(f"{skipped_ledger} {SEED_HISTORY_IGNORED_TABLE} statement(s)")
-    if skipped_setval:
-        obsolete = ", ".join(sorted(set(skipped_setval)))
-        details.append(f"{len(skipped_setval)} obsolete setval(s): {obsolete}")
-    if cast_rewrites:
-        details.append(f"{cast_rewrites} legacy enum cast(s)")
-    typer.echo(f"Sanitized {seed_path.name}: {'; '.join(details)}")
-    return sanitized_path
+    stripped_path = output_dir / seed_path.name
+    stripped_path.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    typer.echo(
+        f"Stripped {stripped} {SEED_LEDGER_TABLE} row statement(s) from "
+        f"{seed_path.name} for replay."
+    )
+    return stripped_path
 
 
 def resync_identity_sequences(args: list[str], env: dict[str, str]) -> None:
@@ -627,52 +552,61 @@ def resync_identity_sequences(args: list[str], env: dict[str, str]) -> None:
     )
 
 
-def create_temp_seed_history_db(
+def _assert_empty_database(db_url: str) -> None:
+    """Refuse to replay into a database that already has application objects.
+
+    The replay database belongs to the caller: it is expected to be fresh or
+    disposable, and it keeps the rebuilt state after the command returns.
+    """
+    schemas = ("public", "auth", "better_auth")
+    schema_literals = ", ".join(f"'{schema}'" for schema in schemas)
+    existing_relations = query_rows(
+        db_url,
+        "SELECT n.nspname || '.' || c.relname "
+        "FROM pg_class c "
+        "JOIN pg_namespace n ON n.oid = c.relnamespace "
+        f"WHERE n.nspname IN ({schema_literals}) "
+        "AND c.relkind IN ('r', 'p', 'v', 'm', 'f') "
+        "ORDER BY 1",
+    )
+    if not existing_relations:
+        return
+
+    preview = ", ".join(existing_relations[:10])
+    if len(existing_relations) > 10:
+        preview += f", ... ({len(existing_relations)} total)"
+    raise RuntimeError(
+        "seed-history replay requires an empty database: point "
+        "--seed-history-db-url at a fresh or disposable instance. "
+        f"Found existing relations: {preview}"
+    )
+
+
+def replay_seed_history(
     seed_paths: list[Path], db_url: str, migrations_dir: Path
-) -> tuple[str | None, str]:
-    admin_db_url = db_url
-    temp_db_url = db_url
+) -> None:
+    """Replay the seed history into a caller-owned, empty database.
 
+    Migrations and seeds form one ordered timeline: for every seed, migrations
+    are applied up to the revision the seed declares, then the seed is replayed.
+    The migrations that follow the last seed are applied afterwards. The database
+    is left in its final state at `db_url` for the caller to inspect.
+    """
+    _assert_empty_database(db_url)
+    history = _resolve_seed_history_revisions(seed_paths, migrations_dir)
+
+    stripped_dir = Path(tempfile.mkdtemp(prefix="tec-seed-history-"))
     try:
-        _apply_migrations(admin_db_url, migrations_dir)
-        _assert_seed_history_db_is_disposable(temp_db_url)
-        truncate_args, truncate_env = psql_connection_args(temp_db_url)
-        subprocess.run(
-            [
-                *truncate_args,
-                "-v",
-                "ON_ERROR_STOP=1",
-                "-c",
-                "DO $$ DECLARE tbls TEXT; BEGIN "
-                "SELECT string_agg(format('%I.%I', schemaname, tablename), ', ') INTO tbls "
-                "FROM pg_tables WHERE schemaname = 'public' "
-                "AND tablename <> '__drizzle_migrations'; "
-                "IF tbls IS NOT NULL THEN EXECUTE 'TRUNCATE TABLE ' || tbls || ' RESTART IDENTITY CASCADE'; END IF; "
-                "END $$;",
-            ],
-            check=True,
-            text=True,
-            capture_output=True,
-            env=truncate_env,
-        )
-    except subprocess.CalledProcessError as exc:
-        error_output = (exc.stderr or exc.stdout or "").strip()
-        raise RuntimeError(
-            f"Failed preparing seed-history temporary DB:\n{error_output}"
-        ) from exc
-
-    sanitized_dir = Path(tempfile.mkdtemp(prefix="tec-seed-history-"))
-    replay_args, replay_env = psql_connection_args(temp_db_url)
-    try:
-        # The lookup tables were introduced after these seeds were generated, so
-        # the seeds insert group_type / course_type / academic_degree values
-        # without creating the catalogue rows and the foreign keys reject them.
-        # Scan every seed once, collect the referenced values, and seed the
-        # catalogues before the replay starts.
-        bootstrap_lookups(temp_db_url, replay_args, replay_env, seed_paths)
-
-        for seed_path in seed_paths:
-            replay_path = sanitize_seed_for_replay(seed_path, temp_db_url, sanitized_dir)
+        applied_count = 0
+        for seed_path, revision, revision_count in history:
+            if revision_count > applied_count:
+                applied_count = _apply_migrations(
+                    db_url,
+                    migrations_dir,
+                    up_to_revision=revision,
+                )
+            replay_path = strip_seed_ledger_rows(seed_path, stripped_dir)
+            replay_args, replay_env = psql_connection_args(db_url)
             try:
                 subprocess.run(
                     [
@@ -688,36 +622,20 @@ def create_temp_seed_history_db(
                     env=replay_env,
                 )
             except subprocess.CalledProcessError as exc:
-                error_output = redact_db_url(
-                    (exc.stderr or exc.stdout or "").strip()
-                )
+                error_output = redact_db_url((exc.stderr or exc.stdout or "").strip())
                 raise RuntimeError(
                     f"Failed applying seed history file {seed_path.name}:\n{error_output}"
                 ) from exc
             resync_identity_sequences(replay_args, replay_env)
+            typer.echo(
+                f"Replayed {seed_path.name} at revision {revision} "
+                f"({revision_count} migrations)."
+            )
+
+        _apply_migrations(db_url, migrations_dir)
+        _assert_full_migration_ledger(db_url, migrations_dir)
     finally:
-        shutil.rmtree(sanitized_dir, ignore_errors=True)
-
-    return None, temp_db_url
-
-
-def drop_temp_seed_history_db(db_name: str) -> None:
-    parsed = urlparse(LOCAL_DB_URL)
-    admin_db_url = parsed._replace(path="/postgres").geturl()
-    args, env = psql_connection_args(admin_db_url)
-    subprocess.run(
-        [
-            *args,
-            "-v",
-            "ON_ERROR_STOP=1",
-            "-c",
-            f"DROP DATABASE IF EXISTS {db_name};",
-        ],
-        check=True,
-        text=True,
-        capture_output=True,
-        env=env,
-    )
+        shutil.rmtree(stripped_dir, ignore_errors=True)
 
 
 def normalize_for_compare(value: Any, value_type: str) -> Any:
@@ -789,7 +707,7 @@ def load_existing_rows_by_id(
     columns: list[str],
     column_types: dict[str, str],
     where_clause: str | None = None,
-) -> dict[int, dict[str, Any]]:
+) -> dict[int | str, dict[str, Any]]:
     query_columns = ", ".join(columns)
     sql = f"SELECT {query_columns} FROM public.{table}"
     if where_clause:
@@ -1017,11 +935,13 @@ def write_noop_seed(
     term_external_keys: list[str],
     fingerprint: str,
     scope: str,
+    schema_revision: str,
 ) -> tuple[Path, dict[str, dict[str, int]]]:
     lines = [
         "-- ============================================================================",
         "-- TEC-DATA DELTA SEED (NOOP)",
         "-- ============================================================================",
+        f"-- TEC-DATA-META schema_revision={schema_revision}",
         f"-- TEC-DATA-META environment_id={environment_id}",
         f"-- TEC-DATA-META scope={scope}",
         f"-- TEC-DATA-META years={','.join(str(y) for y in sorted(set(years)))}",
@@ -1195,6 +1115,7 @@ def generate_minimal_delta_seed(
     term_external_keys: list[str],
     environment_id: str,
     fingerprint: str,
+    schema_revision: str,
     scope: str = "all",
 ) -> tuple[Path, dict[str, dict[str, int]], bool]:
     target_tables = tables_for_scope(scope)
@@ -1224,6 +1145,7 @@ def generate_minimal_delta_seed(
         "-- ============================================================================",
         "-- TEC-DATA DELTA SEED",
         "-- ============================================================================",
+        f"-- TEC-DATA-META schema_revision={schema_revision}",
         f"-- TEC-DATA-META environment_id={environment_id}",
         f"-- TEC-DATA-META scope={scope}",
         f"-- TEC-DATA-META years={','.join(str(y) for y in sorted(set(years)))}",
@@ -1386,7 +1308,7 @@ def generate_minimal_delta_seed(
                             and campus_id in campus_subject_by_term[term_id]
                             and subject_id in campus_subject_by_term[term_id][campus_id]
                         ):
-                            filtered_stale_ids.append(offering_id)
+                            filtered_stale_ids.append(int(offering_id))
 
                     # Offerings that are stale but not soft-deleted: their child records
                     # (groups, professors, meetings) must also be preserved.
@@ -1589,9 +1511,6 @@ def remap_all_ids_to_db(
     level_courses = tables["study_plan_level_course"]
     course_relations = tables["course_relation"]
     professors = tables["professor"]
-    group_types = tables["group_type"]
-    academic_degrees = tables["academic_degree"]
-    course_types = tables["course_type"]
     rooms = tables["room"]
     offerings = tables["course_offering"]
     groups = tables["course_offering_group"]
@@ -1603,7 +1522,6 @@ def remap_all_ids_to_db(
     local_term_by_id = {int(r["id"]): r for r in terms}
     local_course_by_id = {int(r["id"]): r for r in courses}
     local_professor_by_id = {int(r["id"]): r for r in professors}
-    local_room_by_id = {int(r["id"]): r for r in rooms}
     local_group_offering_by_id = {
         int(r["id"]): int(r["course_offering_id"]) for r in groups
     }
@@ -2561,7 +2479,6 @@ def run_sync(
     keep_sql: bool,
     scope: str,
     seed_dir: Path,
-    baseline_seed: str | None,
     seed_history_db_url: str,
 ) -> None:
     scope = normalize_scope(scope)
@@ -2570,7 +2487,6 @@ def run_sync(
     year_list = sorted(set(years))
     tec_data_root = Path(__file__).resolve().parents[2]
     output_path: Path | None = None
-    temp_db_name: str | None = None
     seed_history_container: str | None = None
     if output is not None:
         output_path = (
@@ -2579,6 +2495,8 @@ def run_sync(
 
     root_dir = Path(__file__).resolve().parents[3]
     repo_dir = Path(__file__).resolve().parents[4]
+    migrations_dir = repo_dir / "data" / "migrations"
+    schema_revision = current_schema_revision(migrations_dir)
     backup_dir: Path | None = None
 
     try:
@@ -2588,11 +2506,8 @@ def run_sync(
                 if seed_dir.is_absolute()
                 else (tec_data_root / seed_dir).resolve()
             )
-            seed_paths = collect_seed_history(
-                seed_dir_resolved, baseline_seed=baseline_seed
-            )
+            seed_paths = collect_seed_history(seed_dir_resolved)
             typer.echo(f"Building local state from {len(seed_paths)} seed files...")
-            migrations_dir = repo_dir / "data" / "migrations"
             resolved_db_url = seed_history_db_url
             explicit_seed_db = seed_history_db_url != SEED_HISTORY_SERVICE_DB_URL
             if not os.environ.get("GITHUB_ACTIONS") and not explicit_seed_db:
@@ -2607,7 +2522,7 @@ def run_sync(
             # database, and the delta generator needs that baseline to compute
             # inserts/updates/soft-deletes. The fingerprint short-circuit below
             # still avoids emitting a non-NOOP seed when nothing changed.
-            temp_db_name, resolved_db_url = create_temp_seed_history_db(
+            replay_seed_history(
                 seed_paths,
                 db_url=resolved_db_url,
                 migrations_dir=migrations_dir,
@@ -2662,6 +2577,7 @@ def run_sync(
                 term_external_keys=term_external_keys,
                 fingerprint=sync_fingerprint,
                 scope=scope,
+                schema_revision=schema_revision,
             )
             is_noop = True
         else:
@@ -2673,6 +2589,7 @@ def run_sync(
                 term_external_keys=term_external_keys,
                 environment_id=environment_id,
                 fingerprint=sync_fingerprint,
+                schema_revision=schema_revision,
                 scope=scope,
             )
         if not output_path.is_absolute():
@@ -2682,6 +2599,7 @@ def run_sync(
         manifest_payload = {
             "seed_file": output_path.name,
             "generated_at_utc": generated_at_utc.isoformat(),
+            "schema_revision": schema_revision,
             "scope": scope,
             "years": year_list,
             "term_external_keys": term_external_keys,
@@ -2829,8 +2747,6 @@ def run_sync(
         if backup_dir is not None:
             restore_data_files(data_dir, backup_dir)
             shutil.rmtree(backup_dir, ignore_errors=True)
-        if temp_db_name is not None:
-            drop_temp_seed_history_db(temp_db_name)
         if seed_history_container is not None:
             _stop_seed_history_postgres_container(seed_history_container)
         if not keep_sql and output_path is not None and output_path.exists():
@@ -2902,11 +2818,6 @@ def sync_cmd(
         "--seed-dir",
         help="Directory with seed_*.sql history for target=seed-history",
     ),
-    baseline_seed: str | None = typer.Option(
-        None,
-        "--baseline-seed",
-        help="Baseline seed filename in --seed-dir to start replay from",
-    ),
     seed_history_db_url: str = typer.Option(
         SEED_HISTORY_SERVICE_DB_URL,
         "--seed-history-db-url",
@@ -2932,6 +2843,5 @@ def sync_cmd(
         keep_sql=keep_sql,
         scope=scope,
         seed_dir=seed_dir,
-        baseline_seed=baseline_seed,
         seed_history_db_url=seed_history_db_url,
     )

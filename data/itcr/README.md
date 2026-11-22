@@ -268,9 +268,15 @@ uv run itcr sync --target seed-history --seed-dir ../seeds/itcr --scope offering
 uv run itcr sync --target seed-history --seed-history-db-url "postgresql://postgres:postgres@127.0.0.1:5432/postgres" --seed-dir ../seeds/itcr --scope offering --years 2026 --no-apply
 ```
 
-`--target seed-history` aplica las migraciones SQL (`data/migrations/`) y luego replaya
-los seeds históricos. No requiere `--skip-migrations` ni Supabase CLI: si se pasa
-`--seed-history-db-url` se usa esa base; si no, se levanta un contenedor temporal.
+`--target seed-history` replaya las migraciones y los seeds históricos como una sola
+línea de tiempo: para cada seed aplica las migraciones pendientes hasta la revisión de
+esquema que el seed declara (`-- TEC-DATA-META schema_revision=...`), replaya el seed y
+continúa; después del último seed aplica las migraciones restantes. La base apuntada
+por `--seed-history-db-url` debe estar vacía (sin tablas de usuario en `public`, `auth`
+ni `better_auth`, y sin `public.__drizzle_migrations`); el replay falla si ya contiene
+datos y deja el estado final en esa misma base para que el llamador lo inspeccione. No
+requiere `--skip-migrations` ni Supabase CLI: si se pasa `--seed-history-db-url` se usa
+esa base; si no, se levanta un contenedor temporal.
 
 Qué hace `sync`:
 
@@ -287,8 +293,11 @@ Opciones útiles:
 - `--keep-sql/--no-keep-sql`: conserva o elimina el SQL generado (por defecto se conserva).
 - `--scope catalog|offering|all`: alcance lógico para diff/soft-delete.
 - `--seed-dir ../seeds/itcr`: carpeta de historial para `--target seed-history`.
-- `--baseline-seed seed_YYYYMMDDTHHMMSSZ_*.sql`: seed inicial opcional para replay parcial.
 - `--seed-history-db-url`: URL Postgres para `--target seed-history` (por defecto `127.0.0.1:5432`).
+
+Cada seed generado incluye `-- TEC-DATA-META schema_revision=<sha256>`: el hash de los
+nombres de las migraciones presentes al generarlo. El replay rechaza seeds sin esa
+cabecera, revisiones desconocidas o una secuencia que no sea no decreciente.
 
 ### Ledger de seeds aplicados
 

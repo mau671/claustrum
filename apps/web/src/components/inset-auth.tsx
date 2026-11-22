@@ -6,14 +6,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import {
   PasswordInput,
   PasswordMatchIndicator,
   PasswordStrengthIndicator,
 } from "@/components/password-input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { authClient, getSession, signIn, signUp } from "@/lib/auth/client";
 import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
+import { useAuthCallbackError } from "@/lib/hooks/use-auth-callback-error";
 
 /* ------------------------------------------------------------------ */
 /*  Layout común                                                       */
@@ -30,10 +31,17 @@ import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib
 
 export function InsetSigninPage() {
   const [email, setEmail] = useState("");
+  const callbackError = useAuthCallbackError();
 
   return (
     <>
       <Heading title="Bienvenido de nuevo" subtitle="Inicia sesión para continuar." />
+      {callbackError ? (
+        <Alert variant="destructive" className="mt-4">
+          <AlertTitle>{callbackError.title}</AlertTitle>
+          <AlertDescription>{callbackError.message}</AlertDescription>
+        </Alert>
+      ) : null}
       <OAuthRow />
       <MagicLinkButton email={email} />
       <OrSeparator />
@@ -66,7 +74,6 @@ export function InsetSignupPage() {
     <>
       <Heading title="Crea tu cuenta" subtitle="Completa el formulario para registrarte." />
       <OAuthRow />
-      <MagicLinkButton />
       <OrSeparator />
       <SignUpForm />
       <div className="text-muted-foreground mt-5 text-center text-sm">
@@ -460,13 +467,11 @@ function OAuthRow() {
 }
 
 function useLastUsedLoginMethod() {
-  const [lastMethod, setLastMethod] = useState<string | null>(null);
-
-  useEffect(() => {
-    setLastMethod(authClient.getLastUsedLoginMethod());
-  }, []);
-
-  return lastMethod;
+  return useSyncExternalStore(
+    () => () => {},
+    () => authClient.getLastUsedLoginMethod(),
+    () => null,
+  );
 }
 
 function GoogleOAuthButton() {
@@ -478,6 +483,7 @@ function GoogleOAuthButton() {
     const { error } = await signIn.social({
       provider: "google",
       callbackURL: `${window.location.origin}/`,
+      errorCallbackURL: `${window.location.origin}/auth/signin`,
     });
 
     if (error) {
@@ -639,6 +645,7 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
     const { data, error } = await signIn.email({
       email: normalizedEmail,
       password,
+      callbackURL: `${window.location.origin}/auth/verify-email`,
     });
 
     if (error) {

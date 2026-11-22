@@ -6,6 +6,7 @@ export type AuthErrorType =
   | "weak_password"
   | "rate_limit"
   | "network"
+  | "banned"
   | "signup_disabled"
   | "unknown";
 
@@ -37,12 +38,32 @@ export function normalizeAuthError(
   }
 
   if (
+    rawCode.includes("invalid_email_or_password") ||
+    rawCode.includes("invalid_login_credentials")
+  ) {
+    return {
+      type: "invalid_credentials",
+      message: "Correo o contraseña incorrectos, vuelve a revisar los datos ingresados",
+    };
+  }
+
+  if (
+    rawCode.includes("banned") ||
+    rawMessage.includes("banned") ||
+    rawMessage.includes("suspend")
+  ) {
+    return {
+      type: "banned",
+      message: "Tu cuenta está suspendida. Escríbenos si crees que es un error.",
+    };
+  }
+
+  if (
     rawMessage.includes("email not confirmed") ||
     rawCode.includes("email_not_confirmed") ||
     rawMessage.includes("email not verified") ||
     rawCode.includes("email_not_verified") ||
-    rawCode.includes("not_verified") ||
-    error?.status === 403 // Better Auth often returns 403 for unverified emails
+    rawCode.includes("not_verified")
   ) {
     return {
       type: "email_unconfirmed",
@@ -50,7 +71,11 @@ export function normalizeAuthError(
     };
   }
 
-  if (rawMessage.includes("user already registered") || rawCode.includes("user_already_exists")) {
+  if (
+    rawMessage.includes("user already registered") ||
+    rawCode.includes("user_already_exists") ||
+    rawCode.includes("user_already_registered")
+  ) {
     return {
       type: "already_registered",
       message: "Ya existe una cuenta con ese correo. Intenta iniciar sesión.",
@@ -71,7 +96,11 @@ export function normalizeAuthError(
     };
   }
 
-  if (rawMessage.includes("password should be at least") || rawCode.includes("weak_password")) {
+  if (
+    rawMessage.includes("password should be at least") ||
+    rawCode.includes("weak_password") ||
+    rawCode.includes("password_too_short")
+  ) {
     return {
       type: "weak_password",
       message: "La contraseña es demasiado corta. Usa al menos 8 caracteres.",
@@ -118,4 +147,64 @@ export function normalizeAuthError(
     type: "unknown",
     message: "No pudimos crear tu cuenta. Inténtalo nuevamente en unos segundos.",
   };
+}
+
+export interface AuthCallbackError {
+  title: string;
+  message: string;
+}
+
+export function getAuthCallbackError(search: Record<string, unknown>): AuthCallbackError | null {
+  const rawError = typeof search.error === "string" ? search.error.trim() : "";
+  if (!rawError) return null;
+
+  switch (rawError.toLowerCase()) {
+    case "account_not_linked":
+      return {
+        title: "Ese correo ya tiene una cuenta",
+        message:
+          "Inicia sesión con tu contraseña y confirma tu correo. Después podrás usar Google con la misma dirección.",
+      };
+    case "email_not_verified":
+    case "email_not_confirmed":
+      return {
+        title: "Confirma tu correo",
+        message:
+          "Debes confirmar tu dirección antes de continuar. Revisa el enlace que te enviamos.",
+      };
+    case "access_denied":
+      return {
+        title: "Acceso cancelado",
+        message:
+          "Cancelaste el inicio de sesión con Google. Puedes intentarlo de nuevo cuando quieras.",
+      };
+    case "new_user_signup_disabled":
+      return {
+        title: "No pudimos iniciar sesión",
+        message:
+          "Ese enlace no sirve para crear una cuenta. Regístrate o inicia sesión con tu correo y contraseña.",
+      };
+    case "invalid_token":
+    case "token_expired":
+      return {
+        title: "El enlace no es válido",
+        message: "Expiró o ya fue usado. Solicita uno nuevo para continuar.",
+      };
+    case "state_mismatch":
+    case "please_restart_the_process":
+      return {
+        title: "La sesión expiró",
+        message: "Vuelve a intentarlo desde el inicio de sesión.",
+      };
+    case "banned_user":
+      return {
+        title: "Cuenta suspendida",
+        message: "Tu cuenta está suspendida. Escríbenos si crees que es un error.",
+      };
+    default:
+      return {
+        title: "No pudimos completar el acceso",
+        message: "Inténtalo de nuevo en unos segundos.",
+      };
+  }
 }

@@ -65,8 +65,29 @@ function getTrustedOrigins(env: AuthEnv): string[] {
   ];
 }
 
+function getWebOrigin(env: AuthEnv): string {
+  const corsOrigin = env.CORS_ORIGINS?.split(",")
+    .map((value) => value.trim())
+    .find(Boolean);
+
+  return corsOrigin ?? env.BETTER_AUTH_URL;
+}
+
 export function createAuth(env: AuthEnv, pool: Pool) {
-  return betterAuth({
+  const getEmailVerificationState = async (
+    email: string,
+  ): Promise<"missing" | "unverified" | "verified"> => {
+    const { rows } = await pool.query<{ emailVerified: boolean }>(
+      `SELECT "emailVerified" FROM public."user" WHERE lower(email) = lower($1) LIMIT 1`,
+      [email],
+    );
+    const user = rows[0];
+
+    if (!user) return "missing";
+    return user.emailVerified ? "verified" : "unverified";
+  };
+
+  const auth = betterAuth({
     appName: "Claustrum",
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
@@ -124,6 +145,7 @@ export function createAuth(env: AuthEnv, pool: Pool) {
     },
     emailVerification: {
       sendOnSignUp: true,
+      sendOnSignIn: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
         await sendAuthEmail(env, {
@@ -175,6 +197,24 @@ export function createAuth(env: AuthEnv, pool: Pool) {
         disableSignUp: true,
         expiresIn: 600,
         sendMagicLink: async ({ email, url }) => {
+          const state = await getEmailVerificationState(email);
+
+          // Unknown emails receive no message to avoid account enumeration.
+          if (state === "missing") return;
+
+          // Magic links must not be used to promote unverified accounts:
+          // Better Auth revokes the pre-existing password in that case.
+          // Send the verification email instead so the password is kept.
+          if (state === "unverified") {
+            await auth.api.sendVerificationEmail({
+              body: {
+                email,
+                callbackURL: `${getWebOrigin(env)}/auth/verify-email`,
+              },
+            });
+            return;
+          }
+
           await sendAuthEmail(env, {
             to: email,
             subject: "Tu enlace para iniciar sesión en Claustrum",
@@ -194,4 +234,6 @@ export function createAuth(env: AuthEnv, pool: Pool) {
       }),
     ],
   });
+
+  return auth;
 }

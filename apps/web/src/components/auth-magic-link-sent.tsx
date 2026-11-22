@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { normalizeAuthError } from "@/lib/auth/auth-error-messages";
 import { signIn } from "@/lib/auth/client";
 import { isDisposableEmail, normalizeEmail, suggestEmailCorrection } from "@/lib/email-validation";
+import { useAuthCallbackError } from "@/lib/hooks/use-auth-callback-error";
+import { useSessionStorageValue } from "@/lib/hooks/use-session-storage";
 
 const RESEND_SECONDS = 30;
 const MAGIC_LINK_EMAIL_KEY = "claustrum.auth.magic_link_email";
@@ -46,18 +48,14 @@ type Mode = "request" | "sent";
 
 export function AuthMagicLinkSentPage() {
   const [mode, setMode] = useState<Mode>("request");
-  const [email, setEmail] = useState("");
+  const storedEmail = useSessionStorageValue(MAGIC_LINK_EMAIL_KEY);
+  const [emailDraft, setEmailDraft] = useState<string | null>(null);
+  const email = emailDraft ?? storedEmail;
   const [sentEmail, setSentEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedEmail = window.sessionStorage.getItem(MAGIC_LINK_EMAIL_KEY);
-    if (storedEmail) {
-      setEmail(storedEmail);
-    }
-  }, []);
+  const callbackError = useAuthCallbackError();
 
   useEffect(() => {
     if (mode !== "sent" || secondsLeft <= 0) return;
@@ -85,6 +83,7 @@ export function AuthMagicLinkSentPage() {
     const { error } = await signIn.magicLink({
       email: trimmedEmail,
       callbackURL: `${window.location.origin}/`,
+      errorCallbackURL: `${window.location.origin}/auth/magic-link`,
     });
 
     if (error) {
@@ -121,9 +120,10 @@ export function AuthMagicLinkSentPage() {
       {mode === "request" ? (
         <RequestState
           email={email}
-          setEmail={setEmail}
+          setEmail={setEmailDraft}
           isSending={isSending}
           errorMessage={errorMessage}
+          callbackError={callbackError}
           onSubmit={onSubmit}
         />
       ) : (
@@ -148,12 +148,14 @@ function RequestState({
   setEmail,
   isSending,
   errorMessage,
+  callbackError,
   onSubmit,
 }: {
   email: string;
   setEmail: (value: string) => void;
   isSending: boolean;
   errorMessage: string | null;
+  callbackError: { title: string; message: string } | null;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 }) {
   const [suggestedEmail, setSuggestedEmail] = useState<string | null>(null);
@@ -175,9 +177,17 @@ function RequestState({
           Acceso con enlace mágico
         </h1>
         <p className="text-muted-foreground text-sm">
-          Ingresa tu correo y te enviaremos un enlace para iniciar sesión sin contraseña.
+          Ingresa tu correo y te enviaremos un enlace para iniciar sesión. Si todavía no confirmaste
+          tu cuenta, te enviaremos el correo de verificación.
         </p>
       </div>
+
+      {callbackError ? (
+        <Alert variant="destructive" className="mt-4">
+          <AlertTitle>{callbackError.title}</AlertTitle>
+          <AlertDescription>{callbackError.message}</AlertDescription>
+        </Alert>
+      ) : null}
 
       <div className="mt-6">
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
@@ -265,9 +275,9 @@ function SentState({
         <h1 className="font-heading text-2xl font-semibold tracking-tight">Revisa tu correo</h1>
         <p className="text-muted-foreground text-sm leading-relaxed break-words">
           Si la dirección <strong className="text-foreground break-all">{sentEmail}</strong> está
-          registrada en Claustrum recibirás un mensaje con un enlace para iniciar sesión, el cual
-          expira en 10 minutos, por lo que si no encuentras el correo revisa tu carpeta de spam o
-          promociones.
+          registrada en Claustrum recibirás un enlace para iniciar sesión, el cual expira en 10
+          minutos. Si tu cuenta todavía no está confirmada, recibirás el correo de verificación en
+          su lugar. Revisa también tu carpeta de spam o promociones.
         </p>
       </div>
 

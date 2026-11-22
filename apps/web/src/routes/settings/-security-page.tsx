@@ -271,6 +271,7 @@ export function SecurityPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [isSendingPasswordSetup, setIsSendingPasswordSetup] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isLoadingMfa, setIsLoadingMfa] = useState(false);
   const [isDisablingMfa, setIsDisablingMfa] = useState(false);
@@ -360,6 +361,29 @@ export function SecurityPage() {
         </Button>
       </div>
     );
+  }
+
+  async function handleCreatePassword() {
+    if (!authUser?.email) return;
+
+    setIsSendingPasswordSetup(true);
+    setPasswordError(null);
+
+    try {
+      const { error } = await authClient.requestPasswordReset({
+        email: authUser.email,
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (error) throw error;
+
+      toast.success("Te enviamos un enlace para crear tu contraseña");
+    } catch (err) {
+      const message = getReadableErrorMessage(err, "No se pudo enviar el enlace");
+      setPasswordError(message);
+      toast.error(message);
+    } finally {
+      setIsSendingPasswordSetup(false);
+    }
   }
 
   async function handlePasswordChange() {
@@ -569,70 +593,80 @@ export function SecurityPage() {
           </div>
         ) : (
           <div className="max-w-md space-y-4">
-            <div className="space-y-4">
-              <Field data-disabled={!hasCredentialAccount}>
-                <FieldLabel htmlFor="current-password">Contraseña actual</FieldLabel>
-                <PasswordInput
-                  id="current-password"
-                  value={currentPassword}
-                  onChange={(e) => {
-                    setCurrentPassword(e.target.value);
-                    setPasswordError(null);
-                  }}
-                  autoComplete="current-password"
-                  disabled={!hasCredentialAccount}
-                />
-              </Field>
-              <Field data-disabled={!hasCredentialAccount}>
-                <FieldLabel htmlFor="new-password">Nueva contraseña</FieldLabel>
-                <PasswordInput
-                  id="new-password"
-                  value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    setPasswordError(null);
-                  }}
-                  autoComplete="new-password"
-                  disabled={!hasCredentialAccount}
-                />
-              </Field>
-              {hasCredentialAccount && <PasswordStrengthIndicator password={newPassword} />}
-              <Field data-disabled={!hasCredentialAccount}>
-                <FieldLabel htmlFor="confirm-password">Confirmar contraseña</FieldLabel>
-                <PasswordInput
-                  id="confirm-password"
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    setPasswordError(null);
-                  }}
-                  autoComplete="new-password"
-                  disabled={!hasCredentialAccount}
-                  showLabel="Mostrar confirmación"
-                  hideLabel="Ocultar confirmación"
-                />
-                <PasswordMatchIndicator password={newPassword} confirmPassword={confirmPassword} />
-              </Field>
-            </div>
+            {hasCredentialAccount ? (
+              <div className="space-y-4">
+                <Field>
+                  <FieldLabel htmlFor="current-password">Contraseña actual</FieldLabel>
+                  <PasswordInput
+                    id="current-password"
+                    value={currentPassword}
+                    onChange={(e) => {
+                      setCurrentPassword(e.target.value);
+                      setPasswordError(null);
+                    }}
+                    autoComplete="current-password"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-password">Nueva contraseña</FieldLabel>
+                  <PasswordInput
+                    id="new-password"
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPasswordError(null);
+                    }}
+                    autoComplete="new-password"
+                  />
+                </Field>
+                <PasswordStrengthIndicator password={newPassword} />
+                <Field>
+                  <FieldLabel htmlFor="confirm-password">Confirmar contraseña</FieldLabel>
+                  <PasswordInput
+                    id="confirm-password"
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setPasswordError(null);
+                    }}
+                    autoComplete="new-password"
+                    showLabel="Mostrar confirmación"
+                    hideLabel="Ocultar confirmación"
+                  />
+                  <PasswordMatchIndicator
+                    password={newPassword}
+                    confirmPassword={confirmPassword}
+                  />
+                </Field>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                Tu cuenta no tiene contraseña porque iniciaste sesión con Google o con un enlace
+                mágico. Te enviaremos un enlace a {authUser.email} para que puedas crearla.
+              </p>
+            )}
             {passwordError && (
               <p className="text-destructive-foreground text-sm" role="alert">
                 {passwordError}
               </p>
             )}
-            {!hasCredentialAccount && (
-              <p className="text-muted-foreground text-sm">
-                Tu cuenta inició sesión con Google. Configura una contraseña para habilitar este
-                cambio.
-              </p>
-            )}
             <div className="flex justify-end">
-              <Button
-                onClick={() => void handlePasswordChange()}
-                loading={isSavingPassword}
-                disabled={!hasCredentialAccount || !canSavePassword}
-              >
-                Guardar contraseña
-              </Button>
+              {hasCredentialAccount ? (
+                <Button
+                  onClick={() => void handlePasswordChange()}
+                  loading={isSavingPassword}
+                  disabled={!canSavePassword}
+                >
+                  Guardar contraseña
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => void handleCreatePassword()}
+                  loading={isSendingPasswordSetup}
+                >
+                  Enviar enlace para crear contraseña
+                </Button>
+              )}
             </div>
           </div>
         )}

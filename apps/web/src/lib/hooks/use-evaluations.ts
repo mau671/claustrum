@@ -7,6 +7,8 @@ import {
   getEvaluationDocument,
   getEvaluationAnswersDocument,
   getEvaluationModerationQueue,
+  type EvaluationSearchParams,
+  searchEvaluations,
   moderateEvaluation,
   uploadEvaluation,
 } from "@/lib/evaluations/api";
@@ -16,6 +18,14 @@ export function useCourseEvaluations(courseId: number | null, studyPlanId: numbe
     queryKey: ["courseEvaluations", courseId, studyPlanId],
     queryFn: () => getCourseEvaluations(courseId!, studyPlanId),
     enabled: courseId !== null,
+  });
+}
+
+export function useEvaluationSearch(params: EvaluationSearchParams) {
+  return useQuery({
+    queryKey: ["evaluationSearch", params],
+    queryFn: () => searchEvaluations(params),
+    placeholderData: (previousData) => previousData,
   });
 }
 

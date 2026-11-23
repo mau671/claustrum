@@ -1,7 +1,9 @@
 import type {
   EvaluationRow,
   EvaluationModerationRow,
+  EvaluationSearchRow,
   EvaluationStatus,
+  EvaluationType,
   UploadEvaluationPayload,
 } from "@/lib/evaluations/types";
 
@@ -22,6 +24,26 @@ export async function getCourseEvaluations(
     ? `/evaluations?courseId=${courseId}&studyPlanId=${studyPlanId}`
     : `/evaluations?courseId=${courseId}`;
   const data = await apiClient<EvaluationRow[]>(query);
+  return data ?? [];
+}
+
+export interface EvaluationSearchParams {
+  q?: string;
+  type?: EvaluationType;
+  limit?: number;
+  offset?: number;
+}
+
+export async function searchEvaluations(
+  params: EvaluationSearchParams,
+): Promise<EvaluationSearchRow[]> {
+  const query = new URLSearchParams();
+  if (params.q?.trim()) query.set("q", params.q.trim());
+  if (params.type) query.set("type", params.type);
+  query.set("limit", String(params.limit ?? 25));
+  query.set("offset", String(params.offset ?? 0));
+
+  const data = await apiClient<EvaluationSearchRow[]>(`/evaluations/search?${query.toString()}`);
   return data ?? [];
 }
 

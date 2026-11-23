@@ -20,6 +20,7 @@ import { Route as CurriculumIndexRouteImport } from './routes/curriculum/index'
 import { Route as CurriculumCourseIdRouteImport } from './routes/curriculum/$courseId'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DocsSplatRouteImport } from './routes/docs/$'
+import { Route as EvaluationsIndexRouteImport } from './routes/evaluations/index'
 import { Route as ModerationIndexRouteImport } from './routes/moderation/index'
 import { Route as ModerationEvaluationsRouteImport } from './routes/moderation/evaluations'
 import { Route as ModerationFeedbackRouteImport } from './routes/moderation/feedback'
@@ -101,6 +102,13 @@ const DocsSplatRoute = DocsSplatRouteImport.update({
   path: '/docs/$',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/docs/$.lazy').then((d) => d.Route))
+const EvaluationsIndexRoute = EvaluationsIndexRouteImport.update({
+  id: '/evaluations/',
+  path: '/evaluations/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/evaluations/index.lazy').then((d) => d.Route),
+)
 const ModerationIndexRoute = ModerationIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -309,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/settings/security': typeof SettingsSecurityLazyRoute
   '/curriculum/': typeof CurriculumIndexRoute
   '/docs/': typeof DocsIndexRoute
+  '/evaluations/': typeof EvaluationsIndexRoute
   '/moderation/': typeof ModerationIndexRoute
   '/onboarding/': typeof OnboardingIndexRoute
   '/policies/': typeof PoliciesIndexRoute
@@ -345,6 +354,7 @@ export interface FileRoutesByTo {
   '/settings/security': typeof SettingsSecurityLazyRoute
   '/curriculum': typeof CurriculumIndexRoute
   '/docs': typeof DocsIndexRoute
+  '/evaluations': typeof EvaluationsIndexRoute
   '/moderation': typeof ModerationIndexRoute
   '/onboarding': typeof OnboardingIndexRoute
   '/policies': typeof PoliciesIndexRoute
@@ -384,6 +394,7 @@ export interface FileRoutesById {
   '/settings/security': typeof SettingsSecurityLazyRoute
   '/curriculum/': typeof CurriculumIndexRoute
   '/docs/': typeof DocsIndexRoute
+  '/evaluations/': typeof EvaluationsIndexRoute
   '/moderation/': typeof ModerationIndexRoute
   '/onboarding/': typeof OnboardingIndexRoute
   '/policies/': typeof PoliciesIndexRoute
@@ -424,6 +435,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/curriculum/'
     | '/docs/'
+    | '/evaluations/'
     | '/moderation/'
     | '/onboarding/'
     | '/policies/'
@@ -460,6 +472,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/curriculum'
     | '/docs'
+    | '/evaluations'
     | '/moderation'
     | '/onboarding'
     | '/policies'
@@ -498,6 +511,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/curriculum/'
     | '/docs/'
+    | '/evaluations/'
     | '/moderation/'
     | '/onboarding/'
     | '/policies/'
@@ -529,6 +543,7 @@ export interface RootRouteChildren {
   ProfessorsProfessorIdRoute: typeof ProfessorsProfessorIdRoute
   CurriculumIndexRoute: typeof CurriculumIndexRoute
   DocsIndexRoute: typeof DocsIndexRoute
+  EvaluationsIndexRoute: typeof EvaluationsIndexRoute
   OnboardingIndexRoute: typeof OnboardingIndexRoute
   PoliciesIndexRoute: typeof PoliciesIndexRoute
   ProfessorsIndexRoute: typeof ProfessorsIndexRoute
@@ -601,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/docs/$'
       fullPath: '/docs/$'
       preLoaderRoute: typeof DocsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/evaluations/': {
+      id: '/evaluations/'
+      path: '/evaluations'
+      fullPath: '/evaluations/'
+      preLoaderRoute: typeof EvaluationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/moderation/': {
@@ -871,6 +893,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfessorsProfessorIdRoute: ProfessorsProfessorIdRoute,
   CurriculumIndexRoute: CurriculumIndexRoute,
   DocsIndexRoute: DocsIndexRoute,
+  EvaluationsIndexRoute: EvaluationsIndexRoute,
   OnboardingIndexRoute: OnboardingIndexRoute,
   PoliciesIndexRoute: PoliciesIndexRoute,
   ProfessorsIndexRoute: ProfessorsIndexRoute,

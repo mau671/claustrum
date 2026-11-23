@@ -1,4 +1,5 @@
 import {
+  AssignmentsIcon,
   BubbleChatUserIcon,
   Calendar03Icon,
   File01Icon,
@@ -33,6 +34,15 @@ const data = {
       url: "/curriculum",
       icon: GraduationCapIcon,
       filledIcon: createFilledIcon(GraduationCapIcon),
+    },
+    {
+      title: "Evaluaciones",
+      url: "/evaluations",
+      icon: AssignmentsIcon,
+      filledIcon: createFilledIcon(AssignmentsIcon, {
+        fillKeys: ["1"],
+        invertKeys: ["2", "3", "5"],
+      }),
     },
     {
       title: "Profesores",

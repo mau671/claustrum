@@ -85,6 +85,10 @@ export type EvaluationRow = {
   professor_name: string | null;
 };
 
+export type EvaluationSearchRow = EvaluationRow & {
+  total_count: number;
+};
+
 export type EvaluationModerationRow = {
   id: number;
   course_id: number;

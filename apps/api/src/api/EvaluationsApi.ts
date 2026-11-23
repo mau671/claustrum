@@ -4,9 +4,11 @@ import * as Schema from "effect/Schema";
 import {
   EvaluationDetail,
   EvaluationItem,
+  EvaluationSearchRow,
   GetEvaluationsQuery,
   ModerateEvaluationPayload,
   ModerateEvaluationResponse,
+  SearchEvaluationsQuery,
   UploadEvaluationResponse,
 } from "../domain/Evaluations";
 import {
@@ -23,6 +25,11 @@ export class EvaluationsApiGroup extends HttpApiGroup.make("evaluations")
     HttpApiEndpoint.get("list", "/", {
       query: GetEvaluationsQuery,
       success: Schema.Array(EvaluationItem),
+      error: [BadRequestError, InternalServerError],
+    }),
+    HttpApiEndpoint.get("search", "/search", {
+      query: SearchEvaluationsQuery,
+      success: Schema.Array(EvaluationSearchRow),
       error: [BadRequestError, InternalServerError],
     }),
     HttpApiEndpoint.post("upload", "/", {

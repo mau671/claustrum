@@ -12,6 +12,7 @@ import { ClaustrumApi } from "../api/index";
 import {
   type EvaluationDetail,
   type EvaluationItem,
+  type EvaluationSearchRow,
   formatFileName,
   validateUploadPayload,
 } from "../domain/Evaluations";
@@ -51,6 +52,34 @@ interface EvaluationDbRow {
   readonly term_display_name: string | null;
   readonly professor_name: string | null;
   readonly moderation_note?: string | null;
+}
+
+interface EvaluationSearchDbRow extends EvaluationDbRow {
+  readonly total_count: number | string;
+}
+
+function mapEvaluationRow(r: EvaluationDbRow): EvaluationItem {
+  return {
+    id: Number(r.id),
+    course_id: Number(r.course_id),
+    course_code: r.course_code,
+    course_name: r.course_name,
+    academic_term_id: r.academic_term_id !== null ? Number(r.academic_term_id) : null,
+    professor_id: r.professor_id !== null ? Number(r.professor_id) : null,
+    evaluation_type: r.evaluation_type,
+    evaluation_number: r.evaluation_number !== null ? Number(r.evaluation_number) : null,
+    custom_name: r.custom_name ?? null,
+    is_catedra: Boolean(r.is_catedra),
+    includes_answers: Boolean(r.includes_answers),
+    has_separate_answers: Boolean(r.has_separate_answers),
+    file_key: r.file_key,
+    file_size: Number(r.file_size),
+    answers_file_key: r.answers_file_key ?? null,
+    status: r.status,
+    created_at: toIsoString(r.created_at) ?? "",
+    term_display_name: r.term_display_name ?? null,
+    professor_name: r.professor_name ?? null,
+  };
 }
 
 interface EvaluationFileRow {
@@ -129,26 +158,64 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             ),
           );
 
-          const mapped: EvaluationItem[] = rows.map((r) => ({
-            id: Number(r.id),
-            course_id: Number(r.course_id),
-            course_code: r.course_code,
-            course_name: r.course_name,
-            academic_term_id: r.academic_term_id !== null ? Number(r.academic_term_id) : null,
-            professor_id: r.professor_id !== null ? Number(r.professor_id) : null,
-            evaluation_type: r.evaluation_type,
-            evaluation_number: r.evaluation_number !== null ? Number(r.evaluation_number) : null,
-            custom_name: r.custom_name ?? null,
-            is_catedra: Boolean(r.is_catedra),
-            includes_answers: Boolean(r.includes_answers),
-            has_separate_answers: Boolean(r.has_separate_answers),
-            file_key: r.file_key,
-            file_size: Number(r.file_size),
-            answers_file_key: r.answers_file_key ?? null,
-            status: r.status,
-            created_at: toIsoString(r.created_at) ?? "",
-            term_display_name: r.term_display_name ?? null,
-            professor_name: r.professor_name ?? null,
+          return rows.map(mapEvaluationRow);
+        }),
+      )
+      .handle("search", ({ query }) =>
+        Effect.gen(function* () {
+          const term = query.q?.trim() ?? "";
+          const pattern = term.length > 0 ? `%${term}%` : null;
+          const type = query.type ?? null;
+          const limit = Math.min(Math.max(query.limit ?? 25, 1), 50);
+          const offset = Math.max(query.offset ?? 0, 0);
+
+          const rows = yield* sql<EvaluationSearchDbRow>`
+              SELECT
+                e.id,
+                e.course_id,
+                c.code AS course_code,
+                c.name AS course_name,
+                e.academic_term_id,
+                e.professor_id,
+                e.evaluation_type::TEXT,
+                e.evaluation_number,
+                e.custom_name,
+                e.is_catedra,
+                e.includes_answers,
+                e.has_separate_answers,
+                e.file_key,
+                e.file_size,
+                e.answers_file_key,
+                e.status::TEXT,
+                e.created_at,
+                at.display_name AS term_display_name,
+                p.full_name AS professor_name,
+                COUNT(*) OVER () AS total_count
+              FROM public.course_evaluations e
+              JOIN public.course c ON c.id = e.course_id
+              LEFT JOIN public.academic_term at ON at.id = e.academic_term_id
+              LEFT JOIN public.professor p ON p.id = e.professor_id
+              WHERE e.status = 'approved'
+                AND (${pattern}::text IS NULL OR
+                     c.code ILIKE ${pattern} OR
+                     c.name ILIKE ${pattern} OR
+                     p.full_name ILIKE ${pattern} OR
+                     e.custom_name ILIKE ${pattern})
+                AND (${type}::text IS NULL OR e.evaluation_type::TEXT = ${type}::text)
+              ORDER BY e.created_at DESC, e.id DESC
+              LIMIT ${limit} OFFSET ${offset}
+            `.pipe(
+            Effect.mapError(
+              (e) =>
+                new InternalServerError({
+                  error: `Database error: ${e.message}`,
+                }),
+            ),
+          );
+
+          const mapped: EvaluationSearchRow[] = rows.map((r) => ({
+            ...mapEvaluationRow(r),
+            total_count: Number(r.total_count),
           }));
 
           return mapped;

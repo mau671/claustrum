@@ -20,6 +20,14 @@ export const GetEvaluationsQuery = Schema.Struct({
 });
 export type GetEvaluationsQuery = typeof GetEvaluationsQuery.Type;
 
+export const SearchEvaluationsQuery = Schema.Struct({
+  q: Schema.optional(Schema.String),
+  type: Schema.optional(EvaluationType),
+  limit: Schema.optional(Schema.NumberFromString),
+  offset: Schema.optional(Schema.NumberFromString),
+});
+export type SearchEvaluationsQuery = typeof SearchEvaluationsQuery.Type;
+
 export const EvaluationItem = Schema.Struct({
   id: Schema.Number,
   course_id: Schema.Number,
@@ -42,6 +50,12 @@ export const EvaluationItem = Schema.Struct({
   professor_name: Schema.NullOr(Schema.String),
 });
 export type EvaluationItem = typeof EvaluationItem.Type;
+
+export const EvaluationSearchRow = Schema.Struct({
+  ...EvaluationItem.fields,
+  total_count: Schema.Number,
+});
+export type EvaluationSearchRow = typeof EvaluationSearchRow.Type;
 
 export const EvaluationDetail = Schema.Struct({
   id: Schema.Number,

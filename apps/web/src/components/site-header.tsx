@@ -1,5 +1,6 @@
 import {
   ArrowRight01Icon,
+  AssignmentsIcon,
   Calendar03Icon,
   GraduationCapIcon,
   Moon02Icon,
@@ -57,6 +58,7 @@ type BreadcrumbItem = {
 const quickLinks = [
   { label: "Horarios", to: "/schedule", icon: Calendar03Icon },
   { label: "Plan de estudios", to: "/curriculum", icon: GraduationCapIcon },
+  { label: "Evaluaciones", to: "/evaluations", icon: AssignmentsIcon },
   { label: "Profesores", to: "/professors", icon: UserMultiple02Icon },
   { label: "Perfil", to: "/settings/profile", icon: UserIcon },
   { label: "Seguridad", to: "/settings/security", icon: Shield01Icon },
@@ -66,6 +68,7 @@ const quickLinks = [
 const pageTitles: Record<string, string> = {
   "/schedule": "Horarios",
   "/curriculum": "Plan de estudios",
+  "/evaluations": "Evaluaciones",
   "/professors": "Profesores",
   "/policies": "Reglamento y políticas",
   "/moderation": "Moderación",

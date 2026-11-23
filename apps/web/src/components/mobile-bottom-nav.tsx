@@ -1,4 +1,5 @@
 import {
+  AssignmentsIcon,
   BubbleChatUserIcon,
   Calendar03Icon,
   File01Icon,
@@ -56,6 +57,15 @@ const mainNavItems = [
     filledIcon: createFilledIcon(GraduationCapIcon),
   },
   {
+    title: "Exámenes",
+    url: "/evaluations",
+    icon: AssignmentsIcon,
+    filledIcon: createFilledIcon(AssignmentsIcon, {
+      fillKeys: ["1"],
+      invertKeys: ["2", "3", "5"],
+    }),
+  },
+  {
     title: "Profesores",
     url: "/professors",
     icon: UserMultiple02Icon,
@@ -77,6 +87,7 @@ const instantTransition = {
 function getMatchingMainRoute(pathname: string): string | null {
   if (pathname.startsWith("/schedule")) return "/schedule";
   if (pathname.startsWith("/curriculum")) return "/curriculum";
+  if (pathname.startsWith("/evaluations")) return "/evaluations";
   if (pathname.startsWith("/professors")) return "/professors";
   return null;
 }

@@ -58,6 +58,7 @@ import {
   useCourseOfferingTerms,
   useCourseRecentProfessors,
 } from "@/lib/hooks/use-queries";
+import { cn } from "@/lib/utils";
 
 const Turnstile = lazy(() =>
   import("@marsidev/react-turnstile").then((module) => ({ default: module.Turnstile })),
@@ -396,7 +397,7 @@ export function EvaluationUploadDialog({
       </div>
 
       {/* Period + Professor */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>Período académico</Label>
           <SearchableCombobox
@@ -417,7 +418,6 @@ export function EvaluationUploadDialog({
             }}
             itemToString={(term) => formatClosedTermLabel(term)}
             disabled={!effectiveCourseId || academicTerms.length === 0}
-            clearable
             showSearch={false}
             emptyText="No se encontraron períodos."
             container={comboboxPortalContainerRef}
@@ -563,7 +563,20 @@ export function EvaluationUploadDialog({
         </div>
 
         <div className="space-y-2 pt-1">
-          <Label htmlFor="evaluation-variant">Variante</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="evaluation-variant">Variante</Label>
+            {variant.trim() !== "" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground h-7 px-2 text-xs"
+                onClick={() => setVariant("")}
+              >
+                Quitar variante
+              </Button>
+            )}
+          </div>
           <NumberField
             id="evaluation-variant"
             min={1}
@@ -696,7 +709,13 @@ export function EvaluationUploadDialog({
           else onOpenChange(true);
         }}
       >
-        <DrawerPopup showBar className="max-h-[90dvh]">
+        <DrawerPopup
+          showBar
+          className={cn(
+            "max-h-[90dvh] transition-opacity",
+            confirmOpen && "pointer-events-none invisible opacity-0",
+          )}
+        >
           <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />
           <DrawerHeader className="px-4 pt-4 pb-2">
             <DrawerTitle>Subir evaluación</DrawerTitle>
@@ -723,7 +742,10 @@ export function EvaluationUploadDialog({
       }}
     >
       <DialogContent
-        className="max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden"
+        className={cn(
+          "max-h-[90vh] max-w-2xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden transition-opacity",
+          confirmOpen && "pointer-events-none invisible opacity-0",
+        )}
         initialFocus={false}
       >
         <div ref={comboboxPortalContainerRef} className="absolute top-0 left-0 size-0" />

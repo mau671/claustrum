@@ -77,6 +77,7 @@ export type EvaluationCourseItem = {
 
 export type EvaluationTermItem = {
   term_id: number | null;
+  year: number | null;
   label: string;
   total_count: number;
 };

@@ -45,6 +45,7 @@ export type EvaluationCourseItem = typeof EvaluationCourseItem.Type;
 
 export const EvaluationTermItem = Schema.Struct({
   term_id: Schema.NullOr(Schema.Number),
+  year: Schema.NullOr(Schema.Number),
   label: Schema.String,
   total_count: Schema.Number,
 });

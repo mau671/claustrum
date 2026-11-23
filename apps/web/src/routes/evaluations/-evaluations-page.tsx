@@ -232,7 +232,7 @@ function TermGroup({
 function groupByYear(terms: EvaluationTermItem[]): { year: string; terms: EvaluationTermItem[] }[] {
   const groups = new Map<string, EvaluationTermItem[]>();
   for (const term of terms) {
-    const year = term.label.split(" - ")[0].trim();
+    const year = term.year === null ? "Sin año" : String(term.year);
     const bucket = groups.get(year) ?? [];
     bucket.push(term);
     groups.set(year, bucket);

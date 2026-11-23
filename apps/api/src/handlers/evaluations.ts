@@ -292,12 +292,17 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const rows = yield* sql<{
             term_id: number | string | null;
+            year: number | string | null;
             label: string;
             total_count: number | string;
           }>`
               SELECT
                 e.term_id,
-                COALESCE(at.display_name, 'Sin período') AS label,
+                at.year,
+                COALESCE(
+                  NULLIF(regexp_replace(at.display_name, '^\\s*\\d{4}\\s*[-:]\\s*', ''), ''),
+                  'Sin período'
+                ) AS label,
                 COUNT(*)::bigint AS total_count
               FROM public.course_evaluations e
               LEFT JOIN public.academic_term at ON at.id = e.term_id
@@ -308,7 +313,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
                      p.full_name ILIKE ${pattern} OR
                      e.name ILIKE ${pattern})
                 AND (${types.length}::int = 0 OR e.type::TEXT = ANY(${types}::text[]))
-              GROUP BY e.term_id, label, at.year, at.period_number
+              GROUP BY e.term_id, at.year, at.period_number, label
               ORDER BY at.year DESC NULLS LAST, at.period_number DESC NULLS LAST, e.term_id DESC NULLS LAST
             `.pipe(
             Effect.mapError(
@@ -321,6 +326,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const mapped: EvaluationTermItem[] = rows.map((r) => ({
             term_id: r.term_id !== null ? Number(r.term_id) : null,
+            year: r.year !== null ? Number(r.year) : null,
             label: r.label,
             total_count: Number(r.total_count),
           }));

@@ -24,7 +24,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { AdminUser, AdminUserRole, AdminUserSortBy } from "@/lib/hooks/use-admin-users";
 
@@ -272,6 +272,9 @@ function AdminUsersPage() {
   const sortBy: AdminUserSortBy = search.sortBy ?? "createdAt";
   const sortDesc = search.sortDesc ?? true;
 
+  const headerRef = useRef<HTMLTableSectionElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   const [searchInput, setSearchInput] = useState(searchTerm);
   const [previousSearchTerm, setPreviousSearchTerm] = useState(searchTerm);
   const [lastTypedSearch, setLastTypedSearch] = useState(searchTerm);
@@ -359,6 +362,18 @@ function AdminUsersPage() {
       void navigate({ to: "/moderation/reviews", replace: true });
     }
   }, [isAdmin, navigate]);
+
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+
+    const observer = new ResizeObserver(() => {
+      const height = header.getBoundingClientRect().height;
+      setHeaderHeight((current) => (current === height ? current : height));
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
 
   const openDetail = useCallback((id: string) => {
     setSelectedId(id);
@@ -860,13 +875,14 @@ function AdminUsersPage() {
 
         <ScrollArea
           fade="y"
-          fadeTopOffset="2.625rem"
+          fadeTopOffset={headerHeight > 0 ? `${headerHeight}px` : undefined}
           hideScrollbar
           className="min-h-0 flex-1"
           viewportClassName="[&_[data-slot=table-container]]:overflow-visible"
         >
           <Table variant="card" className="table-fixed">
             <TableHeader
+              ref={headerRef}
               className="sticky top-0 z-10"
               style={{
                 backgroundColor:

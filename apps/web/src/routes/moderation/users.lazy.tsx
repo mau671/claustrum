@@ -2,6 +2,7 @@ import type { ColumnDef, RowSelectionState, SortingState } from "@tanstack/react
 import type { ReactNode } from "react";
 
 import {
+  Cancel01Icon,
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
@@ -280,7 +281,6 @@ function AdminUsersPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState("permanent");
   const [notificationTitle, setNotificationTitle] = useState("");
@@ -717,35 +717,6 @@ function AdminUsersPage() {
     }
   }
 
-  async function handleBulkBan() {
-    const ids = Object.keys(rowSelection);
-    try {
-      await Promise.all(
-        ids.map((id) => banUser.mutateAsync({ id, reason: "Suspensión masiva desde moderación" })),
-      );
-      toast.success(
-        `${ids.length} ${ids.length === 1 ? "usuario suspendido" : "usuarios suspendidos"}`,
-      );
-      setRowSelection({});
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo suspender a los usuarios.");
-    }
-  }
-
-  async function handleBulkDelete() {
-    const ids = Object.keys(rowSelection);
-    try {
-      await Promise.all(ids.map((id) => deleteUser.mutateAsync(id)));
-      toast.success(
-        `${ids.length} ${ids.length === 1 ? "usuario eliminado" : "usuarios eliminados"}`,
-      );
-      setIsBulkDeleteOpen(false);
-      setRowSelection({});
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo eliminar a los usuarios.");
-    }
-  }
-
   async function handleRevokeSession(token: string) {
     try {
       await revokeSession.mutateAsync(token);
@@ -783,30 +754,17 @@ function AdminUsersPage() {
     }
   }
 
-  const selectionButtons = (
-    <>
-      <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setRowSelection({})}>
-        Limpiar
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-7 text-xs"
-        disabled={isMutating}
-        onClick={() => void handleBulkBan()}
-      >
-        Suspender
-      </Button>
-      <Button
-        variant="destructive"
-        size="sm"
-        className="h-7 text-xs"
-        disabled={isMutating}
-        onClick={() => setIsBulkDeleteOpen(true)}
-      >
-        Eliminar
-      </Button>
-    </>
+  const clearSelectionButton = (iconOnly: boolean) => (
+    <Button
+      variant="ghost"
+      size={iconOnly ? "icon" : "sm"}
+      aria-label="Limpiar selección"
+      className={iconOnly ? "size-8" : "h-7 gap-1.5 px-2 text-xs"}
+      onClick={() => setRowSelection({})}
+    >
+      <Icon icon={Cancel01Icon} size={14} className="size-3.5" />
+      {!iconOnly && "Limpiar"}
+    </Button>
   );
 
   return (
@@ -814,12 +772,12 @@ function AdminUsersPage() {
       <Frame className="min-h-0 w-full flex-1 flex-col">
         <FrameHeader className="flex flex-col gap-3 px-4 py-3 sm:h-auto sm:flex-row sm:items-center sm:justify-end sm:px-5">
           {selectedCount > 0 && (
-            <div className="mr-auto hidden items-center gap-2 sm:flex">
+            <div className="mr-auto hidden items-center gap-2 md:flex">
               <span className="text-sm font-medium">
                 {selectedCount}{" "}
                 {selectedCount === 1 ? "usuario seleccionado" : "usuarios seleccionados"}
               </span>
-              <div className="flex items-center gap-2">{selectionButtons}</div>
+              {clearSelectionButton(false)}
             </div>
           )}
 
@@ -883,10 +841,12 @@ function AdminUsersPage() {
           </div>
         </FrameHeader>
 
-        {selectedCount > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 sm:hidden">
-            <span className="text-sm font-medium tabular-nums">{selectedCount}</span>
-            <div className="flex items-center gap-2">{selectionButtons}</div>
+        {selectedCount > 0 && !isDetailOpen && (
+          <div className="animate-in fade-in-0 slide-in-from-bottom-2 bg-popover fixed inset-x-4 bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4.25rem)] z-40 flex items-center justify-between gap-3 rounded-full border px-3 py-1.5 shadow-xl md:hidden">
+            <span className="text-sm font-medium tabular-nums">
+              {selectedCount} {selectedCount === 1 ? "seleccionado" : "seleccionados"}
+            </span>
+            {clearSelectionButton(true)}
           </div>
         )}
 
@@ -1543,29 +1503,6 @@ function AdminUsersPage() {
               variant="destructive"
               disabled={deleteUser.isPending}
               onClick={() => void handleDelete()}
-            >
-              {deleteUser.isPending ? <Spinner className="mr-1.5 size-4" /> : null}
-              Eliminar definitivamente
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isBulkDeleteOpen} onOpenChange={setIsBulkDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar a los usuarios seleccionados?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se eliminarán {selectedCount} {selectedCount === 1 ? "cuenta" : "cuentas"} de forma
-              permanente. Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteUser.isPending}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteUser.isPending}
-              onClick={() => void handleBulkDelete()}
             >
               {deleteUser.isPending ? <Spinner className="mr-1.5 size-4" /> : null}
               Eliminar definitivamente

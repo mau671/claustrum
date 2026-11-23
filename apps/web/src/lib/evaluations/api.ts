@@ -72,22 +72,26 @@ export async function uploadEvaluation(payload: UploadEvaluationPayload): Promis
   if (payload.answersFile) {
     formData.append("answersFile", payload.answersFile);
   }
-  if (payload.academicTermId) {
-    formData.append("academicTermId", String(payload.academicTermId));
+  if (payload.termId) {
+    formData.append("termId", String(payload.termId));
   }
   if (payload.professorId) {
     formData.append("professorId", String(payload.professorId));
   }
-  formData.append("evaluationType", payload.evaluationType);
-  if (payload.evaluationNumber) {
-    formData.append("evaluationNumber", String(payload.evaluationNumber));
+  formData.append("type", payload.type);
+  if (payload.number) {
+    formData.append("number", String(payload.number));
   }
-  if (payload.customName) {
-    formData.append("customName", payload.customName);
+  if (payload.name) {
+    formData.append("name", payload.name);
   }
-  formData.append("isCatedra", String(payload.isCatedra));
-  formData.append("includesAnswers", String(payload.includesAnswers));
-  formData.append("hasSeparateAnswers", String(payload.hasSeparateAnswers));
+  formData.append("coordinated", String(payload.coordinated));
+  formData.append("answersIncluded", String(payload.answersIncluded));
+  formData.append("answersSeparate", String(payload.answersSeparate));
+  formData.append("extraordinary", String(payload.extraordinary));
+  if (payload.variant) {
+    formData.append("variant", String(payload.variant));
+  }
   formData.append("turnstileToken", payload.turnstileToken);
   formData.append("fileSha256", fileSha256);
   if (payload.answersFile) {

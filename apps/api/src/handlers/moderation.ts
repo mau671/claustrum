@@ -48,23 +48,25 @@ interface ModerationEvaluationDbRow {
   readonly course_id: number | string;
   readonly course_code: string;
   readonly course_name: string;
-  readonly academic_term_id: number | string | null;
+  readonly term_id: number | string | null;
   readonly term_display_name: string | null;
   readonly professor_id: number | string | null;
   readonly professor_name: string | null;
-  readonly evaluation_type: string;
-  readonly evaluation_number: number | string | null;
-  readonly custom_name: string | null;
-  readonly is_catedra: boolean;
-  readonly includes_answers: boolean;
-  readonly has_separate_answers: boolean;
+  readonly type: string;
+  readonly number: number | string | null;
+  readonly name: string | null;
+  readonly coordinated: boolean;
+  readonly answers_included: boolean;
+  readonly answers_separate: boolean;
   readonly file_key: string;
   readonly file_size: number | string;
-  readonly answers_file_key: string | null;
+  readonly answer_file_key: string | null;
   readonly status: string;
-  readonly moderation_note: string | null;
+  readonly note: string | null;
   readonly created_at: unknown;
   readonly total_count: number | string;
+  readonly extraordinary: boolean;
+  readonly variant: number | string | null;
 }
 
 export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation", (handlers) =>
@@ -234,26 +236,28 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
                 e.course_id,
                 c.code AS course_code,
                 c.name AS course_name,
-                e.academic_term_id,
+                e.term_id,
                 at.display_name AS term_display_name,
                 e.professor_id,
                 p.full_name AS professor_name,
-                e.evaluation_type::TEXT,
-                e.evaluation_number,
-                e.custom_name,
-                e.is_catedra,
-                e.includes_answers,
-                e.has_separate_answers,
+                e.type::TEXT,
+                e.number,
+                e.name,
+                e.coordinated,
+                e.answers_included,
+                e.answers_separate,
                 e.file_key,
                 e.file_size,
-                e.answers_file_key,
+                e.answer_file_key,
                 e.status::TEXT,
-                e.moderation_note,
+                e.note,
                 e.created_at,
+                e.extraordinary,
+                e.variant,
                 COUNT(*) OVER ()::BIGINT AS total_count
               FROM public.course_evaluations e
               JOIN public.course c ON c.id = e.course_id
-              LEFT JOIN public.academic_term at ON at.id = e.academic_term_id
+              LEFT JOIN public.academic_term at ON at.id = e.term_id
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.status = ${status}
               ORDER BY e.created_at DESC, e.id DESC
@@ -272,23 +276,25 @@ export const ModerationHandlers = HttpApiBuilder.group(ClaustrumApi, "moderation
             course_id: Number(r.course_id),
             course_code: r.course_code,
             course_name: r.course_name,
-            academic_term_id: r.academic_term_id !== null ? Number(r.academic_term_id) : null,
+            term_id: r.term_id !== null ? Number(r.term_id) : null,
             term_display_name: r.term_display_name ?? null,
             professor_id: r.professor_id !== null ? Number(r.professor_id) : null,
             professor_name: r.professor_name ?? null,
-            evaluation_type: r.evaluation_type,
-            evaluation_number: r.evaluation_number !== null ? Number(r.evaluation_number) : null,
-            custom_name: r.custom_name ?? null,
-            is_catedra: Boolean(r.is_catedra),
-            includes_answers: Boolean(r.includes_answers),
-            has_separate_answers: Boolean(r.has_separate_answers),
+            type: r.type,
+            number: r.number !== null ? Number(r.number) : null,
+            name: r.name ?? null,
+            coordinated: Boolean(r.coordinated),
+            answers_included: Boolean(r.answers_included),
+            answers_separate: Boolean(r.answers_separate),
             file_key: r.file_key,
             file_size: Number(r.file_size),
-            answers_file_key: r.answers_file_key ?? null,
+            answer_file_key: r.answer_file_key ?? null,
             status: r.status,
-            moderation_note: r.moderation_note ?? null,
+            note: r.note ?? null,
             created_at: toIsoString(r.created_at) ?? "",
             total_count: Number(r.total_count ?? 0),
+            extraordinary: Boolean(r.extraordinary),
+            variant: r.variant !== null ? Number(r.variant) : null,
           }));
 
           return mapped;

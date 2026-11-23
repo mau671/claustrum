@@ -36,22 +36,24 @@ interface EvaluationDbRow {
   readonly course_id: number | string;
   readonly course_code: string;
   readonly course_name: string;
-  readonly academic_term_id: number | string | null;
+  readonly term_id: number | string | null;
   readonly professor_id: number | string | null;
-  readonly evaluation_type: string;
-  readonly evaluation_number: number | string | null;
-  readonly custom_name: string | null;
-  readonly is_catedra: boolean;
-  readonly includes_answers: boolean;
-  readonly has_separate_answers: boolean;
+  readonly type: string;
+  readonly number: number | string | null;
+  readonly name: string | null;
+  readonly coordinated: boolean;
+  readonly answers_included: boolean;
+  readonly answers_separate: boolean;
   readonly file_key: string;
   readonly file_size: number | string;
-  readonly answers_file_key: string | null;
+  readonly answer_file_key: string | null;
   readonly status: string;
   readonly created_at: unknown;
   readonly term_display_name: string | null;
   readonly professor_name: string | null;
-  readonly moderation_note?: string | null;
+  readonly note?: string | null;
+  readonly extraordinary: boolean;
+  readonly variant: number | string | null;
 }
 
 interface EvaluationSearchDbRow extends EvaluationDbRow {
@@ -64,21 +66,23 @@ function mapEvaluationRow(r: EvaluationDbRow): EvaluationItem {
     course_id: Number(r.course_id),
     course_code: r.course_code,
     course_name: r.course_name,
-    academic_term_id: r.academic_term_id !== null ? Number(r.academic_term_id) : null,
+    term_id: r.term_id !== null ? Number(r.term_id) : null,
     professor_id: r.professor_id !== null ? Number(r.professor_id) : null,
-    evaluation_type: r.evaluation_type,
-    evaluation_number: r.evaluation_number !== null ? Number(r.evaluation_number) : null,
-    custom_name: r.custom_name ?? null,
-    is_catedra: Boolean(r.is_catedra),
-    includes_answers: Boolean(r.includes_answers),
-    has_separate_answers: Boolean(r.has_separate_answers),
+    type: r.type,
+    number: r.number !== null ? Number(r.number) : null,
+    name: r.name ?? null,
+    coordinated: Boolean(r.coordinated),
+    answers_included: Boolean(r.answers_included),
+    answers_separate: Boolean(r.answers_separate),
     file_key: r.file_key,
     file_size: Number(r.file_size),
-    answers_file_key: r.answers_file_key ?? null,
+    answer_file_key: r.answer_file_key ?? null,
     status: r.status,
     created_at: toIsoString(r.created_at) ?? "",
     term_display_name: r.term_display_name ?? null,
     professor_name: r.professor_name ?? null,
+    extraordinary: Boolean(r.extraordinary),
+    variant: r.variant !== null ? Number(r.variant) : null,
   };
 }
 
@@ -86,11 +90,13 @@ interface EvaluationFileRow {
   readonly id: number | string;
   readonly status: string;
   readonly file_key: string;
-  readonly answers_file_key?: string | null;
-  readonly evaluation_type: string;
-  readonly evaluation_number: number | string | null;
-  readonly custom_name: string | null;
+  readonly answer_file_key?: string | null;
+  readonly type: string;
+  readonly number: number | string | null;
+  readonly name: string | null;
   readonly course_code: string;
+  readonly extraordinary: boolean;
+  readonly variant: number | string | null;
 }
 
 function parseNullableNumber(value: unknown): number | null {
@@ -122,30 +128,32 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
                 e.course_id,
                 c.code AS course_code,
                 c.name AS course_name,
-                e.academic_term_id,
+                e.term_id,
                 e.professor_id,
-                e.evaluation_type::TEXT,
-                e.evaluation_number,
-                e.custom_name,
-                e.is_catedra,
-                e.includes_answers,
-                e.has_separate_answers,
+                e.type::TEXT,
+                e.number,
+                e.name,
+                e.coordinated,
+                e.answers_included,
+                e.answers_separate,
                 e.file_key,
                 e.file_size,
-                e.answers_file_key,
+                e.answer_file_key,
                 e.status::TEXT,
                 e.created_at,
                 at.display_name AS term_display_name,
-                p.full_name AS professor_name
+                p.full_name AS professor_name,
+                e.extraordinary,
+                e.variant
               FROM public.course_evaluations e
               JOIN public.course c ON c.id = e.course_id
-              LEFT JOIN public.academic_term at ON at.id = e.academic_term_id
+              LEFT JOIN public.academic_term at ON at.id = e.term_id
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.course_id IN (SELECT course_id FROM target_courses)
                 AND e.status = 'approved'
               ORDER BY
-                e.evaluation_type,
-                e.evaluation_number NULLS LAST,
+                e.type,
+                e.number NULLS LAST,
                 at.year DESC NULLS LAST,
                 at.period_number DESC NULLS LAST,
                 e.created_at DESC
@@ -175,33 +183,35 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
                 e.course_id,
                 c.code AS course_code,
                 c.name AS course_name,
-                e.academic_term_id,
+                e.term_id,
                 e.professor_id,
-                e.evaluation_type::TEXT,
-                e.evaluation_number,
-                e.custom_name,
-                e.is_catedra,
-                e.includes_answers,
-                e.has_separate_answers,
+                e.type::TEXT,
+                e.number,
+                e.name,
+                e.coordinated,
+                e.answers_included,
+                e.answers_separate,
                 e.file_key,
                 e.file_size,
-                e.answers_file_key,
+                e.answer_file_key,
                 e.status::TEXT,
                 e.created_at,
                 at.display_name AS term_display_name,
                 p.full_name AS professor_name,
+                e.extraordinary,
+                e.variant,
                 COUNT(*) OVER () AS total_count
               FROM public.course_evaluations e
               JOIN public.course c ON c.id = e.course_id
-              LEFT JOIN public.academic_term at ON at.id = e.academic_term_id
+              LEFT JOIN public.academic_term at ON at.id = e.term_id
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.status = 'approved'
                 AND (${pattern}::text IS NULL OR
                      c.code ILIKE ${pattern} OR
                      c.name ILIKE ${pattern} OR
                      p.full_name ILIKE ${pattern} OR
-                     e.custom_name ILIKE ${pattern})
-                AND (${type}::text IS NULL OR e.evaluation_type::TEXT = ${type}::text)
+                     e.name ILIKE ${pattern})
+                AND (${type}::text IS NULL OR e.type::TEXT = ${type}::text)
               ORDER BY e.created_at DESC, e.id DESC
               LIMIT ${limit} OFFSET ${offset}
             `.pipe(
@@ -254,19 +264,21 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             });
           }
 
-          const rawCustomName = formData.get("customName");
-          const customName = typeof rawCustomName === "string" ? rawCustomName : null;
+          const rawName = formData.get("name");
+          const name = typeof rawName === "string" ? rawName : null;
 
           const validation = validateUploadPayload({
             courseId: parseNullableNumber(formData.get("courseId")),
-            academicTermId: parseNullableNumber(formData.get("academicTermId")),
+            termId: parseNullableNumber(formData.get("termId")),
             professorId: parseNullableNumber(formData.get("professorId")),
-            evaluationType: formData.get("evaluationType"),
-            evaluationNumber: parseNullableNumber(formData.get("evaluationNumber")),
-            customName,
-            isCatedra: formData.get("isCatedra") === "true",
-            includesAnswers: formData.get("includesAnswers") === "true",
-            hasSeparateAnswers: formData.get("hasSeparateAnswers") === "true",
+            type: formData.get("type"),
+            number: parseNullableNumber(formData.get("number")),
+            name,
+            coordinated: formData.get("coordinated") === "true",
+            answersIncluded: formData.get("answersIncluded") === "true",
+            answersSeparate: formData.get("answersSeparate") === "true",
+            extraordinary: formData.get("extraordinary") === "true",
+            variant: parseNullableNumber(formData.get("variant")),
             turnstileToken: formData.get("turnstileToken"),
           });
 
@@ -309,7 +321,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             });
           }
 
-          if (payload.hasSeparateAnswers && !(answersFile instanceof File)) {
+          if (payload.answersSeparate && !(answersFile instanceof File)) {
             return yield* new BadRequestError({
               error: "Debes adjuntar el archivo de respuestas",
             });
@@ -350,7 +362,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
               ),
             );
 
-          if (payload.hasSeparateAnswers && answersFile instanceof File) {
+          if (payload.answersSeparate && answersFile instanceof File) {
             answersKey = `evaluations/${payload.courseId}/${crypto.randomUUID()}_answers.pdf`;
             yield* storage
               .put(answersKey, answersFile.stream(), {
@@ -368,26 +380,28 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const insertResult = yield* sql`
               INSERT INTO public.course_evaluations (
-                course_id, academic_term_id, professor_id, evaluation_type, evaluation_number,
-                custom_name, is_catedra, includes_answers, has_separate_answers,
-                file_key, file_size, file_sha256, answers_file_key, answers_file_size, answers_file_sha256,
-                status
+                course_id, term_id, professor_id, type, number,
+                name, coordinated, answers_included, answers_separate,
+                file_key, file_size, file_sha256, answer_file_key, answer_file_size, answer_file_sha256,
+                extraordinary, variant, status
               ) VALUES (
                 ${payload.courseId},
-                ${payload.academicTermId},
+                ${payload.termId},
                 ${payload.professorId},
-                ${payload.evaluationType},
-                ${payload.evaluationNumber},
-                ${payload.customName},
-                ${payload.isCatedra},
-                ${payload.includesAnswers},
-                ${payload.hasSeparateAnswers},
+                ${payload.type},
+                ${payload.number},
+                ${payload.name},
+                ${payload.coordinated},
+                ${payload.answersIncluded},
+                ${payload.answersSeparate},
                 ${fileKey},
                 ${evaluationFile.size},
                 ${fileSha256},
                 ${answersKey},
                 ${answersFile instanceof File ? answersFile.size : null},
                 ${answersFileSha256},
+                ${payload.extraordinary},
+                ${payload.variant},
                 'pending'
               )
             `.pipe(
@@ -423,25 +437,27 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
                 e.course_id,
                 c.code AS course_code,
                 c.name AS course_name,
-                e.academic_term_id,
+                e.term_id,
                 at.display_name AS term_display_name,
                 e.professor_id,
                 p.full_name AS professor_name,
-                e.evaluation_type::TEXT,
-                e.evaluation_number,
-                e.custom_name,
-                e.is_catedra,
-                e.includes_answers,
-                e.has_separate_answers,
+                e.type::TEXT,
+                e.number,
+                e.name,
+                e.coordinated,
+                e.answers_included,
+                e.answers_separate,
                 e.file_key,
                 e.file_size,
-                e.answers_file_key,
+                e.answer_file_key,
                 e.status::TEXT,
-                e.moderation_note,
-                e.created_at
+                e.note,
+                e.created_at,
+                e.extraordinary,
+                e.variant
               FROM public.course_evaluations e
               JOIN public.course c ON c.id = e.course_id
-              LEFT JOIN public.academic_term at ON at.id = e.academic_term_id
+              LEFT JOIN public.academic_term at ON at.id = e.term_id
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.id = ${params.id}
             `.pipe(
@@ -465,22 +481,24 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             course_id: Number(r.course_id),
             course_code: r.course_code,
             course_name: r.course_name,
-            academic_term_id: r.academic_term_id !== null ? Number(r.academic_term_id) : null,
+            term_id: r.term_id !== null ? Number(r.term_id) : null,
             term_display_name: r.term_display_name ?? null,
             professor_id: r.professor_id !== null ? Number(r.professor_id) : null,
             professor_name: r.professor_name ?? null,
-            evaluation_type: r.evaluation_type,
-            evaluation_number: r.evaluation_number !== null ? Number(r.evaluation_number) : null,
-            custom_name: r.custom_name ?? null,
-            is_catedra: Boolean(r.is_catedra),
-            includes_answers: Boolean(r.includes_answers),
-            has_separate_answers: Boolean(r.has_separate_answers),
+            type: r.type,
+            number: r.number !== null ? Number(r.number) : null,
+            name: r.name ?? null,
+            coordinated: Boolean(r.coordinated),
+            answers_included: Boolean(r.answers_included),
+            answers_separate: Boolean(r.answers_separate),
             file_key: r.file_key,
             file_size: Number(r.file_size),
-            answers_file_key: r.answers_file_key ?? null,
+            answer_file_key: r.answer_file_key ?? null,
             status: r.status,
-            moderation_note: r.moderation_note ?? null,
+            note: r.note ?? null,
             created_at: toIsoString(r.created_at) ?? "",
+            extraordinary: Boolean(r.extraordinary),
+            variant: r.variant !== null ? Number(r.variant) : null,
           };
 
           return detail;
@@ -492,7 +510,8 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
           const user = Option.getOrNull(userOption);
 
           const rows = yield* sql<EvaluationFileRow>`
-              SELECT e.id, e.status, e.file_key, e.evaluation_type, e.evaluation_number, e.custom_name, c.code AS course_code
+              SELECT e.id, e.status, e.file_key, e.type, e.number, e.name, c.code AS course_code,
+                     e.extraordinary, e.variant
               FROM public.course_evaluations e
               JOIN public.course c ON c.id = e.course_id
               WHERE e.id = ${params.id}
@@ -540,9 +559,11 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const fileName = formatFileName(
             evaluation.course_code,
-            evaluation.evaluation_type,
-            evaluation.evaluation_number !== null ? Number(evaluation.evaluation_number) : null,
-            evaluation.custom_name,
+            evaluation.type,
+            evaluation.number !== null ? Number(evaluation.number) : null,
+            evaluation.name,
+            Boolean(evaluation.extraordinary),
+            evaluation.variant !== null ? Number(evaluation.variant) : null,
           );
 
           return HttpServerResponse.raw(object.body, {
@@ -562,7 +583,8 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
           const user = Option.getOrNull(userOption);
 
           const rows = yield* sql<EvaluationFileRow>`
-              SELECT e.id, e.status, e.answers_file_key, e.evaluation_type, e.evaluation_number, e.custom_name, c.code AS course_code
+              SELECT e.id, e.status, e.answer_file_key, e.type, e.number, e.name, c.code AS course_code,
+                     e.extraordinary, e.variant
               FROM public.course_evaluations e
               JOIN public.course c ON c.id = e.course_id
               WHERE e.id = ${params.id}
@@ -583,7 +605,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const evaluation = rows[0];
 
-          if (!evaluation.answers_file_key) {
+          if (!evaluation.answer_file_key) {
             return yield* new NotFoundError({
               error: "Esta evaluación no tiene archivo de respuestas",
             });
@@ -599,7 +621,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             }
           }
 
-          const object = yield* storage.get(evaluation.answers_file_key).pipe(
+          const object = yield* storage.get(evaluation.answer_file_key).pipe(
             Effect.mapError(
               (e) =>
                 new InternalServerError({
@@ -616,9 +638,11 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const baseName = formatFileName(
             evaluation.course_code,
-            evaluation.evaluation_type,
-            evaluation.evaluation_number !== null ? Number(evaluation.evaluation_number) : null,
-            evaluation.custom_name,
+            evaluation.type,
+            evaluation.number !== null ? Number(evaluation.number) : null,
+            evaluation.name,
+            Boolean(evaluation.extraordinary),
+            evaluation.variant !== null ? Number(evaluation.variant) : null,
           );
           const fileName = baseName.replace(".pdf", "-respuestas.pdf");
 
@@ -644,7 +668,7 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
           const rows = yield* sql<{ id: number | string; status: string }>`
               UPDATE public.course_evaluations
               SET status = ${payload.status},
-                  moderation_note = ${note},
+                  note = ${note},
                   moderated_by = ${user.id},
                   moderated_at = NOW(),
                   updated_at = NOW()
@@ -682,9 +706,9 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
 
           const rows = yield* sql<{
             file_key: string | null;
-            answers_file_key: string | null;
+            answer_file_key: string | null;
           }>`
-              SELECT file_key, answers_file_key FROM public.course_evaluations WHERE id = ${params.id}
+              SELECT file_key, answer_file_key FROM public.course_evaluations WHERE id = ${params.id}
             `.pipe(
             Effect.mapError(
               (e) =>
@@ -700,13 +724,13 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
             });
           }
 
-          const { file_key, answers_file_key } = rows[0];
+          const { file_key, answer_file_key } = rows[0];
 
           if (file_key) {
             yield* storage.delete(file_key).pipe(Effect.ignore);
           }
-          if (answers_file_key) {
-            yield* storage.delete(answers_file_key).pipe(Effect.ignore);
+          if (answer_file_key) {
+            yield* storage.delete(answer_file_key).pipe(Effect.ignore);
           }
 
           yield* sql`

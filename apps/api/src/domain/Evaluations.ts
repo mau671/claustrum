@@ -33,21 +33,23 @@ export const EvaluationItem = Schema.Struct({
   course_id: Schema.Number,
   course_code: Schema.String,
   course_name: Schema.String,
-  academic_term_id: Schema.NullOr(Schema.Number),
+  term_id: Schema.NullOr(Schema.Number),
   professor_id: Schema.NullOr(Schema.Number),
-  evaluation_type: Schema.String,
-  evaluation_number: Schema.NullOr(Schema.Number),
-  custom_name: Schema.NullOr(Schema.String),
-  is_catedra: Schema.Boolean,
-  includes_answers: Schema.Boolean,
-  has_separate_answers: Schema.Boolean,
+  type: Schema.String,
+  number: Schema.NullOr(Schema.Number),
+  name: Schema.NullOr(Schema.String),
+  coordinated: Schema.Boolean,
+  answers_included: Schema.Boolean,
+  answers_separate: Schema.Boolean,
   file_key: Schema.String,
   file_size: Schema.Number,
-  answers_file_key: Schema.NullOr(Schema.String),
+  answer_file_key: Schema.NullOr(Schema.String),
   status: Schema.String,
   created_at: Schema.String,
   term_display_name: Schema.NullOr(Schema.String),
   professor_name: Schema.NullOr(Schema.String),
+  extraordinary: Schema.Boolean,
+  variant: Schema.NullOr(Schema.Number),
 });
 export type EvaluationItem = typeof EvaluationItem.Type;
 
@@ -62,22 +64,24 @@ export const EvaluationDetail = Schema.Struct({
   course_id: Schema.Number,
   course_code: Schema.String,
   course_name: Schema.String,
-  academic_term_id: Schema.NullOr(Schema.Number),
+  term_id: Schema.NullOr(Schema.Number),
   term_display_name: Schema.NullOr(Schema.String),
   professor_id: Schema.NullOr(Schema.Number),
   professor_name: Schema.NullOr(Schema.String),
-  evaluation_type: Schema.String,
-  evaluation_number: Schema.NullOr(Schema.Number),
-  custom_name: Schema.NullOr(Schema.String),
-  is_catedra: Schema.Boolean,
-  includes_answers: Schema.Boolean,
-  has_separate_answers: Schema.Boolean,
+  type: Schema.String,
+  number: Schema.NullOr(Schema.Number),
+  name: Schema.NullOr(Schema.String),
+  coordinated: Schema.Boolean,
+  answers_included: Schema.Boolean,
+  answers_separate: Schema.Boolean,
   file_key: Schema.String,
   file_size: Schema.Number,
-  answers_file_key: Schema.NullOr(Schema.String),
+  answer_file_key: Schema.NullOr(Schema.String),
   status: Schema.String,
-  moderation_note: Schema.NullOr(Schema.String),
+  note: Schema.NullOr(Schema.String),
   created_at: Schema.String,
+  extraordinary: Schema.Boolean,
+  variant: Schema.NullOr(Schema.Number),
 });
 export type EvaluationDetail = typeof EvaluationDetail.Type;
 
@@ -104,33 +108,37 @@ export type UploadEvaluationResponse = typeof UploadEvaluationResponse.Type;
 
 export function formatFileName(
   courseCode: string | null,
-  evaluationType: string | null,
-  evaluationNumber: number | null,
-  customName: string | null,
+  type: string | null,
+  number: number | null,
+  name: string | null,
+  extraordinary: boolean,
+  variant: number | null,
 ): string {
-  if (evaluationType === "otro" && customName && customName.trim() !== "") {
-    return `${courseCode ?? "evaluacion"}-${customName.trim()}.pdf`;
+  if (type === "otro" && name && name.trim() !== "") {
+    return `${courseCode ?? "evaluacion"}-${name.trim()}.pdf`;
   }
 
-  if (!evaluationType) return `${courseCode ?? "evaluacion"}.pdf`;
+  if (!type) return `${courseCode ?? "evaluacion"}.pdf`;
 
-  const base = `${courseCode ?? "evaluacion"}-${evaluationType.toUpperCase()}`;
-  if (evaluationNumber && evaluationNumber > 0) {
-    return `${base}-${evaluationNumber}.pdf`;
-  }
-  return `${base}.pdf`;
+  const base = `${courseCode ?? "evaluacion"}-${type.toUpperCase()}`;
+  const withNumber = number && number > 0 ? `${base}-${number}` : base;
+  const withExtraordinary = extraordinary ? `${withNumber}-EXTRAORDINARIO` : withNumber;
+  const withVariant = variant !== null ? `${withExtraordinary}-V${variant}` : withExtraordinary;
+  return `${withVariant}.pdf`;
 }
 
 export interface EvaluationUploadPayload {
   readonly courseId: number;
-  readonly academicTermId: number | null;
+  readonly termId: number | null;
   readonly professorId: number | null;
-  readonly evaluationType: EvaluationType;
-  readonly evaluationNumber: number | null;
-  readonly customName: string | null;
-  readonly isCatedra: boolean;
-  readonly includesAnswers: boolean;
-  readonly hasSeparateAnswers: boolean;
+  readonly type: EvaluationType;
+  readonly number: number | null;
+  readonly name: string | null;
+  readonly coordinated: boolean;
+  readonly answersIncluded: boolean;
+  readonly answersSeparate: boolean;
+  readonly extraordinary: boolean;
+  readonly variant: number | null;
   readonly turnstileToken: string;
 }
 
@@ -144,14 +152,12 @@ export function validateUploadPayload(
     return { valid: false, error: "courseId debe ser un entero positivo" };
   }
 
-  const academicTermId =
-    payload.academicTermId === null ||
-    payload.academicTermId === undefined ||
-    payload.academicTermId === ""
+  const termId =
+    payload.termId === null || payload.termId === undefined || payload.termId === ""
       ? null
-      : Number(payload.academicTermId);
-  if (academicTermId !== null && (!Number.isInteger(academicTermId) || academicTermId <= 0)) {
-    return { valid: false, error: "academicTermId invalido" };
+      : Number(payload.termId);
+  if (termId !== null && (!Number.isInteger(termId) || termId <= 0)) {
+    return { valid: false, error: "termId invalido" };
   }
 
   const professorId =
@@ -171,47 +177,53 @@ export function validateUploadPayload(
     "proyecto",
     "otro",
   ] as const;
-  const evaluationType = payload.evaluationType as EvaluationType;
-  if (!validTypes.includes(evaluationType)) {
-    return { valid: false, error: "evaluationType invalido" };
+  const type = payload.type as EvaluationType;
+  if (!validTypes.includes(type)) {
+    return { valid: false, error: "type invalido" };
   }
 
-  const evaluationNumber =
-    payload.evaluationNumber === null ||
-    payload.evaluationNumber === undefined ||
-    payload.evaluationNumber === ""
+  const number =
+    payload.number === null || payload.number === undefined || payload.number === ""
       ? null
-      : Number(payload.evaluationNumber);
+      : Number(payload.number);
 
-  const customName =
-    typeof payload.customName === "string" && payload.customName.trim() !== ""
-      ? payload.customName.trim().slice(0, 128)
+  const name =
+    typeof payload.name === "string" && payload.name.trim() !== ""
+      ? payload.name.trim().slice(0, 128)
       : null;
 
   const requiresNumber = ["parcial", "quiz", "reposicion", "tarea", "proyecto"];
-  if (evaluationType === "otro") {
-    if (!customName) {
-      return { valid: false, error: "customName es requerido cuando evaluationType es 'otro'" };
+  if (type === "otro") {
+    if (!name) {
+      return { valid: false, error: "name es requerido cuando type es 'otro'" };
     }
-  } else if (customName !== null) {
-    return { valid: false, error: "customName solo se permite cuando evaluationType es 'otro'" };
+  } else if (name !== null) {
+    return { valid: false, error: "name solo se permite cuando type es 'otro'" };
   }
 
-  if (
-    requiresNumber.includes(evaluationType) &&
-    (evaluationNumber === null || evaluationNumber <= 0)
-  ) {
-    return { valid: false, error: "evaluationNumber es requerido para este tipo de evaluacion" };
+  if (requiresNumber.includes(type) && (number === null || number <= 0)) {
+    return { valid: false, error: "number es requerido para este tipo de evaluacion" };
   }
 
-  if (!requiresNumber.includes(evaluationType) && evaluationNumber !== null) {
-    return { valid: false, error: "evaluationNumber no aplica para este tipo de evaluacion" };
+  if (!requiresNumber.includes(type) && number !== null) {
+    return { valid: false, error: "number no aplica para este tipo de evaluacion" };
   }
 
-  const isCatedra = payload.isCatedra === true || payload.isCatedra === "true";
-  const includesAnswers = payload.includesAnswers === true || payload.includesAnswers === "true";
-  const hasSeparateAnswers =
-    payload.hasSeparateAnswers === true || payload.hasSeparateAnswers === "true";
+  const extraordinary = payload.extraordinary === true || payload.extraordinary === "true";
+  const variant =
+    payload.variant === null || payload.variant === undefined || payload.variant === ""
+      ? null
+      : Number(payload.variant);
+  if (variant !== null && (!Number.isInteger(variant) || variant < 1 || variant > 99)) {
+    return { valid: false, error: "variant debe estar entre 1 y 99" };
+  }
+  if (variant !== null && number === null) {
+    return { valid: false, error: "variant requiere un number" };
+  }
+
+  const coordinated = payload.coordinated === true || payload.coordinated === "true";
+  const answersIncluded = payload.answersIncluded === true || payload.answersIncluded === "true";
+  const answersSeparate = payload.answersSeparate === true || payload.answersSeparate === "true";
 
   const turnstileToken =
     typeof payload.turnstileToken === "string" ? payload.turnstileToken.trim() : "";
@@ -223,14 +235,16 @@ export function validateUploadPayload(
     valid: true,
     data: {
       courseId,
-      academicTermId,
+      termId,
       professorId,
-      evaluationType,
-      evaluationNumber,
-      customName,
-      isCatedra,
-      includesAnswers,
-      hasSeparateAnswers,
+      type,
+      number,
+      name,
+      coordinated,
+      answersIncluded,
+      answersSeparate,
+      extraordinary,
+      variant,
       turnstileToken,
     },
   };

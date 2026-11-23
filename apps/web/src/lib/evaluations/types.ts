@@ -30,37 +30,39 @@ export const EVALUATION_TYPES_WITH_NUMBER: EvaluationType[] = [
 export function formatEvaluationTypeLabel(
   type: EvaluationType,
   number: number | null,
-  customName: string | null,
+  name: string | null,
+  extraordinary = false,
+  variant: number | null = null,
 ): string {
-  if (type === "otro" && customName) {
-    return customName;
-  }
+  if (type === "otro" && name) return name;
   const base = EVALUATION_TYPE_LABELS[type];
-  if (number && number > 0) {
-    return `${base} ${number}`;
-  }
-  return base;
+  const withNumber = number && number > 0 ? `${base} ${number}` : base;
+  const withExtraordinary = extraordinary ? `${withNumber} (Extraordinario)` : withNumber;
+  return variant !== null ? `${withExtraordinary} · V${variant}` : withExtraordinary;
 }
 
 export function formatEvaluationFileName(
   courseCode: string,
   type: EvaluationType,
   number: number | null,
-  customName: string | null,
+  name: string | null,
+  extraordinary = false,
+  variant: number | null = null,
 ): string {
   const normalizedCourseCode = courseCode.trim();
-  const normalizedCustomName = customName?.trim() ?? null;
+  const normalizedName = name?.trim() ?? null;
 
-  if (type === "otro" && normalizedCustomName) {
-    return `${normalizedCourseCode}-${normalizedCustomName}.pdf`;
+  if (type === "otro" && normalizedName) {
+    return `${normalizedCourseCode}-${normalizedName}.pdf`;
   }
 
   const typeUpper = type.toUpperCase();
-  if (number && number > 0) {
-    return `${normalizedCourseCode}-${typeUpper}-${number}.pdf`;
-  }
-
-  return `${normalizedCourseCode}-${typeUpper}.pdf`;
+  const base =
+    number && number > 0
+      ? `${normalizedCourseCode}-${typeUpper}-${number}`
+      : `${normalizedCourseCode}-${typeUpper}`;
+  const withExtraordinary = extraordinary ? `${base}-EXTRAORDINARIO` : base;
+  return variant !== null ? `${withExtraordinary}-V${variant}.pdf` : `${withExtraordinary}.pdf`;
 }
 
 export type EvaluationRow = {
@@ -68,21 +70,23 @@ export type EvaluationRow = {
   course_id: number;
   course_code: string;
   course_name: string;
-  academic_term_id: number | null;
+  term_id: number | null;
   professor_id: number | null;
-  evaluation_type: EvaluationType;
-  evaluation_number: number | null;
-  custom_name: string | null;
-  is_catedra: boolean;
-  includes_answers: boolean;
-  has_separate_answers: boolean;
+  type: EvaluationType;
+  number: number | null;
+  name: string | null;
+  coordinated: boolean;
+  answers_included: boolean;
+  answers_separate: boolean;
   file_key: string;
   file_size: number;
-  answers_file_key: string | null;
+  answer_file_key: string | null;
   status: EvaluationStatus;
   created_at: string;
   term_display_name: string | null;
   professor_name: string | null;
+  extraordinary: boolean;
+  variant: number | null;
 };
 
 export type EvaluationSearchRow = EvaluationRow & {
@@ -94,35 +98,39 @@ export type EvaluationModerationRow = {
   course_id: number;
   course_code: string;
   course_name: string;
-  academic_term_id: number | null;
+  term_id: number | null;
   term_display_name: string | null;
   professor_id: number | null;
   professor_name: string | null;
-  evaluation_type: EvaluationType;
-  evaluation_number: number | null;
-  custom_name: string | null;
-  is_catedra: boolean;
-  includes_answers: boolean;
-  has_separate_answers: boolean;
+  type: EvaluationType;
+  number: number | null;
+  name: string | null;
+  coordinated: boolean;
+  answers_included: boolean;
+  answers_separate: boolean;
   file_key: string;
   file_size: number;
-  answers_file_key: string | null;
+  answer_file_key: string | null;
   status: EvaluationStatus;
-  moderation_note: string | null;
+  note: string | null;
   created_at: string;
   total_count: number;
+  extraordinary: boolean;
+  variant: number | null;
 };
 
 export type UploadEvaluationPayload = {
   courseId: number;
-  academicTermId: number | null;
+  termId: number | null;
   professorId: number | null;
-  evaluationType: EvaluationType;
-  evaluationNumber: number | null;
-  customName: string | null;
-  isCatedra: boolean;
-  includesAnswers: boolean;
-  hasSeparateAnswers: boolean;
+  type: EvaluationType;
+  number: number | null;
+  name: string | null;
+  coordinated: boolean;
+  answersIncluded: boolean;
+  answersSeparate: boolean;
+  extraordinary: boolean;
+  variant: number | null;
   turnstileToken: string;
   evaluationFile: File;
   answersFile: File | null;

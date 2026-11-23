@@ -610,7 +610,7 @@ function EvaluationPdfViewer({
     isLoading: isAnswersLoading,
     error: answersError,
   } = useEvaluationAnswersDocumentQuery(
-    selectedEvaluation.has_separate_answers ? selectedEvaluation.id : null,
+    selectedEvaluation.answers_separate ? selectedEvaluation.id : null,
   );
 
   const blobUrl = useBlobUrl(evalDoc?.blob);
@@ -625,15 +625,17 @@ function EvaluationPdfViewer({
 
   const baseFileName = formatEvaluationFileName(
     selectedEvaluation.course_code,
-    selectedEvaluation.evaluation_type,
-    selectedEvaluation.evaluation_number,
-    selectedEvaluation.custom_name,
+    selectedEvaluation.type,
+    selectedEvaluation.number,
+    selectedEvaluation.name,
+    selectedEvaluation.extraordinary,
+    selectedEvaluation.variant,
   );
   const answersFileName = baseFileName.replace(".pdf", "-respuestas.pdf");
 
   return (
     <div className="bg-card text-card-foreground flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border shadow-xs">
-      {selectedEvaluation.has_separate_answers && (
+      {selectedEvaluation.answers_separate && (
         <div className="border-border/50 flex shrink-0 border-b">
           <button
             onClick={() => setActiveTab("evaluation")}
@@ -778,9 +780,11 @@ export function EvaluationSection({
                       <span className="text-muted-foreground truncate text-sm">
                         {formatEvaluationFileName(
                           evaluation.course_code,
-                          evaluation.evaluation_type,
-                          evaluation.evaluation_number,
-                          evaluation.custom_name,
+                          evaluation.type,
+                          evaluation.number,
+                          evaluation.name,
+                          evaluation.extraordinary,
+                          evaluation.variant,
                         )}
                       </span>
                       <span className="text-muted-foreground truncate text-xs">
@@ -830,9 +834,9 @@ export function EvaluationSection({
                   <span className="col-span-2">
                     <strong className="text-foreground font-medium">Tipo:</strong>{" "}
                     {formatEvaluationTypeLabel(
-                      selectedEvaluation.evaluation_type,
-                      selectedEvaluation.evaluation_number,
-                      selectedEvaluation.custom_name,
+                      selectedEvaluation.type,
+                      selectedEvaluation.number,
+                      selectedEvaluation.name,
                     )}
                   </span>
                   <span>
@@ -851,21 +855,21 @@ export function EvaluationSection({
                   </span>
                   <span>
                     <strong className="text-foreground font-medium">Cátedra:</strong>{" "}
-                    {selectedEvaluation.is_catedra ? "Sí" : "No"}
+                    {selectedEvaluation.coordinated ? "Sí" : "No"}
                   </span>
                   <span className="col-span-2">
                     <strong className="text-foreground font-medium">Respuestas:</strong>{" "}
-                    {selectedEvaluation.has_separate_answers
+                    {selectedEvaluation.answers_separate
                       ? "Archivo aparte"
-                      : selectedEvaluation.includes_answers
+                      : selectedEvaluation.answers_included
                         ? "Incluidas"
                         : "No"}
                   </span>
                 </div>
 
-                {selectedEvaluation.moderation_note && (
+                {selectedEvaluation.note && (
                   <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-900 dark:text-amber-200">
-                    <strong>Nota previa de moderación:</strong> {selectedEvaluation.moderation_note}
+                    <strong>Nota previa de moderación:</strong> {selectedEvaluation.note}
                   </div>
                 )}
 

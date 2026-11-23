@@ -67,9 +67,11 @@ export function EvaluationList({ courseId }: EvaluationListProps) {
               <TableCell>
                 <Badge variant="secondary" className="text-xs">
                   {formatEvaluationTypeLabel(
-                    evaluation.evaluation_type,
-                    evaluation.evaluation_number,
-                    evaluation.custom_name,
+                    evaluation.type,
+                    evaluation.number,
+                    evaluation.name,
+                    evaluation.extraordinary,
+                    evaluation.variant,
                   )}
                 </Badge>
               </TableCell>
@@ -79,11 +81,11 @@ export function EvaluationList({ courseId }: EvaluationListProps) {
                   : "—"}
               </TableCell>
               <TableCell className="text-sm">{evaluation.professor_name ?? "—"}</TableCell>
-              <TableCell className="text-sm">{evaluation.is_catedra ? "Sí" : "No"}</TableCell>
+              <TableCell className="text-sm">{evaluation.coordinated ? "Sí" : "No"}</TableCell>
               <TableCell className="text-sm">
-                {evaluation.has_separate_answers
+                {evaluation.answers_separate
                   ? "Archivo aparte"
-                  : evaluation.includes_answers
+                  : evaluation.answers_included
                     ? "Incluidas"
                     : "No"}
               </TableCell>

@@ -385,19 +385,21 @@ erDiagram
   COURSE_EVALUATIONS {
     BIGSERIAL id PK
     BIGINT course_id FK
-    BIGINT academic_term_id FK
+    BIGINT term_id FK
     BIGINT professor_id FK
-    evaluation_type evaluation_type
-    INT evaluation_number
-    TEXT custom_name
-    BOOLEAN is_catedra
-    BOOLEAN includes_answers
-    BOOLEAN has_separate_answers
+    evaluation_type type
+    INT number
+    TEXT name
+    BOOLEAN coordinated
+    BOOLEAN answers_included
+    BOOLEAN answers_separate
     TEXT file_key
     TEXT file_sha256
-    TEXT answers_file_key
+    TEXT answer_file_key
+    BOOLEAN extraordinary
+    INT variant
     evaluation_status status
-    TEXT moderation_note
+    TEXT note
     UUID moderated_by FK
   }
 

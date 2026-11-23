@@ -236,21 +236,25 @@ export function EvaluationsPage() {
                       className="text-foreground block truncate text-sm"
                       title={
                         formatEvaluationTypeLabel(
-                          row.evaluation_type,
-                          row.evaluation_number,
-                          row.custom_name,
+                          row.type,
+                          row.number,
+                          row.name,
+                          row.extraordinary,
+                          row.variant,
                         ) || undefined
                       }
                     >
                       {formatEvaluationTypeLabel(
-                        row.evaluation_type,
-                        row.evaluation_number,
-                        row.custom_name,
+                        row.type,
+                        row.number,
+                        row.name,
+                        row.extraordinary,
+                        row.variant,
                       )}
                     </span>
                     <span className="text-muted-foreground block text-[10px] leading-tight">
                       {formatFileSize(row.file_size)}
-                      {row.has_separate_answers || row.includes_answers ? " · con respuestas" : ""}
+                      {row.answers_separate || row.answers_included ? " · con respuestas" : ""}
                     </span>
                   </TableCell>
                   {!isMobile && (
@@ -285,9 +289,11 @@ export function EvaluationsPage() {
                         })
                       }
                       aria-label={`Ver ${formatEvaluationTypeLabel(
-                        row.evaluation_type,
-                        row.evaluation_number,
-                        row.custom_name,
+                        row.type,
+                        row.number,
+                        row.name,
+                        row.extraordinary,
+                        row.variant,
                       )} de ${row.course_code}`}
                     >
                       <Icon icon={ViewIcon} className="size-4" />

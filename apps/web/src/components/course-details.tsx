@@ -532,48 +532,38 @@ function ScheduleGroupCard({
   );
 }
 
-function getEvaluationTitle(ev: {
-  evaluation_type: string;
-  evaluation_number: number | null;
-  custom_name: string | null;
-}): string {
-  if (ev.custom_name && ev.custom_name.trim() !== "") {
-    return ev.custom_name.trim();
-  }
-  if (ev.evaluation_type === "parcial" && ev.evaluation_number) {
-    return `Parcial ${ev.evaluation_number}`;
-  }
-  if (ev.evaluation_type === "reposicion") {
-    return "Reposición";
-  }
-  if (ev.evaluation_type === "final") {
-    return "Examen Final";
-  }
-  if (ev.evaluation_type === "quiz" && ev.evaluation_number) {
-    return `Quiz ${ev.evaluation_number}`;
-  }
-  return "Evaluación";
+interface EvaluationTitleFields {
+  type: string;
+  number: number | null;
+  name: string | null;
+  extraordinary?: boolean;
+  variant?: number | null;
 }
 
-function getEvaluationCategoryKey(ev: {
-  evaluation_type: string;
-  evaluation_number: number | null;
-  custom_name: string | null;
-}): string {
-  if (ev.evaluation_type === "parcial") {
-    return ev.evaluation_number ? `parcial_${ev.evaluation_number}` : "parcial";
+function getEvaluationTitle(ev: EvaluationTitleFields): string {
+  if (ev.type === "otro" && ev.name && ev.name.trim() !== "") {
+    return ev.name.trim();
   }
-  if (ev.evaluation_type === "reposicion") {
+  const label =
+    ev.type === "parcial" && ev.number
+      ? `Parcial ${ev.number}`
+      : ev.type === "reposicion"
+        ? "Reposición"
+        : ev.type === "final"
+          ? "Examen Final"
+          : ev.type === "quiz" && ev.number
+            ? `Quiz ${ev.number}`
+            : "Evaluación";
+  const withExtraordinary = ev.extraordinary ? `${label} (Extraordinario)` : label;
+  return ev.variant ? `${withExtraordinary} · V${ev.variant}` : withExtraordinary;
+}
+
+function getEvaluationCategoryKey(ev: EvaluationTitleFields): string {
+  if (ev.type === "parcial") {
+    return ev.number ? `parcial_${ev.number}` : "parcial";
+  }
+  if (ev.type === "reposicion") {
     return "reposicion";
-  }
-  if (ev.custom_name) {
-    const pMatch = ev.custom_name.match(/Parcial\s*(\d+)/i);
-    if (pMatch) {
-      return `parcial_${pMatch[1]}`;
-    }
-    if (/Reposici[oó]n/i.test(ev.custom_name)) {
-      return "reposicion";
-    }
   }
   return "otro";
 }
@@ -596,16 +586,18 @@ function EvaluationDocument({
     course_code?: string;
     course_name?: string;
     file_key: string;
-    evaluation_type: string;
-    evaluation_number: number | null;
-    custom_name: string | null;
+    type: string;
+    number: number | null;
+    name: string | null;
     term_display_name: string | null;
     professor_name: string | null;
-    is_catedra: boolean;
-    includes_answers: boolean;
-    has_separate_answers: boolean;
+    coordinated: boolean;
+    answers_included: boolean;
+    answers_separate: boolean;
     file_size: number;
     status: string;
+    extraordinary: boolean;
+    variant: number | null;
   };
   onPreview: (payload: { id: number; isAnswers?: boolean }) => void;
 }) {
@@ -627,10 +619,10 @@ function EvaluationDocument({
             >
               {title}
             </button>
-            {evaluation.includes_answers ? (
+            {evaluation.answers_included ? (
               <span className="text-muted-foreground text-xs">· Con respuestas</span>
             ) : null}
-            {evaluation.has_separate_answers ? (
+            {evaluation.answers_separate ? (
               <span className="text-muted-foreground text-xs">· Respuestas aparte</span>
             ) : null}
           </div>
@@ -640,7 +632,7 @@ function EvaluationDocument({
               <span>{evaluation.term_display_name.replace(" - ", ": ")}</span>
             ) : null}
             <span>·</span>
-            <span>{evaluation.is_catedra ? "Cátedra" : evaluation.professor_name}</span>
+            <span>{evaluation.coordinated ? "Cátedra" : evaluation.professor_name}</span>
             <span>·</span>
             <span className="font-mono">{formatFileSize(evaluation.file_size)}</span>
           </div>
@@ -648,7 +640,7 @@ function EvaluationDocument({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5 self-end sm:self-center">
-        {evaluation.has_separate_answers ? (
+        {evaluation.answers_separate ? (
           <Button
             variant="outline"
             size="xs"

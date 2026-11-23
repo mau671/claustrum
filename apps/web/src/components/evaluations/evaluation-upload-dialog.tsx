@@ -108,15 +108,17 @@ export function EvaluationUploadDialog({
 
   const [evaluationFile, setEvaluationFile] = useState<File | null>(null);
   const [answersFile, setAnswersFile] = useState<File | null>(null);
-  const [evaluationType, setEvaluationType] = useState<EvaluationType>(DEFAULT_EVALUATION_TYPE);
-  const [evaluationNumberInput, setEvaluationNumberInput] = useState("");
-  const [customName, setCustomName] = useState("");
-  const [academicTermId, setAcademicTermId] = useState<string>("");
+  const [type, setType] = useState<EvaluationType>(DEFAULT_EVALUATION_TYPE);
+  const [numberInput, setNumberInput] = useState("");
+  const [name, setName] = useState("");
+  const [termId, setTermId] = useState<string>("");
   const [selectedCourseId, setSelectedCourseId] = useState<string>(String(courseId));
   const [professorId, setProfessorId] = useState<string>("");
-  const [isCatedra, setIsCatedra] = useState(false);
-  const [includesAnswers, setIncludesAnswers] = useState(false);
-  const [hasSeparateAnswers, setHasSeparateAnswers] = useState(false);
+  const [coordinated, setCoordinated] = useState(false);
+  const [answersIncluded, setAnswersIncluded] = useState(false);
+  const [answersSeparate, setAnswersSeparate] = useState(false);
+  const [extraordinary, setExtraordinary] = useState(false);
+  const [variant, setVariant] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -148,7 +150,7 @@ export function EvaluationUploadDialog({
   const effectiveCourseId = isPlaceholderCourse ? selectedCourse?.id : courseId;
 
   const offeringTermsQuery = useCourseOfferingTerms(effectiveCourseId ?? null, null, null);
-  const selectedTermNumericId = academicTermId ? Number(academicTermId) : null;
+  const selectedTermNumericId = termId ? Number(termId) : null;
   const normalizedTermId = Number.isInteger(selectedTermNumericId) ? selectedTermNumericId : null;
   const recentProfessorsQuery = useCourseRecentProfessors(
     effectiveCourseId ?? null,
@@ -167,18 +169,19 @@ export function EvaluationUploadDialog({
     [normalizedTermId, recentProfessorsQuery.data],
   );
 
-  const showNumberInput = EVALUATION_TYPES_WITH_NUMBER.includes(evaluationType);
-  const showCustomNameInput = evaluationType === "otro";
-  const selectedEvaluationType =
-    EVALUATION_TYPES.find((option) => option.value === evaluationType) ?? EVALUATION_TYPES[0];
+  const showNumberInput = EVALUATION_TYPES_WITH_NUMBER.includes(type);
+  const showNameInput = type === "otro";
+  const selectedType =
+    EVALUATION_TYPES.find((option) => option.value === type) ?? EVALUATION_TYPES[0];
 
   const canSubmit =
     !!evaluationFile &&
-    !!evaluationType &&
+    !!type &&
     !uploadMutation.isPending &&
     !!effectiveCourseId &&
-    !(showNumberInput && evaluationNumberInput.trim() === "") &&
-    !(showCustomNameInput && customName.trim() === "") &&
+    !(showNumberInput && numberInput.trim() === "") &&
+    !(showNameInput && name.trim() === "") &&
+    !(variant.trim() !== "" && numberInput.trim() === "") &&
     !!turnstileSiteKey &&
     !!turnstileToken;
 
@@ -187,27 +190,31 @@ export function EvaluationUploadDialog({
   const resetForm = useCallback(() => {
     setEvaluationFile(null);
     setAnswersFile(null);
-    setEvaluationType(DEFAULT_EVALUATION_TYPE);
-    setEvaluationNumberInput("");
-    setCustomName("");
-    setAcademicTermId("");
+    setType(DEFAULT_EVALUATION_TYPE);
+    setNumberInput("");
+    setName("");
+    setTermId("");
     setSelectedCourseId(String(courseId));
     setProfessorId("");
-    setIsCatedra(false);
-    setIncludesAnswers(false);
-    setHasSeparateAnswers(false);
+    setCoordinated(false);
+    setAnswersIncluded(false);
+    setAnswersSeparate(false);
+    setExtraordinary(false);
+    setVariant("");
     setTurnstileToken(null);
   }, [courseId]);
 
   const isDirty =
     evaluationFile !== null ||
     answersFile !== null ||
-    evaluationNumberInput.trim() !== "" ||
-    customName.trim() !== "" ||
+    numberInput.trim() !== "" ||
+    name.trim() !== "" ||
     professorId !== "" ||
-    isCatedra ||
-    includesAnswers ||
-    hasSeparateAnswers;
+    coordinated ||
+    answersIncluded ||
+    answersSeparate ||
+    extraordinary ||
+    variant.trim() !== "";
 
   const handleRequestClose = useCallback(() => {
     if (isDirty) {
@@ -268,48 +275,50 @@ export function EvaluationUploadDialog({
 
   const handleEvaluationNumberChange = (value: string) => {
     if (value === "") {
-      setEvaluationNumberInput("");
+      setNumberInput("");
       return;
     }
     if (!/^\d+$/.test(value)) return;
     const parsed = Number(value);
     if (Number.isNaN(parsed) || parsed <= 0) return;
-    setEvaluationNumberInput(String(parsed));
+    setNumberInput(String(parsed));
   };
 
   const handleEvaluationNumberStep = (delta: number) => {
-    const currentValue = evaluationNumberInput.trim() === "" ? 0 : Number(evaluationNumberInput);
+    const currentValue = numberInput.trim() === "" ? 0 : Number(numberInput);
     if (Number.isNaN(currentValue)) {
-      setEvaluationNumberInput("1");
+      setNumberInput("1");
       return;
     }
     const nextValue = Math.max(1, currentValue + delta);
-    setEvaluationNumberInput(String(nextValue));
+    setNumberInput(String(nextValue));
   };
 
   const handleSubmit = async () => {
     if (!evaluationFile || !effectiveCourseId) return;
 
-    const parsedTermId = academicTermId ? Number(academicTermId) : null;
+    const parsedTermId = termId ? Number(termId) : null;
     const parsedProfessorId = professorId ? Number(professorId) : null;
-    const parsedEvaluationNumber =
-      evaluationNumberInput.trim() === "" ? null : Number(evaluationNumberInput);
-    const parsedCustomName = customName.trim() === "" ? null : customName.trim();
+    const parsedNumber = numberInput.trim() === "" ? null : Number(numberInput);
+    const parsedName = name.trim() === "" ? null : name.trim();
+    const parsedVariant = variant.trim() === "" ? null : Number(variant);
 
     try {
       await uploadMutation.mutateAsync({
         courseId: effectiveCourseId,
-        academicTermId: parsedTermId,
+        termId: parsedTermId,
         professorId: parsedProfessorId,
-        evaluationType,
-        evaluationNumber: parsedEvaluationNumber,
-        customName: parsedCustomName,
-        isCatedra,
-        includesAnswers,
-        hasSeparateAnswers,
+        type,
+        number: parsedNumber,
+        name: parsedName,
+        coordinated,
+        answersIncluded,
+        answersSeparate,
+        extraordinary,
+        variant: parsedVariant,
         turnstileToken: turnstileToken ?? "",
         evaluationFile,
-        answersFile: hasSeparateAnswers ? answersFile : null,
+        answersFile: answersSeparate ? answersFile : null,
       });
 
       toast.success("Evaluación enviada", {
@@ -322,7 +331,7 @@ export function EvaluationUploadDialog({
     }
   };
 
-  const selectedTerm = academicTerms.find((t) => String(t.id) === academicTermId) ?? null;
+  const selectedTerm = academicTerms.find((t) => String(t.id) === termId) ?? null;
   const selectedProfessor =
     recentProfessors.find((p) => String(p.professorId) === professorId) ?? null;
 
@@ -334,10 +343,10 @@ export function EvaluationUploadDialog({
     }
   }
 
-  if (!academicTermId && academicTerms.length > 0) {
-    setAcademicTermId(String(academicTerms[0].id));
-  } else if (academicTermId && !academicTerms.some((term) => String(term.id) === academicTermId)) {
-    setAcademicTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
+  if (!termId && academicTerms.length > 0) {
+    setTermId(String(academicTerms[0].id));
+  } else if (termId && !academicTerms.some((term) => String(term.id) === termId)) {
+    setTermId(academicTerms.length > 0 ? String(academicTerms[0].id) : "");
   }
 
   if (professorId && !recentProfessors.some((p) => String(p.professorId) === professorId)) {
@@ -429,7 +438,7 @@ export function EvaluationUploadDialog({
             items={academicTermGroups}
             value={selectedTerm as unknown as (typeof academicTermGroups)[number] | null}
             onValueChange={(term) =>
-              setAcademicTermId(term ? String((term as unknown as AcademicTerm).id) : "")
+              setTermId(term ? String((term as unknown as AcademicTerm).id) : "")
             }
             itemToString={(group) => group.value}
             valueToString={(term) => formatClosedTermLabel(term as unknown as AcademicTerm)}
@@ -490,12 +499,12 @@ export function EvaluationUploadDialog({
             label="Tipo"
             ariaLabel="Tipo de evaluación"
             items={EVALUATION_TYPES}
-            value={selectedEvaluationType}
+            value={selectedType}
             onValueChange={(option) => {
               if (!option) return;
-              setEvaluationType(option.value);
-              setEvaluationNumberInput("");
-              setCustomName("");
+              setType(option.value);
+              setNumberInput("");
+              setName("");
             }}
             itemToString={(option) => option.label}
             emptyText="No se encontraron tipos."
@@ -519,7 +528,7 @@ export function EvaluationUploadDialog({
                 className="min-w-0 overflow-hidden text-center text-ellipsis whitespace-nowrap [&::placeholder]:overflow-hidden [&::placeholder]:text-ellipsis [&::placeholder]:whitespace-nowrap"
                 type="text"
                 inputMode="numeric"
-                value={evaluationNumberInput}
+                value={numberInput}
                 onChange={(event) => handleEvaluationNumberChange(event.target.value)}
                 placeholder="Número de evaluación"
               />
@@ -535,12 +544,12 @@ export function EvaluationUploadDialog({
             </div>
           )}
 
-          {showCustomNameInput && (
+          {showNameInput && (
             <div className="flex flex-1 items-center gap-2">
               <Input
                 className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap [&::placeholder]:overflow-hidden [&::placeholder]:text-ellipsis [&::placeholder]:whitespace-nowrap"
-                value={customName}
-                onChange={(event) => setCustomName(event.target.value)}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
                 placeholder="Nombre de la evaluación"
                 maxLength={100}
               />
@@ -554,8 +563,8 @@ export function EvaluationUploadDialog({
         <div className="flex items-center gap-2">
           <Checkbox
             id="is-catedra"
-            checked={isCatedra}
-            onCheckedChange={(v) => setIsCatedra(v === true)}
+            checked={coordinated}
+            onCheckedChange={(v) => setCoordinated(v === true)}
           />
           <Label htmlFor="is-catedra" className="text-sm font-normal">
             Es de cátedra
@@ -565,8 +574,8 @@ export function EvaluationUploadDialog({
         <div className="flex items-center gap-2">
           <Checkbox
             id="includes-answers"
-            checked={includesAnswers}
-            onCheckedChange={(v) => setIncludesAnswers(v === true)}
+            checked={answersIncluded}
+            onCheckedChange={(v) => setAnswersIncluded(v === true)}
           />
           <Label htmlFor="includes-answers" className="text-sm font-normal">
             Incluye respuestas o solucionario
@@ -576,17 +585,47 @@ export function EvaluationUploadDialog({
         <div className="flex items-center gap-2">
           <Checkbox
             id="has-separate-answers"
-            checked={hasSeparateAnswers}
-            onCheckedChange={(v) => setHasSeparateAnswers(v === true)}
+            checked={answersSeparate}
+            onCheckedChange={(v) => setAnswersSeparate(v === true)}
           />
           <Label htmlFor="has-separate-answers" className="text-sm font-normal">
             Respuestas en archivo aparte
           </Label>
         </div>
+
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="extraordinary"
+            checked={extraordinary}
+            onCheckedChange={(v) => setExtraordinary(v === true)}
+          />
+          <Label htmlFor="extraordinary" className="text-sm font-normal">
+            Examen extraordinario
+          </Label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Label htmlFor="variant" className="w-20 shrink-0 text-sm font-normal">
+            Variante
+          </Label>
+          <Input
+            id="variant"
+            type="text"
+            inputMode="numeric"
+            className="h-9 w-24"
+            value={variant}
+            onChange={(event) => setVariant(event.target.value.replace(/[^0-9]/g, ""))}
+            placeholder="Ej: 2"
+            maxLength={2}
+          />
+          <span className="text-muted-foreground text-xs">
+            Solo si hay varias versiones del mismo examen
+          </span>
+        </div>
       </div>
 
       {/* Answers file */}
-      {hasSeparateAnswers && (
+      {answersSeparate && (
         <div className="space-y-2">
           <Label>Archivo de respuestas (PDF)</Label>
           {!answersFile ? (

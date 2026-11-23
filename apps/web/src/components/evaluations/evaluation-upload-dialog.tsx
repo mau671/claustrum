@@ -1,4 +1,4 @@
-import { FileUp, Minus, Plus, X, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
+import { FileUp, Minus, Plus, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import type { AcademicTerm, CourseDetailRelatedCourse, CourseRecentProfessor } from "@/lib/types";
@@ -16,17 +16,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Combobox,
   ComboboxCollection,
-  ComboboxContent,
-  ComboboxEmpty,
   ComboboxGroup,
-  ComboboxInput,
   ComboboxItem,
   ComboboxLabel,
-  ComboboxList,
   ComboboxSeparator,
-  ComboboxTrigger,
 } from "@/components/ui/combobox";
 import {
   Dialog,
@@ -48,6 +42,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -67,7 +62,6 @@ import {
   useCourseOfferingTerms,
   useCourseRecentProfessors,
 } from "@/lib/hooks/use-queries";
-import { cn } from "@/lib/utils";
 
 const Turnstile = lazy(() =>
   import("@marsidev/react-turnstile").then((module) => ({ default: module.Turnstile })),
@@ -111,10 +105,6 @@ export function EvaluationUploadDialog({
   const isMobile = useIsMobile();
   const turnstileSiteKey = getTurnstileSiteKey();
   const comboboxPortalContainerRef = useRef<HTMLDivElement | null>(null);
-  const termTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const professorTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const courseTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const typeTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const [evaluationFile, setEvaluationFile] = useState<File | null>(null);
   const [answersFile, setAnswersFile] = useState<File | null>(null);
@@ -407,197 +397,87 @@ export function EvaluationUploadDialog({
 
       <div className="space-y-2">
         <Label>Curso</Label>
-        <Combobox
+        <SearchableCombobox
+          label="Curso"
+          placeholder="Selecciona un curso"
           items={courseOptions}
           value={selectedCourse}
           onValueChange={(option) => setSelectedCourseId(option ? String(option.id) : "")}
-          itemToStringValue={formatCourseLabel}
-        >
-          <ComboboxTrigger
-            ref={courseTriggerRef}
-            aria-label="Curso"
-            render={
-              <Button
-                variant="outline"
-                aria-label="Curso"
-                className="w-full min-w-0 justify-between overflow-hidden font-normal"
-                disabled={!isPlaceholderCourse || courseOptions.length === 0}
-              />
-            }
-          >
-            <span
-              className={cn(
-                "block min-w-0 flex-1 truncate text-left",
-                !selectedCourse && "text-muted-foreground",
-              )}
-            >
-              {selectedCourse ? formatCourseLabel(selectedCourse) : "Selecciona un curso"}
-            </span>
-            <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
-          </ComboboxTrigger>
-          <ComboboxContent
-            anchor={courseTriggerRef}
-            container={comboboxPortalContainerRef}
-            aria-label="Curso"
-            className="w-(--anchor-width) min-w-(--anchor-width)"
-          >
-            <div className="border-b p-2">
-              <ComboboxInput
-                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                placeholder="Buscar curso..."
-                showTrigger={false}
-                startAddon={<SearchIcon />}
-              />
-            </div>
-            <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
-            <ComboboxList className="max-h-48 scrollbar-none">
-              {(option) => (
-                <ComboboxItem key={option.id} value={option}>
-                  <span className="block min-w-0 flex-1 truncate">{formatCourseLabel(option)}</span>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+          itemToString={formatCourseLabel}
+          disabled={!isPlaceholderCourse || courseOptions.length === 0}
+          emptyText="No se encontraron cursos."
+          container={comboboxPortalContainerRef}
+          listClassName="max-h-48 scrollbar-none"
+          triggerClassName="w-full min-w-0 justify-between overflow-hidden font-normal"
+        />
       </div>
 
       {/* Period + Professor */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label>Período académico</Label>
-          <Combobox
+          <SearchableCombobox
+            label="Período"
+            ariaLabel="Período académico"
+            placeholder={
+              offeringTermsQuery.isLoading
+                ? "Cargando períodos..."
+                : !effectiveCourseId
+                  ? "Selecciona un curso"
+                  : "Sin períodos con oferta"
+            }
             items={academicTermGroups}
-            value={selectedTerm}
-            onValueChange={(term) => setAcademicTermId(term ? String(term.id) : "")}
-            itemToStringValue={(term) => formatTermNameWithoutYear(term.display_name)}
+            value={selectedTerm as unknown as (typeof academicTermGroups)[number] | null}
+            onValueChange={(term) =>
+              setAcademicTermId(term ? String((term as unknown as AcademicTerm).id) : "")
+            }
+            itemToString={(group) => group.value}
+            valueToString={(term) => formatClosedTermLabel(term as unknown as AcademicTerm)}
+            disabled={!effectiveCourseId || academicTerms.length === 0}
+            emptyText="No se encontraron períodos."
+            container={comboboxPortalContainerRef}
+            listClassName="max-h-48 scrollbar-none"
           >
-            <ComboboxTrigger
-              ref={termTriggerRef}
-              aria-label="Período académico"
-              render={
-                <Button
-                  variant="outline"
-                  aria-label="Período académico"
-                  className="w-full min-w-0 justify-between overflow-hidden font-normal"
-                  disabled={!effectiveCourseId || academicTerms.length === 0}
-                />
-              }
-            >
-              <span
-                className={cn(
-                  "block min-w-0 flex-1 truncate text-left",
-                  !selectedTerm && "text-muted-foreground",
-                )}
-              >
-                {selectedTerm
-                  ? formatClosedTermLabel(selectedTerm)
-                  : offeringTermsQuery.isLoading
-                    ? "Cargando períodos..."
-                    : !effectiveCourseId
-                      ? "Selecciona un curso"
-                      : "Sin períodos con oferta"}
-              </span>
-              <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
-            </ComboboxTrigger>
-            <ComboboxContent
-              anchor={termTriggerRef}
-              container={comboboxPortalContainerRef}
-              aria-label="Período académico"
-              className="w-(--anchor-width) min-w-(--anchor-width)"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar período..."
-                  showTrigger={false}
-                  startAddon={<SearchIcon />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
-              <ComboboxList className="max-h-48 scrollbar-none">
-                {(group, index) => (
-                  <ComboboxGroup key={group.value} items={group.items}>
-                    <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
-                    <ComboboxCollection>
-                      {(term) => (
-                        <ComboboxItem key={term.id} value={term}>
-                          <span className="block min-w-0 flex-1 truncate text-xs">
-                            {formatTermNameWithoutYear(term.display_name)}
-                          </span>
-                        </ComboboxItem>
-                      )}
-                    </ComboboxCollection>
-                    {index < academicTermGroups.length - 1 && <ComboboxSeparator />}
-                  </ComboboxGroup>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            {(group, index) => (
+              <ComboboxGroup key={group.value} items={group.items}>
+                <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
+                <ComboboxCollection>
+                  {(term) => (
+                    <ComboboxItem key={term.id} value={term}>
+                      <span className="block min-w-0 flex-1 truncate text-xs">
+                        {formatTermNameWithoutYear(term.display_name)}
+                      </span>
+                    </ComboboxItem>
+                  )}
+                </ComboboxCollection>
+                {index < academicTermGroups.length - 1 && <ComboboxSeparator />}
+              </ComboboxGroup>
+            )}
+          </SearchableCombobox>
         </div>
 
         <div className="space-y-2">
           <Label>Profesor</Label>
-          <Combobox
+          <SearchableCombobox
+            label="Profesor"
+            placeholder={
+              !selectedTerm
+                ? "Selecciona un período"
+                : recentProfessorsQuery.isLoading
+                  ? "Cargando profesores..."
+                  : recentProfessors.length > 0
+                    ? "Seleccionar profesor"
+                    : "Sin profesores en este período"
+            }
             items={recentProfessors}
             value={selectedProfessor}
             onValueChange={(prof) => setProfessorId(prof ? String(prof.professorId) : "")}
-            itemToStringValue={(prof) => prof.professorName}
-          >
-            <ComboboxTrigger
-              ref={professorTriggerRef}
-              aria-label="Profesor"
-              render={
-                <Button
-                  variant="outline"
-                  aria-label="Profesor"
-                  className="w-full min-w-0 justify-between overflow-hidden font-normal"
-                  disabled={!selectedTerm || recentProfessorsQuery.isLoading}
-                />
-              }
-            >
-              <span
-                className={cn(
-                  "block min-w-0 flex-1 truncate text-left",
-                  !selectedProfessor && "text-muted-foreground",
-                )}
-              >
-                {selectedProfessor?.professorName ??
-                  (!selectedTerm
-                    ? "Selecciona un período"
-                    : recentProfessorsQuery.isLoading
-                      ? "Cargando profesores..."
-                      : recentProfessors.length > 0
-                        ? "Seleccionar profesor"
-                        : "Sin profesores en este período")}
-              </span>
-              <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
-            </ComboboxTrigger>
-            <ComboboxContent
-              anchor={professorTriggerRef}
-              container={comboboxPortalContainerRef}
-              aria-label="Profesor"
-              className="w-(--anchor-width) min-w-(--anchor-width)"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar profesor..."
-                  showTrigger={false}
-                  startAddon={<SearchIcon />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron profesores.</ComboboxEmpty>
-              <ComboboxList className="max-h-48 scrollbar-none">
-                {(prof) => (
-                  <ComboboxItem key={prof.professorId} value={prof}>
-                    <span className="block min-w-0 flex-1 truncate text-xs">
-                      {prof.professorName}
-                    </span>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            itemToString={(prof) => prof.professorName}
+            disabled={!selectedTerm || recentProfessorsQuery.isLoading}
+            emptyText="No se encontraron profesores."
+            container={comboboxPortalContainerRef}
+            listClassName="max-h-48 scrollbar-none"
+          />
         </div>
       </div>
 
@@ -605,7 +485,10 @@ export function EvaluationUploadDialog({
       <div className="space-y-2">
         <Label htmlFor="evaluation-type">Tipo de evaluación</Label>
         <div className="flex gap-3">
-          <Combobox
+          <SearchableCombobox
+            id="evaluation-type"
+            label="Tipo"
+            ariaLabel="Tipo de evaluación"
             items={EVALUATION_TYPES}
             value={selectedEvaluationType}
             onValueChange={(option) => {
@@ -614,49 +497,12 @@ export function EvaluationUploadDialog({
               setEvaluationNumberInput("");
               setCustomName("");
             }}
-            itemToStringValue={(option) => option.label}
-          >
-            <ComboboxTrigger
-              ref={typeTriggerRef}
-              aria-label="Tipo de evaluación"
-              render={
-                <Button
-                  id="evaluation-type"
-                  variant="outline"
-                  aria-label="Tipo de evaluación"
-                  className="w-44 justify-between"
-                />
-              }
-            >
-              <span className="block min-w-0 truncate text-left">
-                {selectedEvaluationType.label}
-              </span>
-              <ChevronsUpDownIcon className="-me-1! size-3.5 shrink-0 opacity-60" />
-            </ComboboxTrigger>
-            <ComboboxContent
-              anchor={typeTriggerRef}
-              container={comboboxPortalContainerRef}
-              aria-label="Tipo de evaluación"
-              className="w-(--anchor-width) min-w-(--anchor-width)"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar tipo..."
-                  showTrigger={false}
-                  startAddon={<SearchIcon />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron tipos.</ComboboxEmpty>
-              <ComboboxList className="max-h-48 scrollbar-none">
-                {(option) => (
-                  <ComboboxItem key={option.value} value={option}>
-                    <span className="block min-w-0 flex-1 truncate text-xs">{option.label}</span>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            itemToString={(option) => option.label}
+            emptyText="No se encontraron tipos."
+            container={comboboxPortalContainerRef}
+            listClassName="max-h-48 scrollbar-none"
+            triggerClassName="w-44 justify-between"
+          />
 
           {showNumberInput && (
             <div className="flex flex-1 items-center gap-2">

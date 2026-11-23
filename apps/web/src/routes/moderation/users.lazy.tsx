@@ -6,7 +6,6 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   Search01Icon,
-  UnfoldMoreIcon,
 } from "@hugeicons/core-free-icons";
 import { useDebouncedCallback } from "@tanstack/react-pacer";
 import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
@@ -43,15 +42,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxTrigger,
-} from "@/components/ui/combobox";
-import {
   Drawer,
   DrawerFooter,
   DrawerHeader,
@@ -65,6 +55,7 @@ import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import {
   Select,
   SelectContent,
@@ -245,74 +236,6 @@ function DetailField({
       <span className="text-muted-foreground text-xs font-medium">{label}</span>
       <div className="min-w-0 text-sm break-words">{children}</div>
     </div>
-  );
-}
-
-function CatalogCombobox<T extends { id: number }>({
-  label,
-  items,
-  value,
-  onValueChange,
-  itemToString,
-  placeholder,
-  disabled,
-}: {
-  label: string;
-  items: T[];
-  value: T | null;
-  onValueChange: (item: T | null) => void;
-  itemToString: (item: T) => string;
-  placeholder: string;
-  disabled?: boolean;
-}) {
-  return (
-    <DetailField label={label}>
-      <Combobox
-        items={items}
-        value={value}
-        onValueChange={onValueChange}
-        itemToStringValue={itemToString}
-        disabled={disabled}
-      >
-        <ComboboxTrigger
-          aria-label={label}
-          render={
-            <Button variant="outline" className="h-8 w-full justify-between text-xs font-normal" />
-          }
-        >
-          <span
-            className={cn(
-              "block min-w-0 flex-1 truncate text-left",
-              !value && "text-muted-foreground",
-            )}
-          >
-            {value ? itemToString(value) : placeholder}
-          </span>
-          <Icon icon={UnfoldMoreIcon} size={14} className="-me-1! size-3.5 shrink-0 opacity-60" />
-        </ComboboxTrigger>
-        <ComboboxContent
-          aria-label={label}
-          className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-        >
-          <div className="border-b p-2">
-            <ComboboxInput
-              className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-              placeholder={`Buscar ${label.toLowerCase()}...`}
-              showTrigger={false}
-              startAddon={<Icon icon={Search01Icon} size={16} />}
-            />
-          </div>
-          <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-          <ComboboxList className="max-h-56 scrollbar-none">
-            {(item: T) => (
-              <ComboboxItem key={item.id} value={item}>
-                <span className="block w-full min-w-0 truncate">{itemToString(item)}</span>
-              </ComboboxItem>
-            )}
-          </ComboboxList>
-        </ComboboxContent>
-      </Combobox>
-    </DetailField>
   );
 }
 
@@ -1274,91 +1197,100 @@ function AdminUsersPage() {
                           />
                         </DetailField>
 
-                        <CatalogCombobox
-                          label="Universidad"
-                          items={universitiesQuery.data ?? []}
-                          value={
-                            (universitiesQuery.data ?? []).find(
-                              (item) => item.id === universityIdDraft,
-                            ) ?? null
-                          }
-                          onValueChange={(item) => {
-                            setUniversityIdDraft(item ? item.id : null);
-                            setCampusIdDraft(null);
-                            setAcademicUnitIdDraft(null);
-                            setStudyPlanIdDraft(null);
-                          }}
-                          itemToString={(item) => item.name}
-                          placeholder="Sin seleccionar"
-                          disabled={universitiesQuery.isLoading || isSelf || isMutating}
-                        />
+                        <DetailField label="Universidad">
+                          <SearchableCombobox
+                            label="Universidad"
+                            items={universitiesQuery.data ?? []}
+                            value={
+                              (universitiesQuery.data ?? []).find(
+                                (item) => item.id === universityIdDraft,
+                              ) ?? null
+                            }
+                            onValueChange={(item) => {
+                              setUniversityIdDraft(item ? item.id : null);
+                              setCampusIdDraft(null);
+                              setAcademicUnitIdDraft(null);
+                              setStudyPlanIdDraft(null);
+                            }}
+                            itemToString={(item) => item.name}
+                            placeholder="Sin seleccionar"
+                            disabled={universitiesQuery.isLoading || isSelf || isMutating}
+                          />
+                        </DetailField>
 
-                        <CatalogCombobox
-                          label="Sede"
-                          items={campusesQuery.data ?? []}
-                          value={
-                            (campusesQuery.data ?? []).find((item) => item.id === campusIdDraft) ??
-                            null
-                          }
-                          onValueChange={(item) => {
-                            setCampusIdDraft(item ? item.id : null);
-                            setAcademicUnitIdDraft(null);
-                            setStudyPlanIdDraft(null);
-                          }}
-                          itemToString={(item) =>
-                            item.code ? `${item.code}: ${item.name}` : item.name
-                          }
-                          placeholder="Sin seleccionar"
-                          disabled={
-                            universityIdDraft === null ||
-                            campusesQuery.isLoading ||
-                            isSelf ||
-                            isMutating
-                          }
-                        />
+                        <DetailField label="Sede">
+                          <SearchableCombobox
+                            label="Sede"
+                            items={campusesQuery.data ?? []}
+                            value={
+                              (campusesQuery.data ?? []).find(
+                                (item) => item.id === campusIdDraft,
+                              ) ?? null
+                            }
+                            onValueChange={(item) => {
+                              setCampusIdDraft(item ? item.id : null);
+                              setAcademicUnitIdDraft(null);
+                              setStudyPlanIdDraft(null);
+                            }}
+                            itemToString={(item) =>
+                              item.code ? `${item.code}: ${item.name}` : item.name
+                            }
+                            placeholder="Sin seleccionar"
+                            disabled={
+                              universityIdDraft === null ||
+                              campusesQuery.isLoading ||
+                              isSelf ||
+                              isMutating
+                            }
+                          />
+                        </DetailField>
 
-                        <CatalogCombobox
-                          label="Escuela"
-                          items={academicUnitsQuery.data ?? []}
-                          value={
-                            (academicUnitsQuery.data ?? []).find(
-                              (item) => item.id === academicUnitIdDraft,
-                            ) ?? null
-                          }
-                          onValueChange={(item) => {
-                            setAcademicUnitIdDraft(item ? item.id : null);
-                            setStudyPlanIdDraft(null);
-                          }}
-                          itemToString={(item) =>
-                            item.code ? `${item.code}: ${item.name}` : item.name
-                          }
-                          placeholder="Sin seleccionar"
-                          disabled={
-                            campusIdDraft === null ||
-                            academicUnitsQuery.isLoading ||
-                            isSelf ||
-                            isMutating
-                          }
-                        />
+                        <DetailField label="Escuela">
+                          <SearchableCombobox
+                            label="Escuela"
+                            items={academicUnitsQuery.data ?? []}
+                            value={
+                              (academicUnitsQuery.data ?? []).find(
+                                (item) => item.id === academicUnitIdDraft,
+                              ) ?? null
+                            }
+                            onValueChange={(item) => {
+                              setAcademicUnitIdDraft(item ? item.id : null);
+                              setStudyPlanIdDraft(null);
+                            }}
+                            itemToString={(item) =>
+                              item.code ? `${item.code}: ${item.name}` : item.name
+                            }
+                            placeholder="Sin seleccionar"
+                            disabled={
+                              campusIdDraft === null ||
+                              academicUnitsQuery.isLoading ||
+                              isSelf ||
+                              isMutating
+                            }
+                          />
+                        </DetailField>
 
-                        <CatalogCombobox
-                          label="Plan de estudios"
-                          items={studyPlansQuery.data ?? []}
-                          value={
-                            (studyPlansQuery.data ?? []).find(
-                              (item) => item.id === studyPlanIdDraft,
-                            ) ?? null
-                          }
-                          onValueChange={(item) => setStudyPlanIdDraft(item ? item.id : null)}
-                          itemToString={(item) => item.name.replace(" - ", ": ")}
-                          placeholder="Sin seleccionar"
-                          disabled={
-                            academicUnitIdDraft === null ||
-                            studyPlansQuery.isLoading ||
-                            isSelf ||
-                            isMutating
-                          }
-                        />
+                        <DetailField label="Plan de estudios">
+                          <SearchableCombobox
+                            label="Plan de estudios"
+                            items={studyPlansQuery.data ?? []}
+                            value={
+                              (studyPlansQuery.data ?? []).find(
+                                (item) => item.id === studyPlanIdDraft,
+                              ) ?? null
+                            }
+                            onValueChange={(item) => setStudyPlanIdDraft(item ? item.id : null)}
+                            itemToString={(item) => item.name.replace(" - ", ": ")}
+                            placeholder="Sin seleccionar"
+                            disabled={
+                              academicUnitIdDraft === null ||
+                              studyPlansQuery.isLoading ||
+                              isSelf ||
+                              isMutating
+                            }
+                          />
+                        </DetailField>
 
                         <DetailField label="Año de ingreso">
                           {academicQuery.data.entry_year ?? "—"}

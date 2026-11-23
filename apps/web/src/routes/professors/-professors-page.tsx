@@ -13,7 +13,7 @@ import { useMemo, useState, useCallback } from "react";
 
 import type { ProfessorReviewStatsRow } from "@/lib/professor-reviews/types";
 
-import { FilterCombobox, normalizeText } from "@/components/filters/shared-filters";
+import { normalizeText } from "@/components/filters/shared-filters";
 import { NumberedPagination } from "@/components/numbered-pagination";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -28,6 +28,7 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -447,17 +448,16 @@ export function ProfessorsReviewsPage() {
   const filterSchool = (
     <div className="flex w-full flex-col gap-2">
       <Label htmlFor="school-filter">Escuela</Label>
-      <FilterCombobox
+      <SearchableCombobox
         label="escuela"
-        value={academicUnitIdInput?.toString() || ""}
         placeholder="Seleccionar escuela..."
         items={allAcademicUnits}
-        onChange={(val) => {
-          const newId = val ? parseInt(val) : null;
+        value={allAcademicUnits.find((item) => item.id === academicUnitIdInput) ?? null}
+        onValueChange={(item) => {
+          const newId = item ? item.id : null;
           setAcademicUnitIdInput(newId === academicUnitIdInput ? null : newId);
         }}
-        isVisible={true}
-        itemLabel={(item) =>
+        itemToString={(item) =>
           item.code
             ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
             : normalizeText(item.name)

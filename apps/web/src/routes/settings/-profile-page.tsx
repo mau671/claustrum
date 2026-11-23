@@ -1,23 +1,15 @@
-import { Search01Icon, UnfoldMoreIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { UserIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AcademicProgress } from "@/components/dashboard/academic-progress";
 import { SettingsPage, SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxTrigger,
-} from "@/components/ui/combobox";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { apiClient } from "@/lib/api/client";
@@ -30,7 +22,6 @@ import {
   useStudyPlans,
   useProfileContext,
 } from "@/lib/hooks/use-queries";
-import { cn } from "@/lib/utils";
 
 export function ProfilePageRoute() {
   return (
@@ -71,9 +62,6 @@ function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingIdentity, setIsSavingIdentity] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const campusTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const academicUnitTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const studyPlanTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const universityId = profileContext.data?.university_id ?? null;
   const campusId = profileContext.data?.campus_id ?? null;
@@ -326,74 +314,24 @@ function ProfilePage() {
 
           <Field>
             <FieldLabel>Sede</FieldLabel>
-            <Combobox
+            <SearchableCombobox
+              label="Sede"
+              placeholder="Selecciona tu sede"
               items={mainCampuses}
               value={mainCampuses.find((item) => String(item.id) === campusIdDraft) ?? null}
               onValueChange={(item) => handleCampusChange(item ? String(item.id) : "")}
-              itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+              itemToString={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+              loading={campuses.isLoading && mainCampuses.length === 0}
               disabled={!effectiveUniversityId || campuses.isLoading}
-            >
-              <ComboboxTrigger
-                ref={campusTriggerRef}
-                aria-label="Sede"
-                render={
-                  <Button
-                    variant="outline"
-                    aria-label="Sede"
-                    className="w-full justify-between text-base font-normal md:text-sm"
-                  />
-                }
-              >
-                <span
-                  className={cn(
-                    "block min-w-0 flex-1 truncate text-left",
-                    !campusIdDraft && "text-muted-foreground",
-                  )}
-                >
-                  {campuses.isLoading
-                    ? "Cargando..."
-                    : mainCampuses.find((item) => String(item.id) === campusIdDraft)
-                      ? mainCampuses.find((item) => String(item.id) === campusIdDraft)!.code
-                        ? `${mainCampuses.find((item) => String(item.id) === campusIdDraft)!.code}: ${mainCampuses.find((item) => String(item.id) === campusIdDraft)!.name}`
-                        : mainCampuses.find((item) => String(item.id) === campusIdDraft)!.name
-                      : "Selecciona tu sede"}
-                </span>
-                <Icon
-                  icon={UnfoldMoreIcon}
-                  size={14}
-                  className="-me-1! size-3.5 shrink-0 opacity-60"
-                />
-              </ComboboxTrigger>
-              <ComboboxContent
-                anchor={campusTriggerRef}
-                aria-label="Sede"
-                className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-              >
-                <div className="border-b p-2">
-                  <ComboboxInput
-                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                    placeholder="Buscar sede..."
-                    showTrigger={false}
-                    startAddon={<Icon icon={Search01Icon} size={16} />}
-                  />
-                </div>
-                <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                <ComboboxList className="max-h-56 scrollbar-none">
-                  {(item) => (
-                    <ComboboxItem key={item.id} value={item}>
-                      <span className="block w-full min-w-0 truncate">
-                        {item.code ? `${item.code}: ${item.name}` : item.name}
-                      </span>
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              triggerClassName="justify-between text-base font-normal md:text-sm"
+            />
           </Field>
 
           <Field>
             <FieldLabel>Escuela</FieldLabel>
-            <Combobox
+            <SearchableCombobox
+              label="Escuela"
+              placeholder="Selecciona tu escuela"
               items={academicUnits.data ?? []}
               value={
                 (academicUnits.data ?? []).find(
@@ -401,140 +339,28 @@ function ProfilePage() {
                 ) ?? null
               }
               onValueChange={(item) => handleAcademicUnitChange(item ? String(item.id) : "")}
-              itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+              itemToString={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+              loading={academicUnits.isLoading && (academicUnits.data ?? []).length === 0}
               disabled={!campusIdDraft || academicUnits.isLoading}
-            >
-              <ComboboxTrigger
-                ref={academicUnitTriggerRef}
-                aria-label="Escuela"
-                render={
-                  <Button
-                    variant="outline"
-                    aria-label="Escuela"
-                    className="w-full justify-between text-base font-normal md:text-sm"
-                  />
-                }
-              >
-                <span
-                  className={cn(
-                    "block min-w-0 flex-1 truncate text-left",
-                    !academicUnitIdDraft && "text-muted-foreground",
-                  )}
-                >
-                  {academicUnits.isLoading
-                    ? "Cargando..."
-                    : (academicUnits.data ?? []).find(
-                          (item) => String(item.id) === academicUnitIdDraft,
-                        )
-                      ? (academicUnits.data ?? []).find(
-                          (item) => String(item.id) === academicUnitIdDraft,
-                        )!.code
-                        ? `${(academicUnits.data ?? []).find((item) => String(item.id) === academicUnitIdDraft)!.code}: ${(academicUnits.data ?? []).find((item) => String(item.id) === academicUnitIdDraft)!.name}`
-                        : (academicUnits.data ?? []).find(
-                            (item) => String(item.id) === academicUnitIdDraft,
-                          )!.name
-                      : "Selecciona tu escuela"}
-                </span>
-                <Icon
-                  icon={UnfoldMoreIcon}
-                  size={14}
-                  className="-me-1! size-3.5 shrink-0 opacity-60"
-                />
-              </ComboboxTrigger>
-              <ComboboxContent
-                anchor={academicUnitTriggerRef}
-                aria-label="Escuela"
-                className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-              >
-                <div className="border-b p-2">
-                  <ComboboxInput
-                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                    placeholder="Buscar escuela..."
-                    showTrigger={false}
-                    startAddon={<Icon icon={Search01Icon} size={16} />}
-                  />
-                </div>
-                <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                <ComboboxList className="max-h-56 scrollbar-none">
-                  {(item) => (
-                    <ComboboxItem key={item.id} value={item}>
-                      <span className="block w-full min-w-0 truncate">
-                        {item.code ? `${item.code}: ${item.name}` : item.name}
-                      </span>
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              triggerClassName="justify-between text-base font-normal md:text-sm"
+            />
           </Field>
 
           <Field>
             <FieldLabel>Plan de estudios</FieldLabel>
-            <Combobox
+            <SearchableCombobox
+              label="Plan de estudios"
+              placeholder="Selecciona tu plan"
               items={studyPlans.data ?? []}
               value={
                 (studyPlans.data ?? []).find((item) => String(item.id) === studyPlanIdDraft) ?? null
               }
               onValueChange={(item) => handleStudyPlanChange(item ? String(item.id) : "")}
-              itemToStringValue={(item) => item.name.replace(" - ", ": ")}
+              itemToString={(item) => item.name.replace(" - ", ": ")}
+              loading={studyPlans.isLoading && (studyPlans.data ?? []).length === 0}
               disabled={!academicUnitIdDraft || studyPlans.isLoading}
-            >
-              <ComboboxTrigger
-                ref={studyPlanTriggerRef}
-                aria-label="Plan de estudios"
-                render={
-                  <Button
-                    variant="outline"
-                    aria-label="Plan de estudios"
-                    className="w-full justify-between text-base font-normal md:text-sm"
-                  />
-                }
-              >
-                <span
-                  className={cn(
-                    "block min-w-0 flex-1 truncate text-left",
-                    !studyPlanIdDraft && "text-muted-foreground",
-                  )}
-                >
-                  {studyPlans.isLoading
-                    ? "Cargando..."
-                    : (studyPlans.data ?? []).find((item) => String(item.id) === studyPlanIdDraft)
-                      ? (studyPlans.data ?? [])
-                          .find((item) => String(item.id) === studyPlanIdDraft)!
-                          .name.replace(" - ", ": ")
-                      : "Selecciona tu plan"}
-                </span>
-                <Icon
-                  icon={UnfoldMoreIcon}
-                  size={14}
-                  className="-me-1! size-3.5 shrink-0 opacity-60"
-                />
-              </ComboboxTrigger>
-              <ComboboxContent
-                anchor={studyPlanTriggerRef}
-                aria-label="Plan de estudios"
-                className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-              >
-                <div className="border-b p-2">
-                  <ComboboxInput
-                    className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                    placeholder="Buscar plan..."
-                    showTrigger={false}
-                    startAddon={<Icon icon={Search01Icon} size={16} />}
-                  />
-                </div>
-                <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                <ComboboxList className="max-h-56 scrollbar-none">
-                  {(item) => (
-                    <ComboboxItem key={item.id} value={item}>
-                      <span className="block w-full min-w-0 truncate">
-                        {item.name.replace(" - ", ": ")}
-                      </span>
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              triggerClassName="justify-between text-base font-normal md:text-sm"
+            />
           </Field>
 
           <Field>

@@ -1,4 +1,3 @@
-import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
@@ -6,17 +5,8 @@ import { useCallback, useMemo, useState } from "react";
 import { AuthLeftPanel, AuthPageBackdrop } from "@/components/inset-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxTrigger,
-} from "@/components/ui/combobox";
-import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Spinner } from "@/components/ui/spinner";
 import { Stepper, type StepperStep } from "@/components/ui/stepper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -170,7 +160,7 @@ export function InsetOnboardingPage() {
           : undefined,
         error: showCampusError ? (currentStepError ?? undefined) : undefined,
         content: (
-          <Combobox
+          <SearchableCombobox
             items={mainCampuses}
             value={selectedCampus}
             onValueChange={(item) => {
@@ -183,72 +173,19 @@ export function InsetOnboardingPage() {
                 setStep(2);
               }
             }}
-            itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
-          >
-            <ComboboxTrigger
-              aria-label={
-                selectedCampus
-                  ? `Sede: ${selectedCampus.code ? `${selectedCampus.code}: ${selectedCampus.name}` : selectedCampus.name}`
-                  : "Selecciona una sede"
-              }
-              render={
-                <Button
-                  variant="outline"
-                  aria-label={
-                    selectedCampus
-                      ? `Sede: ${selectedCampus.code ? `${selectedCampus.code}: ${selectedCampus.name}` : selectedCampus.name}`
-                      : "Selecciona una sede"
-                  }
-                  className={cn(
-                    "!h-10 w-full justify-between text-sm font-normal",
-                    showCampusError &&
-                      "border-destructive text-destructive ring-destructive/40 ring-1",
-                  )}
-                />
-              }
-            >
-              <span
-                className={cn(
-                  "block min-w-0 flex-1 truncate text-left",
-                  !campusId && "text-muted-foreground",
-                )}
-              >
-                {selectedCampus
-                  ? selectedCampus.code
-                    ? `${selectedCampus.code}: ${selectedCampus.name}`
-                    : selectedCampus.name
-                  : "Selecciona una sede"}
-              </span>
-              <Icon
-                icon={UnfoldMoreIcon}
-                size={14}
-                className="-me-1! size-3.5 shrink-0 opacity-60"
-              />
-            </ComboboxTrigger>
-            <ComboboxContent
-              aria-label="Sede"
-              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar sede..."
-                  showTrigger={false}
-                  startAddon={<Icon icon={Search01Icon} size={16} />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-              <ComboboxList className="max-h-56 scrollbar-none">
-                {(item) => (
-                  <ComboboxItem key={item.id} value={item}>
-                    <span className="block w-full min-w-0 truncate">
-                      {item.code ? `${item.code}: ${item.name}` : item.name}
-                    </span>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            itemToString={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+            label="Sede"
+            ariaLabel={
+              selectedCampus
+                ? `Sede: ${selectedCampus.code ? `${selectedCampus.code}: ${selectedCampus.name}` : selectedCampus.name}`
+                : "Selecciona una sede"
+            }
+            placeholder="Selecciona una sede"
+            triggerClassName={cn(
+              "!h-10 w-full justify-between text-sm font-normal",
+              showCampusError && "border-destructive text-destructive ring-destructive/40 ring-1",
+            )}
+          />
         ),
       },
       {
@@ -261,7 +198,7 @@ export function InsetOnboardingPage() {
           : undefined,
         error: showAcademicUnitError ? (currentStepError ?? undefined) : undefined,
         content: (
-          <Combobox
+          <SearchableCombobox
             items={academicUnits.data ?? []}
             value={selectedAcademicUnit}
             onValueChange={(item) => {
@@ -273,72 +210,20 @@ export function InsetOnboardingPage() {
                 setStep(3);
               }
             }}
-            itemToStringValue={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
-          >
-            <ComboboxTrigger
-              aria-label={
-                selectedAcademicUnit
-                  ? `Carrera: ${selectedAcademicUnit.code ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}` : selectedAcademicUnit.name}`
-                  : "Selecciona una carrera"
-              }
-              render={
-                <Button
-                  variant="outline"
-                  aria-label={
-                    selectedAcademicUnit
-                      ? `Carrera: ${selectedAcademicUnit.code ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}` : selectedAcademicUnit.name}`
-                      : "Selecciona una carrera"
-                  }
-                  className={cn(
-                    "!h-10 w-full justify-between text-sm font-normal",
-                    showAcademicUnitError &&
-                      "border-destructive text-destructive ring-destructive/40 ring-1",
-                  )}
-                />
-              }
-            >
-              <span
-                className={cn(
-                  "block min-w-0 flex-1 truncate text-left",
-                  !academicUnitId && "text-muted-foreground",
-                )}
-              >
-                {selectedAcademicUnit
-                  ? selectedAcademicUnit.code
-                    ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}`
-                    : selectedAcademicUnit.name
-                  : "Selecciona una carrera"}
-              </span>
-              <Icon
-                icon={UnfoldMoreIcon}
-                size={14}
-                className="-me-1! size-3.5 shrink-0 opacity-60"
-              />
-            </ComboboxTrigger>
-            <ComboboxContent
-              aria-label="Carrera"
-              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar carrera..."
-                  showTrigger={false}
-                  startAddon={<Icon icon={Search01Icon} size={16} />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-              <ComboboxList className="max-h-56 scrollbar-none">
-                {(item) => (
-                  <ComboboxItem key={item.id} value={item}>
-                    <span className="block w-full min-w-0 truncate">
-                      {item.code ? `${item.code}: ${item.name}` : item.name}
-                    </span>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            itemToString={(item) => (item.code ? `${item.code}: ${item.name}` : item.name)}
+            label="Carrera"
+            ariaLabel={
+              selectedAcademicUnit
+                ? `Carrera: ${selectedAcademicUnit.code ? `${selectedAcademicUnit.code}: ${selectedAcademicUnit.name}` : selectedAcademicUnit.name}`
+                : "Selecciona una carrera"
+            }
+            placeholder="Selecciona una carrera"
+            triggerClassName={cn(
+              "!h-10 w-full justify-between text-sm font-normal",
+              showAcademicUnitError &&
+                "border-destructive text-destructive ring-destructive/40 ring-1",
+            )}
+          />
         ),
       },
       {
@@ -351,7 +236,7 @@ export function InsetOnboardingPage() {
           : undefined,
         error: showStudyPlanError ? (currentStepError ?? undefined) : undefined,
         content: (
-          <Combobox
+          <SearchableCombobox
             items={studyPlans.data ?? []}
             value={selectedStudyPlan}
             onValueChange={(item) => {
@@ -362,78 +247,24 @@ export function InsetOnboardingPage() {
                 setStep(4);
               }
             }}
-            itemToStringValue={(item) =>
+            itemToString={(item) =>
               item.external_plan_id
                 ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
                 : item.name
             }
-          >
-            <ComboboxTrigger
-              aria-label={
-                selectedStudyPlan
-                  ? `Plan de estudios: ${selectedStudyPlan.external_plan_id ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}` : selectedStudyPlan.name}`
-                  : "Selecciona un plan de estudios"
-              }
-              render={
-                <Button
-                  variant="outline"
-                  aria-label={
-                    selectedStudyPlan
-                      ? `Plan de estudios: ${selectedStudyPlan.external_plan_id ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}` : selectedStudyPlan.name}`
-                      : "Selecciona un plan de estudios"
-                  }
-                  className={cn(
-                    "!h-10 w-full justify-between text-sm font-normal",
-                    showStudyPlanError &&
-                      "border-destructive text-destructive ring-destructive/40 ring-1",
-                  )}
-                />
-              }
-            >
-              <span
-                className={cn(
-                  "block min-w-0 flex-1 truncate text-left",
-                  !studyPlanId && "text-muted-foreground",
-                )}
-              >
-                {selectedStudyPlan
-                  ? selectedStudyPlan.external_plan_id
-                    ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}`
-                    : selectedStudyPlan.name
-                  : "Selecciona un plan de estudios"}
-              </span>
-              <Icon
-                icon={UnfoldMoreIcon}
-                size={14}
-                className="-me-1! size-3.5 shrink-0 opacity-60"
-              />
-            </ComboboxTrigger>
-            <ComboboxContent
-              aria-label="Plan de estudios"
-              className="w-[var(--anchor-width)] min-w-[var(--anchor-width)]"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar plan..."
-                  showTrigger={false}
-                  startAddon={<Icon icon={Search01Icon} size={16} />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-              <ComboboxList className="max-h-56 scrollbar-none">
-                {(item) => (
-                  <ComboboxItem key={item.id} value={item}>
-                    <span className="block w-full min-w-0 truncate">
-                      {item.external_plan_id
-                        ? `${item.external_plan_id}: ${item.name.replace(new RegExp(`^${item.external_plan_id}\\s*-\\s*`), "")}`
-                        : item.name}
-                    </span>
-                  </ComboboxItem>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            label="Plan"
+            ariaLabel={
+              selectedStudyPlan
+                ? `Plan de estudios: ${selectedStudyPlan.external_plan_id ? `${selectedStudyPlan.external_plan_id}: ${selectedStudyPlan.name.replace(new RegExp(`^${selectedStudyPlan.external_plan_id}\\s*-\\s*`), "")}` : selectedStudyPlan.name}`
+                : "Selecciona un plan de estudios"
+            }
+            placeholder="Selecciona un plan de estudios"
+            triggerClassName={cn(
+              "!h-10 w-full justify-between text-sm font-normal",
+              showStudyPlanError &&
+                "border-destructive text-destructive ring-destructive/40 ring-1",
+            )}
+          />
         ),
       },
       {

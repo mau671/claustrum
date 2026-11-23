@@ -8,11 +8,8 @@ import type {
 } from "@/lib/types";
 
 import { FiltersPanel } from "@/components/filters/filters-panel";
-import {
-  FilterCombobox,
-  normalizeText,
-  removePlanPrefixFromName,
-} from "@/components/filters/shared-filters";
+import { normalizeText, removePlanPrefixFromName } from "@/components/filters/shared-filters";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { cn } from "@/lib/utils";
 
 interface CurriculumFiltersProps {
@@ -96,72 +93,105 @@ export function CurriculumFilters({
       variant="plain"
       className={cn("w-full", className)}
     >
-      <FilterCombobox
-        label="Universidad"
-        value={selectedUniversityId?.toString() || ""}
-        placeholder="Universidad"
-        items={universities}
-        onChange={(val) => {
-          setSkipAnimation(false);
-          onUniversityChange(val ? parseInt(val) : null);
-        }}
-        isVisible={showUniversityFilter}
-        skipAnimation={skipAnimation}
-      />
+      {showUniversityFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Universidad"
+            placeholder="Universidad"
+            items={universities}
+            value={universities.find((item) => item.id === selectedUniversityId) ?? null}
+            onValueChange={(item) => {
+              setSkipAnimation(false);
+              onUniversityChange(item ? item.id : null);
+            }}
+            itemToString={(item) => item.name}
+            clearable
+          />
+        </div>
+      )}
 
-      <FilterCombobox
-        label="Sede"
-        value={selectedCampusId?.toString() || ""}
-        placeholder="Sede"
-        items={campuses}
-        onChange={(val) => {
-          setSkipAnimation(false);
-          onCampusChange(val ? parseInt(val) : null);
-        }}
-        isVisible={showCampusFilter}
-        itemLabel={(item) =>
-          item.code
-            ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
-            : normalizeText(item.name)
-        }
-        skipAnimation={skipAnimation}
-      />
+      {showCampusFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Sede"
+            placeholder="Sede"
+            items={campuses}
+            value={campuses.find((item) => item.id === selectedCampusId) ?? null}
+            onValueChange={(item) => {
+              setSkipAnimation(false);
+              onCampusChange(item ? item.id : null);
+            }}
+            itemToString={(item) =>
+              item.code
+                ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
+                : normalizeText(item.name)
+            }
+            clearable
+          />
+        </div>
+      )}
 
-      <FilterCombobox
-        label="Carrera"
-        value={selectedCareerProgramId?.toString() || ""}
-        placeholder="Carrera"
-        items={careerPrograms}
-        onChange={(val) => {
-          setSkipAnimation(false);
-          onCareerProgramChange(val ? parseInt(val) : null);
-        }}
-        isVisible={showCareerFilter}
-        itemLabel={(item) =>
-          item.code
-            ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
-            : normalizeText(item.name)
-        }
-        skipAnimation={skipAnimation}
-      />
+      {showCareerFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Carrera"
+            placeholder="Carrera"
+            items={careerPrograms}
+            value={careerPrograms.find((item) => item.id === selectedCareerProgramId) ?? null}
+            onValueChange={(item) => {
+              setSkipAnimation(false);
+              onCareerProgramChange(item ? item.id : null);
+            }}
+            itemToString={(item) =>
+              item.code
+                ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
+                : normalizeText(item.name)
+            }
+            clearable
+          />
+        </div>
+      )}
 
-      <FilterCombobox
-        label="Plan"
-        value={selectedPlanId?.toString() || ""}
-        placeholder="Plan de estudios"
-        items={plans}
-        onChange={(val) => {
-          setSkipAnimation(false);
-          onPlanChange(val ? parseInt(val) : null);
-        }}
-        isVisible={showPlanFilter}
-        itemLabel={(item) =>
-          item.external_plan_id !== undefined
-            ? `${item.external_plan_id}: ${removePlanPrefixFromName(item.name, item.external_plan_id)}`
-            : normalizeText(item.name)
-        }
-        skipAnimation={skipAnimation}
-      />
+      {showPlanFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Plan"
+            placeholder="Plan de estudios"
+            items={plans}
+            value={plans.find((item) => item.id === selectedPlanId) ?? null}
+            onValueChange={(item) => {
+              setSkipAnimation(false);
+              onPlanChange(item ? item.id : null);
+            }}
+            itemToString={(item) =>
+              item.external_plan_id !== undefined
+                ? `${item.external_plan_id}: ${removePlanPrefixFromName(item.name, item.external_plan_id)}`
+                : normalizeText(item.name)
+            }
+            clearable
+          />
+        </div>
+      )}
     </FiltersPanel>
   );
 }

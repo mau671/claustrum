@@ -1,19 +1,3 @@
-import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { useRef } from "react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Combobox,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxPopup,
-  ComboboxTrigger,
-  ComboboxTriggerClear,
-} from "@/components/ui/combobox";
-import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 export const normalizeText = (text: string) =>
@@ -33,8 +17,6 @@ export const truncateText = (text: string, maxLength = 35) => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + "...";
 };
-
-export const SEARCH_ITEM_THRESHOLD = 6;
 
 export type FilterItem = {
   id: number;
@@ -83,6 +65,17 @@ export function parseItemCodeAndName(
   };
 }
 
+export const formatFilterItemLabel = (
+  item: FilterItem,
+  itemLabel?: (item: FilterItem) => string,
+  showCode = false,
+) => {
+  const { code, name } = parseItemCodeAndName(item, itemLabel);
+  if (code) return `${code}: ${name}`;
+  if (showCode && item.code) return `${normalizeText(item.code)}: ${normalizeText(item.name)}`;
+  return name;
+};
+
 export function FilterItemDisplay({
   item,
   itemLabel,
@@ -109,133 +102,4 @@ export function FilterItemDisplay({
   }
 
   return <span className={cn("block min-w-0 truncate text-left", className)}>{name}</span>;
-}
-
-export function FilterCombobox({
-  label,
-  value,
-  placeholder,
-  items,
-  onChange,
-  isVisible,
-  showCode = false,
-  itemLabel,
-  triggerClassName,
-  skipAnimation = false,
-  isLoading = false,
-}: {
-  label?: string;
-  value: string;
-  placeholder: string;
-  items: FilterItem[];
-  onChange: (val: string) => void;
-  isVisible: boolean;
-  showCode?: boolean;
-  itemLabel?: (item: FilterItem) => string;
-  triggerClassName?: string;
-  skipAnimation?: boolean;
-  isLoading?: boolean;
-}) {
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-
-  if (!isVisible) return null;
-
-  const isActuallyLoading = isLoading && items.length === 0;
-  const selectedItem = items.find((item) => item.id.toString() === value) ?? null;
-  const showSearch = items.length >= SEARCH_ITEM_THRESHOLD;
-  const getItemLabel = (item: FilterItem) => {
-    const { code, name } = parseItemCodeAndName(item, itemLabel);
-    if (code) return `${code}: ${name}`;
-    if (showCode && item.code) return `${normalizeText(item.code)}: ${normalizeText(item.name)}`;
-    return name;
-  };
-
-  const triggerText = isActuallyLoading
-    ? `Cargando ${label?.toLowerCase() ?? placeholder.toLowerCase()}...`
-    : selectedItem
-      ? getItemLabel(selectedItem)
-      : placeholder;
-
-  const accessibleTriggerLabel = label ? `${label}: ${triggerText}` : triggerText;
-
-  return (
-    <div
-      className={cn(
-        "relative min-w-0 shrink-0",
-        triggerClassName?.includes("w-full") && "w-full shrink",
-        !skipAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
-      )}
-    >
-      <Combobox
-        items={items}
-        value={selectedItem}
-        onValueChange={(item) => onChange(item ? String(item.id) : "")}
-        itemToStringValue={(item) => getItemLabel(item)}
-      >
-        <ComboboxTrigger
-          ref={triggerRef}
-          aria-label={accessibleTriggerLabel}
-          render={
-            <Button
-              variant="outline"
-              aria-label={accessibleTriggerLabel}
-              disabled={isActuallyLoading}
-              className={cn(
-                "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
-                !!selectedItem && "pe-9",
-                triggerClassName,
-              )}
-            />
-          }
-        >
-          <span
-            className={cn(
-              "block min-w-0 flex-1 truncate text-left",
-              !selectedItem && "text-muted-foreground",
-            )}
-          >
-            {triggerText}
-          </span>
-          {isActuallyLoading ? (
-            <Spinner className="text-muted-foreground size-3.5 shrink-0" />
-          ) : (
-            <HugeiconsIcon icon={UnfoldMoreIcon} size={14} className="-me-1! shrink-0 opacity-60" />
-          )}
-        </ComboboxTrigger>
-        <ComboboxTriggerClear aria-label={`Limpiar ${label?.toLowerCase() ?? placeholder}`} />
-        <ComboboxPopup
-          anchor={triggerRef}
-          aria-label={label ?? placeholder}
-          className="w-[var(--anchor-width)] max-w-[calc(var(--available-width)-1rem)] min-w-[var(--anchor-width)]"
-        >
-          {showSearch && (
-            <div className="border-b p-2">
-              <ComboboxInput
-                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                placeholder={label ? `Buscar ${label.toLowerCase()}...` : "Buscar..."}
-                showTrigger={false}
-                startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
-              />
-            </div>
-          )}
-          <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-          <ComboboxList className="max-h-56 scrollbar-none">
-            {(item) => (
-              <ComboboxItem
-                key={item.id}
-                value={item}
-                onClick={() => {
-                  if (selectedItem?.id === item.id) {
-                    onChange("");
-                  }
-                }}
-              >
-                <FilterItemDisplay item={item} itemLabel={itemLabel} className="w-full text-xs" />
-              </ComboboxItem>
-            )}
-          </ComboboxList>
-        </ComboboxPopup>
-      </Combobox>
-    </div>
-  );
 }

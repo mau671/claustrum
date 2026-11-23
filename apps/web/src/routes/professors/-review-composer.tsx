@@ -1,4 +1,3 @@
-import { Cancel01Icon, Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 
@@ -25,12 +24,10 @@ import {
   ComboboxContent,
   ComboboxEmpty,
   ComboboxGroup,
-  ComboboxInput,
   ComboboxItem,
   ComboboxLabel,
   ComboboxList,
   ComboboxSeparator,
-  ComboboxTrigger,
   ComboboxValue,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
@@ -52,7 +49,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import {
   NumberField,
@@ -63,6 +59,7 @@ import {
 } from "@/components/ui/number-field";
 import { Radio, RadioGroup } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { COMBOBOX_SEARCH_THRESHOLD, SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -254,7 +251,6 @@ export function ReviewComposer({
   const [showReviewExample, setShowReviewExample] = useState(false);
   const comboboxPortalContainerRef = useRef<HTMLDivElement | null>(null);
   const courseAnchorRef = useComboboxAnchor();
-  const termTriggerRef = useRef<HTMLButtonElement | null>(null);
   const tagAnchorRef = useComboboxAnchor();
   const parsedEngagementLevel = Number(engagementLevel);
   const clampedEngagementLevel = Number.isFinite(parsedEngagementLevel)
@@ -424,99 +420,45 @@ export function ReviewComposer({
               Opcional
             </Label>
           </div>
-          <Combobox
+          <SearchableCombobox
+            id="composer-term-trigger"
+            label="Período"
+            placeholder="Seleccionar periodo"
             items={termGroups}
-            value={selectedTerm}
-            onValueChange={(term) => setAcademicTermId(term ? String(term.id) : "")}
-            itemToStringValue={(term) => formatTermNameWithoutYear(term.display_name)}
+            value={selectedTerm as unknown as (typeof termGroups)[number] | null}
+            onValueChange={(term) => {
+              const selected = term as unknown as (typeof termOptions)[number] | null;
+              setAcademicTermId(selected ? String(selected.id) : "");
+            }}
+            itemToString={(group) => group.value}
+            valueToString={(term) =>
+              formatClosedTermLabel(term as unknown as (typeof termOptions)[number])
+            }
+            disabled={termsQuery.isLoading || termOptions.length === 0}
+            loading={termsQuery.isLoading && !selectedTerm}
+            showSearch={termOptions.length >= COMBOBOX_SEARCH_THRESHOLD}
+            clearable
+            emptyText="No se encontraron periodos."
+            container={comboboxPortalContainerRef}
+            contentClassName="w-72 min-w-72"
+            triggerClassName="w-full min-w-0 overflow-hidden px-3"
           >
-            <ComboboxTrigger
-              ref={termTriggerRef}
-              aria-label="Período"
-              render={
-                <Button
-                  id="composer-term-trigger"
-                  variant="outline"
-                  aria-label="Período"
-                  className="w-full min-w-0 justify-between overflow-hidden px-3 font-normal"
-                  disabled={termsQuery.isLoading || termOptions.length === 0}
-                />
-              }
-            >
-              <span
-                className={cn(
-                  "block min-w-0 flex-1 truncate text-left",
-                  !selectedTerm && "text-muted-foreground",
-                )}
-              >
-                {selectedTerm
-                  ? formatClosedTermLabel(selectedTerm)
-                  : termsQuery.isLoading
-                    ? "Cargando periodos..."
-                    : "Seleccionar periodo"}
-              </span>
-              {selectedTerm ? (
-                <button
-                  type="button"
-                  className="text-muted-foreground z-10 -mr-1 flex h-full shrink-0 items-center justify-center p-0.5 opacity-60 transition-opacity hover:opacity-100"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setAcademicTermId("");
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setAcademicTermId("");
-                    }
-                  }}
-                >
-                  <Icon icon={Cancel01Icon} size={16} className="size-4" />
-                  <span className="sr-only">Limpiar periodo seleccionado</span>
-                </button>
-              ) : (
-                <Icon
-                  icon={UnfoldMoreIcon}
-                  size={14}
-                  className="-me-1! size-3.5 shrink-0 opacity-60"
-                />
-              )}
-            </ComboboxTrigger>
-            <ComboboxContent
-              anchor={termTriggerRef}
-              container={comboboxPortalContainerRef}
-              aria-label="Período"
-              className="w-72"
-            >
-              <div className="border-b p-2">
-                <ComboboxInput
-                  className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                  placeholder="Buscar periodo..."
-                  showTrigger={false}
-                  startAddon={<Icon icon={Search01Icon} size={16} />}
-                />
-              </div>
-              <ComboboxEmpty>No se encontraron periodos.</ComboboxEmpty>
-              <ComboboxList className="max-h-56 scrollbar-none">
-                {(group, index) => (
-                  <ComboboxGroup key={group.value} items={group.items}>
-                    <ComboboxLabel>{group.value}</ComboboxLabel>
-                    <ComboboxCollection>
-                      {(term) => (
-                        <ComboboxItem key={term.id} value={term}>
-                          <span className="block min-w-0 flex-1 truncate">
-                            {formatTermNameWithoutYear(term.display_name)}
-                          </span>
-                        </ComboboxItem>
-                      )}
-                    </ComboboxCollection>
-                    {index < termGroups.length - 1 && <ComboboxSeparator />}
-                  </ComboboxGroup>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+            {(group, index) => (
+              <ComboboxGroup key={group.value} items={group.items}>
+                <ComboboxLabel>{group.value}</ComboboxLabel>
+                <ComboboxCollection>
+                  {(term: (typeof termOptions)[number]) => (
+                    <ComboboxItem key={term.id} value={term}>
+                      <span className="block min-w-0 flex-1 truncate">
+                        {formatTermNameWithoutYear(term.display_name)}
+                      </span>
+                    </ComboboxItem>
+                  )}
+                </ComboboxCollection>
+                {index < termGroups.length - 1 && <ComboboxSeparator />}
+              </ComboboxGroup>
+            )}
+          </SearchableCombobox>
         </div>
 
         <div className="space-y-2">

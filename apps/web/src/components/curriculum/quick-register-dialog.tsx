@@ -1,17 +1,10 @@
-import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo, useRef, useId } from "react";
 
-import type { Course, CourseStatus } from "@/lib/types";
+import type { AcademicTerm, Course, CourseStatus } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import {
-  Combobox,
-  ComboboxTrigger,
-  ComboboxContent,
-  ComboboxInput,
-  ComboboxEmpty,
-  ComboboxList,
   ComboboxItem,
   ComboboxGroup,
   ComboboxLabel,
@@ -35,7 +28,6 @@ import {
   DrawerPanel,
   DrawerFooter,
 } from "@/components/ui/drawer";
-import { Icon } from "@/components/ui/icon";
 import { Label } from "@/components/ui/label";
 import {
   NumberField,
@@ -46,6 +38,7 @@ import {
 } from "@/components/ui/number-field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -113,8 +106,6 @@ export function QuickRegisterDialog({
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
   const comboboxPortalContainerRef = useRef<HTMLDivElement>(null);
-  const attemptCourseTriggerRef = useRef<HTMLButtonElement>(null);
-  const progressTermTriggerRef = useRef<HTMLButtonElement>(null);
   const gradeId = useId();
 
   const [gradeInput, setGradeInput] = useState("");
@@ -286,130 +277,55 @@ export function QuickRegisterDialog({
     <div className="w-full max-w-full min-w-0 space-y-6">
       <div className="w-full max-w-full min-w-0">
         <Label>Curso a registrar</Label>
-        <Combobox
+        <SearchableCombobox
+          label="Curso"
+          ariaLabel="Curso a registrar"
+          placeholder="Selecciona un curso"
           items={attemptCourseOptions}
           value={selectedAttemptCourse}
           onValueChange={(target) => setAttemptCourseId(target ? String(target.id) : course.id)}
-          itemToStringValue={formatCourseLabel}
-        >
-          <ComboboxTrigger
-            ref={attemptCourseTriggerRef}
-            className="w-full max-w-full min-w-0"
-            aria-label="Curso a registrar"
-            render={
-              <Button
-                variant="outline"
-                aria-label="Curso a registrar"
-                className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
-                disabled={!isPlaceholderCourse || attemptCourseOptions.length === 0}
-              />
-            }
-          >
-            <span
-              className={cn(
-                "block min-w-0 flex-1 truncate text-left",
-                !selectedAttemptCourse && "text-muted-foreground",
-              )}
-            >
-              {selectedAttemptCourse
-                ? formatCourseLabel(selectedAttemptCourse)
-                : "Selecciona un curso"}
-            </span>
-            <Icon icon={UnfoldMoreIcon} className="-me-1! size-3.5 shrink-0 opacity-60" />
-          </ComboboxTrigger>
-          <ComboboxContent
-            anchor={attemptCourseTriggerRef}
-            container={comboboxPortalContainerRef}
-            aria-label="Curso"
-          >
-            <div className="border-b p-2">
-              <ComboboxInput
-                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                placeholder="Buscar curso..."
-                showTrigger={false}
-                startAddon={<Icon icon={Search01Icon} className="size-4" />}
-              />
-            </div>
-            <ComboboxEmpty>No se encontraron cursos.</ComboboxEmpty>
-            <ComboboxList className="max-h-56 scrollbar-none">
-              {(target) => (
-                <ComboboxItem key={target.id} value={target}>
-                  <span className="block min-w-0 flex-1 truncate">{formatCourseLabel(target)}</span>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+          itemToString={formatCourseLabel}
+          disabled={!isPlaceholderCourse || attemptCourseOptions.length === 0}
+          emptyText="No se encontraron cursos."
+          container={comboboxPortalContainerRef}
+          triggerClassName="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
+        />
       </div>
 
       <div className="w-full max-w-full min-w-0">
         <Label>Periodo</Label>
-        <Combobox
+        <SearchableCombobox
+          label="Período"
+          ariaLabel="Periodo"
+          placeholder={progressTermsQuery.isLoading ? "Cargando..." : "Selecciona un periodo"}
           items={academicTermGroups}
-          value={selectedQuickTerm}
-          onValueChange={(term) => setAcademicTermId(term ? String(term.id) : "")}
-          itemToStringValue={(term) => formatTermNameWithoutYear(term.display_name)}
+          value={selectedQuickTerm as unknown as (typeof academicTermGroups)[number] | null}
+          onValueChange={(term) =>
+            setAcademicTermId(term ? String((term as unknown as AcademicTerm).id) : "")
+          }
+          itemToString={(group) => group.value}
+          valueToString={(term) => formatClosedTermLabel(term as unknown as AcademicTerm)}
+          emptyText="No se encontraron períodos."
+          container={comboboxPortalContainerRef}
+          contentClassName="w-72 min-w-72"
+          triggerClassName="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
         >
-          <ComboboxTrigger
-            ref={progressTermTriggerRef}
-            className="w-full max-w-full min-w-0"
-            aria-label="Periodo"
-            render={
-              <Button
-                variant="outline"
-                aria-label="Periodo"
-                className="mt-2 flex w-full max-w-full min-w-0 justify-between overflow-hidden font-normal"
-              />
-            }
-          >
-            <span
-              className={cn(
-                "block min-w-0 flex-1 truncate text-left",
-                !selectedQuickTerm && "text-muted-foreground",
-              )}
-            >
-              {selectedQuickTerm
-                ? formatClosedTermLabel(selectedQuickTerm)
-                : progressTermsQuery.isLoading
-                  ? "Cargando..."
-                  : "Selecciona un periodo"}
-            </span>
-            <Icon icon={UnfoldMoreIcon} className="-me-1! size-3.5 shrink-0 opacity-60" />
-          </ComboboxTrigger>
-          <ComboboxContent
-            anchor={progressTermTriggerRef}
-            container={comboboxPortalContainerRef}
-            aria-label="Período"
-            className="w-72"
-          >
-            <div className="border-b p-2">
-              <ComboboxInput
-                className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                placeholder="Buscar período..."
-                showTrigger={false}
-                startAddon={<Icon icon={Search01Icon} className="size-4" />}
-              />
-            </div>
-            <ComboboxEmpty>No se encontraron períodos.</ComboboxEmpty>
-            <ComboboxList className="max-h-56 scrollbar-none">
-              {(group, index) => (
-                <ComboboxGroup key={group.value} items={group.items}>
-                  <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
-                  <ComboboxCollection>
-                    {(term) => (
-                      <ComboboxItem key={term.id} value={term}>
-                        <span className="block min-w-0 flex-1 truncate text-xs">
-                          {formatTermNameWithoutYear(term.display_name)}
-                        </span>
-                      </ComboboxItem>
-                    )}
-                  </ComboboxCollection>
-                  {index < academicTermGroups.length - 1 && <ComboboxSeparator />}
-                </ComboboxGroup>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+          {(group, index) => (
+            <ComboboxGroup key={group.value} items={group.items}>
+              <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
+              <ComboboxCollection>
+                {(term) => (
+                  <ComboboxItem key={term.id} value={term}>
+                    <span className="block min-w-0 flex-1 truncate text-xs">
+                      {formatTermNameWithoutYear(term.display_name)}
+                    </span>
+                  </ComboboxItem>
+                )}
+              </ComboboxCollection>
+              {index < academicTermGroups.length - 1 && <ComboboxSeparator />}
+            </ComboboxGroup>
+          )}
+        </SearchableCombobox>
       </div>
 
       <div>

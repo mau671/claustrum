@@ -1,4 +1,4 @@
-import { Search01Icon, UnfoldMoreIcon } from "@hugeicons/core-free-icons";
+import { UnfoldMoreIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState, type ReactNode } from "react";
 
@@ -13,20 +13,14 @@ import type {
 import { FiltersPanel } from "@/components/filters/filters-panel";
 import { Button } from "@/components/ui/button";
 import {
-  Combobox,
   ComboboxCollection,
-  ComboboxContent,
-  ComboboxEmpty,
   ComboboxGroup,
-  ComboboxInput,
   ComboboxItem,
   ComboboxLabel,
-  ComboboxList,
   ComboboxSeparator,
-  ComboboxTrigger,
-  ComboboxTriggerClear,
 } from "@/components/ui/combobox";
 import { Label } from "@/components/ui/label";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -70,12 +64,8 @@ interface ScheduleFiltersProps {
   className?: string;
 }
 
-import {
-  FilterCombobox,
-  SEARCH_ITEM_THRESHOLD,
-  normalizeText,
-  removePlanPrefixFromName,
-} from "@/components/filters/shared-filters";
+import { normalizeText, removePlanPrefixFromName } from "@/components/filters/shared-filters";
+import { COMBOBOX_SEARCH_THRESHOLD } from "@/components/ui/searchable-combobox";
 
 export function ScheduleFilters({
   universities,
@@ -167,63 +157,103 @@ export function ScheduleFilters({
       variant="plain"
       className={cn("w-full", className)}
     >
-      <FilterCombobox
-        label="Universidad"
-        value={selectedUniversityId?.toString() || ""}
-        placeholder="Universidad"
-        items={universities}
-        onChange={(val) => onUniversityChange(val ? parseInt(val) : null)}
-        isVisible={showUniversityFilter}
-        skipAnimation={skipUniversityAnimation}
-      />
+      {showUniversityFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipUniversityAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Universidad"
+            placeholder="Universidad"
+            items={universities}
+            value={universities.find((item) => item.id === selectedUniversityId) ?? null}
+            onValueChange={(item) => onUniversityChange(item ? item.id : null)}
+            itemToString={(item) => item.name}
+            clearable
+            triggerClassName="sm:max-w-[360px] sm:min-w-[240px]"
+          />
+        </div>
+      )}
 
-      <FilterCombobox
-        label="Sede"
-        value={selectedCampusId?.toString() || ""}
-        placeholder="Sede"
-        items={campuses}
-        onChange={(val) => onCampusChange(val ? parseInt(val) : null)}
-        isVisible={showCampusFilter}
-        itemLabel={(item) =>
-          item.code
-            ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
-            : normalizeText(item.name)
-        }
-        skipAnimation={skipCampusAnimation}
-        isLoading={isLoadingCampuses}
-      />
+      {showCampusFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipCampusAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Sede"
+            placeholder="Sede"
+            items={campuses}
+            value={campuses.find((item) => item.id === selectedCampusId) ?? null}
+            onValueChange={(item) => onCampusChange(item ? item.id : null)}
+            itemToString={(item) =>
+              item.code
+                ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
+                : normalizeText(item.name)
+            }
+            loading={isLoadingCampuses && campuses.length === 0}
+            disabled={isLoadingCampuses && campuses.length === 0}
+            clearable
+            triggerClassName="sm:max-w-[360px] sm:min-w-[240px]"
+          />
+        </div>
+      )}
 
-      <FilterCombobox
-        label="Carrera"
-        value={selectedCareerId?.toString() || ""}
-        placeholder="Carrera"
-        items={careers}
-        onChange={(val) => onCareerChange(val ? parseInt(val) : null)}
-        isVisible={showCareerFilter}
-        itemLabel={(item) =>
-          item.code
-            ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
-            : normalizeText(item.name)
-        }
-        skipAnimation={skipGroupsAnimation}
-        isLoading={isLoadingCareers}
-      />
+      {showCareerFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipGroupsAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Carrera"
+            placeholder="Carrera"
+            items={careers}
+            value={careers.find((item) => item.id === selectedCareerId) ?? null}
+            onValueChange={(item) => onCareerChange(item ? item.id : null)}
+            itemToString={(item) =>
+              item.code
+                ? `${normalizeText(item.code)}: ${normalizeText(item.name)}`
+                : normalizeText(item.name)
+            }
+            loading={isLoadingCareers && careers.length === 0}
+            disabled={isLoadingCareers && careers.length === 0}
+            clearable
+            triggerClassName="sm:max-w-[360px] sm:min-w-[240px]"
+          />
+        </div>
+      )}
 
-      <FilterCombobox
-        label="Plan"
-        value={selectedPlanId?.toString() || ""}
-        placeholder="Plan de estudios"
-        items={plans}
-        onChange={(val) => onPlanChange(val ? parseInt(val) : null)}
-        isVisible={showPlanFilter}
-        itemLabel={(item) =>
-          item.external_plan_id !== undefined
-            ? `${item.external_plan_id}: ${removePlanPrefixFromName(item.name, item.external_plan_id)}`
-            : normalizeText(item.name)
-        }
-        skipAnimation={skipGroupsAnimation}
-        isLoading={isLoadingPlans}
-      />
+      {showPlanFilter && (
+        <div
+          className={cn(
+            "relative min-w-0 shrink-0",
+            !skipGroupsAnimation && "animate-in fade-in-0 slide-in-from-left-2 duration-300",
+          )}
+        >
+          <SearchableCombobox
+            label="Plan"
+            placeholder="Plan de estudios"
+            items={plans}
+            value={plans.find((item) => item.id === selectedPlanId) ?? null}
+            onValueChange={(item) => onPlanChange(item ? item.id : null)}
+            itemToString={(item) =>
+              item.external_plan_id !== undefined
+                ? `${item.external_plan_id}: ${removePlanPrefixFromName(item.name, item.external_plan_id)}`
+                : normalizeText(item.name)
+            }
+            loading={isLoadingPlans && plans.length === 0}
+            disabled={isLoadingPlans && plans.length === 0}
+            clearable
+            triggerClassName="sm:max-w-[360px] sm:min-w-[240px]"
+          />
+        </div>
+      )}
 
       {showTermFilter && (
         <div
@@ -252,82 +282,36 @@ export function ScheduleFilters({
               )}
             </Button>
           ) : (
-            <Combobox
+            <SearchableCombobox
+              label="Período académico"
+              placeholder="Período académico"
               items={termGroups}
-              value={selectedTerm}
-              onValueChange={(term) => onTermChange(term ? term.id : null)}
-              itemToStringValue={(term) => formatTermNameWithoutYear(term.display_name)}
+              value={selectedTerm as unknown as (typeof termGroups)[number] | null}
+              onValueChange={(term) =>
+                onTermChange((term as unknown as AcademicTerm | null)?.id ?? null)
+              }
+              itemToString={(group) => group.value}
+              valueToString={(term) => formatClosedTermLabel(term as unknown as AcademicTerm)}
+              showSearch={terms.length >= COMBOBOX_SEARCH_THRESHOLD}
+              clearable
+              triggerClassName="sm:max-w-[360px] sm:min-w-[240px]"
             >
-              <ComboboxTrigger
-                aria-label={
-                  selectedTerm
-                    ? `Período académico: ${formatClosedTermLabel(selectedTerm)}`
-                    : "Período académico"
-                }
-                render={
-                  <Button
-                    variant="outline"
-                    aria-label={
-                      selectedTerm
-                        ? `Período académico: ${formatClosedTermLabel(selectedTerm)}`
-                        : "Período académico"
-                    }
-                    className={cn(
-                      "h-8 w-full min-w-0 justify-between rounded-lg text-xs font-normal sm:max-w-[360px] sm:min-w-[240px]",
-                      !!selectedTerm && "pe-9",
+              {(group, index) => (
+                <ComboboxGroup key={group.value} items={group.items}>
+                  <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
+                  <ComboboxCollection>
+                    {(term) => (
+                      <ComboboxItem key={term.id} value={term}>
+                        <span className="block w-full min-w-0 truncate text-xs">
+                          {formatTermNameWithoutYear(term.display_name)}
+                        </span>
+                      </ComboboxItem>
                     )}
-                  />
-                }
-              >
-                <span
-                  className={cn(
-                    "block min-w-0 flex-1 truncate text-left",
-                    !selectedTerm && "text-muted-foreground",
-                  )}
-                >
-                  {selectedTerm ? formatClosedTermLabel(selectedTerm) : "Período académico"}
-                </span>
-                <HugeiconsIcon
-                  icon={UnfoldMoreIcon}
-                  size={14}
-                  className="-me-1! shrink-0 opacity-60"
-                />
-              </ComboboxTrigger>
-              <ComboboxTriggerClear aria-label="Limpiar período académico" />
-              <ComboboxContent
-                aria-label="Período académico"
-                className="w-(--anchor-width) min-w-(--anchor-width)"
-              >
-                {terms.length >= SEARCH_ITEM_THRESHOLD && (
-                  <div className="border-b p-2">
-                    <ComboboxInput
-                      className="rounded-md before:rounded-[calc(var(--radius-md)-1px)]"
-                      placeholder="Buscar período..."
-                      showTrigger={false}
-                      startAddon={<HugeiconsIcon icon={Search01Icon} size={16} />}
-                    />
-                  </div>
-                )}
-                <ComboboxEmpty>No se encontraron resultados.</ComboboxEmpty>
-                <ComboboxList className="max-h-56 scrollbar-none">
-                  {(group, index) => (
-                    <ComboboxGroup key={group.value} items={group.items}>
-                      <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
-                      <ComboboxCollection>
-                        {(term) => (
-                          <ComboboxItem key={term.id} value={term}>
-                            <span className="block w-full min-w-0 truncate text-xs">
-                              {formatTermNameWithoutYear(term.display_name)}
-                            </span>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxCollection>
-                      {index < termGroups.length - 1 && <ComboboxSeparator />}
-                    </ComboboxGroup>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+                  </ComboboxCollection>
+                  {index < termGroups.length - 1 && <ComboboxSeparator />}
+                </ComboboxGroup>
+              )}
+            </SearchableCombobox>
           )}
         </div>
       )}

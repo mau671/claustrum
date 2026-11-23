@@ -3,6 +3,7 @@ import {
   ChevronRightIcon,
   File01Icon,
   File02Icon,
+  FileUpIcon,
 } from "@hugeicons/core-free-icons";
 import { useDebouncedCallback } from "@tanstack/react-pacer";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -10,6 +11,8 @@ import { useMemo, useState } from "react";
 
 import type { BrowseEvaluationsParams } from "@/lib/evaluations/api";
 
+import { EvaluationUploadDialog } from "@/components/evaluations/evaluation-upload-dialog";
+import { Button } from "@/components/ui/button";
 import { Icon, MorphIcon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -245,9 +248,11 @@ function groupByYear(terms: EvaluationTermItem[]): { year: string; terms: Evalua
 function CourseGroup({
   course,
   params,
+  onUpload,
 }: {
   course: EvaluationCourseItem;
   params: BrowseEvaluationsParams;
+  onUpload: (course: EvaluationCourseItem) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const termsQuery = useEvaluationTerms(expanded ? course.course_id : null, params);
@@ -255,12 +260,25 @@ function CourseGroup({
 
   return (
     <div className="py-2">
-      <GroupToggle
-        label={`${course.code}: ${course.name}`}
-        expanded={expanded}
-        onToggle={() => setExpanded((value) => !value)}
-        className="py-2 text-sm"
-      />
+      <div className="flex items-center gap-2">
+        <GroupToggle
+          label={`${course.code}: ${course.name}`}
+          expanded={expanded}
+          onToggle={() => setExpanded((value) => !value)}
+          className="min-w-0 flex-1 py-2 text-sm"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground size-8 shrink-0"
+          onClick={() => onUpload(course)}
+          aria-label={`Subir evaluación para ${course.code}`}
+          title="Subir evaluación"
+        >
+          <Icon icon={FileUpIcon} size={16} className="size-4" />
+        </Button>
+      </div>
       {expanded && (
         <div className="border-border/60 mt-1 ml-4 space-y-2 border-l pl-3 sm:ml-5">
           {termsQuery.isLoading ? (
@@ -296,6 +314,7 @@ export function EvaluationsPage() {
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 
+  const [uploadCourse, setUploadCourse] = useState<EvaluationCourseItem | null>(null);
   const [searchTerm, setSearchTerm] = useState(search.q ?? "");
   const [previousQuery, setPreviousQuery] = useState(search.q ?? "");
   if ((search.q ?? "") !== previousQuery) {
@@ -391,9 +410,27 @@ export function EvaluationsPage() {
       ) : (
         <div className="divide-border/60 divide-y">
           {courses.map((course) => (
-            <CourseGroup key={course.course_id} course={course} params={params} />
+            <CourseGroup
+              key={course.course_id}
+              course={course}
+              params={params}
+              onUpload={setUploadCourse}
+            />
           ))}
         </div>
+      )}
+
+      {uploadCourse && (
+        <EvaluationUploadDialog
+          courseId={uploadCourse.course_id}
+          courseCode={uploadCourse.code}
+          courseName={uploadCourse.name}
+          studyPlanId={null}
+          open
+          onOpenChange={(open) => {
+            if (!open) setUploadCourse(null);
+          }}
+        />
       )}
     </div>
   );

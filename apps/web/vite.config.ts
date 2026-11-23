@@ -8,25 +8,6 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 
-/**
- * Copies the PDFium WebAssembly binary shipped by `@embedpdf/pdfium` into the
- * public directory so the PDF viewer loads it from our own origin instead of a
- * third-party CDN. Keeps the 4.6 MB binary out of version control.
- */
-function copyPdfiumWasm(): Plugin {
-  const publicDir = resolve(import.meta.dirname, "public");
-  const target = resolve(publicDir, "pdfium.wasm");
-
-  return {
-    name: "copy-pdfium-wasm",
-    buildStart() {
-      if (existsSync(target)) return;
-      const source = fileURLToPath(import.meta.resolve("@embedpdf/pdfium/pdfium.wasm"));
-      copyFileSync(source, target);
-    },
-  };
-}
-
 function copyTakumiWasm(): Plugin {
   const publicDir = resolve(import.meta.dirname, "public");
   const target = resolve(publicDir, "takumi_wasm_bg.wasm");
@@ -78,7 +59,6 @@ export default defineConfig({
     "import.meta.url": JSON.stringify("https://claustrum.maugp.com/worker.js"),
   },
   plugins: [
-    copyPdfiumWasm(),
     copyTakumiWasm(),
     {
       name: "fix-cloudflare-create-require",

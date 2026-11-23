@@ -1,13 +1,9 @@
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useParams } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { PdfDocumentViewer } from "@/components/pdf-document-viewer";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
-import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { getEvaluationAnswersDocument, getEvaluationDocument } from "@/lib/evaluations/api";
-import { useBlobUrl } from "@/lib/hooks/use-blob-url";
 
 export function EvaluationViewPage() {
   const { evaluationSlug } = useParams({ from: "/evaluations/view/$evaluationSlug" });
@@ -16,9 +12,7 @@ export function EvaluationViewPage() {
   const isAnswers = Boolean(match?.[2]);
 
   const [blob, setBlob] = useState<Blob | null>(null);
-  const [fileName, setFileName] = useState<string>("evaluacion.pdf");
-  const [error, setError] = useState<string | null>(null);
-  const blobUrl = useBlobUrl(blob);
+  const [fileName, setFileName] = useState("evaluacion.pdf");
 
   const [requestKey, setRequestKey] = useState(`${evaluationId}:${String(isAnswers)}`);
   const currentRequestKey = `${evaluationId}:${String(isAnswers)}`;
@@ -26,12 +20,7 @@ export function EvaluationViewPage() {
     setRequestKey(currentRequestKey);
     setBlob(null);
     setFileName("evaluacion.pdf");
-    setError(null);
   }
-
-  const invalidUrl = evaluationId === null;
-  const errorMessage = invalidUrl ? "URL inválida" : error;
-  const isLoading = !invalidUrl && !errorMessage && blob === null;
 
   useEffect(() => {
     if (!evaluationId) return;
@@ -44,12 +33,13 @@ export function EvaluationViewPage() {
         const result = isAnswers
           ? await getEvaluationAnswersDocument(id)
           : await getEvaluationDocument(id);
-        if (cancelled) return;
-        setBlob(result.blob);
-        setFileName(result.fileName);
-      } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "No se pudo cargar el PDF");
+          setBlob(result.blob);
+          setFileName(result.fileName);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(error instanceof Error ? error.message : "No se pudo cargar el documento");
         }
       }
     }
@@ -61,36 +51,17 @@ export function EvaluationViewPage() {
     };
   }, [evaluationId, isAnswers]);
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <Spinner className="text-muted-foreground size-8" />
-        <p className="text-muted-foreground text-sm">Cargando documento…</p>
-      </div>
-    );
-  }
-
-  if (errorMessage || !blobUrl) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
-        <p className="text-destructive text-sm">
-          {errorMessage ?? "No se pudo cargar el documento"}
-        </p>
-        <Button variant="outline" onClick={() => window.history.back()}>
-          <Icon icon={ArrowLeft01Icon} className="mr-2 size-4" />
-          Volver
-        </Button>
-      </div>
-    );
-  }
+  const source = useMemo(
+    () => (blob ? new File([blob], fileName, { type: "application/pdf" }) : null),
+    [blob, fileName],
+  );
 
   return (
-    <div className="flex h-dvh min-h-0 flex-1 flex-col p-3 md:h-[calc(100dvh-var(--header-height))] md:flex-none md:p-4">
+    <div className="flex h-dvh min-h-0 flex-1 flex-col md:h-[calc(100dvh-var(--header-height))] md:flex-none">
       <PdfDocumentViewer
-        blobUrl={blobUrl}
-        fileName={fileName}
+        blobUrl={source}
         onBack={() => window.history.back()}
-        className="min-h-0 rounded-xl border shadow-xs"
+        className="min-h-0 flex-1"
       />
     </div>
   );

@@ -14,10 +14,10 @@
           11,
           45
         ],
-        "count": 15,
+        "count": 16,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (96.2) with clear separation from second candidate (90.9)."
+        "last_reason": "Very high fuzzy match (96.2) with clear separation from second candidate (92.6)."
       },
       "FINANCIERA": {
         "raw_examples": [
@@ -29,10 +29,10 @@
           11,
           45
         ],
-        "count": 15,
+        "count": 16,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (96.2) with clear separation from second candidate (90.9)."
+        "last_reason": "Very high fuzzy match (96.2) with clear separation from second candidate (92.6)."
       },
       "ADMINISTRACION FINANCIERA 2": {
         "raw_examples": [
@@ -45,6 +45,18 @@
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (96.2) with clear separation from second candidate (90.9)."
+      },
+      "ADMINISTRACION FINANCIERA 1": {
+        "raw_examples": [
+          "Administraci\u00f3n financiera 1"
+        ],
+        "professor_ids": [
+          11
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Very high fuzzy match (96.2) with clear separation from second candidate (92.6)."
       }
     }
   },
@@ -103,9 +115,11 @@
           486,
           490,
           506,
-          501
+          501,
+          496,
+          485
         ],
-        "count": 520,
+        "count": 527,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -137,9 +151,11 @@
           486,
           490,
           506,
-          501
+          501,
+          496,
+          485
         ],
-        "count": 434,
+        "count": 441,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -171,9 +187,11 @@
           486,
           490,
           506,
-          501
+          501,
+          496,
+          485
         ],
-        "count": 414,
+        "count": 421,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -207,12 +225,14 @@
           "CDI"
         ],
         "professor_ids": [
-          513
+          513,
+          487,
+          517
         ],
-        "count": 40,
+        "count": 56,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 121.0 vs 113.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, course taught by professors with EM context, professor history."
+        "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
       },
       "CALCULO DIFERENCIA E INTEGRAL": {
         "raw_examples": [
@@ -465,6 +485,18 @@
         "last_method": "openrouter",
         "last_confidence": "medium",
         "last_reason": "Se interpreta como primer curso de c\u00e1lculo; coincide con el curso de historial C\u00c1LCULO DIFERENCIAL E INTEGRAL, af\u00edn al prefijo dominante MA."
+      },
+      "CALCULO DIFERENCIAL E INTEGRAL CON IPADS": {
+        "raw_examples": [
+          "C\u00e1lculo diferencial e integral con ipads"
+        ],
+        "professor_ids": [
+          485
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix MA, course taught by professors with EM/MA context, professor history."
       }
     }
   },
@@ -593,7 +625,7 @@
           67,
           11
         ],
-        "count": 33,
+        "count": 38,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -609,7 +641,7 @@
           67,
           11
         ],
-        "count": 35,
+        "count": 40,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -633,7 +665,7 @@
         "professor_ids": [
           59
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 88.0 vs 69.9: matching level 1, course taught by professors with AM context, professor history."
@@ -652,13 +684,14 @@
       },
       "ADMINISTRACION FINANCIERA 1": {
         "raw_examples": [
-          "Administraci\u00f3n Financiera 1"
+          "Administraci\u00f3n Financiera 1",
+          "Administraci\u00f3n financiera 1"
         ],
         "professor_ids": [
           59,
           11
         ],
-        "count": 6,
+        "count": 7,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, course taught by professors with AM context, professor history."
@@ -702,12 +735,13 @@
           517,
           754,
           506,
-          501
+          501,
+          519
         ],
-        "count": 408,
+        "count": 414,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match with dominant department prefix (MA)."
+        "last_reason": "Exact normalized course name match."
       },
       "DIFERENCIALES": {
         "raw_examples": [
@@ -727,12 +761,13 @@
           517,
           754,
           506,
-          501
+          501,
+          519
         ],
-        "count": 353,
+        "count": 358,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match with dominant department prefix (MA)."
+        "last_reason": "Exact normalized course name match."
       },
       "ED": {
         "raw_examples": [
@@ -846,6 +881,30 @@
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (98.0) with clear separation from second candidate (46.2)."
+      },
+      "ECUACIONES DIFERECIALES": {
+        "raw_examples": [
+          "Ecuaciones Difereciales"
+        ],
+        "professor_ids": [
+          519
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Very high fuzzy match (97.9) with clear separation from second candidate (56.6)."
+      },
+      "DIFERECIALES": {
+        "raw_examples": [
+          "DIFERECIALES"
+        ],
+        "professor_ids": [
+          519
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Very high fuzzy match (97.9) with clear separation from second candidate (56.6)."
       }
     }
   },
@@ -910,7 +969,7 @@
           501,
           514
         ],
-        "count": 70,
+        "count": 71,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, learned professor variation, dominant prefix MA, course taught by professors with MA context, professor history."
@@ -1098,10 +1157,10 @@
           512,
           523
         ],
-        "count": 3,
+        "count": 4,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 109.2 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, dominant prefix MA, course taught by professors with MA context, professor history."
+        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, learned professor variation, dominant prefix MA, course taught by professors with MA context, professor history."
       },
       "MATEMATICA BASICA PARA ADMINISTRACION AE": {
         "raw_examples": [
@@ -1128,10 +1187,10 @@
           512,
           523
         ],
-        "count": 2,
+        "count": 3,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 109.2 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, dominant prefix MA, course taught by professors with MA context, professor history."
+        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, learned professor variation, dominant prefix MA, course taught by professors with MA context, professor history."
       },
       "MATEMATICA BASICA PARA ADMI": {
         "raw_examples": [
@@ -1198,9 +1257,10 @@
           523,
           493,
           810,
-          525
+          525,
+          519
         ],
-        "count": 61,
+        "count": 69,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
@@ -1225,10 +1285,10 @@
           490,
           501
         ],
-        "count": 32,
+        "count": 33,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
+        "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, course taught by professors with EM context, professor history."
       },
       "ALGEBRA": {
         "raw_examples": [
@@ -1250,10 +1310,10 @@
           490,
           501
         ],
-        "count": 78,
+        "count": 79,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
+        "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, course taught by professors with EM context, professor history."
       },
       "LINEAL": {
         "raw_examples": [
@@ -1272,10 +1332,10 @@
           490,
           501
         ],
-        "count": 34,
+        "count": 35,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
+        "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, course taught by professors with EM context, professor history."
       },
       "ALGEBRAL LINEAL": {
         "raw_examples": [
@@ -1425,12 +1485,13 @@
         "professor_ids": [
           107,
           491,
-          490
+          490,
+          520
         ],
-        "count": 24,
+        "count": 28,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
+        "last_reason": "Contextual score 139.0 vs 120.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
       },
       "PROBABIILIDAD": {
         "raw_examples": [
@@ -2428,10 +2489,10 @@
           328,
           327
         ],
-        "count": 124,
+        "count": 126,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, professor history."
+        "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history."
       },
       "ORGANIZACION": {
         "raw_examples": [
@@ -2581,7 +2642,7 @@
           328,
           327
         ],
-        "count": 164,
+        "count": 170,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix IC, course taught by professors with IC context, professor history."
@@ -2692,10 +2753,10 @@
           327,
           416
         ],
-        "count": 83,
+        "count": 85,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (96.6) with clear separation from second candidate (93.3)."
+        "last_reason": "Exact normalized course name match."
       },
       "COMPUTADORES": {
         "raw_examples": [
@@ -2711,10 +2772,10 @@
           327,
           416
         ],
-        "count": 70,
+        "count": 72,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (96.6) with clear separation from second candidate (93.3)."
+        "last_reason": "Exact normalized course name match."
       },
       "ARQUI": {
         "raw_examples": [
@@ -2817,12 +2878,13 @@
           535,
           540,
           543,
-          96
+          96,
+          527
         ],
-        "count": 127,
+        "count": 129,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 127.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix QU, course taught by professors with QU context, professor history."
+        "last_reason": "Contextual score 149.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "QUIMICA": {
         "raw_examples": [
@@ -2834,12 +2896,13 @@
           535,
           540,
           543,
-          96
+          96,
+          527
         ],
-        "count": 150,
+        "count": 152,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 127.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix QU, course taught by professors with QU context, professor history."
+        "last_reason": "Contextual score 149.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "BASICA": {
         "raw_examples": [
@@ -2851,12 +2914,13 @@
           535,
           543,
           540,
-          96
+          96,
+          527
         ],
-        "count": 63,
-        "last_method": "deterministic",
+        "count": 64,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 149.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "LABORATORIO DE QUIMICA II": {
         "raw_examples": [
@@ -2884,12 +2948,13 @@
         ],
         "professor_ids": [
           723,
-          535
+          535,
+          527
         ],
-        "count": 41,
+        "count": 42,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
+        "last_reason": "Contextual score 129.0 vs 115.1: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "LABORATORIO DE QUIMICA 2": {
         "raw_examples": [
@@ -3050,13 +3115,15 @@
       "LABORATORIO DE QUIMICA BASICA 2": {
         "raw_examples": [
           "Laboratorio de Qu\u00edmica B\u00e1sica 2",
-          "Laboratorio de qu\u00edmica b\u00e1sica 2"
+          "Laboratorio de qu\u00edmica b\u00e1sica 2",
+          "Laboratorio de quimica basica 2"
         ],
         "professor_ids": [
           542,
-          96
+          96,
+          527
         ],
-        "count": 2,
+        "count": 3,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
@@ -3111,9 +3178,10 @@
         "professor_ids": [
           723,
           540,
-          96
+          96,
+          527
         ],
-        "count": 9,
+        "count": 11,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -3125,9 +3193,10 @@
         "professor_ids": [
           723,
           540,
-          96
+          96,
+          527
         ],
-        "count": 8,
+        "count": 10,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -3180,10 +3249,10 @@
           164,
           157
         ],
-        "count": 148,
-        "last_method": "contextual_deterministic",
+        "count": 151,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 142.3: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix CI, course taught by professors with CI context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "INGLES 1": {
         "raw_examples": [
@@ -3269,10 +3338,10 @@
           161,
           157
         ],
-        "count": 103,
-        "last_method": "contextual_deterministic",
+        "count": 105,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 142.3: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix CI, course taught by professors with CI context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "INGLES 2": {
         "raw_examples": [
@@ -3296,7 +3365,7 @@
           161,
           157
         ],
-        "count": 33,
+        "count": 34,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 142.3: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix CI, course taught by professors with CI context, professor history."
@@ -3421,10 +3490,10 @@
           311,
           336
         ],
-        "count": 90,
-        "last_method": "contextual_deterministic",
+        "count": 91,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "LENGUJES DE PROGRAMACION": {
         "raw_examples": [
@@ -3526,12 +3595,13 @@
           723,
           542,
           535,
-          540
+          540,
+          527
         ],
-        "count": 136,
-        "last_method": "deterministic",
+        "count": 139,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 129.0 vs 113.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "QUIMICA": {
         "raw_examples": [
@@ -3543,12 +3613,13 @@
           723,
           542,
           535,
-          540
+          540,
+          527
         ],
-        "count": 142,
-        "last_method": "deterministic",
+        "count": 145,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 129.0 vs 113.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "LABORATORIO DE QUIMICA": {
         "raw_examples": [
@@ -3600,12 +3671,13 @@
         ],
         "professor_ids": [
           723,
-          535
+          535,
+          527
         ],
-        "count": 37,
+        "count": 38,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+        "last_reason": "Contextual score 129.0 vs 113.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
       },
       "LABORATORIO DE QUIMICA 1": {
         "raw_examples": [
@@ -3642,9 +3714,10 @@
           723,
           542,
           535,
-          540
+          540,
+          527
         ],
-        "count": 22,
+        "count": 24,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -3801,7 +3874,8 @@
       "ANALISIS": {
         "raw_examples": [
           "ANALISIS",
-          "An\u00e1lisis"
+          "An\u00e1lisis",
+          "Analisis"
         ],
         "professor_ids": [
           312,
@@ -3811,12 +3885,14 @@
           317,
           319,
           336,
-          626
+          626,
+          291,
+          332
         ],
-        "count": 118,
-        "last_method": "deterministic",
+        "count": 126,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match with dominant department prefix (IC)."
+        "last_reason": "Contextual score 139.0 vs 134.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history."
       },
       "ALGORITMOS": {
         "raw_examples": [
@@ -3831,12 +3907,13 @@
           317,
           319,
           336,
-          626
+          626,
+          291
         ],
-        "count": 112,
+        "count": 118,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match with dominant department prefix (IC)."
+        "last_reason": "Exact normalized course name match."
       },
       "ANALISIS DE ALGORITMO": {
         "raw_examples": [
@@ -4310,12 +4387,14 @@
           208,
           259,
           224,
-          210
+          210,
+          206,
+          1217
         ],
-        "count": 263,
+        "count": 281,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 144.0 vs 72.5: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, course taught by professors with IF context, professor history."
       },
       "GENERAL": {
         "raw_examples": [
@@ -4335,12 +4414,14 @@
           211,
           259,
           224,
-          210
+          210,
+          206,
+          1217
         ],
-        "count": 105,
+        "count": 118,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 144.0 vs 72.5: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, course taught by professors with IF context, professor history."
       },
       "FISICA I": {
         "raw_examples": [
@@ -4362,9 +4443,10 @@
           219,
           205,
           203,
-          210
+          210,
+          206
         ],
-        "count": 65,
+        "count": 67,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -4395,9 +4477,10 @@
           203,
           211,
           208,
-          210
+          210,
+          206
         ],
-        "count": 83,
+        "count": 86,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -4419,12 +4502,14 @@
           219,
           205,
           211,
-          210
+          210,
+          206,
+          1217
         ],
-        "count": 26,
+        "count": 28,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 144.0 vs 72.5: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, course taught by professors with IF context, professor history."
       },
       "FISICA I INTERACTIVO": {
         "raw_examples": [
@@ -4543,6 +4628,18 @@
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 136.9 vs 128.0: class tokens mention course, matching level 1, dominant prefix FI, course taught by professors with FI/IF context, has active offerings."
+      },
+      "FISICA GENERAL": {
+        "raw_examples": [
+          "F\u00edsica General"
+        ],
+        "professor_ids": [
+          1217
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 134.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, course taught by professors with IF context, professor history."
       }
     }
   },
@@ -4570,12 +4667,13 @@
           221,
           216,
           779,
-          210
+          210,
+          206
         ],
-        "count": 192,
+        "count": 205,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 138.4 vs 99.3: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 138.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "FISICA": {
         "raw_examples": [
@@ -4596,12 +4694,13 @@
           221,
           216,
           779,
-          210
+          210,
+          206
         ],
-        "count": 227,
+        "count": 240,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 138.4 vs 99.3: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 138.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "GENERAL": {
         "raw_examples": [
@@ -4615,12 +4714,13 @@
           219,
           216,
           221,
-          779
+          779,
+          206
         ],
-        "count": 49,
+        "count": 52,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 141.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 149.0 vs 141.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO FISICA I": {
         "raw_examples": [
@@ -4651,10 +4751,10 @@
           779,
           210
         ],
-        "count": 46,
+        "count": 49,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 138.4 vs 107.7: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 138.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO DE FISICA I": {
         "raw_examples": [
@@ -4679,10 +4779,10 @@
           221,
           779
         ],
-        "count": 27,
+        "count": 30,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.5 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 131.5 vs 107.7: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO DE FISICA GENERAL I": {
         "raw_examples": [
@@ -4700,10 +4800,10 @@
           216,
           221
         ],
-        "count": 16,
+        "count": 17,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 149.0 vs 141.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO DE FISICA 1": {
         "raw_examples": [
@@ -4728,12 +4828,13 @@
           215,
           205,
           221,
-          216
+          216,
+          206
         ],
-        "count": 26,
+        "count": 28,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.5 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 131.5 vs 99.3: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LANORATORIO FISICA I": {
         "raw_examples": [
@@ -4798,9 +4899,10 @@
           205,
           221,
           216,
-          210
+          210,
+          206
         ],
-        "count": 46,
+        "count": 48,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 138.4 vs 99.3: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -5111,10 +5213,10 @@
           259,
           210
         ],
-        "count": 59,
-        "last_method": "contextual_deterministic",
+        "count": 63,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "GENERAL": {
         "raw_examples": [
@@ -5129,7 +5231,7 @@
           221,
           259
         ],
-        "count": 34,
+        "count": 37,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -5146,7 +5248,7 @@
           208,
           221
         ],
-        "count": 9,
+        "count": 10,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -5166,7 +5268,7 @@
           221,
           210
         ],
-        "count": 23,
+        "count": 24,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -5211,10 +5313,10 @@
           221,
           779
         ],
-        "count": 9,
+        "count": 10,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.5 vs 97.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 131.5 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO": {
         "raw_examples": [
@@ -5236,10 +5338,10 @@
           779,
           210
         ],
-        "count": 87,
+        "count": 91,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 136.0 vs 110.2: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 138.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "FISICA": {
         "raw_examples": [
@@ -5261,10 +5363,10 @@
           779,
           210
         ],
-        "count": 116,
+        "count": 120,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 136.0 vs 110.2: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 138.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "FISICA II": {
         "raw_examples": [
@@ -5422,10 +5524,10 @@
           779,
           210
         ],
-        "count": 29,
+        "count": 30,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 136.0 vs 110.2: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 136.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO DE FISICA GENERAL 2": {
         "raw_examples": [
@@ -5467,10 +5569,10 @@
           216,
           779
         ],
-        "count": 11,
+        "count": 13,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 138.4 vs 97.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 138.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 2, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "LABORATORIO DE FISICA II PRESENCIAL": {
         "raw_examples": [
@@ -5581,7 +5683,7 @@
           224,
           210
         ],
-        "count": 62,
+        "count": 70,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 3, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -5611,10 +5713,10 @@
           224,
           210
         ],
-        "count": 146,
+        "count": 162,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 3, dominant prefix FI, course taught by professors with FI context, professor history."
+        "last_reason": "Contextual score 134.3 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 3, dominant prefix FI, course taught by professors with FI context, professor history."
       },
       "FISICA 3": {
         "raw_examples": [
@@ -5642,7 +5744,7 @@
           224,
           210
         ],
-        "count": 48,
+        "count": 50,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 134.3 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 3, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -5684,7 +5786,7 @@
           259,
           224
         ],
-        "count": 34,
+        "count": 40,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -5733,7 +5835,7 @@
         "professor_ids": [
           216
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 84.5 vs 0.0: class tokens mention course, matching level 3, dominant prefix FI, course taught by professors with FI context, professor history."
@@ -5766,12 +5868,14 @@
           540,
           543,
           820,
-          96
+          96,
+          551,
+          527
         ],
-        "count": 40,
-        "last_method": "contextual_deterministic",
+        "count": 47,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 135.1 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "BASICA": {
         "raw_examples": [
@@ -5781,9 +5885,10 @@
           542,
           540,
           543,
-          820
+          820,
+          551
         ],
-        "count": 27,
+        "count": 33,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -5811,9 +5916,10 @@
           "Quimica Basica 1"
         ],
         "professor_ids": [
-          540
+          540,
+          551
         ],
-        "count": 6,
+        "count": 7,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
@@ -5857,12 +5963,14 @@
       },
       "QUIMICA BASICA L": {
         "raw_examples": [
-          "Qu\u00edmica B\u00e1sica l"
+          "Qu\u00edmica B\u00e1sica l",
+          "Quimica B\u00e1sica l"
         ],
         "professor_ids": [
-          543
+          543,
+          551
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
@@ -5906,15 +6014,29 @@
       "QUIMICA I": {
         "raw_examples": [
           "Qu\u00edmica I",
-          "QU\u00cdMICA I"
+          "QU\u00cdMICA I",
+          "Quimica I"
         ],
         "professor_ids": [
-          96
+          96,
+          527
         ],
-        "count": 4,
+        "count": 5,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 135.1 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+        "last_reason": "Contextual score 135.1 vs 129.9: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+      },
+      "QBII": {
+        "raw_examples": [
+          "QBII"
+        ],
+        "professor_ids": [
+          551
+        ],
+        "count": 2,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 119.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix QU, course taught by professors with QU context, professor history."
       }
     }
   },
@@ -6626,9 +6748,11 @@
           "CA (virtual)"
         ],
         "professor_ids": [
-          398
+          398,
+          238,
+          395
         ],
-        "count": 54,
+        "count": 68,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
@@ -6653,12 +6777,13 @@
         "professor_ids": [
           398,
           238,
-          241
+          241,
+          393
         ],
-        "count": 23,
+        "count": 25,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 107.1 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with MI context, professor history."
+        "last_reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
       },
       "ELECTRICOS": {
         "raw_examples": [
@@ -6750,6 +6875,44 @@
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 107.1 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with MI context, professor history."
+      },
+      "CC": {
+        "raw_examples": [
+          "CC",
+          "Cc"
+        ],
+        "professor_ids": [
+          238,
+          393
+        ],
+        "count": 11,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
+      },
+      "CIRCUITOS CC": {
+        "raw_examples": [
+          "Circuitos CC"
+        ],
+        "professor_ids": [
+          393
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 109.9 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
+      },
+      "CIRCUITOS EN CC": {
+        "raw_examples": [
+          "Circuitos en CC"
+        ],
+        "professor_ids": [
+          393
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
       }
     }
   },
@@ -6800,7 +6963,7 @@
           389,
           395
         ],
-        "count": 45,
+        "count": 46,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix EL, course taught by professors with EL context, professor history."
@@ -6816,7 +6979,7 @@
           389,
           395
         ],
-        "count": 45,
+        "count": 46,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix EL, course taught by professors with EL context, professor history."
@@ -6836,7 +6999,7 @@
           389,
           395
         ],
-        "count": 60,
+        "count": 61,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix EL, course taught by professors with EL context, professor history."
@@ -6980,9 +7143,10 @@
           58,
           41,
           68,
-          72
+          72,
+          10
         ],
-        "count": 167,
+        "count": 169,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -7001,9 +7165,10 @@
           58,
           41,
           68,
-          72
+          72,
+          10
         ],
-        "count": 199,
+        "count": 201,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -7775,10 +7940,10 @@
           434,
           435
         ],
-        "count": 19,
-        "last_method": "deterministic",
+        "count": 25,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix PI, course taught by professors with PI context, professor history."
       },
       "PERSONAL": {
         "raw_examples": [
@@ -7788,7 +7953,7 @@
           434,
           435
         ],
-        "count": 15,
+        "count": 17,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -7810,10 +7975,10 @@
           443,
           433
         ],
-        "count": 42,
-        "last_method": "contextual_deterministic",
+        "count": 43,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 148.0 vs 86.4: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix PI, course taught by professors with PI context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "TRABAJO": {
         "raw_examples": [
@@ -7825,10 +7990,10 @@
           443,
           433
         ],
-        "count": 25,
-        "last_method": "contextual_deterministic",
+        "count": 26,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 148.0 vs 86.4: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix PI, course taught by professors with PI context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "ESTUDIO DEL TRABAJO 2": {
         "raw_examples": [
@@ -7976,7 +8141,7 @@
           1135,
           147
         ],
-        "count": 625,
+        "count": 649,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8003,7 +8168,7 @@
           1135,
           147
         ],
-        "count": 671,
+        "count": 695,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8124,7 +8289,7 @@
           1067,
           147
         ],
-        "count": 255,
+        "count": 259,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8279,7 +8444,7 @@
           1067,
           147
         ],
-        "count": 90,
+        "count": 92,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8299,7 +8464,7 @@
           1067,
           147
         ],
-        "count": 93,
+        "count": 95,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8696,7 +8861,7 @@
           967,
           45
         ],
-        "count": 17,
+        "count": 21,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8712,7 +8877,7 @@
           967,
           45
         ],
-        "count": 17,
+        "count": 21,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -8724,7 +8889,7 @@
         "professor_ids": [
           66
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, professor history."
@@ -8829,10 +8994,10 @@
           161,
           164
         ],
-        "count": 4,
-        "last_method": "deterministic",
+        "count": 5,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.4) with clear separation from second candidate (64.3)."
+        "last_reason": "Contextual score 106.4 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix."
       },
       "FORMACION": {
         "raw_examples": [
@@ -8845,10 +9010,10 @@
           161,
           164
         ],
-        "count": 5,
-        "last_method": "deterministic",
+        "count": 6,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.4) with clear separation from second candidate (64.3)."
+        "last_reason": "Contextual score 106.4 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix."
       },
       "HUMANISTICA": {
         "raw_examples": [
@@ -8863,10 +9028,10 @@
           161,
           164
         ],
-        "count": 15,
-        "last_method": "deterministic",
+        "count": 16,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.4) with clear separation from second candidate (64.3)."
+        "last_reason": "Contextual score 106.4 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix."
       },
       "CENTROS": {
         "raw_examples": [
@@ -8887,7 +9052,7 @@
         "professor_ids": [
           161
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 106.4 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix."
@@ -9014,7 +9179,7 @@
           296,
           308
         ],
-        "count": 7,
+        "count": 8,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -9474,9 +9639,10 @@
           230,
           254,
           371,
-          242
+          242,
+          233
         ],
-        "count": 418,
+        "count": 428,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -9502,9 +9668,10 @@
           230,
           254,
           371,
-          242
+          242,
+          233
         ],
-        "count": 425,
+        "count": 435,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -9521,7 +9688,7 @@
           258,
           230
         ],
-        "count": 31,
+        "count": 39,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -9638,9 +9805,10 @@
         "professor_ids": [
           226,
           234,
-          225
+          225,
+          233
         ],
-        "count": 68,
+        "count": 75,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -9652,9 +9820,10 @@
         "professor_ids": [
           226,
           234,
-          225
+          225,
+          233
         ],
-        "count": 63,
+        "count": 70,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -9689,6 +9858,18 @@
         ],
         "professor_ids": [
           225
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 135.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix MI, course taught by professors with MI context, professor history."
+      },
+      "DIBUJO INDUSTRIAL EN REALIDAD CUALQUIER CURSO": {
+        "raw_examples": [
+          "Dibujo Industrial (en realidad cualquier curso)"
+        ],
+        "professor_ids": [
+          233
         ],
         "count": 1,
         "last_method": "contextual_deterministic",
@@ -9813,9 +9994,13 @@
           486,
           506,
           490,
-          501
+          501,
+          479,
+          485,
+          519,
+          520
         ],
-        "count": 360,
+        "count": 376,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -9849,12 +10034,16 @@
           486,
           506,
           490,
-          501
+          501,
+          479,
+          485,
+          519,
+          520
         ],
-        "count": 565,
-        "last_method": "deterministic",
+        "count": 589,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
       },
       "MATEMATICAS": {
         "raw_examples": [
@@ -9901,9 +10090,11 @@
           486,
           506,
           490,
-          501
+          501,
+          479,
+          485
         ],
-        "count": 216,
+        "count": 224,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
@@ -10201,9 +10392,10 @@
           "MATE"
         ],
         "professor_ids": [
-          506
+          506,
+          479
         ],
-        "count": 2,
+        "count": 3,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
@@ -10495,7 +10687,7 @@
         "professor_ids": [
           494
         ],
-        "count": 4,
+        "count": 6,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact course match with dominant prefix (EM) resolved to latest course code (EM3911)."
@@ -10507,7 +10699,7 @@
         "professor_ids": [
           494
         ],
-        "count": 4,
+        "count": 6,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact course match with dominant prefix (EM) resolved to latest course code (EM3911)."
@@ -10696,7 +10888,7 @@
           93,
           254
         ],
-        "count": 120,
+        "count": 122,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -10710,7 +10902,7 @@
           238,
           254
         ],
-        "count": 69,
+        "count": 71,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -10725,10 +10917,10 @@
           93,
           254
         ],
-        "count": 95,
-        "last_method": "deterministic",
+        "count": 98,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 120.4 vs 117.4: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, course taught by professors with MI context, professor history."
       },
       "MAUINAS ELECTRICAS": {
         "raw_examples": [
@@ -10737,7 +10929,7 @@
         "professor_ids": [
           238
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 120.4 vs 117.4: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, course taught by professors with MI context, professor history."
@@ -10749,7 +10941,7 @@
         "professor_ids": [
           238
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 120.4 vs 117.4: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, course taught by professors with MI context, professor history."
@@ -10833,7 +11025,7 @@
           92,
           94
         ],
-        "count": 11,
+        "count": 13,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 151.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, candidate preserves class-name modifier, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -10860,7 +11052,7 @@
           94,
           100
         ],
-        "count": 261,
+        "count": 275,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -10883,7 +11075,7 @@
           94,
           100
         ],
-        "count": 211,
+        "count": 223,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -10903,10 +11095,10 @@
           94,
           100
         ],
-        "count": 39,
-        "last_method": "deterministic",
+        "count": 43,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 151.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, candidate preserves class-name modifier, dominant prefix CM, course taught by professors with CM context, professor history."
       },
       "METODOS NUMERICOS": {
         "raw_examples": [
@@ -10940,7 +11132,7 @@
           91,
           94
         ],
-        "count": 176,
+        "count": 184,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -10987,7 +11179,7 @@
           84,
           106
         ],
-        "count": 50,
+        "count": 51,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 116.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -11002,7 +11194,7 @@
           84,
           106
         ],
-        "count": 115,
+        "count": 117,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 116.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -11017,7 +11209,7 @@
           84,
           106
         ],
-        "count": 15,
+        "count": 16,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 116.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -11031,10 +11223,10 @@
           84,
           106
         ],
-        "count": 25,
-        "last_method": "deterministic",
+        "count": 26,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (99.1) with clear separation from second candidate (59.3)."
+        "last_reason": "Contextual score 116.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CM, course taught by professors with CM context, professor history."
       },
       "INTRO A LA CIENCIA E INGENIERIA DE LOS MATERIALES": {
         "raw_examples": [
@@ -11487,10 +11679,10 @@
           130,
           131
         ],
-        "count": 198,
-        "last_method": "deterministic",
+        "count": 211,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
       },
       "COSTARRICENSES": {
         "raw_examples": [
@@ -11507,10 +11699,10 @@
           130,
           131
         ],
-        "count": 202,
-        "last_method": "deterministic",
+        "count": 216,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
       },
       "ESTUDIOS COSTARRICENSES": {
         "raw_examples": [
@@ -11541,7 +11733,7 @@
           131,
           115
         ],
-        "count": 15,
+        "count": 17,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
@@ -11556,7 +11748,7 @@
           110,
           131
         ],
-        "count": 8,
+        "count": 9,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 119.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CS, course taught by professors with CS context, professor history."
@@ -11569,7 +11761,7 @@
           113,
           131
         ],
-        "count": 2,
+        "count": 4,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (98.6) with clear separation from second candidate (0.0)."
@@ -11582,7 +11774,7 @@
           113,
           131
         ],
-        "count": 2,
+        "count": 4,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (98.6) with clear separation from second candidate (0.0)."
@@ -11755,7 +11947,7 @@
         "professor_ids": [
           131
         ],
-        "count": 2,
+        "count": 4,
         "last_method": "openrouter",
         "last_confidence": "high",
         "last_reason": "ECR es una abreviatura plausible de Estudios Costarricenses, y el curso aparece en el historial de la profesora como opci\u00f3n principal."
@@ -11870,6 +12062,18 @@
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (98.6) with clear separation from second candidate (34.6)."
+      },
+      "SEMINARIO DE ESTUDIOS COSTARRICENSES SEMESTRE": {
+        "raw_examples": [
+          "Seminario de Estudios Costarricenses Semestre"
+        ],
+        "professor_ids": [
+          131
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
       }
     }
   },
@@ -11889,7 +12093,7 @@
           253,
           252
         ],
-        "count": 20,
+        "count": 21,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 143.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -11904,10 +12108,10 @@
           253,
           252
         ],
-        "count": 63,
-        "last_method": "deterministic",
+        "count": 64,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 143.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix MI, course taught by professors with MI context, professor history."
       },
       "EECTRICIDAD 1": {
         "raw_examples": [
@@ -12001,7 +12205,7 @@
           239,
           241
         ],
-        "count": 44,
+        "count": 45,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -12060,7 +12264,7 @@
           103,
           104
         ],
-        "count": 37,
+        "count": 38,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -12076,7 +12280,7 @@
           103,
           104
         ],
-        "count": 59,
+        "count": 60,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -12827,10 +13031,10 @@
           59,
           71
         ],
-        "count": 29,
+        "count": 32,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, professor history."
+        "last_reason": "Contextual score 135.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, course taught by professors with AM context, professor history."
       },
       "ADMINISTRACION FINANCIERA I": {
         "raw_examples": [
@@ -12858,7 +13062,7 @@
         "professor_ids": [
           59
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, course taught by professors with AM context, professor history."
@@ -12872,10 +13076,10 @@
           67,
           11
         ],
-        "count": 18,
-        "last_method": "deterministic",
+        "count": 20,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, course taught by professors with AM context, professor history."
       },
       "ADMINISTRACION FINANCIERA LL": {
         "raw_examples": [
@@ -12884,7 +13088,7 @@
         "professor_ids": [
           59
         ],
-        "count": 10,
+        "count": 11,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, course taught by professors with AM context, professor history."
@@ -12898,10 +13102,10 @@
           67,
           11
         ],
-        "count": 13,
-        "last_method": "deterministic",
+        "count": 14,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, course taught by professors with AM context, professor history."
       },
       "FINANZAS II": {
         "raw_examples": [
@@ -13127,10 +13331,10 @@
           85,
           98
         ],
-        "count": 96,
-        "last_method": "contextual_deterministic",
+        "count": 104,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, course taught by professors with CM/DM context, has active offerings."
+        "last_reason": "Exact normalized course name match."
       },
       "MATERIALES": {
         "raw_examples": [
@@ -13140,10 +13344,10 @@
           85,
           98
         ],
-        "count": 106,
-        "last_method": "contextual_deterministic",
+        "count": 114,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, course taught by professors with CM/DM context, has active offerings."
+        "last_reason": "Exact normalized course name match."
       },
       "TECNOLOGIA MATERIALES": {
         "raw_examples": [
@@ -13231,7 +13435,7 @@
         "professor_ids": [
           85
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 138.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CM, course taught by professors with CM context, professor history."
@@ -13243,7 +13447,7 @@
         "professor_ids": [
           85
         ],
-        "count": 10,
+        "count": 13,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -13255,7 +13459,7 @@
         "professor_ids": [
           85
         ],
-        "count": 10,
+        "count": 13,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -13267,7 +13471,7 @@
         "professor_ids": [
           85
         ],
-        "count": 10,
+        "count": 13,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -13532,7 +13736,7 @@
           238,
           241
         ],
-        "count": 36,
+        "count": 37,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 141.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 3, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -13545,7 +13749,7 @@
           238,
           241
         ],
-        "count": 57,
+        "count": 58,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 141.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 3, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -13613,9 +13817,10 @@
           85,
           106,
           84,
-          86
+          86,
+          83
         ],
-        "count": 21,
+        "count": 23,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -13628,9 +13833,10 @@
           85,
           106,
           84,
-          86
+          86,
+          83
         ],
-        "count": 21,
+        "count": 23,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -13643,9 +13849,10 @@
           85,
           106,
           84,
-          86
+          86,
+          83
         ],
-        "count": 21,
+        "count": 23,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -13747,12 +13954,13 @@
           112,
           127,
           129,
-          126
+          126,
+          114
         ],
-        "count": 174,
-        "last_method": "contextual_deterministic",
+        "count": 177,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 126.9 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CS, course taught by professors with CS context, has active offerings."
+        "last_reason": "Exact normalized course name match."
       },
       "SEMINARIO DE ETICA": {
         "raw_examples": [
@@ -13959,14 +14167,16 @@
       },
       "SEMINARIO DE ETICA PARA INGENIERIA": {
         "raw_examples": [
-          "Seminario de \u00e9tica para ingenier\u00eda"
+          "Seminario de \u00e9tica para ingenier\u00eda",
+          "Seminario de \u00c9tica para Ingenier\u00eda"
         ],
         "professor_ids": [
           127,
           129,
-          112
+          112,
+          114
         ],
-        "count": 3,
+        "count": 4,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 151.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, candidate preserves class-name modifier, dominant prefix CS, course taught by professors with CS context, professor history."
@@ -14566,12 +14776,13 @@
           129,
           126,
           117,
-          135
+          135,
+          125
         ],
-        "count": 224,
-        "last_method": "contextual_deterministic",
+        "count": 235,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 119.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CS, course taught by professors with CS context, professor history."
+        "last_reason": "Very high fuzzy match (97.8) with clear separation from second candidate (50.6)."
       },
       "SEMINARIO DE ESTUDIOS FILOSOFICOS": {
         "raw_examples": [
@@ -14592,9 +14803,10 @@
           127,
           129,
           126,
-          117
+          117,
+          125
         ],
-        "count": 82,
+        "count": 85,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
@@ -14611,12 +14823,13 @@
           129,
           126,
           117,
-          135
+          135,
+          125
         ],
-        "count": 205,
+        "count": 216,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.9) with clear separation from second candidate (0.0)."
+        "last_reason": "Very high fuzzy match (97.8) with clear separation from second candidate (50.6)."
       },
       "SEMINARIO DE ESTUDIOS FILOSOFICOS E HISTORICOS": {
         "raw_examples": [
@@ -14626,7 +14839,8 @@
           "Seminario de Estudios Filosoficos e Hist\u00f3ricos",
           "Seminario de Estudios Filosoficos e Historicos",
           "Seminario de Estudios Filos\u00f3ficos e hist\u00f3ricos",
-          "Seminario de estudios filos\u00f3ficos e historicos"
+          "Seminario de estudios filos\u00f3ficos e historicos",
+          "Seminario De Estudios Filos\u00f3ficos e Hist\u00f3ricos"
         ],
         "professor_ids": [
           111,
@@ -14634,12 +14848,13 @@
           127,
           112,
           129,
-          126
+          126,
+          125
         ],
-        "count": 42,
+        "count": 48,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (97.8) with clear separation from second candidate (0.0)."
+        "last_reason": "Very high fuzzy match (97.8) with clear separation from second candidate (50.6)."
       },
       "HISTORICOS": {
         "raw_examples": [
@@ -14652,12 +14867,13 @@
           112,
           129,
           126,
-          135
+          135,
+          125
         ],
-        "count": 108,
+        "count": 116,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.9) with clear separation from second candidate (0.0)."
+        "last_reason": "Very high fuzzy match (97.8) with clear separation from second candidate (50.6)."
       },
       "SEMINARIO DE FILOSOFICOS": {
         "raw_examples": [
@@ -15150,7 +15366,7 @@
           579,
           296
         ],
-        "count": 598,
+        "count": 601,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -15177,7 +15393,7 @@
           579,
           296
         ],
-        "count": 429,
+        "count": 432,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -15727,39 +15943,43 @@
       },
       "PRINCIPIOS": {
         "raw_examples": [
-          "PRINCIPIOS"
+          "PRINCIPIOS",
+          "Principios"
         ],
         "professor_ids": [
-          264
+          264,
+          702
         ],
-        "count": 20,
+        "count": 26,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.6) with clear separation from second candidate (43.5)."
+        "last_reason": "Exact normalized course name match."
       },
       "MODELADO": {
         "raw_examples": [
           "MODELADO"
         ],
         "professor_ids": [
-          264
+          264,
+          702
         ],
-        "count": 16,
-        "last_method": "contextual_deterministic",
+        "count": 20,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 125.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, course taught by professors with IC context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "INGENIERIA": {
         "raw_examples": [
           "INGENIERIA"
         ],
         "professor_ids": [
-          264
+          264,
+          702
         ],
-        "count": 8,
+        "count": 12,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.6) with clear separation from second candidate (43.5)."
+        "last_reason": "Exact normalized course name match."
       },
       "PRINCIPIOS DE MODELADOS EN INGENIERIA": {
         "raw_examples": [
@@ -15891,12 +16111,13 @@
           317,
           331,
           308,
-          296
+          296,
+          332
         ],
-        "count": 161,
-        "last_method": "deterministic",
+        "count": 173,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, professor history."
       },
       "ED": {
         "raw_examples": [
@@ -15926,7 +16147,7 @@
           331,
           308
         ],
-        "count": 24,
+        "count": 25,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (97.4) with clear separation from second candidate (36.0)."
@@ -15943,7 +16164,7 @@
           331,
           308
         ],
-        "count": 26,
+        "count": 27,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Very high fuzzy match (97.4) with clear separation from second candidate (36.0)."
@@ -16598,7 +16819,7 @@
           379,
           396
         ],
-        "count": 77,
+        "count": 81,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -16620,10 +16841,10 @@
           412,
           396
         ],
-        "count": 98,
-        "last_method": "deterministic",
+        "count": 106,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, learned professor variation, dominant prefix EL, course taught by professors with EL/MP context, professor history."
       },
       "ELEMENTOS ACTIVOS PRESENCIAL": {
         "raw_examples": [
@@ -17003,10 +17224,10 @@
           299,
           339
         ],
-        "count": 69,
+        "count": 77,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 156.0 vs 110.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, has active offerings."
+        "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, professor history."
       },
       "SOFTWARE": {
         "raw_examples": [
@@ -17022,7 +17243,7 @@
           299,
           339
         ],
-        "count": 41,
+        "count": 45,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -17112,10 +17333,10 @@
           442,
           438
         ],
-        "count": 29,
-        "last_method": "deterministic",
+        "count": 31,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 138.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix PI, course taught by professors with PI context, professor history."
       },
       "CALIDAD": {
         "raw_examples": [
@@ -17129,10 +17350,10 @@
           442,
           438
         ],
-        "count": 33,
-        "last_method": "deterministic",
+        "count": 37,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 138.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix PI, course taught by professors with PI context, professor history."
       },
       "CALIDAS": {
         "raw_examples": [
@@ -17154,7 +17375,7 @@
         "professor_ids": [
           438
         ],
-        "count": 2,
+        "count": 3,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 138.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix PI, course taught by professors with PI context, professor history."
@@ -17290,7 +17511,7 @@
           501,
           514
         ],
-        "count": 87,
+        "count": 89,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -17320,10 +17541,10 @@
           501,
           514
         ],
-        "count": 158,
-        "last_method": "deterministic",
+        "count": 161,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
       },
       "MATE DISCRETA": {
         "raw_examples": [
@@ -17347,7 +17568,7 @@
           506,
           501
         ],
-        "count": 28,
+        "count": 29,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
@@ -17577,10 +17798,10 @@
           10,
           9
         ],
-        "count": 9,
-        "last_method": "contextual_deterministic",
+        "count": 11,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "ADMINISTRACION": {
         "raw_examples": [
@@ -17592,10 +17813,10 @@
           10,
           9
         ],
-        "count": 11,
-        "last_method": "contextual_deterministic",
+        "count": 13,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "EMPRESAS": {
         "raw_examples": [
@@ -17605,7 +17826,7 @@
           10,
           9
         ],
-        "count": 4,
+        "count": 6,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18151,9 +18372,12 @@
           811,
           525,
           506,
-          501
+          501,
+          479,
+          496,
+          520
         ],
-        "count": 64,
+        "count": 74,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18178,9 +18402,12 @@
           811,
           525,
           506,
-          501
+          501,
+          479,
+          496,
+          520
         ],
-        "count": 82,
+        "count": 94,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18416,7 +18643,7 @@
           712,
           396
         ],
-        "count": 36,
+        "count": 42,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18433,7 +18660,7 @@
           712,
           396
         ],
-        "count": 42,
+        "count": 48,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18470,7 +18697,7 @@
           391,
           393
         ],
-        "count": 10,
+        "count": 11,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 149.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, learned professor variation, dominant prefix EL, course taught by professors with EL context, professor history."
@@ -18508,10 +18735,10 @@
           393,
           382
         ],
-        "count": 25,
+        "count": 27,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact course match with dominant prefix (EL) resolved to latest course code (EL2113)."
+        "last_reason": "Exact normalized course name match."
       },
       "CORRIENTE": {
         "raw_examples": [
@@ -18529,10 +18756,10 @@
           379,
           392
         ],
-        "count": 88,
-        "last_method": "contextual_deterministic",
+        "count": 90,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix EL, course taught by professors with EL context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "CONTINUA": {
         "raw_examples": [
@@ -18550,10 +18777,10 @@
           379,
           392
         ],
-        "count": 88,
-        "last_method": "contextual_deterministic",
+        "count": 90,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix EL, course taught by professors with EL context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "ELECTRICOS": {
         "raw_examples": [
@@ -18566,10 +18793,10 @@
           393,
           382
         ],
-        "count": 13,
+        "count": 14,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact course match with dominant prefix (EL) resolved to latest course code (EL2113)."
+        "last_reason": "Exact normalized course name match."
       },
       "CIRCUITOS CORRIENTE CONTINUA": {
         "raw_examples": [
@@ -18621,10 +18848,10 @@
           425,
           396
         ],
-        "count": 40,
-        "last_method": "deterministic",
+        "count": 42,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 131.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix EL, course taught by professors with EL/MP context, professor history."
       },
       "CIRCUITOS DISCRETOS TEORIA": {
         "raw_examples": [
@@ -18855,9 +19082,10 @@
           305,
           298,
           316,
-          296
+          296,
+          17
         ],
-        "count": 62,
+        "count": 65,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18870,9 +19098,10 @@
           305,
           298,
           316,
-          296
+          296,
+          17
         ],
-        "count": 62,
+        "count": 65,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -18884,9 +19113,10 @@
         "professor_ids": [
           305,
           298,
-          316
+          316,
+          291
         ],
-        "count": 56,
+        "count": 62,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 125.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix IC, course taught by professors with IC context, professor history."
@@ -18987,10 +19217,10 @@
           228,
           242
         ],
-        "count": 37,
-        "last_method": "deterministic",
+        "count": 42,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 142.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, learned professor variation, dominant prefix MI, course taught by professors with MI context, professor history."
       },
       "MANUFACTURA": {
         "raw_examples": [
@@ -19000,10 +19230,10 @@
           228,
           242
         ],
-        "count": 35,
-        "last_method": "deterministic",
+        "count": 39,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 142.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, learned professor variation, dominant prefix MI, course taught by professors with MI context, professor history."
       },
       "PROCESOS DE MANUFACTURA SOLDADURA": {
         "raw_examples": [
@@ -19025,7 +19255,7 @@
         "professor_ids": [
           242
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 127.7 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -19037,7 +19267,7 @@
         "professor_ids": [
           242
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 127.7 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -19053,7 +19283,7 @@
         "professor_ids": [
           242
         ],
-        "count": 7,
+        "count": 8,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 142.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, learned professor variation, dominant prefix MI, course taught by professors with MI context, professor history."
@@ -19583,10 +19813,10 @@
           446,
           452
         ],
-        "count": 9,
+        "count": 10,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 117.0 vs 92.7: class tokens mention course, all class tokens are explained by course name, matching level 1, course taught by professors with MQ context, has active offerings."
+        "last_reason": "Contextual score 129.0 vs 84.2: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix PI, course taught by professors with PI context, professor history."
       },
       "PROBA 1": {
         "raw_examples": [
@@ -19598,10 +19828,10 @@
           436,
           446
         ],
-        "count": 15,
+        "count": 16,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix PI, course taught by professors with PI context, professor history."
+        "last_reason": "Contextual score 129.0 vs 80.9: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix PI, course taught by professors with PI context, professor history."
       },
       "PROBABILIDAD I": {
         "raw_examples": [
@@ -19724,9 +19954,10 @@
           "ESTADISTICA"
         ],
         "professor_ids": [
-          438
+          438,
+          435
         ],
-        "count": 2,
+        "count": 4,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 131.0 vs 117.9: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix PI, course taught by professors with PI context, professor history."
@@ -19765,10 +19996,10 @@
           442,
           438
         ],
-        "count": 33,
-        "last_method": "contextual_deterministic",
+        "count": 35,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 138.3 vs 113.3: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix PI, course taught by professors with PI context, has active offerings."
+        "last_reason": "Exact normalized course name match."
       },
       "INDUSTRIALES": {
         "raw_examples": [
@@ -19780,7 +20011,7 @@
           435,
           442
         ],
-        "count": 12,
+        "count": 13,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -19793,9 +20024,10 @@
         "professor_ids": [
           435,
           429,
-          442
+          442,
+          436
         ],
-        "count": 6,
+        "count": 7,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 138.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix PI, course taught by professors with PI context, professor history."
@@ -19985,7 +20217,7 @@
           433,
           446
         ],
-        "count": 17,
+        "count": 21,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -19999,7 +20231,7 @@
           433,
           446
         ],
-        "count": 15,
+        "count": 19,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -22298,10 +22530,10 @@
           696,
           1068
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 122.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix CE, course taught by professors with CE context, professor history."
+        "last_reason": "Contextual score 122.0 vs 82.2: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix CE, course taught by professors with CE context, professor history."
       },
       "ARQUI II": {
         "raw_examples": [
@@ -22406,7 +22638,7 @@
           698,
           696
         ],
-        "count": 5,
+        "count": 11,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -22419,7 +22651,7 @@
           698,
           696
         ],
-        "count": 5,
+        "count": 11,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -22432,7 +22664,7 @@
           698,
           696
         ],
-        "count": 5,
+        "count": 11,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -22647,10 +22879,10 @@
           698,
           696
         ],
-        "count": 7,
-        "last_method": "contextual_deterministic",
+        "count": 8,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 135.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CE, course taught by professors with CE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "CIRCUITOS": {
         "raw_examples": [
@@ -22660,10 +22892,10 @@
           698,
           696
         ],
-        "count": 7,
-        "last_method": "contextual_deterministic",
+        "count": 8,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 135.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CE, course taught by professors with CE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "ELECTRICOS": {
         "raw_examples": [
@@ -22673,10 +22905,10 @@
           698,
           696
         ],
-        "count": 6,
-        "last_method": "contextual_deterministic",
+        "count": 7,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 135.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CE, course taught by professors with CE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "LABORATORIO DE CIRCUITOS": {
         "raw_examples": [
@@ -23568,7 +23800,7 @@
         "professor_ids": [
           10
         ],
-        "count": 4,
+        "count": 8,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 147.0 vs 128.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix AE, course taught by professors with AE context, professor history."
@@ -23580,7 +23812,7 @@
         "professor_ids": [
           10
         ],
-        "count": 2,
+        "count": 4,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 137.0 vs 128.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, professor history."
@@ -23745,21 +23977,23 @@
           "Productividad"
         ],
         "professor_ids": [
-          64
+          64,
+          17
         ],
-        "count": 9,
-        "last_method": "contextual_deterministic",
+        "count": 11,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 147.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix AE, course taught by professors with AE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "EMPRESARIAL": {
         "raw_examples": [
           "EMPRESARIAL"
         ],
         "professor_ids": [
-          64
+          64,
+          17
         ],
-        "count": 7,
+        "count": 9,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -24153,7 +24387,7 @@
           393,
           390
         ],
-        "count": 7,
+        "count": 8,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -24166,7 +24400,7 @@
           393,
           390
         ],
-        "count": 6,
+        "count": 7,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -25163,10 +25397,10 @@
           174,
           178
         ],
-        "count": 24,
-        "last_method": "deterministic",
+        "count": 26,
+        "last_method": "openrouter",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (97.4) with clear separation from second candidate (68.3)."
+        "last_reason": "Coincide con APRECIACI\u00d3N DE CINE; 'dine' parece error tipogr\u00e1fico por 'cine'."
       },
       "APRECIACION": {
         "raw_examples": [
@@ -25178,10 +25412,10 @@
           178,
           1161
         ],
-        "count": 70,
-        "last_method": "deterministic",
+        "count": 71,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix SE, course taught by professors with SE context, professor history."
       },
       "A CINE": {
         "raw_examples": [
@@ -25216,7 +25450,7 @@
           174,
           178
         ],
-        "count": 3,
+        "count": 4,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 136.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix SE, course taught by professors with SE context, professor history."
@@ -25301,7 +25535,7 @@
         "professor_ids": [
           696
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 134.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CE, course taught by professors with CE context, professor history."
@@ -25313,7 +25547,7 @@
         "professor_ids": [
           696
         ],
-        "count": 3,
+        "count": 5,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -25325,7 +25559,7 @@
         "professor_ids": [
           696
         ],
-        "count": 2,
+        "count": 3,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -25458,10 +25692,10 @@
           696,
           290
         ],
-        "count": 5,
+        "count": 6,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 138.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix CE, course taught by professors with CE context, professor history."
+        "last_reason": "Contextual score 138.0 vs 106.4: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix CE, course taught by professors with CE context, professor history."
       },
       "DATOS 1": {
         "raw_examples": [
@@ -25514,7 +25748,7 @@
         "professor_ids": [
           696
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 124.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix CE, course taught by professors with CE context, professor history."
@@ -25526,7 +25760,7 @@
         "professor_ids": [
           696
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 124.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix CE, course taught by professors with CE context, professor history."
@@ -25538,7 +25772,7 @@
         "professor_ids": [
           696
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 124.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix CE, course taught by professors with CE context, professor history."
@@ -25798,7 +26032,7 @@
           9,
           60
         ],
-        "count": 3,
+        "count": 4,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix AE, course taught by professors with AE context, professor history."
@@ -25810,7 +26044,7 @@
         "professor_ids": [
           60
         ],
-        "count": 6,
+        "count": 11,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 129.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix AE, course taught by professors with AE context, professor history."
@@ -25931,9 +26165,10 @@
           970,
           42,
           48,
-          45
+          45,
+          751
         ],
-        "count": 15,
+        "count": 18,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -25981,9 +26216,10 @@
           29,
           288,
           465,
-          55
+          55,
+          17
         ],
-        "count": 25,
+        "count": 29,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -25996,9 +26232,10 @@
           29,
           288,
           465,
-          55
+          55,
+          17
         ],
-        "count": 12,
+        "count": 16,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -26224,10 +26461,10 @@
           14,
           1151
         ],
-        "count": 42,
-        "last_method": "contextual_deterministic",
+        "count": 49,
+        "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 148.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix AE, course taught by professors with AE context, professor history."
+        "last_reason": "Exact normalized course name match."
       },
       "ESTADISTICA 1": {
         "raw_examples": [
@@ -26240,7 +26477,7 @@
           15,
           1151
         ],
-        "count": 12,
+        "count": 17,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 148.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix AE, course taught by professors with AE context, professor history."
@@ -26297,24 +26534,27 @@
           53,
           15,
           14,
-          490
+          490,
+          1151
         ],
-        "count": 15,
-        "last_method": "deterministic",
+        "count": 16,
+        "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Exact normalized course name match."
+        "last_reason": "Contextual score 148.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix AE, course taught by professors with AE context, professor history."
       },
       "ESTADISTICA 2": {
         "raw_examples": [
-          "Estad\u00edstica 2"
+          "Estad\u00edstica 2",
+          "Estadistica 2"
         ],
         "professor_ids": [
-          53
+          53,
+          1151
         ],
-        "count": 2,
+        "count": 3,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
-        "last_reason": "Contextual score 149.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix AE, course taught by professors with AE context, professor history."
+        "last_reason": "Contextual score 148.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix AE, course taught by professors with AE context, professor history."
       },
       "ESTADISTICAS II": {
         "raw_examples": [
@@ -26409,10 +26649,10 @@
         "professor_ids": [
           60
         ],
-        "count": 3,
+        "count": 5,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.2) with clear separation from second candidate (78.6)."
+        "last_reason": "Exact normalized course name match."
       },
       "TALENTO": {
         "raw_examples": [
@@ -26421,10 +26661,10 @@
         "professor_ids": [
           60
         ],
-        "count": 3,
+        "count": 5,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.2) with clear separation from second candidate (78.6)."
+        "last_reason": "Exact normalized course name match."
       },
       "HUMANO": {
         "raw_examples": [
@@ -26433,10 +26673,10 @@
         "professor_ids": [
           60
         ],
-        "count": 3,
+        "count": 5,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (98.2) with clear separation from second candidate (78.6)."
+        "last_reason": "Exact normalized course name match."
       },
       "GTH2": {
         "raw_examples": [
@@ -27036,7 +27276,7 @@
           178,
           147
         ],
-        "count": 8,
+        "count": 22,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -27049,7 +27289,7 @@
           178,
           147
         ],
-        "count": 8,
+        "count": 22,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -27144,7 +27384,7 @@
           167,
           1161
         ],
-        "count": 64,
+        "count": 66,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -28284,7 +28524,7 @@
         "professor_ids": [
           395
         ],
-        "count": 4,
+        "count": 5,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 102.7 vs 0.0: matching level 2, dominant prefix EL, course taught by professors with EL context, professor history."
@@ -28897,9 +29137,10 @@
           "LABORATORIO"
         ],
         "professor_ids": [
-          412
+          412,
+          707
         ],
-        "count": 8,
+        "count": 9,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -28909,9 +29150,10 @@
           "ELECTRONICA"
         ],
         "professor_ids": [
-          412
+          412,
+          707
         ],
-        "count": 7,
+        "count": 8,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -28921,9 +29163,10 @@
           "ANALOGICA"
         ],
         "professor_ids": [
-          412
+          412,
+          707
         ],
-        "count": 8,
+        "count": 9,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -29403,7 +29646,7 @@
         "professor_ids": [
           11
         ],
-        "count": 11,
+        "count": 15,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -29415,7 +29658,7 @@
         "professor_ids": [
           11
         ],
-        "count": 11,
+        "count": 15,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -29674,7 +29917,7 @@
         "professor_ids": [
           11
         ],
-        "count": 5,
+        "count": 9,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -29686,7 +29929,7 @@
         "professor_ids": [
           11
         ],
-        "count": 6,
+        "count": 10,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -32785,10 +33028,10 @@
           340,
           296
         ],
-        "count": 5,
+        "count": 13,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (97.7) with clear separation from second candidate (40.8)."
+        "last_reason": "Very high fuzzy match (97.7) with clear separation from second candidate (53.7)."
       },
       "SEGURIDAD": {
         "raw_examples": [
@@ -32800,10 +33043,10 @@
           340,
           296
         ],
-        "count": 12,
+        "count": 22,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (97.7) with clear separation from second candidate (40.8)."
+        "last_reason": "Very high fuzzy match (97.7) with clear separation from second candidate (53.7)."
       },
       "SOFTWARE": {
         "raw_examples": [
@@ -32815,10 +33058,10 @@
           340,
           296
         ],
-        "count": 12,
+        "count": 22,
         "last_method": "deterministic",
         "last_confidence": "high",
-        "last_reason": "Very high fuzzy match (97.7) with clear separation from second candidate (40.8)."
+        "last_reason": "Very high fuzzy match (97.7) with clear separation from second candidate (53.7)."
       }
     }
   },
@@ -32890,7 +33133,7 @@
           340,
           301
         ],
-        "count": 10,
+        "count": 18,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 113.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix MC, course taught by professors with MC context, professor history."
@@ -33886,9 +34129,10 @@
           "Datos 2"
         ],
         "professor_ids": [
-          290
+          290,
+          702
         ],
-        "count": 3,
+        "count": 5,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 124.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix CE, course taught by professors with CE context, professor history."
@@ -35155,6 +35399,30 @@
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 120.9 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 2, course taught by professors with AE context, professor history."
+      },
+      "CONTABILIDAD DE COSTOS": {
+        "raw_examples": [
+          "Contabilidad de Costos"
+        ],
+        "professor_ids": [
+          751
+        ],
+        "count": 2,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 131.0 vs 128.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix LA, course taught by professors with LA context, professor history."
+      },
+      "COSTOS": {
+        "raw_examples": [
+          "COSTOS"
+        ],
+        "professor_ids": [
+          751
+        ],
+        "count": 2,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 131.0 vs 128.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix LA, course taught by professors with LA context, professor history."
       }
     }
   },
@@ -35818,7 +36086,7 @@
         "professor_ids": [
           438
         ],
-        "count": 4,
+        "count": 5,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -35830,7 +36098,7 @@
         "professor_ids": [
           438
         ],
-        "count": 4,
+        "count": 5,
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match."
@@ -35861,7 +36129,7 @@
         "professor_ids": [
           438
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 127.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix PI, course taught by professors with PI context, professor history."
@@ -35873,7 +36141,7 @@
         "professor_ids": [
           438
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 127.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix PI, course taught by professors with PI context, professor history."
@@ -35885,7 +36153,7 @@
         "professor_ids": [
           438
         ],
-        "count": 1,
+        "count": 2,
         "last_method": "contextual_deterministic",
         "last_confidence": "high",
         "last_reason": "Contextual score 127.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix PI, course taught by professors with PI context, professor history."
@@ -36044,6 +36312,326 @@
         "last_method": "deterministic",
         "last_confidence": "high",
         "last_reason": "Exact normalized course name match with dominant department prefix (PI)."
+      }
+    }
+  },
+  "3425": {
+    "course_id": 3425,
+    "course_code": "LA8005",
+    "course_name": "VALORACI\u00d3N DE EMPRESAS EN MARCHA",
+    "variations": {
+      "VALORACION": {
+        "raw_examples": [
+          "VALORACION"
+        ],
+        "professor_ids": [
+          11
+        ],
+        "count": 4,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "EMPRESAS": {
+        "raw_examples": [
+          "EMPRESAS"
+        ],
+        "professor_ids": [
+          11
+        ],
+        "count": 4,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "MARCHA": {
+        "raw_examples": [
+          "MARCHA"
+        ],
+        "professor_ids": [
+          11
+        ],
+        "count": 4,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      }
+    }
+  },
+  "1254": {
+    "course_id": 1254,
+    "course_code": "CI1407",
+    "course_name": "HABILIDADES DE COMUNICACI\u00d3N EN INGENIER\u00cdA",
+    "variations": {
+      "HABILIDADES": {
+        "raw_examples": [
+          "HABILIDADES"
+        ],
+        "professor_ids": [
+          1070
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "COMUNICACION": {
+        "raw_examples": [
+          "COMUNICACION"
+        ],
+        "professor_ids": [
+          1070
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "INGENIERIA": {
+        "raw_examples": [
+          "INGENIERIA"
+        ],
+        "professor_ids": [
+          1070
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      }
+    }
+  },
+  "769": {
+    "course_id": 769,
+    "course_code": "FH0121",
+    "course_name": "INTRODUCCI\u00d3N A LA FILOSOF\u00cdA",
+    "variations": {
+      "FILOSOFIA BASICA": {
+        "raw_examples": [
+          "Filosof\u00eda (Humanidades)",
+          "Filosof\u00eda b\u00e1sica",
+          "FILOSOFIA",
+          "Filosof\u00eda (Humanidades)."
+        ],
+        "professor_ids": [
+          125
+        ],
+        "count": 4,
+        "last_method": "openrouter",
+        "last_confidence": "high",
+        "last_reason": "El nombre de la clase 'Filosof\u00eda (Humanidades)' y el comentario 'Filosof\u00eda b\u00e1sica' apuntan a un curso introductorio de filosof\u00eda; la opci\u00f3n 'INTRODUCCI\u00d3N A LA FILOSOF\u00cdA' (course_id 769) coincide directamente."
+      }
+    }
+  },
+  "673": {
+    "course_id": 673,
+    "course_code": "FH0025",
+    "course_name": "SEXUALIDAD PAREJA Y TEOR\u00cdA PSICOSEXUAL",
+    "variations": {
+      "PAREJA PERFECTA": {
+        "raw_examples": [
+          "Pareja perfecta"
+        ],
+        "professor_ids": [
+          496
+        ],
+        "count": 1,
+        "last_method": "openrouter",
+        "last_confidence": "medium",
+        "last_reason": "El nombre coloquial 'Pareja perfecta' coincide con el curso 'SEXUALIDAD PAREJA Y TEOR\u00cdA PSICOSEXUAL' que trata sobre relaciones de pareja."
+      }
+    }
+  },
+  "650": {
+    "course_id": 650,
+    "course_code": "FH0002",
+    "course_name": "AUTO ESTIMA Y PROYECTO DE VIDA",
+    "variations": {
+      "AUTOSABOTAJE": {
+        "raw_examples": [
+          "Autosabotaje",
+          "AUTOSABOTAJE"
+        ],
+        "professor_ids": [
+          496
+        ],
+        "count": 2,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 106.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, has active offerings."
+      }
+    }
+  },
+  "2737": {
+    "course_id": 2737,
+    "course_code": "QU2403",
+    "course_name": "QU\u00cdMICA ORG\u00c1NICA",
+    "variations": {
+      "QUIMICA": {
+        "raw_examples": [
+          "QUIMICA"
+        ],
+        "professor_ids": [
+          551
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "ORGANICA": {
+        "raw_examples": [
+          "ORGANICA"
+        ],
+        "professor_ids": [
+          551
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      }
+    }
+  },
+  "2972": {
+    "course_id": 2972,
+    "course_code": "CE1108",
+    "course_name": "COMPILADORES E INT\u00c9RPRETES",
+    "variations": {
+      "COMPILADORES E INTEPRETES": {
+        "raw_examples": [
+          "Compiladores e Intepretes"
+        ],
+        "professor_ids": [
+          702
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Very high fuzzy match (98.0) with clear separation from second candidate (82.0)."
+      },
+      "COMPILADORES": {
+        "raw_examples": [
+          "COMPILADORES",
+          "Compiladores"
+        ],
+        "professor_ids": [
+          702
+        ],
+        "count": 6,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "INTEPRETES": {
+        "raw_examples": [
+          "INTEPRETES"
+        ],
+        "professor_ids": [
+          702
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Very high fuzzy match (98.0) with clear separation from second candidate (82.0)."
+      },
+      "INTERPRETES": {
+        "raw_examples": [
+          "INTERPRETES"
+        ],
+        "professor_ids": [
+          702
+        ],
+        "count": 3,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      }
+    }
+  },
+  "3077": {
+    "course_id": 3077,
+    "course_code": "MT7005",
+    "course_name": "FORMULACI\u00d3N DE PROYECTOS",
+    "variations": {
+      "FORMULACION": {
+        "raw_examples": [
+          "FORMULACION"
+        ],
+        "professor_ids": [
+          707
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "PROYECTOS": {
+        "raw_examples": [
+          "PROYECTOS"
+        ],
+        "professor_ids": [
+          707
+        ],
+        "count": 2,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      }
+    }
+  },
+  "3259": {
+    "course_id": 3259,
+    "course_code": "IB1601",
+    "course_name": "INTRODUCCI\u00d3N A LA BIOTECNOLOG\u00cdA",
+    "variations": {
+      "INTRODUCCION": {
+        "raw_examples": [
+          "INTRODUCCION"
+        ],
+        "professor_ids": [
+          728
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "BIOTECNOLOGIA": {
+        "raw_examples": [
+          "BIOTECNOLOGIA"
+        ],
+        "professor_ids": [
+          728
+        ],
+        "count": 1,
+        "last_method": "deterministic",
+        "last_confidence": "high",
+        "last_reason": "Exact normalized course name match."
+      },
+      "INTRO A BIOTEC": {
+        "raw_examples": [
+          "Intro a Biotec"
+        ],
+        "professor_ids": [
+          728
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 131.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IB, course taught by professors with IB context, professor history."
+      },
+      "BIOTEC": {
+        "raw_examples": [
+          "BIOTEC"
+        ],
+        "professor_ids": [
+          728
+        ],
+        "count": 1,
+        "last_method": "contextual_deterministic",
+        "last_confidence": "high",
+        "last_reason": "Contextual score 131.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IB, course taught by professors with IB context, professor history."
       }
     }
   }

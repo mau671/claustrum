@@ -6199,31 +6199,9 @@
     "match_scope": "professor_history",
     "requires_offering_backfill": false,
     "confidence": "none",
-    "method": "deterministic_ambiguous",
-    "reason": "Class name clearly names multiple courses.",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
     "related_course_matches": [
-      {
-        "course_id": 925,
-        "course_code": "MI2202",
-        "course_name": "LABORATORIO DE ELECTRICIDAD I",
-        "match_scope": "professor_history",
-        "requires_offering_backfill": false,
-        "confidence": "high",
-        "method": "deterministic_ambiguous",
-        "reason": "Class name clearly names multiple courses.",
-        "is_primary": false
-      },
-      {
-        "course_id": 941,
-        "course_code": "MI2204",
-        "course_name": "LABORATORIO DE ELECTRICIDAD II",
-        "match_scope": "professor_history",
-        "requires_offering_backfill": false,
-        "confidence": "high",
-        "method": "deterministic_ambiguous",
-        "reason": "Class name clearly names multiple courses.",
-        "is_primary": false
-      },
       {
         "course_id": 926,
         "course_code": "MI2205",
@@ -6231,8 +6209,8 @@
         "match_scope": "professor_history",
         "requires_offering_backfill": false,
         "confidence": "high",
-        "method": "deterministic_ambiguous",
-        "reason": "Class name clearly names multiple courses.",
+        "method": "segment_deterministic",
+        "reason": "Segment 'ELECTRICIDAD 1' matched with contextual score 157.0 vs 145.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix MI, course taught by professors with MI context, professor history, professor history segment preference.",
         "is_primary": false
       },
       {
@@ -6242,19 +6220,8 @@
         "match_scope": "professor_history",
         "requires_offering_backfill": false,
         "confidence": "high",
-        "method": "deterministic_ambiguous",
-        "reason": "Class name clearly names multiple courses.",
-        "is_primary": false
-      },
-      {
-        "course_id": 974,
-        "course_code": "MI3209",
-        "course_name": "ELECTRICIDAD III",
-        "match_scope": "professor_history",
-        "requires_offering_backfill": false,
-        "confidence": "high",
-        "method": "deterministic_ambiguous",
-        "reason": "Class name clearly names multiple courses.",
+        "method": "segment_deterministic",
+        "reason": "Segment 'ELECTRICIDAD 2' matched with contextual score 156.0 vs 141.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix MI, course taught by professors with MI context, professor history, professor history segment preference.",
         "is_primary": false
       }
     ]
@@ -20422,7 +20389,7 @@
     "requires_offering_backfill": false,
     "confidence": "high",
     "method": "contextual_deterministic",
-    "reason": "Contextual score 109.2 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, dominant prefix MA, course taught by professors with MA context, professor history."
+    "reason": "Contextual score 149.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, candidate has compatible extra descriptor tokens, learned professor variation, dominant prefix MA, course taught by professors with MA context, professor history."
   },
   "523:MATEMATICA GENERAL": {
     "course_id": 563,
@@ -34616,14 +34583,38 @@
     "reason": "Exact normalized course name match."
   },
   "66:FORMULACION Y EVALUACION DE PROTECTOS ADMI": {
-    "course_id": 91,
-    "course_code": "AE4130",
-    "course_name": "FORMULACI\u00d3N Y EVALUACI\u00d3N DE PROYECTOS",
-    "match_scope": "professor_history",
-    "requires_offering_backfill": false,
-    "confidence": "high",
-    "method": "contextual_deterministic",
-    "reason": "Contextual score 134.3 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, professor history."
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 91,
+        "course_code": "AE4130",
+        "course_name": "FORMULACI\u00d3N Y EVALUACI\u00d3N DE PROYECTOS",
+        "match_scope": "global_catalog",
+        "requires_offering_backfill": true,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'FORMULACION' matched with contextual score 158.0 vs 128.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix AE, course taught by professors with AE context, has active offerings, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 3648,
+        "course_code": "MI6406",
+        "course_name": "EVALUACI\u00d3N DE PROYECTOS",
+        "match_scope": "global_catalog",
+        "requires_offering_backfill": true,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'EVALUACION DE PROTECTOS ADMI' matched with contextual score 122.7 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, course taught by professors with AE context, has active offerings.",
+        "is_primary": false
+      }
+    ]
   },
   "66:CONTABILIDAD III": {
     "course_id": 2367,
@@ -36176,16 +36167,16 @@
     "related_course_matches": []
   },
   "161:INGLES III PARA ADMINISTRACION DE EMPRESAS": {
-    "course_id": 2432,
-    "course_code": "CI2307",
-    "course_name": "INGL\u00c9S III PARA ADMINISTRACI\u00d3N",
-    "match_scope": "global_catalog",
-    "requires_offering_backfill": true,
-    "confidence": "medium",
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
     "method": "openrouter",
-    "reason": "Coincide en nivel III, materia Ingl\u00e9s y contexto de Administraci\u00f3n; la opci\u00f3n global omite 'de Empresas', pero es el equivalente m\u00e1s cercano y requerir\u00e1 backfill de oferta.",
     "prompt_version": 7,
-    "recognized_variation": "Ingl\u00e9s III para Administraci\u00f3n",
+    "recognized_variation": "Ingl\u00e9s III para Administraci\u00f3n de Empresas",
+    "reason": "No se encontr\u00f3 un curso que coincida exactamente con 'Ingl\u00e9s III para Administraci\u00f3n de Empresas' en las opciones del profesor. Los cursos disponibles en el historial del profesor solo llegan hasta Ingl\u00e9s II para Administraci\u00f3n (CI1306). No hay cursos de nivel III ni que incluyan ambos modificadores 'Administraci\u00f3n' y 'Empresas' en el nombre.",
     "related_course_matches": []
   },
   "117:SEMINARIO DE ESTUDIOS FILOSOFICOS": {
@@ -41960,7 +41951,7 @@
     "method": "openrouter",
     "prompt_version": 7,
     "recognized_variation": null,
-    "reason": "El texto no corresponde a ning\u00fan curso identificable; es una expresi\u00f3n coloquial y no permite asociarlo a las opciones disponibles.",
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso conocido; es una expresi\u00f3n coloquial sin referencia a curso espec\u00edfico.",
     "related_course_matches": []
   },
   "307:TODAS": {
@@ -42416,17 +42407,44 @@
     "reason": "Contextual score 131.4 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix EL, course taught by professors with EL context, professor history."
   },
   "395:TEM": {
-    "course_id": 1294,
-    "course_code": "EL4513",
-    "course_name": "TEOR\u00cdA ELECTROMAGN\u00c9TICA I",
-    "match_scope": "professor_history",
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
     "requires_offering_backfill": false,
     "confidence": "medium",
     "method": "openrouter",
-    "reason": "\u00abTem\u00bb se interpreta como abreviatura de Teor\u00eda Electromagn\u00e9tica; por el historial del profesor y la afinidad EL se elige el nivel I, ya que el nivel II no se menciona expl\u00edcitamente.",
     "prompt_version": 7,
-    "recognized_variation": "TEM (Teor\u00eda Electromagn\u00e9tica)",
-    "related_course_matches": []
+    "recognized_variation": "Tem",
+    "reason": "Tem es abreviatura com\u00fan de Teor\u00eda Electromagn\u00e9tica; el profesor dicta ambos niveles I y II, sin especificar nivel en la rese\u00f1a.",
+    "related_course_matches": [
+      {
+        "course_id": 1294,
+        "course_code": "EL4513",
+        "course_name": "TEOR\u00cdA ELECTROMAGN\u00c9TICA I",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "medium",
+        "method": "openrouter",
+        "reason": "Tem es abreviatura com\u00fan de Teor\u00eda Electromagn\u00e9tica; el profesor dicta ambos niveles I y II, sin especificar nivel en la rese\u00f1a.",
+        "prompt_version": 7,
+        "recognized_variation": "Tem",
+        "is_primary": false
+      },
+      {
+        "course_id": 1307,
+        "course_code": "EL4514",
+        "course_name": "TEOR\u00cdA ELECTROMAGN\u00c9TICA II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "medium",
+        "method": "openrouter",
+        "reason": "Tem es abreviatura com\u00fan de Teor\u00eda Electromagn\u00e9tica; el profesor dicta ambos niveles I y II, sin especificar nivel en la rese\u00f1a.",
+        "prompt_version": 7,
+        "recognized_variation": "Tem",
+        "is_primary": false
+      }
+    ]
   },
   "395:CIRCUITOS EN CORRIENTE ALTERNA": {
     "course_id": 1262,
@@ -65386,8 +65404,8 @@
     "confidence": "none",
     "method": "openrouter",
     "prompt_version": 7,
-    "recognized_variation": null,
-    "reason": "El nombre de clase 'Resentid@' no corresponde a ning\u00fan curso acad\u00e9mico de las opciones; parece un comentario no relacionado con materias.",
+    "recognized_variation": "Resentid@",
+    "reason": "El nombre de clase no corresponde a ning\u00fan curso conocido",
     "related_course_matches": []
   },
   "496:AYUDANDO A QUIEN JAJA": {
@@ -65413,7 +65431,7 @@
     "method": "openrouter",
     "prompt_version": 7,
     "recognized_variation": null,
-    "reason": "\u201cAdvertencia\u201d no corresponde al nombre de ning\u00fan curso de las opciones; no hay curso primario ni relacionados claros.",
+    "reason": "El nombre de clase 'Advertencia' no coincide con ning\u00fan curso en las opciones proporcionadas.",
     "related_course_matches": []
   },
   "496:LA VISTIMA": {
@@ -65595,7 +65613,7 @@
     "method": "openrouter",
     "prompt_version": 7,
     "recognized_variation": null,
-    "reason": "El nombre de clase 'Visto por ah\u00ed' no identifica ning\u00fan curso; el comentario solo describe una an\u00e9cdota y no permite asignar una materia.",
+    "reason": "El nombre de la clase 'Visto por ah\u00ed' no corresponde a ning\u00fan curso en las opciones proporcionadas; es una frase coloquial sin referencia a un curso espec\u00edfico.",
     "related_course_matches": []
   },
   "496:VEANLO USTEDES MISMOS": {
@@ -68349,5 +68367,1868 @@
     "confidence": "high",
     "method": "contextual_deterministic",
     "reason": "Contextual score 142.0 vs 118.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix PI, course taught by professors with PI context, has active offerings."
+  },
+  "10:DESARROLLO DE EMPRENDEDORES": {
+    "course_id": 965,
+    "course_code": "AE4208",
+    "course_name": "DESARROLLO DE EMPRENDEDORES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "11:ADMI FINANCIERA": {
+    "course_id": 1782,
+    "course_code": "AE3127",
+    "course_name": "ADMINISTRACI\u00d3N FINANCIERA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "openrouter_family",
+    "reason": "El profesor ha impartido tanto Administraci\u00f3n Financiera I como II; la rese\u00f1a no especifica nivel, por lo que se incluyen ambos cursos nivelados del historial del profesor.",
+    "prompt_version": 3,
+    "recognized_variation": "ADMINISTRACI\u00d3N FINANCIERA",
+    "is_primary": true,
+    "related_course_matches": [
+      {
+        "course_id": 2403,
+        "course_code": "AE3128",
+        "course_name": "ADMINISTRACI\u00d3N FINANCIERA II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "openrouter_family",
+        "reason": "El profesor ha impartido tanto Administraci\u00f3n Financiera I como II; la rese\u00f1a no especifica nivel, por lo que se incluyen ambos cursos nivelados del historial del profesor.",
+        "prompt_version": 3,
+        "recognized_variation": "ADMINISTRACI\u00d3N FINANCIERA",
+        "is_primary": false
+      }
+    ]
+  },
+  "11:VALORACION DE EMPRESAS EN MARCHA": {
+    "course_id": 3425,
+    "course_code": "LA8005",
+    "course_name": "VALORACI\u00d3N DE EMPRESAS EN MARCHA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "17:INVESTIGACION DE OPERACIONES": {
+    "course_id": 1151,
+    "course_code": "IC6400",
+    "course_name": "INVESTIGACI\u00d3N DE OPERACIONES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "17:COMPUTACION PARA ADMINISTRACION": {
+    "course_id": 2376,
+    "course_code": "AE2703",
+    "course_name": "COMPUTACI\u00d3N PARA ADMINISTRACI\u00d3N",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "17:PRODUCTIVIDAD EMPRESARIAL": {
+    "course_id": 2454,
+    "course_code": "AE3506",
+    "course_name": "PRODUCTIVIDAD EMPRESARIAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "59:ADMIN FINANCIERA": {
+    "course_id": 1782,
+    "course_code": "AE3127",
+    "course_name": "ADMINISTRACI\u00d3N FINANCIERA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "openrouter_family",
+    "reason": "El profesor ha impartido Administraci\u00f3n Financiera I (AE3127) y II (AE3128); la rese\u00f1a no especifica nivel, por lo que se incluyen ambos cursos nivelados del historial del profesor.",
+    "prompt_version": 3,
+    "recognized_variation": "ADMINISTRACI\u00d3N FINANCIERA",
+    "is_primary": true,
+    "related_course_matches": [
+      {
+        "course_id": 2403,
+        "course_code": "AE3128",
+        "course_name": "ADMINISTRACI\u00d3N FINANCIERA II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "openrouter_family",
+        "reason": "El profesor ha impartido Administraci\u00f3n Financiera I (AE3127) y II (AE3128); la rese\u00f1a no especifica nivel, por lo que se incluyen ambos cursos nivelados del historial del profesor.",
+        "prompt_version": 3,
+        "recognized_variation": "ADMINISTRACI\u00d3N FINANCIERA",
+        "is_primary": false
+      }
+    ]
+  },
+  "83:LABORATORIO DE TECNOLOGIA DE MATERIALES": {
+    "course_id": 938,
+    "course_code": "ME3209",
+    "course_name": "LABORATORIO DE TECNOLOG\u00cdA DE MATERIALES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "92:METODOS": {
+    "course_id": 968,
+    "course_code": "CM3207",
+    "course_name": "M\u00c9TODOS NUM\u00c9RICOS PARA INGENIER\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix CM, course taught by professors with CM context, professor history."
+  },
+  "114:INTRODUCCION A CIENCIA Y TECNOLOGIA": {
+    "course_id": 559,
+    "course_code": "CS1502",
+    "course_name": "INTRODUCCI\u00d3N A LA T\u00c9CNICA CIENCIA Y TECNOLOG\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 119.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CS, course taught by professors with CS context, professor history."
+  },
+  "114:INTRODUCCION A LA TECNICA CIENCIA Y TECNOLOGIA": {
+    "course_id": 559,
+    "course_code": "CS1502",
+    "course_name": "INTRODUCCI\u00d3N A LA T\u00c9CNICA CIENCIA Y TECNOLOG\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "114:INTRODUCCION A LA CIENCIA Y LA TECNOLOGIA": {
+    "course_id": 559,
+    "course_code": "CS1502",
+    "course_name": "INTRODUCCI\u00d3N A LA T\u00c9CNICA CIENCIA Y TECNOLOG\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 123.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix CS, course taught by professors with CS context, professor history."
+  },
+  "114:INTRO A LA TECNICA CIENCIA Y TECNOLOGIA": {
+    "course_id": 559,
+    "course_code": "CS1502",
+    "course_name": "INTRODUCCI\u00d3N A LA T\u00c9CNICA CIENCIA Y TECNOLOG\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
+  },
+  "114:INTRO AL BOSTEZO": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": "Intro al bostezo",
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso real; parece una broma o expresi\u00f3n coloquial.",
+    "related_course_matches": []
+  },
+  "114:SEMINARIO DE ETICA PARA INGENIERIA": {
+    "course_id": 980,
+    "course_code": "CS3404",
+    "course_name": "SEMINARIO DE \u00c9TICA PARA LA INGENIER\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 151.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, candidate preserves class-name modifier, dominant prefix CS, course taught by professors with CS context, professor history."
+  },
+  "114:SEMINARIO DE ETICA PARA LA INGENIERIA": {
+    "course_id": 980,
+    "course_code": "CS3404",
+    "course_name": "SEMINARIO DE \u00c9TICA PARA LA INGENIER\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "125:FILOSOFIA HUMANIDADES": {
+    "course_id": 769,
+    "course_code": "FH0121",
+    "course_name": "INTRODUCCI\u00d3N A LA FILOSOF\u00cdA",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "openrouter",
+    "reason": "El nombre de la clase 'Filosof\u00eda (Humanidades)' y el comentario 'Filosof\u00eda b\u00e1sica' apuntan a un curso introductorio de filosof\u00eda; la opci\u00f3n 'INTRODUCCI\u00d3N A LA FILOSOF\u00cdA' (course_id 769) coincide directamente.",
+    "prompt_version": 7,
+    "recognized_variation": "Filosof\u00eda b\u00e1sica",
+    "related_course_matches": []
+  },
+  "125:SEMINARIO DE ESTUDIOS FILOSOFICOS": {
+    "course_id": 981,
+    "course_code": "CS3401",
+    "course_name": "SEMINARIO DE ESTUDIOS FILOS\u00d3FICOS HIST\u00d3RICOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
+  },
+  "125:SEMINARIO DE ESTUDIOS FILOSOFICOS E HISTORICOS": {
+    "course_id": 981,
+    "course_code": "CS3401",
+    "course_name": "SEMINARIO DE ESTUDIOS FILOS\u00d3FICOS HIST\u00d3RICOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Very high fuzzy match (97.8) with clear separation from second candidate (50.6)."
+  },
+  "125:SEMINARIO DE ESTUDIOS FILOSOFICOS HISTORICOS": {
+    "course_id": 981,
+    "course_code": "CS3401",
+    "course_name": "SEMINARIO DE ESTUDIOS FILOS\u00d3FICOS HIST\u00d3RICOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "131:SEMINARIO DE ESTUDIOS COSTARRICENSES SEMESTRE": {
+    "course_id": 1004,
+    "course_code": "CS4402",
+    "course_name": "SEMINARIO DE ESTUDIOS COSTARRICENSES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix CS, course taught by professors with CS context, professor history."
+  },
+  "206:FISICA GENERAL 1": {
+    "course_id": 604,
+    "course_code": "FI1101",
+    "course_name": "F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+  },
+  "206:FISICA GENERAL I": {
+    "course_id": 604,
+    "course_code": "FI1101",
+    "course_name": "F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "206:FISICA I": {
+    "course_id": 604,
+    "course_code": "FI1101",
+    "course_name": "F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+  },
+  "206:FISICA 1": {
+    "course_id": 604,
+    "course_code": "FI1101",
+    "course_name": "F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 134.3 vs 129.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+  },
+  "206:LABORATORIO FISICA 1": {
+    "course_id": 607,
+    "course_code": "FI1201",
+    "course_name": "LABORATORIO F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 138.4 vs 99.3: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+  },
+  "206:LABORATORIO FISICA GENERAL I": {
+    "course_id": 607,
+    "course_code": "FI1201",
+    "course_name": "LABORATORIO F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "206:LABORATORIO DE FISICA 1": {
+    "course_id": 607,
+    "course_code": "FI1201",
+    "course_name": "LABORATORIO F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 131.5 vs 99.3: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix FI, course taught by professors with FI context, professor history."
+  },
+  "233:DIBUJO TECNICO": {
+    "course_id": 610,
+    "course_code": "MI2101",
+    "course_name": "DIBUJO T\u00c9CNICO",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "233:DIBUJO INDUSTRIAL": {
+    "course_id": 933,
+    "course_code": "MI3124",
+    "course_name": "DIBUJO INDUSTRIAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "233:DIBUJO INDUSTRIAL EN REALIDAD CUALQUIER CURSO": {
+    "course_id": 933,
+    "course_code": "MI3124",
+    "course_name": "DIBUJO INDUSTRIAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 135.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix MI, course taught by professors with MI context, professor history."
+  },
+  "238:CIRCUITOS ELECTRICOS EN CC Y CA": {
+    "course_id": 3049,
+    "course_code": "MT2001",
+    "course_name": "CIRCUITOS EL\u00c9CTRICOS EN CC Y CA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "277:SEGURIDAD DEL SOFTWARE": {
+    "course_id": 1158,
+    "course_code": "IC8071",
+    "course_name": "SEGURIDAD DEL SOFTWARE",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "285:INTRODUCCION Y TALLER DE PROGRAMACION": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 2510,
+        "course_code": "TI1400",
+        "course_name": "INTRODUCCI\u00d3N A LA PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'INTRODUCCION' matched with contextual score 148.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 2512,
+        "course_code": "TI1401",
+        "course_name": "TALLER DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'TALLER DE PROGRAMACION' matched with contextual score 148.0 vs 0.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "285:INTRODUCCION A LA PROGRAMACION Y TALLER DE PROGRAMACION": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 2510,
+        "course_code": "TI1400",
+        "course_name": "INTRODUCCI\u00d3N A LA PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'INTRODUCCION A LA PROGRAMACION' matched with contextual score 148.0 vs 0.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 2512,
+        "course_code": "TI1401",
+        "course_name": "TALLER DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'TALLER DE PROGRAMACION' matched with contextual score 148.0 vs 0.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "285:INTRO Y TALLER": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 2510,
+        "course_code": "TI1400",
+        "course_name": "INTRODUCCI\u00d3N A LA PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'INTRO' matched with contextual score 136.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 2512,
+        "course_code": "TI1401",
+        "course_name": "TALLER DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'TALLER' matched with contextual score 148.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "285:ALGORITMOS Y ESTRUCTURAS DE DATOS": {
+    "course_id": 2517,
+    "course_code": "TI2402",
+    "course_name": "ALGORITMOS Y ESTRUCTURAS DE DATOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "285:TALLER DE PROGRAMACION": {
+    "course_id": 2512,
+    "course_code": "TI1401",
+    "course_name": "TALLER DE PROGRAMACI\u00d3N",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "285:INTRO A LA PROGRA TALLER": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 2510,
+        "course_code": "TI1400",
+        "course_name": "INTRODUCCI\u00d3N A LA PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'INTRO A LA PROGRA' matched with contextual score 148.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 2512,
+        "course_code": "TI1401",
+        "course_name": "TALLER DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'TALLER' matched with contextual score 148.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "285:INTRO Y TALLER DE PROGRAMACION": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 2510,
+        "course_code": "TI1400",
+        "course_name": "INTRODUCCI\u00d3N A LA PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'INTRO' matched with contextual score 136.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 2512,
+        "course_code": "TI1401",
+        "course_name": "TALLER DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'TALLER DE PROGRAMACION' matched with contextual score 148.0 vs 0.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix TI, course taught by professors with TI context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "288:REQUERIMIENTOS": {
+    "course_id": 1039,
+    "course_code": "IC5821",
+    "course_name": "REQUERIMIENTOS DE SOFTWARE",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, professor history."
+  },
+  "291:ANALISIS DE ALGORITMOS": {
+    "course_id": 1035,
+    "course_code": "IC3002",
+    "course_name": "AN\u00c1LISIS DE ALGORITMOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "291:IO": {
+    "course_id": 1151,
+    "course_code": "IC6400",
+    "course_name": "INVESTIGACI\u00d3N DE OPERACIONES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 125.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix IC, course taught by professors with IC context, professor history."
+  },
+  "315:ANALISIS Y DISENO DE ALGORITMOS": {
+    "course_id": 1253,
+    "course_code": "CA3125",
+    "course_name": "AN\u00c1LISIS Y DISE\u00d1O DE ALGORITMOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "332:ESTRUCTURAS": {
+    "course_id": 1029,
+    "course_code": "IC2001",
+    "course_name": "ESTRUCTURAS DE DATOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix IC, course taught by professors with IC context, professor history."
+  },
+  "332:ESTRUCTURAS DE DATOS": {
+    "course_id": 1029,
+    "course_code": "IC2001",
+    "course_name": "ESTRUCTURAS DE DATOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "332:ESTRUC AN INTRO TALLER LENG": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 1029,
+        "course_code": "IC2001",
+        "course_name": "ESTRUCTURAS DE DATOS",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'ESTRUC' matched with contextual score 153.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 1020,
+        "course_code": "IC1802",
+        "course_name": "INTRODUCCI\u00d3N A LA PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'INTRO' matched with contextual score 141.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 1022,
+        "course_code": "IC1803",
+        "course_name": "TALLER DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'TALLER' matched with contextual score 153.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 1045,
+        "course_code": "IC4700",
+        "course_name": "LENGUAJES DE PROGRAMACI\u00d3N",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'LENG' matched with contextual score 141.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "332:": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "deterministic",
+    "reason": "Missing or unusable class name."
+  },
+  "332:CUALQUIER CLASE": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": "Cualquier clase",
+    "reason": "El nombre de la clase es gen\u00e9rico y no menciona ning\u00fan curso espec\u00edfico.",
+    "related_course_matches": []
+  },
+  "332:ANALISIS": {
+    "course_id": 1035,
+    "course_code": "IC3002",
+    "course_name": "AN\u00c1LISIS DE ALGORITMOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 134.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IC, course taught by professors with IC context, professor history."
+  },
+  "332:NO IMPORTA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": "No importa",
+    "reason": "El nombre de la clase 'No importa' no identifica ning\u00fan curso espec\u00edfico en las opciones disponibles.",
+    "related_course_matches": []
+  },
+  "393:CC": {
+    "course_id": 3049,
+    "course_code": "MT2001",
+    "course_name": "CIRCUITOS EL\u00c9CTRICOS EN CC Y CA",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
+  },
+  "393:CIRCUITOS CC": {
+    "course_id": 3049,
+    "course_code": "MT2001",
+    "course_name": "CIRCUITOS EL\u00c9CTRICOS EN CC Y CA",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 109.9 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
+  },
+  "393:CIRCUITOS EN CC": {
+    "course_id": 3049,
+    "course_code": "MT2001",
+    "course_name": "CIRCUITOS EL\u00c9CTRICOS EN CC Y CA",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
+  },
+  "395:C A": {
+    "course_id": 1262,
+    "course_code": "EL2114",
+    "course_name": "CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "openrouter",
+    "reason": "La abreviatura \"C.A\" corresponde com\u00fanmente a \"Corriente Alterna\"; el curso \"CIRCUITOS EL\u00c9CTRICOS EN CORRIENTE ALTERNA\" (EL2114) est\u00e1 en el historial del profesor y coincide exactamente.",
+    "prompt_version": 7,
+    "recognized_variation": "C.A \u2192 Corriente Alterna",
+    "related_course_matches": []
+  },
+  "395:CA": {
+    "course_id": 3049,
+    "course_code": "MT2001",
+    "course_name": "CIRCUITOS EL\u00c9CTRICOS EN CC Y CA",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 107.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, course taught by professors with EL context, has active offerings."
+  },
+  "435:ESTADISTICA": {
+    "course_id": 1728,
+    "course_code": "PI2610",
+    "course_name": "PROBABILIDAD Y ESTAD\u00cdSTICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 131.0 vs 117.9: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix PI, course taught by professors with PI context, professor history."
+  },
+  "436:COSTOS I": {
+    "course_id": 1719,
+    "course_code": "PI3501",
+    "course_name": "COSTOS INDUSTRIALES I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 138.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, matching level 1, dominant prefix PI, course taught by professors with PI context, professor history."
+  },
+  "438:DISENO Y PLANEACION DE PLANTA": {
+    "course_id": 1760,
+    "course_code": "PI4309",
+    "course_name": "PLANEACI\u00d3N Y DISE\u00d1O DE INSTALACIONES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "openrouter",
+    "reason": "El nombre de la clase coincide con el curso PI4309 'PLANEACI\u00d3N Y DISE\u00d1O DE INSTALACIONES' del historial del profesor, variando solo el orden de las palabras.",
+    "prompt_version": 7,
+    "recognized_variation": "Dise\u00f1o y Planeaci\u00f3n de Planta \u2248 PLANEACI\u00d3N Y DISE\u00d1O DE INSTALACIONES",
+    "related_course_matches": []
+  },
+  "479:CALCULO SUPERIOR": {
+    "course_id": 923,
+    "course_code": "MA2104",
+    "course_name": "C\u00c1LCULO SUPERIOR",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "479:MATEMATICA GENERAL": {
+    "course_id": 563,
+    "course_code": "MA0101",
+    "course_name": "MATEM\u00c1TICA GENERAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "479:MATE GENERAL": {
+    "course_id": 563,
+    "course_code": "MA0101",
+    "course_name": "MATEM\u00c1TICA GENERAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
+  },
+  "479:SUPERIOR": {
+    "course_id": 923,
+    "course_code": "MA2104",
+    "course_name": "C\u00c1LCULO SUPERIOR",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, learned professor variation, dominant prefix MA, course taught by professors with MA context, professor history."
+  },
+  "485:MATE GENERAL": {
+    "course_id": 563,
+    "course_code": "MA0101",
+    "course_name": "MATEM\u00c1TICA GENERAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with EM/MA context, professor history."
+  },
+  "485:MATEMATICA GENERAL": {
+    "course_id": 563,
+    "course_code": "MA0101",
+    "course_name": "MATEM\u00c1TICA GENERAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "485:CALCULO DIFERENCIAL E INTEGRAL CON IPADS": {
+    "course_id": 605,
+    "course_code": "MA1102",
+    "course_name": "C\u00c1LCULO DIFERENCIAL E INTEGRAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 0.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix MA, course taught by professors with EM/MA context, professor history."
+  },
+  "487:CDI": {
+    "course_id": 605,
+    "course_code": "MA1102",
+    "course_name": "C\u00c1LCULO DIFERENCIAL E INTEGRAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
+  },
+  "496:OBJETIVO CUMPLIDO": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase 'Objetivo cumplido' no corresponde a ning\u00fan curso en las opciones disponibles; el comentario parece ser una opini\u00f3n personal sin referencia a un curso espec\u00edfico.",
+    "related_course_matches": []
+  },
+  "496:CUCHARADA DE SU PROPIO VENENO": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso conocido; es un comentario personal sin referencia a asignaturas.",
+    "related_course_matches": []
+  },
+  "496:CALCULO SUPERIOR": {
+    "course_id": 923,
+    "course_code": "MA2104",
+    "course_name": "C\u00c1LCULO SUPERIOR",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "496:SOS BRUTA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de clase \"Sos bruta\" no corresponde a ning\u00fan curso conocido; es un comentario personal sin referencia acad\u00e9mica.",
+    "related_course_matches": []
+  },
+  "496:JAJAJA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase 'Jajaja' no corresponde a ning\u00fan curso conocido; no se identifica ning\u00fan curso en el texto.",
+    "related_course_matches": []
+  },
+  "496:AY SI SI": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de clase 'Ay s\u00ed s\u00ed' no corresponde a ning\u00fan curso conocido en las opciones; el comentario es un comentario personal sin referencia a materias.",
+    "related_course_matches": []
+  },
+  "496:CALCULO DIFERENCIAL E INTEGRAL": {
+    "course_id": 605,
+    "course_code": "MA1102",
+    "course_name": "C\u00c1LCULO DIFERENCIAL E INTEGRAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "496:LUCHEMOS POR EL DIVORCIO": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso en las opciones disponibles.",
+    "related_course_matches": []
+  },
+  "496:PAREJA PERFECTA": {
+    "course_id": 673,
+    "course_code": "FH0025",
+    "course_name": "SEXUALIDAD PAREJA Y TEOR\u00cdA PSICOSEXUAL",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "medium",
+    "method": "openrouter",
+    "reason": "El nombre coloquial 'Pareja perfecta' coincide con el curso 'SEXUALIDAD PAREJA Y TEOR\u00cdA PSICOSEXUAL' que trata sobre relaciones de pareja.",
+    "prompt_version": 7,
+    "recognized_variation": "Pareja perfecta",
+    "related_course_matches": []
+  },
+  "496:DIVORCIADO": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase '\u00bfDivorciado?' no corresponde a ning\u00fan curso conocido; es un comentario personal sin referencia acad\u00e9mica.",
+    "related_course_matches": []
+  },
+  "496:COMO SE LLAMA LA OBRA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso en las opciones disponibles.",
+    "related_course_matches": []
+  },
+  "496:CONSULTA CONSTANTE": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": "Consulta constante",
+    "reason": "El nombre de la clase no coincide con ning\u00fan curso conocido en las opciones disponibles.",
+    "related_course_matches": []
+  },
+  "496:DISCUSIONES DE OFICINA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": "Discusiones de oficina",
+    "reason": "No se encontr\u00f3 ning\u00fan curso que coincida con 'Discusiones de oficina' en el historial del profesor ni en el cat\u00e1logo global; las opciones disponibles no contienen esa combinaci\u00f3n de t\u00e9rminos.",
+    "related_course_matches": []
+  },
+  "496:REACCIONE MAE": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de clase 'Reaccione mae' no corresponde a ning\u00fan curso en las opciones proporcionadas; no se detectan abreviaturas, siglas ni nombres de cursos reconocibles.",
+    "related_course_matches": []
+  },
+  "496:UNA PERSONA SIN VIDA PROPIA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso conocido; es un comentario personal sin referencia a materia.",
+    "related_course_matches": []
+  },
+  "496:APARTE DE FEA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase no corresponde a ning\u00fan curso; el comentario es personal y no menciona ninguna materia.",
+    "related_course_matches": []
+  },
+  "496:AUTOSABOTAJE": {
+    "course_id": 650,
+    "course_code": "FH0002",
+    "course_name": "AUTO ESTIMA Y PROYECTO DE VIDA",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 106.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, has active offerings."
+  },
+  "496:ETS CONFIRMADA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de clase 'ETS confirmada' no corresponde a ning\u00fan curso en las opciones disponibles.",
+    "related_course_matches": []
+  },
+  "496:QUE NO SE LE OLVIDE": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": null,
+    "reason": "El nombre de la clase 'Que no se le olvide' no corresponde a ning\u00fan curso en las opciones proporcionadas; es una frase gen\u00e9rica sin referencia a un curso espec\u00edfico.",
+    "related_course_matches": []
+  },
+  "496:PAPELES INVERTIDOS": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": null,
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "openrouter",
+    "prompt_version": 7,
+    "recognized_variation": "Papeles invertidos",
+    "reason": "No se encontr\u00f3 ning\u00fan curso que coincida con 'Papeles invertidos' en las opciones disponibles.",
+    "related_course_matches": []
+  },
+  "517:CDI": {
+    "course_id": 605,
+    "course_code": "MA1102",
+    "course_name": "C\u00c1LCULO DIFERENCIAL E INTEGRAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
+  },
+  "519:ECUACIONES DIFERENCIALES": {
+    "course_id": 935,
+    "course_code": "MA2105",
+    "course_name": "ECUACIONES DIFERENCIALES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "519:MATEMATICA GENERAL": {
+    "course_id": 563,
+    "course_code": "MA0101",
+    "course_name": "MATEM\u00c1TICA GENERAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "519:ECUACIONES DIFERECIALES": {
+    "course_id": 935,
+    "course_code": "MA2105",
+    "course_name": "ECUACIONES DIFERENCIALES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Very high fuzzy match (97.9) with clear separation from second candidate (56.6)."
+  },
+  "519:CAL": {
+    "course_id": 634,
+    "course_code": "MA1103",
+    "course_name": "C\u00c1LCULO Y \u00c1LGEBRA LINEAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 126.0 vs 0.0: class tokens mention course, class token matches course acronym, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history."
+  },
+  "519:MATE GENERAL CALCULO Y ALGEBRA LINEAL ECUAS DIFERENCIAL": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 563,
+        "course_code": "MA0101",
+        "course_name": "MATEM\u00c1TICA GENERAL",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'MATE GENERAL' matched with contextual score 153.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 634,
+        "course_code": "MA1103",
+        "course_name": "C\u00c1LCULO Y \u00c1LGEBRA LINEAL",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'ALGEBRA LINEAL' matched with contextual score 145.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, dominant prefix MA, course taught by professors with MA context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "519:CALCULO Y ALGEBRA LINEAL": {
+    "course_id": 634,
+    "course_code": "MA1103",
+    "course_name": "C\u00c1LCULO Y \u00c1LGEBRA LINEAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "520:CALCULO SUPERIOR": {
+    "course_id": 923,
+    "course_code": "MA2104",
+    "course_name": "C\u00c1LCULO SUPERIOR",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "520:CALCULO Y ALGEBRA LINEAL": {
+    "course_id": 634,
+    "course_code": "MA1103",
+    "course_name": "C\u00c1LCULO Y \u00c1LGEBRA LINEAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "520:PROBABILIDAD": {
+    "course_id": 1049,
+    "course_code": "MA2404",
+    "course_name": "PROBABILIDADES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 139.0 vs 120.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, professor history."
+  },
+  "520:PROBABILIDADES": {
+    "course_id": 1049,
+    "course_code": "MA2404",
+    "course_name": "PROBABILIDADES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "520:MATEMATICA GENERAL": {
+    "course_id": 563,
+    "course_code": "MA0101",
+    "course_name": "MATEM\u00c1TICA GENERAL",
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 146.0 vs 118.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix MA, course taught by professors with MA context, has active offerings."
+  },
+  "527:QUIMICA II": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "none",
+    "method": "contextual_related",
+    "reason": "Class name maps to multiple contextual courses.",
+    "related_course_matches": [
+      {
+        "course_id": 614,
+        "course_code": "QU1107",
+        "course_name": "QU\u00cdMICA B\u00c1SICA II",
+        "match_scope": "global_catalog",
+        "requires_offering_backfill": true,
+        "confidence": "high",
+        "method": "contextual_related",
+        "reason": "Contextual related score 136.9: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix QU, course taught by professors with QU context, has active offerings, requested level 2.",
+        "is_primary": false
+      },
+      {
+        "course_id": 573,
+        "course_code": "QU1903",
+        "course_name": "QU\u00cdMICA",
+        "match_scope": "global_catalog",
+        "requires_offering_backfill": true,
+        "confidence": "high",
+        "method": "contextual_related",
+        "reason": "Contextual related score 118.0: class tokens mention course, strong partial name match, class name is a course-name prefix, dominant prefix QU.",
+        "is_primary": false
+      }
+    ]
+  },
+  "527:QUIMICA BASICA I Y LABORATORIO DE QUIMICA BASICA I": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "segment_deterministic",
+    "reason": "Class name contains explicit course segments that matched multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 568,
+        "course_code": "QU1106",
+        "course_name": "QU\u00cdMICA B\u00c1SICA I",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'QUIMICA BASICA I' matched with contextual score 163.0 vs 155.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history, professor history segment preference.",
+        "is_primary": false
+      },
+      {
+        "course_id": 567,
+        "course_code": "QU1102",
+        "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA I",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "segment_deterministic",
+        "reason": "Segment 'LABORATORIO DE QUIMICA BASICA I' matched with contextual score 163.0 vs 155.0: exact normalized name, equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history, professor history segment preference.",
+        "is_primary": false
+      }
+    ]
+  },
+  "527:LABORATORIO DE QUIMICA BASICA I": {
+    "course_id": 567,
+    "course_code": "QU1102",
+    "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "527:QUIMICA I": {
+    "course_id": 568,
+    "course_code": "QU1106",
+    "course_name": "QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 135.1 vs 129.9: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "527:LABORATORIO QUIMICA I": {
+    "course_id": 567,
+    "course_code": "QU1102",
+    "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 129.0 vs 113.0: class tokens mention course, all class tokens are explained by course name, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "527:LABORATORIO QUIMICA II": {
+    "course_id": 613,
+    "course_code": "QU1104",
+    "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 129.0 vs 115.1: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "527:QUIMICA BASICA 2 LABORATORIO Y TEORIA": {
+    "course_id": 614,
+    "course_code": "QU1107",
+    "course_name": "QU\u00cdMICA B\u00c1SICA II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 142.8 vs 116.4: class tokens mention course, class name is a course-name prefix, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "527:LABORATORIO DE QUIMICA BASICA 2": {
+    "course_id": 613,
+    "course_code": "QU1104",
+    "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 131.9: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "527:QUIMICA BASICA II": {
+    "course_id": 614,
+    "course_code": "QU1107",
+    "course_name": "QU\u00cdMICA B\u00c1SICA II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "551:QUIMICA BASICA Y LABORATORIO QUIMICA BASICA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "deterministic_ambiguous",
+    "reason": "Class name clearly names multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 567,
+        "course_code": "QU1102",
+        "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA I",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "deterministic_ambiguous",
+        "reason": "Class name clearly names multiple courses.",
+        "is_primary": false
+      },
+      {
+        "course_id": 613,
+        "course_code": "QU1104",
+        "course_name": "LABORATORIO DE QU\u00cdMICA B\u00c1SICA II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "deterministic_ambiguous",
+        "reason": "Class name clearly names multiple courses.",
+        "is_primary": false
+      }
+    ]
+  },
+  "551:QUIMICA BASICA 1": {
+    "course_id": 568,
+    "course_code": "QU1106",
+    "course_name": "QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "551:QBII": {
+    "course_id": 568,
+    "course_code": "QU1106",
+    "course_name": "QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 119.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "551:QUIMICA BASICA I": {
+    "course_id": 568,
+    "course_code": "QU1106",
+    "course_name": "QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "551:QUIMICA": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "contextual_related",
+    "reason": "Class name maps to multiple contextual courses.",
+    "related_course_matches": [
+      {
+        "course_id": 568,
+        "course_code": "QU1106",
+        "course_name": "QU\u00cdMICA B\u00c1SICA I",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "contextual_related",
+        "reason": "Contextual related score 149.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix QU, course taught by professors with QU context, professor history, ambiguous base course with level.",
+        "is_primary": false
+      },
+      {
+        "course_id": 614,
+        "course_code": "QU1107",
+        "course_name": "QU\u00cdMICA B\u00c1SICA II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "contextual_related",
+        "reason": "Contextual related score 139.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix QU, course taught by professors with QU context, professor history, ambiguous base course with level.",
+        "is_primary": false
+      }
+    ]
+  },
+  "551:QUIMICA ORGANICA": {
+    "course_id": 2737,
+    "course_code": "QU2403",
+    "course_name": "QU\u00cdMICA ORG\u00c1NICA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "551:QUIMICA BASICA L": {
+    "course_id": 568,
+    "course_code": "QU1106",
+    "course_name": "QU\u00cdMICA B\u00c1SICA I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 149.0 vs 134.8: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, dominant prefix QU, course taught by professors with QU context, professor history."
+  },
+  "608:CALCULO Y ABALISIS II": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "deterministic_ambiguous",
+    "reason": "Class name clearly names multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 1653,
+        "course_code": "EM2607",
+        "course_name": "C\u00c1LCULO Y AN\u00c1LISIS II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "deterministic_ambiguous",
+        "reason": "Class name clearly names multiple courses.",
+        "is_primary": false
+      },
+      {
+        "course_id": 1667,
+        "course_code": "EM3608",
+        "course_name": "C\u00c1LCULO Y AN\u00c1LISIS III",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "deterministic_ambiguous",
+        "reason": "Class name clearly names multiple courses.",
+        "is_primary": false
+      }
+    ]
+  },
+  "608:MATE": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "global_catalog",
+    "requires_offering_backfill": true,
+    "confidence": "none",
+    "method": "contextual_related",
+    "reason": "Class name maps to multiple contextual courses.",
+    "related_course_matches": [
+      {
+        "course_id": 1631,
+        "course_code": "EM1902",
+        "course_name": "MATEM\u00c1TICA 2",
+        "match_scope": "global_catalog",
+        "requires_offering_backfill": true,
+        "confidence": "high",
+        "method": "contextual_related",
+        "reason": "Contextual related score 106.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix EM, ambiguous base course with level.",
+        "is_primary": false
+      },
+      {
+        "course_id": 1629,
+        "course_code": "EM1901",
+        "course_name": "MATEM\u00c1TICA 1",
+        "match_scope": "global_catalog",
+        "requires_offering_backfill": true,
+        "confidence": "high",
+        "method": "contextual_related",
+        "reason": "Contextual related score 106.0: class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix EM, ambiguous base course with level.",
+        "is_primary": false
+      }
+    ]
+  },
+  "608:CALCULO Y GEOMETRIA ANALITICA": {
+    "course_id": 1864,
+    "course_code": "MA2117",
+    "course_name": "C\u00c1LCULO Y GEOMETR\u00cdA ANAL\u00cdTICA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "608:CALCULO Y ALGEBRA LINEAL": {
+    "course_id": 634,
+    "course_code": "MA1103",
+    "course_name": "C\u00c1LCULO Y \u00c1LGEBRA LINEAL",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "696:ALGORITMOS Y ESTRUCTURAS DE DATOS I": {
+    "course_id": 2962,
+    "course_code": "CE1103",
+    "course_name": "ALGORITMOS Y ESTRUCTURAS DE DATOS I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "702:PRINCIPIOS DE MODELADO EN INGENIERIA": {
+    "course_id": 2963,
+    "course_code": "CE1105",
+    "course_name": "PRINCIPIOS DE MODELADO EN INGENIER\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "702:DATOS 2": {
+    "course_id": 2965,
+    "course_code": "CE2103",
+    "course_name": "ALGORITMOS Y ESTRUCTURAS DE DATOS II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 124.0 vs 0.0: class tokens mention course, all class tokens are explained by course name, matching level 2, dominant prefix CE, course taught by professors with CE context, professor history."
+  },
+  "702:PRINCIPIOS": {
+    "course_id": 2963,
+    "course_code": "CE1105",
+    "course_name": "PRINCIPIOS DE MODELADO EN INGENIER\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 145.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix CE, course taught by professors with CE context, professor history."
+  },
+  "702:COMPILADORES E INTEPRETES": {
+    "course_id": 2972,
+    "course_code": "CE1108",
+    "course_name": "COMPILADORES E INT\u00c9RPRETES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Very high fuzzy match (98.0) with clear separation from second candidate (82.0)."
+  },
+  "702:COMPILADORES": {
+    "course_id": 2972,
+    "course_code": "CE1108",
+    "course_name": "COMPILADORES E INT\u00c9RPRETES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 141.0 vs 123.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, learned professor variation, dominant prefix CE, course taught by professors with CE context, professor history."
+  },
+  "702:COMPILADORES E INTERPRETES": {
+    "course_id": 2972,
+    "course_code": "CE1108",
+    "course_name": "COMPILADORES E INT\u00c9RPRETES",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "707:LABORATORIO DE ELECTRONICA ANALOGICA": {
+    "course_id": 3052,
+    "course_code": "MT3002",
+    "course_name": "LABORATORIO DE ELECTR\u00d3NICA ANAL\u00d3GICA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "707:FORMULACION DE PROYECTOS": {
+    "course_id": 3077,
+    "course_code": "MT7005",
+    "course_name": "FORMULACI\u00d3N DE PROYECTOS",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "728:BIOQUIMICA": {
+    "course_id": 3274,
+    "course_code": "IB3601",
+    "course_name": "BIOQU\u00cdMICA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "728:GENETICA": {
+    "course_id": 3268,
+    "course_code": "IB2304",
+    "course_name": "GEN\u00c9TICA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "728:INTRODUCCION A LA BIOTECNOLOGIA": {
+    "course_id": 3259,
+    "course_code": "IB1601",
+    "course_name": "INTRODUCCI\u00d3N A LA BIOTECNOLOG\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "728:INTRO A BIOTEC": {
+    "course_id": 3259,
+    "course_code": "IB1601",
+    "course_name": "INTRODUCCI\u00d3N A LA BIOTECNOLOG\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 131.0 vs 0.0: equivalent course tokens, class tokens mention course, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix IB, course taught by professors with IB context, professor history."
+  },
+  "751:CONTABILIDAD COSTOS": {
+    "course_id": null,
+    "course_code": null,
+    "course_name": null,
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "none",
+    "method": "deterministic_ambiguous",
+    "reason": "Class name clearly names multiple courses.",
+    "related_course_matches": [
+      {
+        "course_id": 2394,
+        "course_code": "AE2126",
+        "course_name": "CONTABILIDAD DE COSTOS I",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "deterministic_related",
+        "reason": "Class name clearly names this course, but no primary course was identifiable.",
+        "is_primary": false
+      },
+      {
+        "course_id": 294,
+        "course_code": "LA5135",
+        "course_name": "CONTABILIDAD DE COSTOS II",
+        "match_scope": "professor_history",
+        "requires_offering_backfill": false,
+        "confidence": "high",
+        "method": "deterministic_related",
+        "reason": "Class name clearly names this course, but no primary course was identifiable.",
+        "is_primary": false
+      }
+    ]
+  },
+  "751:CONTABILIDAD DE COSTOS": {
+    "course_id": 294,
+    "course_code": "LA5135",
+    "course_name": "CONTABILIDAD DE COSTOS II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 131.0 vs 128.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, dominant prefix LA, course taught by professors with LA context, professor history."
+  },
+  "751:CONTABILIDAD DE COSTOS I": {
+    "course_id": 2394,
+    "course_code": "AE2126",
+    "course_name": "CONTABILIDAD DE COSTOS I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "751:CONTABILIDAD IV": {
+    "course_id": 289,
+    "course_code": "LA5125",
+    "course_name": "CONTABILIDAD IV",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "1070:HABILIDADES DE COMUNICACION EN INGENIERIA": {
+    "course_id": 1254,
+    "course_code": "CI1407",
+    "course_name": "HABILIDADES DE COMUNICACI\u00d3N EN INGENIER\u00cdA",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "deterministic",
+    "reason": "Exact normalized course name match."
+  },
+  "1151:ESTADISTICA 2": {
+    "course_id": 1892,
+    "course_code": "AE2506",
+    "course_name": "ESTAD\u00cdSTICA II",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 148.0 vs 0.0: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 2, dominant prefix AE, course taught by professors with AE context, professor history."
+  },
+  "1217:FISICA GENERAL": {
+    "course_id": 604,
+    "course_code": "FI1101",
+    "course_name": "F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 134.0 vs 0.0: class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, course taught by professors with IF context, professor history."
+  },
+  "1217:FISICA GENERAL 1": {
+    "course_id": 604,
+    "course_code": "FI1101",
+    "course_name": "F\u00cdSICA GENERAL I",
+    "match_scope": "professor_history",
+    "requires_offering_backfill": false,
+    "confidence": "high",
+    "method": "contextual_deterministic",
+    "reason": "Contextual score 144.0 vs 72.5: equivalent course tokens, class tokens mention course, strong partial name match, all class tokens are explained by course name, class name is a course-name prefix, matching level 1, course taught by professors with IF context, professor history."
   }
 }

@@ -1434,5 +1434,29 @@
     "prompt_version": 3,
     "recognized_variation": "An\u00e1lisis Num\u00e9rico para Ingenier\u00eda",
     "reason": "ANPI corresponde a An\u00e1lisis Num\u00e9rico para Ingenier\u00eda; ambas opciones comparten el mismo t\u00edtulo exacto y el alias no especifica nivel, por lo que no se puede distinguir entre CE1111 y CE3102."
+  },
+  "11:ADMI FINANCIERA:generic:ADMI FINANCIERA": {
+    "family": "ADMI FINANCIERA",
+    "preferred_course_ids": [
+      1782,
+      2403
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ADMINISTRACI\u00d3N FINANCIERA",
+    "reason": "El profesor ha impartido tanto Administraci\u00f3n Financiera I como II; la rese\u00f1a no especifica nivel, por lo que se incluyen ambos cursos nivelados del historial del profesor."
+  },
+  "59:ADMIN FINANCIERA:generic:ADMIN FINANCIERA": {
+    "family": "ADMIN FINANCIERA",
+    "preferred_course_ids": [
+      1782,
+      2403
+    ],
+    "confidence": "high",
+    "method": "openrouter_family",
+    "prompt_version": 3,
+    "recognized_variation": "ADMINISTRACI\u00d3N FINANCIERA",
+    "reason": "El profesor ha impartido Administraci\u00f3n Financiera I (AE3127) y II (AE3128); la rese\u00f1a no especifica nivel, por lo que se incluyen ambos cursos nivelados del historial del profesor."
   }
 }

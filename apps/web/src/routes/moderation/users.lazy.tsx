@@ -870,7 +870,7 @@ function AdminUsersPage() {
               className="sticky top-0 z-10"
               style={{
                 backgroundColor:
-                  "color-mix(in oklab, var(--color-muted) 72%, var(--color-background))",
+                  "color-mix(in oklab, var(--color-foreground) 2.88%, var(--color-background))",
               }}
             >
               {table.getHeaderGroups().map((headerGroup) => (

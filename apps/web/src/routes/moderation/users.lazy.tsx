@@ -860,12 +860,13 @@ function AdminUsersPage() {
 
         <ScrollArea
           fade="y"
+          fadeTopOffset="2.625rem"
           hideScrollbar
           className="min-h-0 flex-1"
           viewportClassName="[&_[data-slot=table-container]]:overflow-visible"
         >
           <Table variant="card" className="table-fixed">
-            <TableHeader className="bg-card sticky top-0 z-10">
+            <TableHeader className="bg-muted/72 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow className="hover:bg-transparent" key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {

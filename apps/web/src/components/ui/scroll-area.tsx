@@ -13,6 +13,7 @@ export function ScrollArea({
   children,
   fade = false,
   fadeSize,
+  fadeTopOffset,
   hideScrollbar = false,
   viewportClassName,
   scrollbarGutter = false,
@@ -24,6 +25,8 @@ export function ScrollArea({
 }: ScrollAreaPrimitive.Root.Props & {
   fade?: ScrollFadeAxis;
   fadeSize?: string;
+  /** Keeps the top of the viewport opaque, e.g. for a sticky table header. */
+  fadeTopOffset?: string;
   hideScrollbar?: boolean;
   viewportClassName?: string;
   scrollbarGutter?: boolean;
@@ -40,6 +43,7 @@ export function ScrollArea({
           "--fade-x": fadeBoth || fade === "x" ? "var(--fade-size)" : "0px",
           "--fade-y": fadeBoth || fade === "y" ? "var(--fade-size)" : "0px",
           ...(fadeSize ? { "--fade-size": fadeSize } : {}),
+          ...(fadeTopOffset ? { "--fade-top-offset": fadeTopOffset } : {}),
         } as React.CSSProperties);
 
   return (

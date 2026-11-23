@@ -166,6 +166,7 @@ pre {
   --fade-size: 1.5rem;
   --fade-x-active: 0px;
   --fade-y-active: 0px;
+  --fade-top-offset: 0px;
 
   &[data-has-overflow-x] {
     --fade-x-active: var(--fade-x, 0px);
@@ -188,8 +189,14 @@ pre {
     ),
     linear-gradient(
       to bottom,
-      transparent 0,
-      black min(var(--fade-y-active), var(--scroll-area-overflow-y-start, 0px)),
+      black 0,
+      black var(--fade-top-offset),
+      transparent var(--fade-top-offset),
+      black
+        calc(
+          var(--fade-top-offset) +
+            min(var(--fade-y-active), var(--scroll-area-overflow-y-start, 0px))
+        ),
       black
         calc(
           100% - min(var(--fade-y-active), var(--scroll-area-overflow-y-end, var(--fade-y-active)))
@@ -210,8 +217,14 @@ pre {
     ),
     linear-gradient(
       to bottom,
-      transparent 0,
-      black min(var(--fade-y-active), var(--scroll-area-overflow-y-start, 0px)),
+      black 0,
+      black var(--fade-top-offset),
+      transparent var(--fade-top-offset),
+      black
+        calc(
+          var(--fade-top-offset) +
+            min(var(--fade-y-active), var(--scroll-area-overflow-y-start, 0px))
+        ),
       black
         calc(
           100% - min(var(--fade-y-active), var(--scroll-area-overflow-y-end, var(--fade-y-active)))

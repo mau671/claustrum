@@ -379,6 +379,23 @@ def parse_args() -> argparse.Namespace:
         help="Disable OpenRouter LLM and use only deterministic course matching.",
     )
     parser.add_argument(
+        "--model",
+        default=None,
+        help="OpenRouter model(s) for ambiguous course matching. Defaults to COURSE_MATCH_MODELS.",
+    )
+    parser.add_argument(
+        "--llm-timeout",
+        type=float,
+        default=None,
+        help="OpenRouter request timeout in seconds. Defaults to OPENROUTER_TIMEOUT_SECONDS (20).",
+    )
+    parser.add_argument(
+        "--llm-attempts",
+        type=int,
+        default=None,
+        help="OpenRouter attempts across the model list. Defaults to OPENROUTER_ATTEMPTS.",
+    )
+    parser.add_argument(
         "--min-course-confidence",
         choices=["high", "medium", "low"],
         default="high",
@@ -600,6 +617,12 @@ def run_daily_sync(args: argparse.Namespace) -> dict[str, Any]:
         process_argv.append("--write-sql")
     if args.no_openrouter:
         process_argv.append("--no-openrouter")
+    if args.model:
+        process_argv.extend(["--model", args.model])
+    if args.llm_timeout is not None:
+        process_argv.extend(["--llm-timeout", str(args.llm_timeout)])
+    if args.llm_attempts is not None:
+        process_argv.extend(["--llm-attempts", str(args.llm_attempts)])
 
     for pid in sorted(unique_professor_ids):
         process_argv.extend(["--professor-id", str(pid)])

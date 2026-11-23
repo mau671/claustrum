@@ -21,6 +21,7 @@
     "db:setup": "pnpm run db:start && pnpm run db:migrate && pnpm run db:seed",
     "generate:og": "tsx scripts/generate-og.ts",
     "generate:summaries": "tsx scripts/generate-review-summaries.ts",
+    "check:models": "tsx scripts/check-llm-models.ts",
     "sync:reviews": "tsx scripts/sync-daily-reviews.ts"
   },
   "devDependencies": {

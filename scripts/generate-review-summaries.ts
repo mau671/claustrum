@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
 
 import { loadDatabaseEnv } from "./env.ts";
+import { DEFAULT_SUMMARY_AGENT, DEFAULT_SUMMARY_MODEL } from "./llm-config.ts";
 
 const { Pool } = pg;
 
@@ -29,20 +30,27 @@ function escapeSqlString(str: string): string {
   return str.replace(/'/g, "''");
 }
 
-function runOpenCodeAgent(prompt: string, timeoutMs = 45000): Promise<string> {
+interface AgentOptions {
+  bin: string;
+  agent: string;
+  model: string;
+  timeoutMs: number;
+}
+
+function runOpenCodeAgent(prompt: string, options: AgentOptions): Promise<string> {
   return new Promise((resolve, reject) => {
     const args = [
       "run",
       "--agent",
-      "professor-reviews-summarizer",
+      options.agent,
       "--model",
-      "cliproxy/gemini-3.8-flash#medium",
+      options.model,
       "--format",
       "json",
       prompt,
     ];
 
-    const child = spawn("opencode", args, {
+    const child = spawn(options.bin, args, {
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env },
     });
@@ -55,9 +63,9 @@ function runOpenCodeAgent(prompt: string, timeoutMs = 45000): Promise<string> {
       if (!isSettled) {
         isSettled = true;
         child.kill("SIGKILL");
-        reject(new Error(`opencode process timed out after ${timeoutMs}ms`));
+        reject(new Error(`opencode process timed out after ${options.timeoutMs}ms`));
       }
-    }, timeoutMs);
+    }, options.timeoutMs);
 
     child.stdout.on("data", (chunk: Buffer) => {
       stdout += chunk.toString("utf-8");
@@ -113,11 +121,78 @@ function runOpenCodeAgent(prompt: string, timeoutMs = 45000): Promise<string> {
   });
 }
 
+function readOption(args: string[], name: string): string | null {
+  const index = args.indexOf(name);
+  return index !== -1 && args[index + 1] ? args[index + 1] : null;
+}
+
+function readPositiveInt(
+  argValue: string | null,
+  envValue: string | undefined,
+  fallback: number,
+): number {
+  const raw = argValue ?? envValue;
+  const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function assertOpenCodeModel(bin: string, model: string): void {
+  try {
+    const listing = execFileSync(bin, ["models"], { encoding: "utf-8", timeout: 30000 });
+    const available = new Set(listing.split(/\s+/).filter(Boolean));
+    if (!available.has(model)) {
+      console.error(`❌ Model unavailable in the opencode catalog: ${model}`);
+      console.error(
+        "   Connect the opencode provider or set REVIEW_SUMMARY_MODEL / --model to an available model.",
+      );
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(
+      `❌ Could not run '${bin} models'. Is the opencode CLI installed and authenticated?`,
+      error,
+    );
+    process.exit(1);
+  }
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2).filter((arg) => arg !== "--");
   const isProd = args.includes("--prod");
   const isDryRun = args.includes("--dry-run");
   const isForce = args.includes("--force");
+
+  const model =
+    readOption(args, "--model") ?? process.env.REVIEW_SUMMARY_MODEL ?? DEFAULT_SUMMARY_MODEL;
+  const agent =
+    readOption(args, "--agent") ?? process.env.REVIEW_SUMMARY_AGENT ?? DEFAULT_SUMMARY_AGENT;
+  const timeoutMs = readPositiveInt(
+    readOption(args, "--timeout-ms"),
+    process.env.REVIEW_SUMMARY_TIMEOUT_MS,
+    45000,
+  );
+  const concurrency = readPositiveInt(
+    readOption(args, "--concurrency"),
+    process.env.REVIEW_SUMMARY_CONCURRENCY,
+    16,
+  );
+  const minReviews = readPositiveInt(
+    readOption(args, "--min-reviews"),
+    process.env.REVIEW_SUMMARY_MIN_REVIEWS,
+    10,
+  );
+  const minNew = readPositiveInt(
+    readOption(args, "--min-new"),
+    process.env.REVIEW_SUMMARY_MIN_NEW,
+    5,
+  );
+  const opencodeBin = process.env.OPENCODE_BIN ?? "opencode";
+  const skipModelCheck = args.includes("--skip-model-check");
+
+  if (!skipModelCheck) {
+    assertOpenCodeModel(opencodeBin, model);
+  }
+  console.log(`🤖 Summary model: ${model} (agent: ${agent})`);
 
   const limitIndex = args.indexOf("--limit");
   const limit =
@@ -168,8 +243,8 @@ async function main(): Promise<void> {
       LEFT JOIN public.professor_review_summary s ON s.professor_id = p.id
       ${targetProfId ? `WHERE p.id = ${targetProfId}` : ""}
       GROUP BY p.id, p.full_name, s.last_review_id_analyzed
-      HAVING COUNT(pr.id) > 10
-         ${isForce ? "" : "AND (s.last_review_id_analyzed IS NULL OR COUNT(CASE WHEN pr.id > s.last_review_id_analyzed THEN 1 END) >= 5)"}
+      HAVING COUNT(pr.id) > ${minReviews}
+         ${isForce ? "" : `AND (s.last_review_id_analyzed IS NULL OR COUNT(CASE WHEN pr.id > s.last_review_id_analyzed THEN 1 END) >= ${minNew})`}
       ORDER BY COUNT(pr.id) DESC
       ${limit ? `LIMIT ${limit}` : ""};
     `;
@@ -183,7 +258,7 @@ async function main(): Promise<void> {
 
     console.log(`📋 Found ${candidates.length} candidate(s) to process.\n`);
 
-    const CONCURRENCY = 16;
+    const CONCURRENCY = Math.min(concurrency, candidates.length);
     let completedCount = 0;
 
     async function processCandidate(candidate: ProfessorCandidate) {
@@ -224,10 +299,10 @@ async function main(): Promise<void> {
       try {
         let summary: string;
         try {
-          summary = await runOpenCodeAgent(prompt);
+          summary = await runOpenCodeAgent(prompt, { bin: opencodeBin, agent, model, timeoutMs });
         } catch {
           // Retry once on failure/timeout
-          summary = await runOpenCodeAgent(prompt);
+          summary = await runOpenCodeAgent(prompt, { bin: opencodeBin, agent, model, timeoutMs });
         }
 
         completedCount++;
@@ -306,7 +381,7 @@ async function main(): Promise<void> {
 
     const valuesSql = summaryEntries
       .map((entry) => {
-        return `    (${entry.professorId}, '${escapeSqlString(entry.summary)}', ${entry.approvedCount}, ${entry.maxReviewId}, 'cliproxy/gemini-3.8-flash#medium', NOW())`;
+        return `    (${entry.professorId}, '${escapeSqlString(entry.summary)}', ${entry.approvedCount}, ${entry.maxReviewId}, '${escapeSqlString(model)}', NOW())`;
       })
       .join(",\n");
 

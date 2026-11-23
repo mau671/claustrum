@@ -1,7 +1,7 @@
 ---
 description: Sintetiza reseñas estudiantiles de profesores en una redacción fluida en Markdown, sin divisiones genéricas ni símbolos distractores.
 mode: subagent
-model: cliproxy/gemini-3.8-flash#medium
+model: opencode/deepseek-v4.1-flash-free
 permissions:
   - action: edit
     resource: "*"

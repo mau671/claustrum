@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections import Counter
 from typing import Any
@@ -11,8 +12,13 @@ from unidecode import unidecode
 
 from reviews.text import normalize_course_text
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "meta-llama/llama-3.3-70b-instruct:free, nvidia/nemotron-3-super-120b-a12b:free, poolside/laguna-m.1:free"
+OPENROUTER_URL = os.getenv("OPENROUTER_API_URL", "https://openrouter.ai/api/v1/chat/completions")
+# Comma-separated list of models, tried in order. Override with COURSE_MATCH_MODELS.
+DEFAULT_MODEL = os.getenv(
+    "COURSE_MATCH_MODELS",
+    "nvidia/nemotron-3-ultra-550b-a55b:free, baidu/ernie-5.5-flash-preview:free, particle-ai/particle-1:free, nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+)
+
 COURSE_MATCH_PROMPT_VERSION = 7
 COURSE_FAMILY_PROMPT_VERSION = 3
 CONFIDENCE_ORDER = {"none": 0, "low": 1, "medium": 2, "high": 3}
@@ -1081,11 +1087,14 @@ def call_openrouter_for_course(*, api_key: str, model: str, professor_id: int, c
         "raw_tags": raw_tags,
         "course_options": course_options,
     }
-    models_list = [m.strip() for m in model.split(",")] if "," in model else [model]
-    
+    models_list = [m.strip() for m in model.split(",") if m.strip()] or [model]
+    timeout_seconds = float(os.getenv("OPENROUTER_TIMEOUT_SECONDS", "20"))
+    configured_attempts = int(os.getenv("OPENROUTER_ATTEMPTS", "0") or "0")
+    attempts = max(configured_attempts, len(models_list), 1)
+
     parsed = None
     last_error = None
-    for attempt in range(3):
+    for attempt in range(attempts):
         current_model = models_list[attempt % len(models_list)]
         payload = {
             "model": current_model,
@@ -1100,7 +1109,7 @@ def call_openrouter_for_course(*, api_key: str, model: str, professor_id: int, c
                 OPENROUTER_URL,
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json=payload,
-                timeout=15,
+                timeout=timeout_seconds,
             )
             response.raise_for_status()
             parsed = parse_json_content(response.json()["choices"][0]["message"]["content"])
@@ -1210,11 +1219,14 @@ def call_openrouter_for_course_family(*, api_key: str, model: str, professor_id:
         "raw_tags": raw_tags,
         "course_options": course_options,
     }
-    models_list = [m.strip() for m in model.split(",")] if "," in model else [model]
-    
+    models_list = [m.strip() for m in model.split(",") if m.strip()] or [model]
+    timeout_seconds = float(os.getenv("OPENROUTER_TIMEOUT_SECONDS", "20"))
+    configured_attempts = int(os.getenv("OPENROUTER_ATTEMPTS", "0") or "0")
+    attempts = max(configured_attempts, len(models_list), 1)
+
     parsed = None
     last_error = None
-    for attempt in range(3):
+    for attempt in range(attempts):
         current_model = models_list[attempt % len(models_list)]
         payload = {
             "model": current_model,
@@ -1229,7 +1241,7 @@ def call_openrouter_for_course_family(*, api_key: str, model: str, professor_id:
                 OPENROUTER_URL,
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json=payload,
-                timeout=15,
+                timeout=timeout_seconds,
             )
             response.raise_for_status()
             parsed = parse_json_content(response.json()["choices"][0]["message"]["content"])

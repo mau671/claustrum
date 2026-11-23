@@ -95,8 +95,35 @@ uv run reviews-sync-daily               # Python directo
 pnpm run sync:reviews                   # Tarea diaria unificada (detecta, descarga, procesa y aplica seeds)
 pnpm run sync:reviews -- --dry-run      # Vista previa sin descargar ni alterar la base
 pnpm run sync:reviews -- --prod         # Aplica a base de datos en producción
-pnpm run sync:reviews -- --summaries    # Dispara actualización de AI summaries si hubo reseñas nuevas
+pnpm run sync:reviews -- --skip-summaries  # Omite la fase de AI summaries
+pnpm run sync:reviews -- --push-branch mi-rama  # Rama destino del push (default: development)
+pnpm run check:models                   # Verifica los modelos LLM configurados
 ```
+
+### Modelos LLM
+
+El matching de cursos usa OpenRouter y los resúmenes usan el CLI de `opencode` con un modelo free del provider `opencode`. Todo se puede sobreescribir por entorno:
+
+| Variable | Default | Uso |
+| --- | --- | --- |
+| `OPENROUTER_API_KEY` | — | Requerida para el matching con LLM |
+| `OPENROUTER_API_URL` | `https://openrouter.ai/api/v1/chat/completions` | Endpoint alternativo/proxy |
+| `COURSE_MATCH_MODELS` | `nvidia/nemotron-3-ultra-550b-a55b:free, baidu/ernie-5.5-flash-preview:free, particle-ai/particle-1:free, nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | Lista de modelos en orden de fallback |
+| `OPENROUTER_TIMEOUT_SECONDS` | `20` | Timeout por llamada |
+| `OPENROUTER_ATTEMPTS` | número de modelos | Intentos totales entre la lista |
+| `REVIEW_SUMMARY_MODEL` | `opencode/deepseek-v4.1-flash-free` | Modelo de los resúmenes |
+| `REVIEW_SUMMARY_AGENT` | `professor-reviews-summarizer` | Agente de OpenCode |
+| `REVIEW_SUMMARY_TIMEOUT_MS` | `45000` | Timeout por profesor |
+| `REVIEW_SUMMARY_CONCURRENCY` | `16` | Profesores en paralelo |
+| `REVIEW_SUMMARY_MIN_REVIEWS` | `10` | Mínimo de reseñas aprobadas |
+| `REVIEW_SUMMARY_MIN_NEW` | `5` | Mínimo de reseñas nuevas desde el último resumen |
+| `OPENCODE_BIN` | `opencode` | Binario del CLI |
+| `SYNC_PUSH_BRANCH` | `development` | Rama del push automático |
+| `SYNC_SKIP_SUMMARIES` / `SYNC_NO_OPENROUTER` | `0` | Equivalentes a los flags |
+
+Los mismos valores se pueden pasar por flag (`--model`, `--llm-timeout`, `--llm-attempts`, `--timeout-ms`, `--concurrency`, `--min-reviews`, `--min-new`, `--push-branch`). El modelo usado se guarda en `professor_review_summary.model_used` en cada ejecución (la columna es nullable y no tiene default).
+
+Para usar los modelos free de `opencode` el provider debe estar habilitado en la configuración de OpenCode. Una política `provider.use` que solo permita `opencode-go` los oculta del catálogo y `check:models` lo reporta como `MISS`.
 
 Sincronización diaria rápida basada en snapshot del directorio de ITCR. En una única llamada HTTP (~1.5s) calcula si hubo incremento en el contador de reseñas de algún profesor (`m`), descarga y procesa únicamente los perfiles con cambios, y aplica los seeds generados.
 

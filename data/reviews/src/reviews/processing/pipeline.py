@@ -282,7 +282,9 @@ def prime_course_variations(raw_files: list[Path], all_courses: list[dict[str, A
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Process raw MisProfesores reviews into normalized JSON files.")
-    parser.add_argument("--model", default=DEFAULT_MODEL, help="OpenRouter model for ambiguous course matching.")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="OpenRouter model(s) for ambiguous course matching, comma-separated. Defaults to COURSE_MATCH_MODELS.")
+    parser.add_argument("--llm-timeout", type=float, default=None, help="OpenRouter request timeout in seconds. Defaults to OPENROUTER_TIMEOUT_SECONDS (20).")
+    parser.add_argument("--llm-attempts", type=int, default=None, help="OpenRouter attempts across the model list. Defaults to OPENROUTER_ATTEMPTS or the number of models.")
     parser.add_argument("--no-openrouter", action="store_true", help="Disable OpenRouter and only use deterministic matching.")
     parser.add_argument("--limit-files", type=int, default=None, help="Process only the first N raw page files.")
     parser.add_argument("--limit-professors", type=int, default=None, help="Process only the first N professors by raw folder order.")
@@ -302,6 +304,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     load_env_file(ROOT / ".env")
+    if args.llm_timeout is not None:
+        os.environ["OPENROUTER_TIMEOUT_SECONDS"] = str(args.llm_timeout)
+    if args.llm_attempts is not None:
+        os.environ["OPENROUTER_ATTEMPTS"] = str(args.llm_attempts)
     api_key = os.getenv("OPENROUTER_API_KEY")
     use_openrouter = not args.no_openrouter
     if use_openrouter and not api_key:

@@ -78,13 +78,26 @@ function runProcess(
   });
 }
 
+function isTruthyEnv(value: string | undefined): boolean {
+  return value === "1" || value === "true" || value === "yes";
+}
+
+function readOption(args: string[], name: string): string | null {
+  const index = args.indexOf(name);
+  return index !== -1 && args[index + 1] ? args[index + 1] : null;
+}
+
 async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2).filter((arg) => arg !== "--");
   const isProd = rawArgs.includes("--prod");
   const isDryRun = rawArgs.includes("--dry-run");
-  const isNoOpenRouter = rawArgs.includes("--no-openrouter");
-  const isSkipSummaries = rawArgs.includes("--skip-summaries");
+  const isNoOpenRouter =
+    rawArgs.includes("--no-openrouter") || isTruthyEnv(process.env.SYNC_NO_OPENROUTER);
+  const isSkipSummaries =
+    rawArgs.includes("--skip-summaries") || isTruthyEnv(process.env.SYNC_SKIP_SUMMARIES);
   const isGitPush = rawArgs.includes("--git-push");
+  const pushBranch =
+    readOption(rawArgs, "--push-branch") ?? process.env.SYNC_PUSH_BRANCH ?? "development";
 
   console.log("================================================================================");
   console.log("🚀 MisProfesores Unified Daily Sync, Seeding & Summaries");
@@ -282,10 +295,10 @@ async function main(): Promise<void> {
           ...syncPaths,
         ]);
         if (commitRes.code === 0) {
-          console.log("🚀 Pushing changes to origin development...");
-          const pushRes = await runProcess("git", ["push", "origin", "HEAD:development"]);
+          console.log(`🚀 Pushing changes to origin ${pushBranch}...`);
+          const pushRes = await runProcess("git", ["push", "origin", `HEAD:${pushBranch}`]);
           if (pushRes.code === 0) {
-            console.log("✅ Changes successfully pushed to origin development.");
+            console.log(`✅ Changes successfully pushed to origin ${pushBranch}.`);
           } else {
             console.error(
               "⚠️ Failed to push changes to remote repository:",

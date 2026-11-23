@@ -1,56 +1,16 @@
-import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
 export function resolveEnvFilePath(filename: string): string | null {
-  const directPath = path.resolve(process.cwd(), filename);
-  if (fs.existsSync(directPath)) {
-    return directPath;
-  }
+  const candidates = [
+    path.resolve(process.cwd(), filename),
+    path.resolve(import.meta.dirname, "..", filename),
+  ];
 
-  // If in a git worktree, resolve the main repository root
-  try {
-    const gitCommonDir = execSync("git rev-parse --git-common-dir", {
-      encoding: "utf-8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-
-    if (gitCommonDir) {
-      const mainRepoRoot = path.isAbsolute(gitCommonDir)
-        ? path.dirname(gitCommonDir)
-        : path.resolve(process.cwd(), path.dirname(gitCommonDir));
-      const candidatePath = path.join(mainRepoRoot, filename);
-
-      if (fs.existsSync(candidatePath)) {
-        // Create symlink in the current worktree for seamless access by child processes
-        try {
-          fs.symlinkSync(candidatePath, directPath);
-        } catch {
-          // Ignore error if symlink already exists or filesystem is read-only
-        }
-        return candidatePath;
-      }
-    }
-  } catch {
-    // Git command failed or not inside a git repository
-  }
-
-  // Check parent directories as fallback
-  let current = path.dirname(process.cwd());
-  while (current !== path.dirname(current)) {
-    const candidate = path.join(current, filename);
+  for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
-      try {
-        fs.symlinkSync(candidate, directPath);
-      } catch {
-        // Ignore symlink failure
-      }
       return candidate;
     }
-    if (fs.existsSync(path.join(current, ".git"))) {
-      break;
-    }
-    current = path.dirname(current);
   }
 
   return null;
@@ -89,6 +49,13 @@ export function loadDatabaseEnv(isProd: boolean): {
   const targetFile = isProd ? ".env.prod" : ".env.dev";
   const resolvedPath = resolveEnvFilePath(targetFile) || resolveEnvFilePath(".env");
   const env = resolvedPath ? parseEnvFile(resolvedPath) : {};
+
+  // Export the file values to child processes without overriding the real environment.
+  for (const [key, value] of Object.entries(env)) {
+    if (process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
 
   let connectionString = process.env.DATABASE_URL;
   if (!connectionString && env.DATABASE_URL) {

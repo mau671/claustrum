@@ -1,11 +1,41 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
+function mainRepositoryRoot(): string | null {
+  try {
+    const commonDir = execFileSync(
+      "git",
+      ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+      {
+        cwd: path.resolve(import.meta.dirname, ".."),
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+
+    return commonDir ? path.dirname(commonDir) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function resolveEnvFilePath(filename: string): string | null {
-  const candidates = [
-    path.resolve(process.cwd(), filename),
-    path.resolve(import.meta.dirname, "..", filename),
-  ];
+  const repoRoot = path.resolve(import.meta.dirname, "..");
+  const candidates: string[] = [];
+
+  if (process.env.ENV_FILE) {
+    candidates.push(path.resolve(process.env.ENV_FILE));
+  }
+
+  candidates.push(path.resolve(process.cwd(), filename), path.resolve(repoRoot, filename));
+
+  // T3 task worktrees do not contain gitignored .env files; read the main
+  // checkout's file instead of copying or linking secrets between trees.
+  const mainRoot = mainRepositoryRoot();
+  if (mainRoot) {
+    candidates.push(path.resolve(mainRoot, filename));
+  }
 
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {

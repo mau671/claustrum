@@ -645,7 +645,6 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
     const { data, error } = await signIn.email({
       email: normalizedEmail,
       password,
-      callbackURL: `${window.location.origin}/schedule`,
     });
 
     if (error) {

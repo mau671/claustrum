@@ -148,10 +148,19 @@ export function createAuth(env: AuthEnv, pool: Pool) {
       sendOnSignIn: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
+        const verificationUrl = new URL(url);
+        const callbackURL = verificationUrl.searchParams.get("callbackURL");
+
+        // Password sign-in does not set a callbackURL, so the default is "/".
+        // Point it to the app so verification does not route through the landing page.
+        if (!callbackURL || callbackURL === "/") {
+          verificationUrl.searchParams.set("callbackURL", `${getWebOrigin(env)}/schedule`);
+        }
+
         await sendAuthEmail(env, {
           to: user.email,
           subject: "Confirma tu correo para activar tu cuenta en Claustrum",
-          url,
+          url: verificationUrl.toString(),
           type: "email-verification",
         });
       },

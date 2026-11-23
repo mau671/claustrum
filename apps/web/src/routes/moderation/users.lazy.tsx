@@ -184,16 +184,16 @@ function UsersTableSkeleton() {
   return (
     <>
       {Array.from({ length: PAGE_SIZE }).map((_, index) => (
-        <TableRow key={index} className="border-border/70 border-b">
+        <TableRow key={index} className="h-14">
           <TableCell>
             <Skeleton className="size-4 rounded-[.25rem]" />
           </TableCell>
           <TableCell className="max-w-0">
             <div className="flex items-center gap-2.5">
               <Skeleton className="size-8 rounded-full" />
-              <div className="flex flex-col gap-1">
-                <Skeleton className={cn("h-3.5 rounded-sm", index % 2 ? "w-40" : "w-32")} />
-                <Skeleton className="h-2.5 w-48 rounded-sm" />
+              <div className="flex flex-col">
+                <Skeleton className={cn("h-5 rounded-sm", index % 2 ? "w-40" : "w-32")} />
+                <Skeleton className="h-4 w-48 rounded-sm" />
               </div>
             </div>
           </TableCell>
@@ -204,13 +204,13 @@ function UsersTableSkeleton() {
             <Skeleton className="h-5 w-16 rounded-sm" />
           </TableCell>
           <TableCell className="hidden lg:table-cell">
-            <Skeleton className="h-3.5 w-16 rounded-sm" />
+            <Skeleton className="h-4 w-16 rounded-sm" />
           </TableCell>
           <TableCell className="hidden md:table-cell">
-            <Skeleton className="h-3.5 w-20 rounded-sm" />
+            <Skeleton className="h-4 w-20 rounded-sm" />
           </TableCell>
           <TableCell>
-            <Skeleton className="h-6 w-20 rounded-sm" />
+            <Skeleton className="h-7 w-20 rounded-sm" />
           </TableCell>
         </TableRow>
       ))}
@@ -274,9 +274,12 @@ function AdminUsersPage() {
 
   const [searchInput, setSearchInput] = useState(searchTerm);
   const [previousSearchTerm, setPreviousSearchTerm] = useState(searchTerm);
+  const [lastTypedSearch, setLastTypedSearch] = useState(searchTerm);
   if (searchTerm !== previousSearchTerm) {
     setPreviousSearchTerm(searchTerm);
-    setSearchInput(searchTerm);
+    if (searchTerm !== lastTypedSearch) {
+      setSearchInput(searchTerm);
+    }
   }
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -789,7 +792,12 @@ function AdminUsersPage() {
               <InputGroupInput
                 type="search"
                 value={searchInput}
-                onChange={(event) => debouncedSearch(event.target.value)}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  setLastTypedSearch(next);
+                  setSearchInput(next);
+                  debouncedSearch(next);
+                }}
                 placeholder="Buscar por nombre o correo"
                 aria-label="Buscar usuarios"
               />
@@ -850,91 +858,102 @@ function AdminUsersPage() {
           </div>
         )}
 
-        <Table variant="card" className="table-fixed">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="hover:bg-transparent" key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const sort = header.column.getIsSorted();
-                  const columnSize = header.column.getSize();
-                  return (
-                    <TableHead
-                      key={header.id}
-                      aria-sort={
-                        sort === "asc" ? "ascending" : sort === "desc" ? "descending" : undefined
-                      }
-                      style={columnSize ? { width: `${columnSize}px` } : undefined}
-                      className={cn(
-                        (header.column.id === "emailVerified" ||
-                          header.column.id === "createdAt") &&
-                          "hidden lg:table-cell",
-                        header.column.id === "actions" && "text-right",
-                      )}
-                    >
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <button
-                          type="button"
-                          className="flex h-full w-full cursor-pointer items-center justify-between gap-2 select-none"
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: (
-                              <Icon
-                                icon={ChevronUpIcon}
-                                size={14}
-                                className="size-3.5 shrink-0 opacity-80"
-                              />
-                            ),
-                            desc: (
-                              <Icon
-                                icon={ChevronDownIcon}
-                                size={14}
-                                className="size-3.5 shrink-0 opacity-80"
-                              />
-                            ),
-                          }[sort as string] ?? null}
-                        </button>
-                      ) : (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {usersQuery.isLoading ? (
-              <UsersTableSkeleton />
-            ) : table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  <span className="text-muted-foreground text-sm">
-                    No se encontraron usuarios con esos filtros.
-                  </span>
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() ? "selected" : undefined}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        (cell.column.id === "emailVerified" || cell.column.id === "createdAt") &&
-                          "hidden lg:table-cell",
-                        cell.column.id === "actions" && "text-right",
-                      )}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+        <ScrollArea
+          fade="y"
+          hideScrollbar
+          className="min-h-0 flex-1"
+          viewportClassName="[&_[data-slot=table-container]]:overflow-visible"
+        >
+          <Table variant="card" className="table-fixed">
+            <TableHeader className="bg-card sticky top-0 z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow className="hover:bg-transparent" key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const sort = header.column.getIsSorted();
+                    const columnSize = header.column.getSize();
+                    return (
+                      <TableHead
+                        key={header.id}
+                        aria-sort={
+                          sort === "asc" ? "ascending" : sort === "desc" ? "descending" : undefined
+                        }
+                        style={columnSize ? { width: `${columnSize}px` } : undefined}
+                        className={cn(
+                          (header.column.id === "emailVerified" ||
+                            header.column.id === "createdAt") &&
+                            "hidden lg:table-cell",
+                          header.column.id === "actions" && "text-right",
+                        )}
+                      >
+                        {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                          <button
+                            type="button"
+                            className="flex h-full w-full cursor-pointer items-center justify-between gap-2 select-none"
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: (
+                                <Icon
+                                  icon={ChevronUpIcon}
+                                  size={14}
+                                  className="size-3.5 shrink-0 opacity-80"
+                                />
+                              ),
+                              desc: (
+                                <Icon
+                                  icon={ChevronDownIcon}
+                                  size={14}
+                                  className="size-3.5 shrink-0 opacity-80"
+                                />
+                              ),
+                            }[sort as string] ?? null}
+                          </button>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {usersQuery.isLoading ? (
+                <UsersTableSkeleton />
+              ) : table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    <span className="text-muted-foreground text-sm">
+                      No se encontraron usuarios con esos filtros.
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() ? "selected" : undefined}
+                    className="h-14"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          (cell.column.id === "emailVerified" || cell.column.id === "createdAt") &&
+                            "hidden lg:table-cell",
+                          cell.column.id === "actions" && "text-right",
+                        )}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
 
         <FrameFooter className="p-1.5 pt-2">
           <NumberedPagination
@@ -1072,8 +1091,10 @@ function AdminUsersPage() {
                 <Tabs defaultValue="sesiones" className="flex min-w-0 flex-col gap-3">
                   <div className="min-w-0 border-b">
                     <ScrollArea
-                      scrollFadeX
-                      className="w-full [&_[data-slot=scroll-area-scrollbar]]:opacity-0! [&_[data-slot=scroll-area-viewport]]:!h-auto [&_[data-slot=scroll-area-viewport]]:!overflow-y-hidden"
+                      fade="x"
+                      hideScrollbar
+                      className="w-full"
+                      viewportClassName="h-auto! overflow-y-hidden!"
                     >
                       <TabsList variant="underline" className="w-max min-w-full">
                         <TabsTab value="sesiones">Sesiones</TabsTab>

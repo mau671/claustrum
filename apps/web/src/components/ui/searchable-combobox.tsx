@@ -148,7 +148,7 @@ export function SearchableCombobox<T extends ComboboxItemShape>(props: Searchabl
           {clearable && hasValue && (
             <ComboboxTriggerClear
               aria-label={`Limpiar ${label.toLowerCase()}`}
-              className="end-2 top-1/2"
+              className="end-1 top-1/2 size-6"
             />
           )}
         </div>

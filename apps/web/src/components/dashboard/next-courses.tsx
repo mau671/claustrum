@@ -95,7 +95,7 @@ export function NextCourses({
             </p>
           </div>
         ) : (
-          <ScrollArea className="size-full min-h-0" scrollFade>
+          <ScrollArea className="size-full min-h-0" fade="y">
             <div className="grid grid-cols-2 gap-2 pb-1">
               {courses.map((course) => (
                 <CourseCard key={course.id} course={course} searchParams={searchParams} />

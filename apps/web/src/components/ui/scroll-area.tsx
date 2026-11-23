@@ -6,11 +6,15 @@ import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
 
 import { cn } from "@/lib/utils";
 
+export type ScrollFadeAxis = false | "auto" | "x" | "y" | "both";
+
 export function ScrollArea({
   className,
   children,
-  scrollFade = false,
-  scrollFadeX = false,
+  fade = false,
+  fadeSize,
+  hideScrollbar = false,
+  viewportClassName,
   scrollbarGutter = false,
   fill = false,
   clampContentMinWidth = true,
@@ -18,14 +22,26 @@ export function ScrollArea({
   viewportRef,
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
-  scrollFade?: boolean;
-  scrollFadeX?: boolean;
+  fade?: ScrollFadeAxis;
+  fadeSize?: string;
+  hideScrollbar?: boolean;
+  viewportClassName?: string;
   scrollbarGutter?: boolean;
   fill?: boolean;
   clampContentMinWidth?: boolean;
   overscrollContain?: boolean;
   viewportRef?: React.Ref<HTMLDivElement>;
 }): React.ReactElement {
+  const fadeBoth = fade === "auto" || fade === "both";
+  const fadeStyle =
+    fade === false
+      ? undefined
+      : ({
+          "--fade-x": fadeBoth || fade === "x" ? "var(--fade-size)" : "0px",
+          "--fade-y": fadeBoth || fade === "y" ? "var(--fade-size)" : "0px",
+          ...(fadeSize ? { "--fade-size": fadeSize } : {}),
+        } as React.CSSProperties);
+
   return (
     <ScrollAreaPrimitive.Root
       className={cn("size-full min-h-0 max-w-full min-w-0", className)}
@@ -37,11 +53,12 @@ export function ScrollArea({
           "focus-visible:ring-ring focus-visible:ring-offset-background h-full w-full max-w-full min-w-0 rounded-[inherit] transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
           overscrollContain &&
             "data-has-overflow-x:overscroll-x-contain data-has-overflow-y:overscroll-y-contain",
-          scrollFade && "scroll-fade",
-          scrollFadeX && "scroll-fade-x",
+          fade !== false && "scroll-fade",
           scrollbarGutter && "data-has-overflow-x:pb-2.5 data-has-overflow-y:pe-2.5",
+          viewportClassName,
         )}
         data-slot="scroll-area-viewport"
+        style={fadeStyle}
       >
         <ScrollAreaPrimitive.Content
           className={cn(fill && "size-full", "max-w-full min-w-0")}
@@ -51,8 +68,8 @@ export function ScrollArea({
           {children}
         </ScrollAreaPrimitive.Content>
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar orientation="vertical" />
-      <ScrollBar orientation="horizontal" />
+      <ScrollBar orientation="vertical" className={hideScrollbar ? "opacity-0!" : undefined} />
+      <ScrollBar orientation="horizontal" className={hideScrollbar ? "opacity-0!" : undefined} />
       <ScrollAreaPrimitive.Corner data-slot="scroll-area-corner" />
     </ScrollAreaPrimitive.Root>
   );

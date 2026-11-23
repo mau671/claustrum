@@ -327,7 +327,7 @@ export function ModerationStatusTabs<T extends string>({
   ];
 
   return (
-    <ScrollArea scrollFade className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden">
+    <ScrollArea fade="x" hideScrollbar className="w-full">
       <div className="flex w-max min-w-full items-center gap-1 px-0.5 text-xs">
         {tabs.map((tab) => {
           const isSelected = statusFilter === tab.value;

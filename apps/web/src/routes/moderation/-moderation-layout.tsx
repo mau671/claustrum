@@ -103,7 +103,7 @@ export function ModerationLayout() {
     <div className="flex min-h-full flex-1 flex-col gap-6 px-4 py-6 lg:h-[calc(100dvh-var(--header-height))] lg:min-h-0 lg:flex-none lg:overflow-hidden lg:px-6">
       {/* Tabs principales de moderación */}
       <div className="w-full">
-        <ScrollArea scrollFade className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden">
+        <ScrollArea fade="x" hideScrollbar className="w-full">
           <nav className="border-border/60 bg-muted/40 flex w-max min-w-full items-center gap-1.5 rounded-xl border p-1">
             {navItems.map((item) => {
               const isActive = location.pathname.startsWith(item.path);

@@ -9,7 +9,7 @@ import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, type ScrollFadeAxis } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 export const DialogCreateHandle: typeof DialogPrimitive.createHandle = DialogPrimitive.createHandle;
@@ -179,11 +179,11 @@ export function DialogDescription({
 
 export function DialogPanel({
   className,
-  scrollFade = true,
+  fade = "auto",
   render,
   ...props
 }: useRender.ComponentProps<"div"> & {
-  scrollFade?: boolean;
+  fade?: ScrollFadeAxis;
 }): React.ReactElement {
   const defaultProps = {
     className: cn(
@@ -194,7 +194,7 @@ export function DialogPanel({
   };
 
   return (
-    <ScrollArea overscrollContain scrollFade={scrollFade}>
+    <ScrollArea overscrollContain fade={fade}>
       {useRender({
         defaultTagName: "div",
         props: mergeProps<"div">(defaultProps, props),

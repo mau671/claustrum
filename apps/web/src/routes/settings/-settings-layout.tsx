@@ -55,11 +55,7 @@ export function SettingsLayout() {
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-4 lg:gap-6 lg:px-6 lg:py-6">
       {/* Tabs horizontales arriba en escritorio y móvil */}
       <div className="w-full">
-        <ScrollArea
-          scrollFade
-          viewportRef={tabsViewportRef}
-          className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden"
-        >
+        <ScrollArea fade="x" hideScrollbar viewportRef={tabsViewportRef} className="w-full">
           <nav className="border-border/60 bg-muted/40 flex w-max items-center gap-1.5 rounded-xl border p-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;

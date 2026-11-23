@@ -407,7 +407,7 @@ export function SidebarContent({
   ...props
 }: React.ComponentProps<"div">): React.ReactElement {
   return (
-    <ScrollArea className="min-h-0 flex-1" fill overscrollContain scrollFade>
+    <ScrollArea className="min-h-0 flex-1" fill overscrollContain fade="y">
       <div
         className={cn(
           "flex h-full flex-col gap-2 group-data-[collapsible=icon]:overflow-hidden",

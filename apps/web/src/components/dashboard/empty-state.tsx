@@ -204,7 +204,7 @@ export function NextCoursesSkeleton() {
         <div className="bg-muted-foreground/20 h-6 w-36 rounded" />
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col pt-0 pb-3">
-        <ScrollArea className="size-full min-h-0" scrollFade>
+        <ScrollArea className="size-full min-h-0" fade="y">
           <div className="grid grid-cols-2 gap-2 pb-1">
             {Array.from({ length: 4 }).map((_, index) => (
               <div

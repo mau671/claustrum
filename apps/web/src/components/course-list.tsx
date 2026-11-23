@@ -437,9 +437,10 @@ export default function CourseList({
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex-1 overflow-hidden">
         <ScrollArea
-          scrollFade
+          fade="auto"
           viewportRef={handleViewportRef}
-          className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:mr-0 [&_[data-slot=scroll-area-viewport]>div]:!block [&_[data-slot=scroll-area-viewport]>div]:!w-full"
+          className="h-full w-full [&_[data-slot=scroll-area-content]]:block [&_[data-slot=scroll-area-content]]:w-full [&_[data-slot=scroll-area-scrollbar][data-orientation=vertical]]:mr-0"
+          viewportClassName="[&>div]:!block [&>div]:!w-full"
         >
           {(isLoading && courses.length === 0) || !viewportEl ? (
             <CourseListSkeleton count={5} />

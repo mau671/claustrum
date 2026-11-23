@@ -13,7 +13,7 @@ import { createContext, useContext } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, type ScrollFadeAxis } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type DrawerPosition = "right" | "left" | "top" | "bottom";
@@ -300,13 +300,13 @@ export function DrawerDescription({
 
 export function DrawerPanel({
   className,
-  scrollFade = true,
+  fade = "auto",
   scrollable = true,
   allowSelection = true,
   render,
   ...props
 }: useRender.ComponentProps<"div"> & {
-  scrollFade?: boolean;
+  fade?: ScrollFadeAxis;
   scrollable?: boolean;
   allowSelection?: boolean;
 }): React.ReactElement {
@@ -327,11 +327,7 @@ export function DrawerPanel({
 
   if (scrollable) {
     return (
-      <ScrollArea
-        className="touch-auto *:data-[slot=scroll-area-viewport]:pb-0!"
-        overscrollContain
-        scrollFade={scrollFade}
-      >
+      <ScrollArea className="touch-auto" overscrollContain fade={fade} viewportClassName="pb-0!">
         {content}
       </ScrollArea>
     );

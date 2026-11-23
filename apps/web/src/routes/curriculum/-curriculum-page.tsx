@@ -1,4 +1,4 @@
-import { Alert02Icon, BookOpen01Icon, FloppyDiskIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, BookOpen01Icon } from "@hugeicons/core-free-icons";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -6,12 +6,11 @@ import type { CatalogCampus, CatalogStudyPlan } from "@/lib/types";
 
 import { MemoizedCurriculumBoard } from "@/components/curriculum/curriculum-board";
 import { CurriculumFilters } from "@/components/curriculum/curriculum-filters";
-import { Button } from "@/components/ui/button";
+import { ProfileDefaultsActions } from "@/components/profile-defaults-actions";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { sortTermsLogical } from "@/lib/academic-terms";
 import { useActiveStudyPlan } from "@/lib/hooks/use-active-study-plan";
@@ -422,42 +421,13 @@ export function CurriculumPage() {
               isVisible={filtersOpen}
               onVisibleChange={handleFiltersChange}
               actions={
-                <>
-                  {!!authUser && !!userStudyPlan && (
-                    <Button
-                      type="button"
-                      variant={isUsingProfileDefaults ? "secondary" : "outline"}
-                      size="sm"
-                      onClick={handleUseProfileDefaults}
-                      disabled={isUsingProfileDefaults}
-                      className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                    >
-                      <Icon icon={UserIcon} className="size-3.5" />
-                      {isUsingProfileDefaults ? "Perfil activo" : "Usar mi perfil"}
-                    </Button>
-                  )}
-                  {!authUser && (
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant={isUsingProfileDefaults ? "secondary" : "outline"}
-                            size="sm"
-                            onClick={handleSaveLocalPlan}
-                            onPointerDown={(e) => e.preventDefault()}
-                            disabled={isUsingProfileDefaults}
-                            className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                          />
-                        }
-                      >
-                        <Icon icon={FloppyDiskIcon} className="size-3.5" />
-                        {isUsingProfileDefaults ? "Guardado" : "Guardar"}
-                      </TooltipTrigger>
-                      <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
-                    </Tooltip>
-                  )}
-                </>
+                <ProfileDefaultsActions
+                  isActive={isUsingProfileDefaults}
+                  canUseProfile={Boolean(authUser && userStudyPlan)}
+                  isAuthenticated={Boolean(authUser)}
+                  onUseProfile={handleUseProfileDefaults}
+                  onSaveLocal={handleSaveLocalPlan}
+                />
               }
             />
           </div>

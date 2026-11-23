@@ -200,6 +200,27 @@ pre {
   }
 }
 
+@utility scroll-fade-x {
+  --fade-size: 1.5rem;
+
+  &[data-has-overflow-x] {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      black min(var(--fade-size), var(--scroll-area-overflow-x-start, 0px)),
+      black calc(100% - min(var(--fade-size), var(--scroll-area-overflow-x-end, var(--fade-size)))),
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      black min(var(--fade-size), var(--scroll-area-overflow-x-start, 0px)),
+      black calc(100% - min(var(--fade-size), var(--scroll-area-overflow-x-end, var(--fade-size)))),
+      transparent 100%
+    );
+  }
+}
+
 :root {
   --radius: 0.625rem;
   --background: var(--color-white);

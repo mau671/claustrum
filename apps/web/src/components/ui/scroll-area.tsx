@@ -10,6 +10,7 @@ export function ScrollArea({
   className,
   children,
   scrollFade = false,
+  scrollFadeX = false,
   scrollbarGutter = false,
   fill = false,
   clampContentMinWidth = true,
@@ -18,6 +19,7 @@ export function ScrollArea({
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
   scrollFade?: boolean;
+  scrollFadeX?: boolean;
   scrollbarGutter?: boolean;
   fill?: boolean;
   clampContentMinWidth?: boolean;
@@ -36,6 +38,7 @@ export function ScrollArea({
           overscrollContain &&
             "data-has-overflow-x:overscroll-x-contain data-has-overflow-y:overscroll-y-contain",
           scrollFade && "scroll-fade",
+          scrollFadeX && "scroll-fade-x",
           scrollbarGutter && "data-has-overflow-x:pb-2.5 data-has-overflow-y:pe-2.5",
         )}
         data-slot="scroll-area-viewport"

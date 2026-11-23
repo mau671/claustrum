@@ -85,6 +85,7 @@ import {
   useAdminUserNotifications,
   useAdminUsers,
   useAdminUserSessions,
+  usePrefetchAdminUserDetails,
   useUpdateAdminUserAcademicProfile,
   useBanAdminUser,
   useDeleteAdminUser,
@@ -327,11 +328,14 @@ function AdminUsersPage() {
     },
     isAdmin,
   );
-  const detailQuery = useAdminUser(isDetailOpen ? selectedId : null, isAdmin);
+  const users = usersQuery.data?.users ?? [];
+  const selectedRow = users.find((item) => item.id === selectedId) ?? null;
+  const detailQuery = useAdminUser(isDetailOpen ? selectedId : null, isAdmin, selectedRow);
   const updateRole = useUpdateAdminUserRole();
   const banUser = useBanAdminUser();
   const unbanUser = useUnbanAdminUser();
   const deleteUser = useDeleteAdminUser();
+  const prefetchDetails = usePrefetchAdminUserDetails();
   const updateIdentity = useUpdateAdminUserIdentity();
   const updateVerification = useUpdateAdminUserVerification();
   const updateAcademic = useUpdateAdminUserAcademicProfile();
@@ -476,6 +480,8 @@ function AdminUsersPage() {
             variant="ghost"
             size="sm"
             className="h-7 px-2 text-xs"
+            onPointerEnter={() => prefetchDetails(row.original.id, row.original)}
+            onFocus={() => prefetchDetails(row.original.id, row.original)}
             onClick={() => openDetail(row.original.id)}
           >
             Ver detalle
@@ -483,10 +489,9 @@ function AdminUsersPage() {
         ),
       },
     ],
-    [openDetail],
+    [openDetail, prefetchDetails],
   );
 
-  const users = usersQuery.data?.users ?? [];
   const total = usersQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hasMore = page < totalPages;
@@ -1107,8 +1112,8 @@ function AdminUsersPage() {
                 <Tabs defaultValue="sesiones" className="flex min-w-0 flex-col gap-3">
                   <div className="min-w-0 border-b">
                     <ScrollArea
-                      scrollFade
-                      className="w-full [&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:!h-auto [&_[data-slot=scroll-area-viewport]]:!overflow-y-hidden"
+                      scrollFadeX
+                      className="w-full [&_[data-slot=scroll-area-scrollbar]]:opacity-0! [&_[data-slot=scroll-area-viewport]]:!h-auto [&_[data-slot=scroll-area-viewport]]:!overflow-y-hidden"
                     >
                       <TabsList variant="underline" className="w-max min-w-full">
                         <TabsTab value="sesiones">Sesiones</TabsTab>

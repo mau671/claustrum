@@ -119,7 +119,7 @@ export function SearchableCombobox<T extends ComboboxItemShape>(props: Searchabl
           />
         </ComboboxChips>
       ) : (
-        <>
+        <div className="relative w-full">
           <ComboboxTrigger
             ref={triggerRef}
             id={id}
@@ -129,6 +129,7 @@ export function SearchableCombobox<T extends ComboboxItemShape>(props: Searchabl
                 variant="outline"
                 className={cn(
                   "h-8 w-full min-w-0 justify-between text-xs font-normal",
+                  clearable && hasValue && "pe-9",
                   triggerClassName,
                 )}
               />
@@ -142,12 +143,15 @@ export function SearchableCombobox<T extends ComboboxItemShape>(props: Searchabl
             >
               {triggerText}
             </span>
-            <Icon icon={UnfoldMoreIcon} size={14} className="-me-1! size-3.5 shrink-0 opacity-60" />
+            <Icon icon={UnfoldMoreIcon} size={14} className="size-3.5 shrink-0 opacity-60" />
           </ComboboxTrigger>
           {clearable && hasValue && (
-            <ComboboxTriggerClear aria-label={`Limpiar ${label.toLowerCase()}`} />
+            <ComboboxTriggerClear
+              aria-label={`Limpiar ${label.toLowerCase()}`}
+              className="end-2 top-1/2"
+            />
           )}
-        </>
+        </div>
       )}
 
       <ComboboxContent

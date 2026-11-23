@@ -2,10 +2,8 @@ import {
   Alert02Icon,
   ArrowDown01Icon,
   Calendar03Icon,
-  FloppyDiskIcon,
   GridViewIcon,
   ListViewIcon,
-  UserIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate, useSearch, ClientOnly } from "@tanstack/react-router";
@@ -33,6 +31,7 @@ import Calendar from "@/components/calendar/calendar";
 import { colorOptions } from "@/components/calendar/calendar-tailwind-classes";
 import CourseList from "@/components/course-list";
 import { CourseSearchInput } from "@/components/course-search-input";
+import { ProfileDefaultsActions } from "@/components/profile-defaults-actions";
 import { ScheduleCornerActions } from "@/components/schedule/schedule-corner-actions";
 import { ScheduleFilters } from "@/components/schedule/schedule-filters";
 import { CourseListSkeleton } from "@/components/schedule/schedule-skeletons";
@@ -40,7 +39,6 @@ import { SCHEDULE_DEFAULT_HOUR_HEIGHT } from "@/components/schedule/schedule-zoo
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { toast } from "@/components/ui/toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { sortTermsLogical } from "@/lib/academic-terms";
 import { apiClient } from "@/lib/api/client";
@@ -1295,42 +1293,13 @@ export function SchedulePage() {
                 isVisible={filtersOpen}
                 onVisibleChange={handleFiltersChange}
                 actions={
-                  <>
-                    {isAuthenticated && userStudyPlan && (
-                      <Button
-                        type="button"
-                        variant={isProfileActive ? "secondary" : "outline"}
-                        size="sm"
-                        onClick={handleUseProfileDefaults}
-                        disabled={isProfileActive}
-                        className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                      >
-                        <HugeiconsIcon icon={UserIcon} size={14} />
-                        {isProfileActive ? "Perfil activo" : "Usar mi perfil"}
-                      </Button>
-                    )}
-                    {!isAuthenticated && (
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              type="button"
-                              variant={isProfileActive ? "secondary" : "outline"}
-                              size="sm"
-                              onClick={handleSaveLocalPlan}
-                              onPointerDown={(e) => e.preventDefault()}
-                              disabled={isProfileActive}
-                              className="h-8 shrink-0 gap-1.5 rounded-lg text-xs"
-                            />
-                          }
-                        >
-                          <HugeiconsIcon icon={FloppyDiskIcon} size={14} />
-                          {isProfileActive ? "Guardado" : "Guardar"}
-                        </TooltipTrigger>
-                        <TooltipContent>Solo se guarda en este dispositivo</TooltipContent>
-                      </Tooltip>
-                    )}
-                  </>
+                  <ProfileDefaultsActions
+                    isActive={isProfileActive}
+                    canUseProfile={Boolean(isAuthenticated && userStudyPlan)}
+                    isAuthenticated={isAuthenticated}
+                    onUseProfile={handleUseProfileDefaults}
+                    onSaveLocal={handleSaveLocalPlan}
+                  />
                 }
               />
             </div>

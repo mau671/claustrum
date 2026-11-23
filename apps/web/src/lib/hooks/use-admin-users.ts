@@ -134,12 +134,19 @@ export function useAdminUsers(filters: AdminUsersFilters, enabled = true) {
   });
 }
 
-export function useAdminUser(id: string | null, enabled = true) {
-  return useQuery({
-    queryKey: ["adminUser", id],
-    queryFn: () => apiClient<AdminUser>(`/users/${encodeURIComponent(id ?? "")}`),
-    enabled: enabled && Boolean(id),
+export function adminUserQueryOptions(id: string, initialData?: AdminUser | null) {
+  return {
+    queryKey: ["adminUser", id] as const,
+    queryFn: () => apiClient<AdminUser>(`/users/${encodeURIComponent(id)}`),
     staleTime: 30_000,
+    ...(initialData ? { initialData } : {}),
+  };
+}
+
+export function useAdminUser(id: string | null, enabled = true, initialData?: AdminUser | null) {
+  return useQuery({
+    ...adminUserQueryOptions(id ?? "", initialData),
+    enabled: enabled && Boolean(id),
   });
 }
 
@@ -236,13 +243,19 @@ export function useUpdateAdminUserVerification() {
   });
 }
 
+export function adminUserAcademicProfileQueryOptions(id: string) {
+  return {
+    queryKey: ["adminUserAcademicProfile", id] as const,
+    queryFn: () =>
+      apiClient<UserAcademicProfile>(`/users/${encodeURIComponent(id)}/academic-profile`),
+    staleTime: 60_000,
+  };
+}
+
 export function useAdminUserAcademicProfile(id: string | null, enabled = true) {
   return useQuery({
-    queryKey: ["adminUserAcademicProfile", id],
-    queryFn: () =>
-      apiClient<UserAcademicProfile>(`/users/${encodeURIComponent(id ?? "")}/academic-profile`),
+    ...adminUserAcademicProfileQueryOptions(id ?? ""),
     enabled: enabled && Boolean(id),
-    staleTime: 60_000,
   });
 }
 
@@ -274,22 +287,34 @@ export function useUpdateAdminUserAcademicProfile() {
   });
 }
 
+export function adminUserFeedbackQueryOptions(id: string) {
+  return {
+    queryKey: ["adminUserFeedback", id] as const,
+    queryFn: () => apiClient<UserFeedbackItem[]>(`/users/${encodeURIComponent(id)}/feedback`),
+    staleTime: 60_000,
+  };
+}
+
 export function useAdminUserFeedback(id: string | null, enabled = true) {
   return useQuery({
-    queryKey: ["adminUserFeedback", id],
-    queryFn: () => apiClient<UserFeedbackItem[]>(`/users/${encodeURIComponent(id ?? "")}/feedback`),
+    ...adminUserFeedbackQueryOptions(id ?? ""),
     enabled: enabled && Boolean(id),
-    staleTime: 60_000,
   });
+}
+
+export function adminUserNotificationsQueryOptions(id: string) {
+  return {
+    queryKey: ["adminUserNotifications", id] as const,
+    queryFn: () =>
+      apiClient<UserNotificationItem[]>(`/users/${encodeURIComponent(id)}/notifications`),
+    staleTime: 30_000,
+  };
 }
 
 export function useAdminUserNotifications(id: string | null, enabled = true) {
   return useQuery({
-    queryKey: ["adminUserNotifications", id],
-    queryFn: () =>
-      apiClient<UserNotificationItem[]>(`/users/${encodeURIComponent(id ?? "")}/notifications`),
+    ...adminUserNotificationsQueryOptions(id ?? ""),
     enabled: enabled && Boolean(id),
-    staleTime: 30_000,
   });
 }
 
@@ -317,19 +342,36 @@ export function useSendAdminNotification() {
   });
 }
 
-export function useAdminUserSessions(id: string | null, enabled = true) {
-  return useQuery({
-    queryKey: ["adminUserSessions", id],
+export function adminUserSessionsQueryOptions(id: string) {
+  return {
+    queryKey: ["adminUserSessions", id] as const,
     queryFn: async (): Promise<UserSessionItem[]> => {
-      const result = await authClient.admin.listUserSessions({ userId: id ?? "" });
+      const result = await authClient.admin.listUserSessions({ userId: id });
       if (result.error) {
         throw new Error(result.error.message ?? "No se pudieron cargar las sesiones.");
       }
       return (result.data?.sessions ?? []) as UserSessionItem[];
     },
-    enabled: enabled && Boolean(id),
     staleTime: 30_000,
+  };
+}
+
+export function useAdminUserSessions(id: string | null, enabled = true) {
+  return useQuery({
+    ...adminUserSessionsQueryOptions(id ?? ""),
+    enabled: enabled && Boolean(id),
   });
+}
+
+export function usePrefetchAdminUserDetails() {
+  const queryClient = useQueryClient();
+  return (id: string, user: AdminUser) => {
+    queryClient.setQueryData(adminUserQueryOptions(id).queryKey, user);
+    void queryClient.prefetchQuery(adminUserAcademicProfileQueryOptions(id));
+    void queryClient.prefetchQuery(adminUserFeedbackQueryOptions(id));
+    void queryClient.prefetchQuery(adminUserNotificationsQueryOptions(id));
+    void queryClient.prefetchQuery(adminUserSessionsQueryOptions(id));
+  };
 }
 
 export function useRevokeAdminUserSession() {

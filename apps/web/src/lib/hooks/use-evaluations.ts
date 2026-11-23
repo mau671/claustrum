@@ -7,7 +7,11 @@ import {
   getEvaluationDocument,
   getEvaluationAnswersDocument,
   getEvaluationModerationQueue,
+  type BrowseEvaluationsParams,
   type EvaluationSearchParams,
+  getCourseTermEvaluations,
+  getEvaluationCourses,
+  getEvaluationTerms,
   searchEvaluations,
   moderateEvaluation,
   uploadEvaluation,
@@ -18,6 +22,33 @@ export function useCourseEvaluations(courseId: number | null, studyPlanId: numbe
     queryKey: ["courseEvaluations", courseId, studyPlanId],
     queryFn: () => getCourseEvaluations(courseId!, studyPlanId),
     enabled: courseId !== null,
+  });
+}
+
+export function useEvaluationCourses(params: BrowseEvaluationsParams) {
+  return useQuery({
+    queryKey: ["evaluationCourses", params],
+    queryFn: () => getEvaluationCourses(params),
+  });
+}
+
+export function useEvaluationTerms(courseId: number | null, params: BrowseEvaluationsParams) {
+  return useQuery({
+    queryKey: ["evaluationTerms", courseId, params],
+    queryFn: () => getEvaluationTerms(courseId!, params),
+    enabled: courseId !== null,
+  });
+}
+
+export function useCourseTermEvaluations(
+  courseId: number | null,
+  termKey: string | null,
+  params: BrowseEvaluationsParams,
+) {
+  return useQuery({
+    queryKey: ["courseTermEvaluations", courseId, termKey, params],
+    queryFn: () => getCourseTermEvaluations(courseId!, termKey!, params),
+    enabled: courseId !== null && termKey !== null,
   });
 }
 

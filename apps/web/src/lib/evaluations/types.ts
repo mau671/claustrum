@@ -68,6 +68,19 @@ export function formatEvaluationFileName(
   return variant !== null ? `${withExtraordinary}-V${variant}.pdf` : `${withExtraordinary}.pdf`;
 }
 
+export type EvaluationCourseItem = {
+  course_id: number;
+  code: string;
+  name: string;
+  total_count: number;
+};
+
+export type EvaluationTermItem = {
+  term_id: number | null;
+  label: string;
+  total_count: number;
+};
+
 export type EvaluationRow = {
   id: number;
   course_id: number;

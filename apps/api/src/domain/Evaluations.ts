@@ -28,6 +28,28 @@ export const SearchEvaluationsQuery = Schema.Struct({
 });
 export type SearchEvaluationsQuery = typeof SearchEvaluationsQuery.Type;
 
+export const BrowseEvaluationsQuery = Schema.Struct({
+  q: Schema.optional(Schema.String),
+  /** Comma-separated evaluation types. */
+  types: Schema.optional(Schema.String),
+});
+export type BrowseEvaluationsQuery = typeof BrowseEvaluationsQuery.Type;
+
+export const EvaluationCourseItem = Schema.Struct({
+  course_id: Schema.Number,
+  code: Schema.String,
+  name: Schema.String,
+  total_count: Schema.Number,
+});
+export type EvaluationCourseItem = typeof EvaluationCourseItem.Type;
+
+export const EvaluationTermItem = Schema.Struct({
+  term_id: Schema.NullOr(Schema.Number),
+  label: Schema.String,
+  total_count: Schema.Number,
+});
+export type EvaluationTermItem = typeof EvaluationTermItem.Type;
+
 export const EvaluationItem = Schema.Struct({
   id: Schema.Number,
   course_id: Schema.Number,

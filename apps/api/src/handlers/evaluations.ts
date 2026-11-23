@@ -10,9 +10,11 @@ import type { Env } from "../types";
 
 import { ClaustrumApi } from "../api/index";
 import {
+  type EvaluationCourseItem,
   type EvaluationDetail,
   type EvaluationItem,
   type EvaluationSearchRow,
+  type EvaluationTermItem,
   formatFileName,
   validateUploadPayload,
 } from "../domain/Evaluations";
@@ -229,6 +231,159 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
           }));
 
           return mapped;
+        }),
+      )
+      .handle("browseCourses", ({ query }) =>
+        Effect.gen(function* () {
+          const term = query.q?.trim() ?? "";
+          const pattern = term.length > 0 ? `%${term}%` : null;
+          const types =
+            query.types
+              ?.split(",")
+              .map((value) => value.trim())
+              .filter(Boolean) ?? [];
+
+          const rows = yield* sql<{
+            course_id: number | string;
+            code: string;
+            name: string;
+            total_count: number | string;
+          }>`
+              SELECT e.course_id, c.code, c.name, COUNT(*)::bigint AS total_count
+              FROM public.course_evaluations e
+              JOIN public.course c ON c.id = e.course_id
+              LEFT JOIN public.professor p ON p.id = e.professor_id
+              WHERE e.status = 'approved'
+                AND (${pattern}::text IS NULL OR
+                     c.code ILIKE ${pattern} OR
+                     c.name ILIKE ${pattern} OR
+                     p.full_name ILIKE ${pattern} OR
+                     e.name ILIKE ${pattern})
+                AND (${types.length}::int = 0 OR e.type::TEXT = ANY(${types}::text[]))
+              GROUP BY e.course_id, c.code, c.name
+              ORDER BY c.code
+            `.pipe(
+            Effect.mapError(
+              (e) =>
+                new InternalServerError({
+                  error: `Database error: ${e.message}`,
+                }),
+            ),
+          );
+
+          const mapped: EvaluationCourseItem[] = rows.map((r) => ({
+            course_id: Number(r.course_id),
+            code: r.code,
+            name: r.name,
+            total_count: Number(r.total_count),
+          }));
+          return mapped;
+        }),
+      )
+      .handle("browseTerms", ({ params, query }) =>
+        Effect.gen(function* () {
+          const term = query.q?.trim() ?? "";
+          const pattern = term.length > 0 ? `%${term}%` : null;
+          const types =
+            query.types
+              ?.split(",")
+              .map((value) => value.trim())
+              .filter(Boolean) ?? [];
+
+          const rows = yield* sql<{
+            term_id: number | string | null;
+            label: string;
+            total_count: number | string;
+          }>`
+              SELECT
+                e.term_id,
+                COALESCE(at.display_name, 'Sin período') AS label,
+                COUNT(*)::bigint AS total_count
+              FROM public.course_evaluations e
+              LEFT JOIN public.academic_term at ON at.id = e.term_id
+              LEFT JOIN public.professor p ON p.id = e.professor_id
+              WHERE e.status = 'approved'
+                AND e.course_id = ${params.courseId}
+                AND (${pattern}::text IS NULL OR
+                     p.full_name ILIKE ${pattern} OR
+                     e.name ILIKE ${pattern})
+                AND (${types.length}::int = 0 OR e.type::TEXT = ANY(${types}::text[]))
+              GROUP BY e.term_id, label, at.year, at.period_number
+              ORDER BY at.year DESC NULLS LAST, at.period_number DESC NULLS LAST, e.term_id DESC NULLS LAST
+            `.pipe(
+            Effect.mapError(
+              (e) =>
+                new InternalServerError({
+                  error: `Database error: ${e.message}`,
+                }),
+            ),
+          );
+
+          const mapped: EvaluationTermItem[] = rows.map((r) => ({
+            term_id: r.term_id !== null ? Number(r.term_id) : null,
+            label: r.label,
+            total_count: Number(r.total_count),
+          }));
+          return mapped;
+        }),
+      )
+      .handle("browseEvaluations", ({ params, query }) =>
+        Effect.gen(function* () {
+          const term = query.q?.trim() ?? "";
+          const pattern = term.length > 0 ? `%${term}%` : null;
+          const types =
+            query.types
+              ?.split(",")
+              .map((value) => value.trim())
+              .filter(Boolean) ?? [];
+          const noTerm = params.termId === "none";
+          const termId = noTerm ? null : Number(params.termId);
+
+          const rows = yield* sql<EvaluationDbRow>`
+              SELECT
+                e.id,
+                e.course_id,
+                c.code AS course_code,
+                c.name AS course_name,
+                e.term_id,
+                e.professor_id,
+                e.type::TEXT,
+                e.number,
+                e.name,
+                e.coordinated,
+                e.answers_included,
+                e.answers_separate,
+                e.file_key,
+                e.file_size,
+                e.answer_file_key,
+                e.status::TEXT,
+                e.created_at,
+                at.display_name AS term_display_name,
+                p.full_name AS professor_name,
+                e.extraordinary,
+                e.variant
+              FROM public.course_evaluations e
+              JOIN public.course c ON c.id = e.course_id
+              LEFT JOIN public.academic_term at ON at.id = e.term_id
+              LEFT JOIN public.professor p ON p.id = e.professor_id
+              WHERE e.status = 'approved'
+                AND e.course_id = ${params.courseId}
+                AND (${noTerm} OR e.term_id = ${termId})
+                AND (${pattern}::text IS NULL OR
+                     p.full_name ILIKE ${pattern} OR
+                     e.name ILIKE ${pattern})
+                AND (${types.length}::int = 0 OR e.type::TEXT = ANY(${types}::text[]))
+              ORDER BY e.type, e.number NULLS LAST, at.year DESC NULLS LAST, e.created_at DESC
+            `.pipe(
+            Effect.mapError(
+              (e) =>
+                new InternalServerError({
+                  error: `Database error: ${e.message}`,
+                }),
+            ),
+          );
+
+          return rows.map(mapEvaluationRow);
         }),
       )
       .handle("upload", ({ request }) =>

@@ -2,9 +2,12 @@ import { HttpApi, HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "effect/ht
 import * as Schema from "effect/Schema";
 
 import {
+  BrowseEvaluationsQuery,
+  EvaluationCourseItem,
   EvaluationDetail,
   EvaluationItem,
   EvaluationSearchRow,
+  EvaluationTermItem,
   GetEvaluationsQuery,
   ModerateEvaluationPayload,
   ModerateEvaluationResponse,
@@ -30,6 +33,26 @@ export class EvaluationsApiGroup extends HttpApiGroup.make("evaluations")
     HttpApiEndpoint.get("search", "/search", {
       query: SearchEvaluationsQuery,
       success: Schema.Array(EvaluationSearchRow),
+      error: [BadRequestError, InternalServerError],
+    }),
+    HttpApiEndpoint.get("browseCourses", "/courses", {
+      query: BrowseEvaluationsQuery,
+      success: Schema.Array(EvaluationCourseItem),
+      error: [BadRequestError, InternalServerError],
+    }),
+    HttpApiEndpoint.get("browseTerms", "/courses/:courseId/terms", {
+      params: { courseId: Schema.NumberFromString },
+      query: BrowseEvaluationsQuery,
+      success: Schema.Array(EvaluationTermItem),
+      error: [BadRequestError, InternalServerError],
+    }),
+    HttpApiEndpoint.get("browseEvaluations", "/courses/:courseId/terms/:termId/evaluations", {
+      params: {
+        courseId: Schema.NumberFromString,
+        termId: Schema.String,
+      },
+      query: BrowseEvaluationsQuery,
+      success: Schema.Array(EvaluationItem),
       error: [BadRequestError, InternalServerError],
     }),
     HttpApiEndpoint.post("upload", "/", {

@@ -41,6 +41,7 @@ type SharedProps<T extends ComboboxItemShape> = {
   showSearch?: boolean;
   searchThreshold?: number;
   triggerClassName?: string;
+  chipsClassName?: string;
   contentClassName?: string;
   listClassName?: string;
   id?: string;
@@ -80,6 +81,7 @@ export function SearchableCombobox<T extends ComboboxItemShape>(props: Searchabl
     showSearch,
     searchThreshold = COMBOBOX_SEARCH_THRESHOLD,
     triggerClassName,
+    chipsClassName,
     contentClassName,
     listClassName,
     container,
@@ -110,7 +112,7 @@ export function SearchableCombobox<T extends ComboboxItemShape>(props: Searchabl
       disabled={disabled}
     >
       {isMultiple ? (
-        <ComboboxChips>
+        <ComboboxChips className={chipsClassName}>
           {props.value.map((item) => (
             <ComboboxChip key={itemToString(item)}>{itemToString(item)}</ComboboxChip>
           ))}

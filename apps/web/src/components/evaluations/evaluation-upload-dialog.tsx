@@ -1,4 +1,4 @@
-import { FileUp, Minus, Plus, X } from "lucide-react";
+import { FileUp, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 import type { AcademicTerm, CourseDetailRelatedCourse, CourseRecentProfessor } from "@/lib/types";
@@ -15,13 +15,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ComboboxCollection,
-  ComboboxGroup,
-  ComboboxItem,
-  ComboboxLabel,
-  ComboboxSeparator,
-} from "@/components/ui/combobox";
 import {
   Dialog,
   DialogContent,
@@ -41,15 +34,18 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  NumberField,
+  NumberFieldDecrement,
+  NumberFieldGroup,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  formatClosedTermLabel,
-  formatTermNameWithoutYear,
-  groupTermsByYear,
-} from "@/lib/academic-terms";
+import { formatClosedTermLabel } from "@/lib/academic-terms";
 import { getTurnstileSiteKey } from "@/lib/env/public";
 import {
   EVALUATION_TYPE_LABELS,
@@ -163,7 +159,6 @@ export function EvaluationUploadDialog({
     () => offeringTermsQuery.data ?? [],
     [offeringTermsQuery.data],
   );
-  const academicTermGroups = useMemo(() => groupTermsByYear(academicTerms), [academicTerms]);
   const recentProfessors = useMemo<CourseRecentProfessor[]>(
     () => (normalizedTermId ? (recentProfessorsQuery.data ?? []) : []),
     [normalizedTermId, recentProfessorsQuery.data],
@@ -272,27 +267,6 @@ export function EvaluationUploadDialog({
     },
     [],
   );
-
-  const handleEvaluationNumberChange = (value: string) => {
-    if (value === "") {
-      setNumberInput("");
-      return;
-    }
-    if (!/^\d+$/.test(value)) return;
-    const parsed = Number(value);
-    if (Number.isNaN(parsed) || parsed <= 0) return;
-    setNumberInput(String(parsed));
-  };
-
-  const handleEvaluationNumberStep = (delta: number) => {
-    const currentValue = numberInput.trim() === "" ? 0 : Number(numberInput);
-    if (Number.isNaN(currentValue)) {
-      setNumberInput("1");
-      return;
-    }
-    const nextValue = Math.max(1, currentValue + delta);
-    setNumberInput(String(nextValue));
-  };
 
   const handleSubmit = async () => {
     if (!evaluationFile || !effectiveCourseId) return;
@@ -435,34 +409,20 @@ export function EvaluationUploadDialog({
                   ? "Selecciona un curso"
                   : "Sin períodos con oferta"
             }
-            items={academicTermGroups}
-            value={selectedTerm as unknown as (typeof academicTermGroups)[number] | null}
-            onValueChange={(term) =>
-              setTermId(term ? String((term as unknown as AcademicTerm).id) : "")
-            }
-            itemToString={(group) => group.value}
-            valueToString={(term) => formatClosedTermLabel(term as unknown as AcademicTerm)}
+            items={academicTerms}
+            value={selectedTerm}
+            onValueChange={(term) => {
+              setTermId(term ? String(term.id) : "");
+              setProfessorId("");
+            }}
+            itemToString={(term) => formatClosedTermLabel(term)}
             disabled={!effectiveCourseId || academicTerms.length === 0}
+            clearable
+            showSearch={false}
             emptyText="No se encontraron períodos."
             container={comboboxPortalContainerRef}
             listClassName="max-h-48 scrollbar-none"
-          >
-            {(group, index) => (
-              <ComboboxGroup key={group.value} items={group.items}>
-                <ComboboxLabel className="text-xs font-semibold">{group.value}</ComboboxLabel>
-                <ComboboxCollection>
-                  {(term) => (
-                    <ComboboxItem key={term.id} value={term}>
-                      <span className="block min-w-0 flex-1 truncate text-xs">
-                        {formatTermNameWithoutYear(term.display_name)}
-                      </span>
-                    </ComboboxItem>
-                  )}
-                </ComboboxCollection>
-                {index < academicTermGroups.length - 1 && <ComboboxSeparator />}
-              </ComboboxGroup>
-            )}
-          </SearchableCombobox>
+          />
         </div>
 
         <div className="space-y-2">
@@ -491,9 +451,9 @@ export function EvaluationUploadDialog({
       </div>
 
       {/* Type + Number / Custom name */}
-      <div className="space-y-2">
-        <Label htmlFor="evaluation-type">Tipo de evaluación</Label>
-        <div className="flex gap-3">
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <Label htmlFor="evaluation-type">Tipo de evaluación</Label>
           <SearchableCombobox
             id="evaluation-type"
             label="Tipo"
@@ -510,52 +470,50 @@ export function EvaluationUploadDialog({
             emptyText="No se encontraron tipos."
             container={comboboxPortalContainerRef}
             listClassName="max-h-48 scrollbar-none"
-            triggerClassName="w-44 justify-between"
+            triggerClassName="justify-between"
           />
-
-          {showNumberInput && (
-            <div className="flex flex-1 items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => handleEvaluationNumberStep(-1)}
-                aria-label="Disminuir número"
-              >
-                <Minus className="size-4" />
-              </Button>
-              <Input
-                className="min-w-0 overflow-hidden text-center text-ellipsis whitespace-nowrap [&::placeholder]:overflow-hidden [&::placeholder]:text-ellipsis [&::placeholder]:whitespace-nowrap"
-                type="text"
-                inputMode="numeric"
-                value={numberInput}
-                onChange={(event) => handleEvaluationNumberChange(event.target.value)}
-                placeholder="Número de evaluación"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => handleEvaluationNumberStep(1)}
-                aria-label="Aumentar número"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </div>
-          )}
-
-          {showNameInput && (
-            <div className="flex flex-1 items-center gap-2">
-              <Input
-                className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap [&::placeholder]:overflow-hidden [&::placeholder]:text-ellipsis [&::placeholder]:whitespace-nowrap"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Nombre de la evaluación"
-                maxLength={100}
-              />
-            </div>
-          )}
         </div>
+
+        {showNumberInput && (
+          <div className="space-y-2">
+            <Label htmlFor="evaluation-number">Número de evaluación</Label>
+            <NumberField
+              id="evaluation-number"
+              min={1}
+              max={99}
+              step={1}
+              value={numberInput.trim() === "" ? null : Number(numberInput)}
+              onValueChange={(value) =>
+                setNumberInput(
+                  value !== null && value !== undefined && !Number.isNaN(value)
+                    ? String(value)
+                    : "",
+                )
+              }
+              className="w-full"
+            >
+              <NumberFieldGroup className="h-9 w-full sm:h-9">
+                <NumberFieldDecrement aria-label="Disminuir número" />
+                <NumberFieldInput placeholder="Ej: 1" />
+                <NumberFieldIncrement aria-label="Aumentar número" />
+              </NumberFieldGroup>
+            </NumberField>
+          </div>
+        )}
+
+        {showNameInput && (
+          <div className="space-y-2">
+            <Label htmlFor="evaluation-name">Nombre de la evaluación</Label>
+            <Input
+              id="evaluation-name"
+              className="h-9 w-full"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Ej: Trabajo práctico"
+              maxLength={100}
+            />
+          </div>
+        )}
       </div>
 
       {/* Checkboxes */}
@@ -604,23 +562,30 @@ export function EvaluationUploadDialog({
           </Label>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Label htmlFor="variant" className="w-20 shrink-0 text-sm font-normal">
-            Variante
-          </Label>
-          <Input
-            id="variant"
-            type="text"
-            inputMode="numeric"
-            className="h-9 w-24"
-            value={variant}
-            onChange={(event) => setVariant(event.target.value.replace(/[^0-9]/g, ""))}
-            placeholder="Ej: 2"
-            maxLength={2}
-          />
-          <span className="text-muted-foreground text-xs">
-            Solo si hay varias versiones del mismo examen
-          </span>
+        <div className="space-y-2 pt-1">
+          <Label htmlFor="evaluation-variant">Variante</Label>
+          <NumberField
+            id="evaluation-variant"
+            min={1}
+            max={99}
+            step={1}
+            value={variant.trim() === "" ? null : Number(variant)}
+            onValueChange={(value) =>
+              setVariant(
+                value !== null && value !== undefined && !Number.isNaN(value) ? String(value) : "",
+              )
+            }
+            className="w-full"
+          >
+            <NumberFieldGroup className="h-9 w-full sm:h-9">
+              <NumberFieldDecrement aria-label="Disminuir variante" />
+              <NumberFieldInput placeholder="Ej: 2" />
+              <NumberFieldIncrement aria-label="Aumentar variante" />
+            </NumberFieldGroup>
+          </NumberField>
+          <p className="text-muted-foreground text-xs">
+            Solo si hay varias versiones del mismo examen.
+          </p>
         </div>
       </div>
 

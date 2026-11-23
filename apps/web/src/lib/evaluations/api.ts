@@ -1,8 +1,10 @@
 import type {
+  EvaluationCourseItem,
   EvaluationRow,
   EvaluationModerationRow,
   EvaluationSearchRow,
   EvaluationStatus,
+  EvaluationTermItem,
   EvaluationType,
   UploadEvaluationPayload,
 } from "@/lib/evaluations/types";
@@ -44,6 +46,48 @@ export async function searchEvaluations(
   query.set("offset", String(params.offset ?? 0));
 
   const data = await apiClient<EvaluationSearchRow[]>(`/evaluations/search?${query.toString()}`);
+  return data ?? [];
+}
+
+export interface BrowseEvaluationsParams {
+  q?: string;
+  types?: EvaluationType[];
+}
+
+function browseQuery(params: BrowseEvaluationsParams): string {
+  const query = new URLSearchParams();
+  if (params.q?.trim()) query.set("q", params.q.trim());
+  if (params.types && params.types.length > 0) query.set("types", params.types.join(","));
+  return query.toString();
+}
+
+export async function getEvaluationCourses(
+  params: BrowseEvaluationsParams,
+): Promise<EvaluationCourseItem[]> {
+  const data = await apiClient<EvaluationCourseItem[]>(
+    `/evaluations/courses?${browseQuery(params)}`,
+  );
+  return data ?? [];
+}
+
+export async function getEvaluationTerms(
+  courseId: number,
+  params: BrowseEvaluationsParams,
+): Promise<EvaluationTermItem[]> {
+  const data = await apiClient<EvaluationTermItem[]>(
+    `/evaluations/courses/${courseId}/terms?${browseQuery(params)}`,
+  );
+  return data ?? [];
+}
+
+export async function getCourseTermEvaluations(
+  courseId: number,
+  termKey: string,
+  params: BrowseEvaluationsParams,
+): Promise<EvaluationRow[]> {
+  const data = await apiClient<EvaluationRow[]>(
+    `/evaluations/courses/${courseId}/terms/${termKey}/evaluations?${browseQuery(params)}`,
+  );
   return data ?? [];
 }
 

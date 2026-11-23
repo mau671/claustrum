@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { searchEvaluations } from "@/lib/evaluations/api";
+import { getEvaluationCourses } from "@/lib/evaluations/api";
 import { EVALUATION_TYPE_LABELS, type EvaluationType } from "@/lib/evaluations/types";
 import { buildSeoMeta } from "@/lib/seo";
 
@@ -8,12 +8,19 @@ type EvaluationsSearchInput = Record<string, unknown>;
 
 export interface EvaluationsSearch {
   q?: string;
-  type?: EvaluationType;
-  page?: number;
+  types?: EvaluationType[];
 }
 
-const PAGE_SIZE = 25;
 const VALID_TYPES = Object.keys(EVALUATION_TYPE_LABELS) as EvaluationType[];
+
+function parseTypes(value: unknown): EvaluationType[] | undefined {
+  const raw = typeof value === "string" ? value.split(",") : Array.isArray(value) ? value : [];
+  const types = raw.filter(
+    (item): item is EvaluationType =>
+      typeof item === "string" && VALID_TYPES.includes(item as EvaluationType),
+  );
+  return types.length > 0 ? types : undefined;
+}
 
 export const Route = createFileRoute("/evaluations/")({
   head: () =>
@@ -25,26 +32,19 @@ export const Route = createFileRoute("/evaluations/")({
       urlPath: "/evaluations",
     }),
   validateSearch: (search: EvaluationsSearchInput): EvaluationsSearch => ({
-    q: typeof search.q === "string" ? search.q : undefined,
-    type:
-      typeof search.type === "string" && VALID_TYPES.includes(search.type as EvaluationType)
-        ? (search.type as EvaluationType)
-        : undefined,
-    page: search.page !== undefined ? Number(search.page) : undefined,
+    q: typeof search.q === "string" && search.q.trim() !== "" ? search.q : undefined,
+    types: parseTypes(search.types),
   }),
-  loaderDeps: ({ search }) => ({ q: search.q, type: search.type, page: search.page }),
+  loaderDeps: ({ search }) => ({ q: search.q, types: search.types }),
   loader: async ({ context: { queryClient }, deps }) => {
-    const page = deps.page ? Math.max(0, deps.page - 1) : 0;
     const params = {
       q: deps.q?.trim() || undefined,
-      type: deps.type,
-      limit: PAGE_SIZE,
-      offset: page * PAGE_SIZE,
+      types: deps.types,
     };
 
     await queryClient.ensureQueryData({
-      queryKey: ["evaluationSearch", params],
-      queryFn: () => searchEvaluations(params),
+      queryKey: ["evaluationCourses", params],
+      queryFn: () => getEvaluationCourses(params),
     });
   },
 });

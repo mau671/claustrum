@@ -8,68 +8,33 @@ import { useDebouncedCallback } from "@tanstack/react-pacer";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
-import { NumberedPagination } from "@/components/numbered-pagination";
-import { Frame, FrameFooter, FramePanel } from "@/components/ui/frame";
+import type { BrowseEvaluationsParams } from "@/lib/evaluations/api";
+
 import { Icon, MorphIcon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EVALUATION_TYPE_LABELS,
   formatEvaluationTypeLabel,
-  type EvaluationSearchRow,
+  type EvaluationCourseItem,
+  type EvaluationRow,
+  type EvaluationTermItem,
   type EvaluationType,
 } from "@/lib/evaluations/types";
-import { useEvaluationSearch } from "@/lib/hooks/use-evaluations";
+import {
+  useCourseTermEvaluations,
+  useEvaluationCourses,
+  useEvaluationTerms,
+} from "@/lib/hooks/use-evaluations";
 import { cn } from "@/lib/utils";
 
 const routeApi = getRouteApi("/evaluations/");
-const labelCollator = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
-const PAGE_SIZE = 25;
 const TYPE_OPTIONS = (Object.keys(EVALUATION_TYPE_LABELS) as EvaluationType[]).map((value) => ({
   value,
   label: EVALUATION_TYPE_LABELS[value],
 }));
-
-type DocumentNode = {
-  kind: "enunciado" | "solucion";
-  slug: string;
-  size: number | null;
-  includesAnswers: boolean;
-};
-
-type EvaluationNode = {
-  key: string;
-  label: string;
-  professor: string | null;
-  documents: DocumentNode[];
-};
-
-type TermNode = {
-  key: string;
-  label: string;
-  evaluations: EvaluationNode[];
-};
-
-type YearNode = {
-  key: string;
-  label: string;
-  terms: TermNode[];
-};
-
-type CourseNode = {
-  key: string;
-  code: string;
-  name: string;
-  years: YearNode[];
-};
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -77,94 +42,34 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function splitTerm(displayName: string | null): { year: string; term: string } {
-  if (!displayName) return { year: "Sin año", term: "Sin período" };
-  const [year, ...rest] = displayName.split(" - ");
-  return { year: year.trim(), term: rest.join(" - ").trim() || "Sin período" };
+function termsSkeleton() {
+  return (
+    <div className="space-y-2 py-2" aria-hidden="true">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-2 px-2">
+          <Skeleton className="size-3.5 shrink-0 rounded-sm" />
+          <Skeleton className={cn("h-4 rounded-sm", index === 0 ? "w-28" : "w-20")} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
-function termRank(label: string): number {
-  if (label.includes("SEMESTRE 1")) return 1;
-  if (label.includes("SEMESTRE 2")) return 2;
-  if (label.includes("VERANO")) return 3;
-  return 4;
-}
-
-function buildTree(rows: EvaluationSearchRow[]): CourseNode[] {
-  const courses = new Map<string, CourseNode>();
-
-  for (const row of rows) {
-    const courseKey = String(row.course_id);
-    let course = courses.get(courseKey);
-    if (!course) {
-      course = {
-        key: courseKey,
-        code: row.course_code,
-        name: row.course_name,
-        years: [],
-      };
-      courses.set(courseKey, course);
-    }
-
-    const { year: yearLabel, term: termLabel } = splitTerm(row.term_display_name);
-    let year = course.years.find((item) => item.label === yearLabel);
-    if (!year) {
-      year = { key: `${courseKey}/${yearLabel}`, label: yearLabel, terms: [] };
-      course.years.push(year);
-    }
-    let term = year.terms.find((item) => item.label === termLabel);
-    if (!term) {
-      term = { key: `${year.key}/${termLabel}`, label: termLabel, evaluations: [] };
-      year.terms.push(term);
-    }
-
-    term.evaluations.push({
-      key: String(row.id),
-      label: formatEvaluationTypeLabel(
-        row.type,
-        row.number,
-        row.name,
-        row.extraordinary,
-        row.variant,
-      ),
-      professor: row.professor_name,
-      documents: [
-        {
-          kind: "enunciado",
-          slug: `${row.id}.pdf`,
-          size: row.file_size,
-          includesAnswers: row.answers_included,
-        },
-        ...(row.answers_separate
-          ? [
-              {
-                kind: "solucion" as const,
-                slug: `${row.id}_answers.pdf`,
-                size: null,
-                includesAnswers: false,
-              },
-            ]
-          : []),
-      ],
-    });
-  }
-
-  return [...courses.values()]
-    .sort((a, b) => a.code.localeCompare(b.code))
-    .map((course) => ({
-      ...course,
-      years: course.years
-        .sort((a, b) => b.label.localeCompare(a.label))
-        .map((year) => ({
-          ...year,
-          terms: year.terms
-            .sort((a, b) => termRank(a.label) - termRank(b.label))
-            .map((term) => ({
-              ...term,
-              evaluations: term.evaluations.sort((a, b) => labelCollator.compare(a.label, b.label)),
-            })),
-        })),
-    }));
+function evaluationsSkeleton() {
+  return (
+    <div className="space-y-3 py-2" aria-hidden="true">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="px-2">
+          <Skeleton className={cn("h-4 rounded-sm", index === 0 ? "w-32" : "w-24")} />
+          {index === 0 && <Skeleton className="mt-1.5 h-3 w-40 rounded-sm" />}
+          <div className="mt-2 ml-4 space-y-1.5">
+            <Skeleton className="h-3 w-28 rounded-sm" />
+            {index === 0 && <Skeleton className="h-3 w-24 rounded-sm" />}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function GroupToggle({
@@ -184,7 +89,7 @@ function GroupToggle({
       onClick={onToggle}
       aria-expanded={expanded}
       className={cn(
-        "group/toggle hover:bg-muted/40 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
+        "hover:bg-muted/40 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
         className,
       )}
     >
@@ -198,7 +103,18 @@ function GroupToggle({
   );
 }
 
-function DocumentLink({ document, courseCode }: { document: DocumentNode; courseCode: string }) {
+function DocumentLink({
+  document,
+  courseCode,
+}: {
+  document: {
+    kind: "enunciado" | "solucion";
+    slug: string;
+    size: number | null;
+    includesAnswers: boolean;
+  };
+  courseCode: string;
+}) {
   const isSolution = document.kind === "solucion";
   return (
     <Link
@@ -229,19 +145,149 @@ function DocumentLink({ document, courseCode }: { document: DocumentNode; course
   );
 }
 
-function TreeSkeleton() {
+function EvaluationRowView({ row, courseCode }: { row: EvaluationRow; courseCode: string }) {
+  const label = formatEvaluationTypeLabel(
+    row.type,
+    row.number,
+    row.name,
+    row.extraordinary,
+    row.variant,
+  );
   return (
-    <div className="space-y-6 p-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="space-y-3">
-          <Skeleton className="h-5 w-48 rounded-sm" />
-          <div className="ml-6 space-y-2 border-l pl-4">
-            <Skeleton className="h-4 w-20 rounded-sm" />
-            <Skeleton className="h-4 w-28 rounded-sm" />
-            <Skeleton className="h-4 w-24 rounded-sm" />
-          </div>
+    <div className="py-1">
+      <div className="px-2">
+        <span className="text-foreground block text-sm font-medium">{label}</span>
+        {row.professor_name && (
+          <span className="text-muted-foreground block truncate text-xs">{row.professor_name}</span>
+        )}
+      </div>
+      <div className="mt-0.5 ml-4 flex flex-col gap-0.5 sm:ml-5">
+        <DocumentLink
+          document={{
+            kind: "enunciado",
+            slug: `${row.id}.pdf`,
+            size: row.file_size,
+            includesAnswers: row.answers_included,
+          }}
+          courseCode={courseCode}
+        />
+        {row.answers_separate && (
+          <DocumentLink
+            document={{
+              kind: "solucion",
+              slug: `${row.id}_answers.pdf`,
+              size: null,
+              includesAnswers: false,
+            }}
+            courseCode={courseCode}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TermGroup({
+  course,
+  term,
+  params,
+}: {
+  course: EvaluationCourseItem;
+  term: EvaluationTermItem;
+  params: BrowseEvaluationsParams;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const termKey = term.term_id === null ? "none" : String(term.term_id);
+  const evaluationsQuery = useCourseTermEvaluations(
+    expanded ? course.course_id : null,
+    expanded ? termKey : null,
+    params,
+  );
+
+  return (
+    <div className="py-0.5">
+      <GroupToggle
+        label={term.label}
+        expanded={expanded}
+        onToggle={() => setExpanded((value) => !value)}
+        className="text-muted-foreground text-xs tracking-wide uppercase"
+      />
+      {expanded && (
+        <div className="border-border/60 mt-1 ml-4 space-y-1 border-l pl-3 sm:ml-5">
+          {evaluationsQuery.isLoading ? (
+            evaluationsSkeleton()
+          ) : (evaluationsQuery.data ?? []).length === 0 ? (
+            <p className="text-muted-foreground px-2 py-2 text-xs">Sin evaluaciones.</p>
+          ) : (
+            (evaluationsQuery.data ?? []).map((row) => (
+              <EvaluationRowView key={row.id} row={row} courseCode={course.code} />
+            ))
+          )}
         </div>
-      ))}
+      )}
+    </div>
+  );
+}
+
+function groupByYear(terms: EvaluationTermItem[]): { year: string; terms: EvaluationTermItem[] }[] {
+  const groups = new Map<string, EvaluationTermItem[]>();
+  for (const term of terms) {
+    const year = term.label.split(" - ")[0].trim();
+    const bucket = groups.get(year) ?? [];
+    bucket.push(term);
+    groups.set(year, bucket);
+  }
+  return [...groups.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([year, items]) => ({ year, terms: items }));
+}
+
+function CourseGroup({
+  course,
+  params,
+}: {
+  course: EvaluationCourseItem;
+  params: BrowseEvaluationsParams;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const termsQuery = useEvaluationTerms(expanded ? course.course_id : null, params);
+  const years = useMemo(() => groupByYear(termsQuery.data ?? []), [termsQuery.data]);
+
+  return (
+    <div className="py-2">
+      <GroupToggle
+        label={`${course.code}: ${course.name}`}
+        expanded={expanded}
+        onToggle={() => setExpanded((value) => !value)}
+        className="py-2 text-sm"
+      />
+      {expanded && (
+        <div className="border-border/60 mt-1 ml-4 space-y-2 border-l pl-3 sm:ml-5">
+          {termsQuery.isLoading ? (
+            termsSkeleton()
+          ) : years.length === 0 ? (
+            <p className="text-muted-foreground px-2 py-2 text-xs">Sin períodos registrados.</p>
+          ) : (
+            years.map((group) => (
+              <div key={group.year}>
+                <div className="text-muted-foreground px-2 font-mono text-xs tracking-wide">
+                  {group.year}
+                </div>
+                <div className="border-border/60 mt-1 ml-4 space-y-0.5 border-l pl-3 sm:ml-5">
+                  {group.terms.map((term) => (
+                    <TermGroup
+                      key={term.term_id ?? "none"}
+                      course={course}
+                      term={term}
+                      params={params}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -257,57 +303,30 @@ export function EvaluationsPage() {
     setSearchTerm(search.q ?? "");
   }
 
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
-
   const updateSearchUrl = useDebouncedCallback(
     (query: string) => {
       void navigate({
-        search: (prev) => ({ ...prev, q: query.trim() || undefined, page: undefined }),
+        search: (prev) => ({ ...prev, q: query.trim() || undefined }),
         replace: true,
       });
     },
     { wait: 300 },
   );
 
-  const page = search.page ? Math.max(0, search.page - 1) : 0;
-  const setPage = (newPage: number) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        page: newPage === 0 ? undefined : newPage + 1,
-      }),
-      replace: true,
-    });
-  };
+  const params = useMemo<BrowseEvaluationsParams>(
+    () => ({ q: search.q?.trim() || undefined, types: search.types }),
+    [search.q, search.types],
+  );
+  const coursesQuery = useEvaluationCourses(params);
+  const courses = useMemo(() => coursesQuery.data ?? [], [coursesQuery.data]);
 
-  const params = useMemo(
-    () => ({
-      q: search.q?.trim() || undefined,
-      type: search.type,
-      limit: PAGE_SIZE,
-      offset: page * PAGE_SIZE,
-    }),
-    [search.q, search.type, page],
+  const selectedTypes = useMemo(
+    () => TYPE_OPTIONS.filter((option) => (search.types ?? []).includes(option.value)),
+    [search.types],
   );
 
-  const query = useEvaluationSearch(params);
-  const rows = useMemo(() => query.data ?? [], [query.data]);
-  const tree = useMemo(() => buildTree(rows), [rows]);
-  const totalCount = rows[0]?.total_count ?? 0;
-  const totalPages = totalCount === 0 ? 1 : Math.ceil(totalCount / PAGE_SIZE);
-  const hasMore = page + 1 < totalPages;
-
-  const toggle = (key: string) => {
-    setCollapsed((previous) => {
-      const next = new Set(previous);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
   return (
-    <div className="flex flex-1 flex-col gap-6 px-4 py-6 lg:px-6">
+    <div className="flex flex-1 flex-col gap-5 px-4 py-6 lg:px-6">
       <header className="sr-only">
         <h1>Evaluaciones y exámenes del TEC</h1>
         <p>
@@ -332,129 +351,50 @@ export function EvaluationsPage() {
             }}
           />
         </div>
-        <div className="flex w-full flex-col gap-2 sm:w-52">
-          <Label htmlFor="evaluation-type">Tipo de evaluación</Label>
-          <Select
+        <div className="flex w-full flex-col gap-2 sm:w-72">
+          <Label>Tipo de evaluación</Label>
+          <SearchableCombobox
+            label="Tipo de evaluación"
+            placeholder="Todos los tipos"
             items={TYPE_OPTIONS}
-            value={search.type ?? null}
-            onValueChange={(value) => {
+            value={selectedTypes}
+            onValueChange={(options) => {
+              const types = options.map((option) => option.value);
               void navigate({
-                search: (prev) => ({
-                  ...prev,
-                  type: (value as EvaluationType | null) ?? undefined,
-                  page: undefined,
-                }),
+                search: (prev) => ({ ...prev, types: types.length > 0 ? types : undefined }),
                 replace: true,
               });
             }}
-          >
-            <SelectTrigger id="evaluation-type">
-              <SelectValue placeholder="Todos los tipos" />
-            </SelectTrigger>
-            <SelectContent>
-              {TYPE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            itemToString={(option) => option.label}
+            multiple
+            chipsClassName="min-h-9 sm:min-h-9"
+            listClassName="max-h-48 scrollbar-none"
+          />
         </div>
       </div>
 
-      <Frame className="w-full">
-        <FramePanel className="p-2">
-          {query.isLoading ? (
-            <TreeSkeleton />
-          ) : tree.length === 0 ? (
-            <div className="flex h-24 items-center justify-center">
-              <span className="text-muted-foreground text-sm">
-                No hay evaluaciones para los filtros seleccionados.
-              </span>
+      {coursesQuery.isLoading ? (
+        <div className="space-y-2" aria-hidden="true">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="flex items-center gap-2 px-2 py-2">
+              <Skeleton className="size-3.5 shrink-0 rounded-sm" />
+              <Skeleton className={cn("h-4 rounded-sm", index % 2 === 0 ? "w-56" : "w-44")} />
             </div>
-          ) : (
-            <div className="divide-border/60 divide-y">
-              {tree.map((course) => {
-                const courseExpanded = !collapsed.has(course.key);
-                return (
-                  <div key={course.key} className="px-2 py-1.5">
-                    <GroupToggle
-                      label={`${course.code}: ${course.name}`}
-                      expanded={courseExpanded}
-                      onToggle={() => toggle(course.key)}
-                      className="py-2"
-                    />
-
-                    {courseExpanded && (
-                      <div className="border-border/60 ml-4 space-y-1 border-l pt-1 pl-3 sm:ml-5">
-                        {course.years.map((year) => {
-                          const yearExpanded = !collapsed.has(year.key);
-                          return (
-                            <div key={year.key}>
-                              <GroupToggle
-                                label={year.label}
-                                expanded={yearExpanded}
-                                onToggle={() => toggle(year.key)}
-                                className="font-mono text-xs tracking-wide"
-                              />
-
-                              {yearExpanded && (
-                                <div className="border-border/60 ml-4 space-y-1 border-l pl-3 sm:ml-5">
-                                  {year.terms.map((term) => (
-                                    <div key={term.key} className="py-1">
-                                      <div className="text-muted-foreground px-2 text-[11px] font-medium tracking-wide uppercase">
-                                        {term.label}
-                                      </div>
-                                      <div className="border-border/60 mt-1 ml-4 space-y-1 border-l pl-3 sm:ml-5">
-                                        {term.evaluations.map((evaluation) => (
-                                          <div key={evaluation.key} className="py-1">
-                                            <div className="px-2">
-                                              <span className="text-foreground block text-sm font-medium">
-                                                {evaluation.label}
-                                              </span>
-                                              {evaluation.professor && (
-                                                <span className="text-muted-foreground block truncate text-xs">
-                                                  {evaluation.professor}
-                                                </span>
-                                              )}
-                                            </div>
-                                            <div className="mt-0.5 ml-4 flex flex-col gap-0.5 sm:ml-5">
-                                              {evaluation.documents.map((document) => (
-                                                <DocumentLink
-                                                  key={document.kind}
-                                                  document={document}
-                                                  courseCode={course.code}
-                                                />
-                                              ))}
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </FramePanel>
-        <FrameFooter className="p-1.5 pt-2">
-          <NumberedPagination
-            page={page}
-            totalPages={totalPages}
-            hasMore={hasMore}
-            isFetching={query.isFetching}
-            onPageChange={setPage}
-          />
-        </FrameFooter>
-      </Frame>
+          ))}
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="flex h-24 items-center justify-center">
+          <span className="text-muted-foreground text-sm">
+            No hay evaluaciones para los filtros seleccionados.
+          </span>
+        </div>
+      ) : (
+        <div className="divide-border/60 divide-y">
+          {courses.map((course) => (
+            <CourseGroup key={course.course_id} course={course} params={params} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

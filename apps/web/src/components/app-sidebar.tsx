@@ -131,12 +131,14 @@ export function AppSidebar() {
     : null;
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <aside
-        data-state={isExpanded ? "expanded" : "collapsed"}
-        data-user-menu={isUserMenuOpen ? "open" : "closed"}
-        className="peer/sidebar group/sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out data-[state=expanded]:w-72 md:flex"
-      >
+    <div
+      className="peer/sidebar group/sidebar contents"
+      data-state={isExpanded ? "expanded" : "collapsed"}
+      data-user-menu={isUserMenuOpen ? "open" : "closed"}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <aside className="text-sidebar-foreground fixed inset-y-0 left-0 z-50 hidden w-20 flex-col overflow-hidden bg-transparent px-4 pt-1 pb-4 transition-[width] duration-200 ease-out group-data-[state=expanded]/sidebar:w-72 md:flex">
         <Link
           to={user ? "/curriculum" : "/schedule"}
           preload="intent"

@@ -866,7 +866,13 @@ function AdminUsersPage() {
           viewportClassName="[&_[data-slot=table-container]]:overflow-visible"
         >
           <Table variant="card" className="table-fixed">
-            <TableHeader className="bg-muted/72 sticky top-0 z-10">
+            <TableHeader
+              className="sticky top-0 z-10"
+              style={{
+                backgroundColor:
+                  "color-mix(in oklab, var(--color-muted) 72%, var(--color-background))",
+              }}
+            >
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow className="hover:bg-transparent" key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {

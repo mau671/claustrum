@@ -82,6 +82,52 @@ function isTruthyEnv(value: string | undefined): boolean {
   return value === "1" || value === "true" || value === "yes";
 }
 
+function parseDailySyncOutput(raw: string): DailySyncOutput {
+  const trimmed = raw.trim();
+  try {
+    return JSON.parse(trimmed) as DailySyncOutput;
+  } catch {
+    // Nested pipeline stages may still print human-readable output to stdout.
+    // Recover the JSON payload by isolating the first balanced object.
+    const start = trimmed.indexOf("{");
+    if (start === -1) {
+      throw new Error("No JSON payload found in daily sync output.");
+    }
+
+    let depth = 0;
+    let isInString = false;
+    let isEscaped = false;
+
+    for (let index = start; index < trimmed.length; index += 1) {
+      const char = trimmed[index];
+
+      if (isInString) {
+        if (isEscaped) {
+          isEscaped = false;
+        } else if (char === "\\") {
+          isEscaped = true;
+        } else if (char === '"') {
+          isInString = false;
+        }
+        continue;
+      }
+
+      if (char === '"') {
+        isInString = true;
+      } else if (char === "{") {
+        depth += 1;
+      } else if (char === "}") {
+        depth -= 1;
+        if (depth === 0) {
+          return JSON.parse(trimmed.slice(start, index + 1)) as DailySyncOutput;
+        }
+      }
+    }
+
+    throw new Error("Unbalanced JSON payload in daily sync output.");
+  }
+}
+
 function readOption(args: string[], name: string): string | null {
   const index = args.indexOf(name);
   return index !== -1 && args[index + 1] ? args[index + 1] : null;
@@ -136,7 +182,7 @@ async function main(): Promise<void> {
 
   let syncResult: DailySyncOutput;
   try {
-    syncResult = JSON.parse(pythonRes.stdout.trim()) as DailySyncOutput;
+    syncResult = parseDailySyncOutput(pythonRes.stdout);
   } catch {
     console.error("❌ Failed to parse JSON response from daily sync:");
     console.error(pythonRes.stdout);
@@ -296,20 +342,38 @@ async function main(): Promise<void> {
         ]);
         if (commitRes.code === 0) {
           console.log(`🚀 Pushing changes to origin ${pushBranch}...`);
-          const pushRes = await runProcess("git", ["push", "origin", `HEAD:${pushBranch}`]);
+          let pushRes = await runProcess("git", ["push", "origin", `HEAD:${pushBranch}`]);
+
+          // Another scheduled run or a human may have pushed in the meantime.
+          // Rebase onto the remote tip once and retry before giving up.
+          if (pushRes.code !== 0) {
+            console.log(`↻ Push rejected, rebasing onto origin/${pushBranch} and retrying...`);
+            const rebaseRes = await runProcess("git", ["pull", "--rebase", "origin", pushBranch]);
+            if (rebaseRes.code !== 0) {
+              console.error(
+                "❌ Failed to rebase onto the remote branch:",
+                rebaseRes.stderr || rebaseRes.stdout,
+              );
+              process.exit(1);
+            }
+            pushRes = await runProcess("git", ["push", "origin", `HEAD:${pushBranch}`]);
+          }
+
           if (pushRes.code === 0) {
             console.log(`✅ Changes successfully pushed to origin ${pushBranch}.`);
           } else {
             console.error(
-              "⚠️ Failed to push changes to remote repository:",
+              "❌ Failed to push changes to remote repository:",
               pushRes.stderr || pushRes.stdout,
             );
+            process.exit(1);
           }
         } else {
           console.error(
-            "⚠️ Failed to commit review sync output:",
+            "❌ Failed to commit review sync output:",
             commitRes.stderr || commitRes.stdout,
           );
+          process.exit(1);
         }
       }
     }

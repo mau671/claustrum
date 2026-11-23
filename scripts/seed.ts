@@ -49,6 +49,46 @@ function parseSeedMetadata(content: string, defaultScope: string): SeedMeta {
   return { scope, years, termExternalKeys };
 }
 
+function extractReviewImportKeys(content: string): string[] {
+  const matches = content.matchAll(/'([0-9a-f]{64})'::TEXT/g);
+  return [...new Set([...matches].map((match) => match[1]))];
+}
+
+async function markSeedApplied(
+  client: pg.PoolClient,
+  seed: {
+    file: string;
+    sha: string;
+    scope: string;
+    years: number[];
+    termExternalKeys: string[];
+  },
+): Promise<void> {
+  await client.query(
+    `INSERT INTO public.sync_seed_run (
+      seed_file_name,
+      seed_sha256,
+      scope,
+      years,
+      term_external_keys,
+      generated_at_utc,
+      applied_at_utc,
+      status,
+      metadata
+    ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), 'applied', '{}'::jsonb)
+    ON CONFLICT (seed_sha256) DO UPDATE SET
+      seed_file_name = EXCLUDED.seed_file_name,
+      scope = EXCLUDED.scope,
+      years = EXCLUDED.years,
+      term_external_keys = EXCLUDED.term_external_keys,
+      applied_at_utc = NOW(),
+      status = 'applied',
+      error_message = NULL,
+      updated_at = NOW();`,
+    [seed.file, seed.sha, seed.scope, seed.years, seed.termExternalKeys],
+  );
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2).filter((arg) => arg !== "--");
   const isProd = args.includes("--prod");
@@ -158,14 +198,38 @@ async function main(): Promise<void> {
         continue;
       }
 
+      const defaultScope = isSummaries ? "review_summaries" : isReviews ? "reviews" : "all";
+      const { scope, years, termExternalKeys } = parseSeedMetadata(content, defaultScope);
+
+      // Legacy review seeds generated before the current schema (or applied
+      // before sync_seed_run was reset) would fail on stale column types even
+      // though their reviews are already imported. Their import keys are the
+      // idempotency key, so treat a file whose reviews are all present as
+      // already applied instead of executing it again.
+      if (scope === "reviews") {
+        const importKeys = extractReviewImportKeys(content);
+        if (importKeys.length > 0) {
+          const { rows: presentRows } = await client.query<{ present: string }>(
+            "SELECT count(DISTINCT import_key)::text AS present FROM public.professor_review WHERE import_key = ANY($1::text[]);",
+            [importKeys],
+          );
+          if (Number(presentRows[0].present) === importKeys.length) {
+            console.log(`  [skip] ${file} (reviews already imported)`);
+            if (!isDryRun) {
+              await markSeedApplied(client, { file, sha, scope, years, termExternalKeys });
+              appliedShas.add(sha);
+            }
+            skippedCount++;
+            continue;
+          }
+        }
+      }
+
       if (isDryRun) {
         console.log(`  [dry-run] Would apply ${file} (sha: ${sha.slice(0, 10)}...)`);
         appliedCount++;
         continue;
       }
-
-      const defaultScope = isSummaries ? "review_summaries" : isReviews ? "reviews" : "all";
-      const { scope, years, termExternalKeys } = parseSeedMetadata(content, defaultScope);
 
       console.log(`  [apply] ${file} (scope: ${scope})...`);
       const startTime = Date.now();
@@ -173,29 +237,7 @@ async function main(): Promise<void> {
       try {
         await client.query("BEGIN;");
         await client.query(content);
-        await client.query(
-          `INSERT INTO public.sync_seed_run (
-            seed_file_name,
-            seed_sha256,
-            scope,
-            years,
-            term_external_keys,
-            generated_at_utc,
-            applied_at_utc,
-            status,
-            metadata
-          ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), 'applied', '{}'::jsonb)
-          ON CONFLICT (seed_sha256) DO UPDATE SET
-            seed_file_name = EXCLUDED.seed_file_name,
-            scope = EXCLUDED.scope,
-            years = EXCLUDED.years,
-            term_external_keys = EXCLUDED.term_external_keys,
-            applied_at_utc = NOW(),
-            status = 'applied',
-            error_message = NULL,
-            updated_at = NOW();`,
-          [file, sha, scope, years, termExternalKeys],
-        );
+        await markSeedApplied(client, { file, sha, scope, years, termExternalKeys });
         await client.query("COMMIT;");
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
         console.log(`  [ok]    ${file} in ${elapsed}s`);

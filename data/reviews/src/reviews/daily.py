@@ -682,16 +682,33 @@ def run_daily_sync(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> None:
     args = parse_args()
-    try:
-        result = run_daily_sync(args)
-        if args.json:
-            print(json.dumps(result, indent=2, ensure_ascii=False))
-    except Exception as err:
-        if args.json:
-            print(json.dumps({"status": "error", "message": str(err)}))
-        else:
+
+    if not args.json:
+        try:
+            run_daily_sync(args)
+        except Exception:
             console.print_exception()
-        sys.exit(1)
+            sys.exit(1)
+        return
+
+    # Machine-readable mode: stdout must carry only the JSON payload. Nested
+    # stages (review processing, progress bars, tables) keep writing to
+    # stdout, so redirect every human-readable line to stderr for the run.
+    original_stdout = sys.stdout
+    sys.stdout = sys.stderr
+    console.file = sys.stderr
+    exit_code = 0
+    try:
+        payload = json.dumps(run_daily_sync(args), indent=2, ensure_ascii=False)
+    except Exception as err:
+        payload = json.dumps({"status": "error", "message": str(err)})
+        exit_code = 1
+    finally:
+        console.file = original_stdout
+        sys.stdout = original_stdout
+
+    print(payload)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

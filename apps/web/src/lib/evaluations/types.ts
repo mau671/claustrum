@@ -37,8 +37,11 @@ export function formatEvaluationTypeLabel(
   if (type === "otro" && name) return name;
   const base = EVALUATION_TYPE_LABELS[type];
   const withNumber = number && number > 0 ? `${base} ${number}` : base;
-  const withExtraordinary = extraordinary ? `${withNumber} (Extraordinario)` : withNumber;
-  return variant !== null ? `${withExtraordinary} · V${variant}` : withExtraordinary;
+  const modifiers = [
+    extraordinary ? "Extraordinario" : null,
+    variant !== null ? `V${variant}` : null,
+  ].filter((modifier): modifier is string => modifier !== null);
+  return modifiers.length > 0 ? `${withNumber} (${modifiers.join(", ")})` : withNumber;
 }
 
 export function formatEvaluationFileName(

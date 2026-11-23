@@ -554,8 +554,11 @@ function getEvaluationTitle(ev: EvaluationTitleFields): string {
           : ev.type === "quiz" && ev.number
             ? `Quiz ${ev.number}`
             : "Evaluación";
-  const withExtraordinary = ev.extraordinary ? `${label} (Extraordinario)` : label;
-  return ev.variant ? `${withExtraordinary} · V${ev.variant}` : withExtraordinary;
+  const modifiers = [
+    ev.extraordinary ? "Extraordinario" : null,
+    ev.variant ? `V${ev.variant}` : null,
+  ].filter((modifier): modifier is string => modifier !== null);
+  return modifiers.length > 0 ? `${label} (${modifiers.join(", ")})` : label;
 }
 
 function getEvaluationCategoryKey(ev: EvaluationTitleFields): string {

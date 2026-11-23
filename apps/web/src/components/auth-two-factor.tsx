@@ -30,7 +30,7 @@ export function AuthTwoFactorPage() {
 
       const { data } = await getSession();
       if (data?.user && !data.user.twoFactorEnabled) {
-        void navigate({ to: "/curriculum", replace: true });
+        void navigate({ to: "/schedule", replace: true });
         return;
       }
 
@@ -106,7 +106,7 @@ export function AuthTwoFactorPage() {
 
     await queryClient.invalidateQueries({ queryKey: ["appState"] });
     setIsVerifying(false);
-    void navigate({ to: "/curriculum", replace: true });
+    void navigate({ to: "/schedule", replace: true });
   }
 
   return (

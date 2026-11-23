@@ -209,7 +209,7 @@ export function createAuth(env: AuthEnv, pool: Pool) {
             await auth.api.sendVerificationEmail({
               body: {
                 email,
-                callbackURL: `${getWebOrigin(env)}/auth/verify-email`,
+                callbackURL: `${getWebOrigin(env)}/schedule`,
               },
             });
             return;

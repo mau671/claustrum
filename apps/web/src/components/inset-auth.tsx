@@ -482,7 +482,7 @@ function GoogleOAuthButton() {
     setPending(true);
     const { error } = await signIn.social({
       provider: "google",
-      callbackURL: `${window.location.origin}/`,
+      callbackURL: `${window.location.origin}/schedule`,
       errorCallbackURL: `${window.location.origin}/auth/signin`,
     });
 
@@ -537,7 +537,7 @@ async function invalidateAuthFlowQueries(
 }
 
 async function getPostSignInRedirect() {
-  return "/" as const;
+  return "/schedule" as const;
 }
 
 function MagicLinkButton({ email = "" }: { email?: string }) {
@@ -645,7 +645,7 @@ function SignInForm({ email, setEmail }: { email: string; setEmail: (value: stri
     const { data, error } = await signIn.email({
       email: normalizedEmail,
       password,
-      callbackURL: `${window.location.origin}/auth/verify-email`,
+      callbackURL: `${window.location.origin}/schedule`,
     });
 
     if (error) {
@@ -756,7 +756,7 @@ function SignUpForm() {
       const { data: session } = await getSession();
       if (session) {
         await queryClient.invalidateQueries({ queryKey: ["appState"] });
-        void navigate({ to: "/curriculum", replace: true });
+        void navigate({ to: "/schedule", replace: true });
       }
     };
 
@@ -842,7 +842,7 @@ function SignUpForm() {
       email: normalizedEmail,
       password,
       name: trimmedName,
-      callbackURL: `${window.location.origin}/auth/verify-email`,
+      callbackURL: `${window.location.origin}/schedule`,
     });
 
     if (error) {

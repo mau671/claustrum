@@ -82,7 +82,7 @@ export function AuthMagicLinkSentPage() {
 
     const { error } = await signIn.magicLink({
       email: trimmedEmail,
-      callbackURL: `${window.location.origin}/`,
+      callbackURL: `${window.location.origin}/schedule`,
       errorCallbackURL: `${window.location.origin}/auth/magic-link`,
     });
 

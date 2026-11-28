@@ -10,7 +10,7 @@ import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Spinner } from "@/components/ui/spinner";
 import { Stepper, type StepperStep } from "@/components/ui/stepper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { authClient } from "@/lib/auth/client";
+import { apiClient } from "@/lib/api/client";
 import {
   useAcademicUnits,
   useAuthUser,
@@ -50,9 +50,13 @@ export function InsetOnboardingPage() {
   const skipForNow = () => {
     void (async () => {
       if (!authUser) return;
-      await authClient.$fetch("/onboarding/dismiss", { method: "POST" });
-      await queryClient.invalidateQueries({ queryKey: ["appState"] });
-      void navigate({ to: "/schedule" });
+      try {
+        await apiClient("/onboarding/dismiss", { method: "POST" });
+        await queryClient.invalidateQueries({ queryKey: ["appState"] });
+        void navigate({ to: "/schedule" });
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : "No se pudo omitir el onboarding.");
+      }
     })();
   };
 
@@ -87,19 +91,19 @@ export function InsetOnboardingPage() {
       const parsedStudyPlanId = Number(studyPlanId);
       const entryYear = carnet ? parseInt(carnet.substring(0, 4), 10) : null;
 
-      const response = await authClient.$fetch("/onboarding/submit", {
+      const response = await apiClient<{ success: boolean }>("/onboarding/submit", {
         method: "POST",
-        body: {
+        body: JSON.stringify({
           campusId: parsedCampusId,
           academicUnitId: Number(academicUnitId),
           studyPlanId: parsedStudyPlanId,
           entryYear,
-          carnet,
-        },
+          carnet: carnet.trim() || null,
+        }),
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || "No se pudo guardar el onboarding.");
+      if (!response?.success) {
+        throw new Error("No se pudo guardar el onboarding.");
       }
 
       await Promise.all([

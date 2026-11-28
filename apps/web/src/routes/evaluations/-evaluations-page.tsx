@@ -7,7 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useDebouncedCallback } from "@tanstack/react-pacer";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import type { BrowseEvaluationsParams } from "@/lib/evaluations/api";
 
@@ -20,6 +20,7 @@ import { SearchableCombobox } from "@/components/ui/searchable-combobox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EVALUATION_TYPE_LABELS,
+  formatEvaluationLevelLabel,
   formatEvaluationTypeLabel,
   type EvaluationCourseItem,
   type EvaluationRow,
@@ -80,11 +81,13 @@ function GroupToggle({
   expanded,
   onToggle,
   className,
+  meta,
 }: {
   label: string;
   expanded: boolean;
   onToggle: () => void;
   className?: string;
+  meta?: string;
 }) {
   return (
     <button
@@ -102,6 +105,11 @@ function GroupToggle({
         className="text-muted-foreground size-3.5 shrink-0"
       />
       <span className="text-foreground min-w-0 truncate">{label}</span>
+      {meta && (
+        <span className="text-muted-foreground/80 ml-auto min-w-0 shrink-0 truncate text-[11px] font-normal">
+          {meta}
+        </span>
+      )}
     </button>
   );
 }
@@ -123,13 +131,13 @@ function DocumentLink({
     <Link
       to="/evaluations/view/$evaluationSlug"
       params={{ evaluationSlug: document.slug }}
-      className="text-muted-foreground hover:text-foreground hover:bg-muted/50 -mx-1 flex items-start gap-2 rounded-md px-1 py-1 text-xs transition-colors"
+      className="text-muted-foreground hover:text-foreground hover:bg-muted/50 -mx-1 flex items-center gap-2 rounded-md px-1 py-1 text-xs transition-colors"
       aria-label={`${isSolution ? "Solución" : "Enunciado"} de ${courseCode}`}
     >
       <Icon
         icon={isSolution ? File02Icon : File01Icon}
         size={14}
-        className="text-muted-foreground/70 mt-0.5 size-3.5 shrink-0"
+        className="text-muted-foreground/70 size-3.5 shrink-0"
       />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="flex items-baseline justify-between gap-2">
@@ -148,44 +156,168 @@ function DocumentLink({
   );
 }
 
-function EvaluationRowView({ row, courseCode }: { row: EvaluationRow; courseCode: string }) {
-  const label = formatEvaluationTypeLabel(
-    row.type,
-    row.number,
-    row.name,
-    row.extraordinary,
-    row.variant,
-  );
+type LevelGroup = {
+  key: string;
+  extraordinary: boolean;
+  variant: number | null;
+  label: string;
+  rows: EvaluationRow[];
+};
+
+type ExamGroup = {
+  key: string;
+  label: string;
+  typeOrder: number;
+  numberOrder: number;
+  levels: LevelGroup[];
+  showLevels: boolean;
+};
+
+const TYPE_ORDER: Record<EvaluationType, number> = {
+  parcial: 0,
+  quiz: 1,
+  final: 2,
+  reposicion: 3,
+  tarea: 4,
+  proyecto: 5,
+  otro: 6,
+};
+
+function groupEvaluationsByExam(rows: EvaluationRow[]): ExamGroup[] {
+  const exams = new Map<string, ExamGroup>();
+
+  for (const row of rows) {
+    const examKey = `${row.type}:${row.number ?? 0}:${row.name ?? ""}`;
+    let exam = exams.get(examKey);
+    if (!exam) {
+      exam = {
+        key: examKey,
+        label: formatEvaluationTypeLabel(row.type, row.number, row.name),
+        typeOrder: TYPE_ORDER[row.type] ?? 99,
+        numberOrder: row.number ?? 0,
+        levels: [],
+        showLevels: false,
+      };
+      exams.set(examKey, exam);
+    }
+
+    const levelKey = `${row.extraordinary}:${row.variant ?? ""}`;
+    let level = exam.levels.find((item) => item.key === levelKey);
+    if (!level) {
+      level = {
+        key: levelKey,
+        extraordinary: row.extraordinary,
+        variant: row.variant,
+        label: formatEvaluationLevelLabel(row.extraordinary, row.variant),
+        rows: [],
+      };
+      exam.levels.push(level);
+    }
+    level.rows.push(row);
+  }
+
+  return [...exams.values()]
+    .sort(
+      (a, b) =>
+        a.typeOrder - b.typeOrder ||
+        a.numberOrder - b.numberOrder ||
+        a.label.localeCompare(b.label),
+    )
+    .map((exam) => {
+      const levels = [...exam.levels].sort((a, b) => {
+        if (a.extraordinary !== b.extraordinary) return a.extraordinary ? 1 : -1;
+        return (a.variant ?? 0) - (b.variant ?? 0);
+      });
+      return {
+        ...exam,
+        levels,
+        // A single ordinary version needs no extra heading: show its documents directly.
+        showLevels:
+          levels.length > 1 ||
+          levels.some((level) => level.extraordinary || level.variant !== null),
+      };
+    });
+}
+
+function DocumentList({ rows, courseCode }: { rows: EvaluationRow[]; courseCode: string }) {
   return (
-    <div className="py-1">
-      <div className="px-2">
-        <span className="text-foreground block text-sm font-medium">{label}</span>
-        {row.professor_name && (
-          <span className="text-muted-foreground block truncate text-xs">{row.professor_name}</span>
-        )}
-      </div>
-      <div className="mt-0.5 ml-4 flex flex-col gap-0.5 sm:ml-5">
-        <DocumentLink
-          document={{
-            kind: "enunciado",
-            slug: `${row.id}.pdf`,
-            size: row.file_size,
-            includesAnswers: row.answers_included,
-          }}
-          courseCode={courseCode}
-        />
-        {row.answers_separate && (
+    <>
+      {rows.map((row) => (
+        <Fragment key={row.id}>
           <DocumentLink
             document={{
-              kind: "solucion",
-              slug: `${row.id}_answers.pdf`,
-              size: null,
-              includesAnswers: false,
+              kind: "enunciado",
+              slug: `${row.id}.pdf`,
+              size: row.file_size,
+              includesAnswers: row.answers_included,
             }}
             courseCode={courseCode}
           />
+          {row.answers_separate && (
+            <DocumentLink
+              document={{
+                kind: "solucion",
+                slug: `${row.id}_answers.pdf`,
+                size: null,
+                includesAnswers: false,
+              }}
+              courseCode={courseCode}
+            />
+          )}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+function LevelGroupView({ level, courseCode }: { level: LevelGroup; courseCode: string }) {
+  const professorName = level.rows.find((row) => row.professor_name)?.professor_name ?? null;
+
+  return (
+    <div className="py-0.5">
+      <div className="flex items-baseline justify-between gap-2 px-2">
+        <span className="text-muted-foreground text-xs font-medium">{level.label}</span>
+        {professorName && (
+          <span className="text-muted-foreground/80 min-w-0 truncate text-[11px]">
+            {professorName}
+          </span>
         )}
       </div>
+      <div className="mt-0.5 ml-4 flex flex-col gap-0.5 sm:ml-5">
+        <DocumentList rows={level.rows} courseCode={courseCode} />
+      </div>
+    </div>
+  );
+}
+
+function ExamGroupView({ exam, courseCode }: { exam: ExamGroup; courseCode: string }) {
+  const [expanded, setExpanded] = useState(true);
+  const professorName =
+    exam.levels.flatMap((level) => level.rows).find((row) => row.professor_name)?.professor_name ??
+    null;
+
+  return (
+    <div className="py-1">
+      <GroupToggle
+        label={exam.label}
+        expanded={expanded}
+        onToggle={() => setExpanded((value) => !value)}
+        className="text-foreground text-sm font-medium"
+        meta={exam.showLevels ? undefined : (professorName ?? undefined)}
+      />
+      {expanded && (
+        <div className="border-border/60 mt-0.5 ml-4 space-y-1 border-l pl-3 sm:ml-5">
+          {exam.showLevels ? (
+            exam.levels.map((level) => (
+              <LevelGroupView key={level.key} level={level} courseCode={courseCode} />
+            ))
+          ) : (
+            <div className="flex flex-col gap-0.5 py-0.5">
+              <DocumentList rows={exam.levels[0]?.rows ?? []} courseCode={courseCode} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -206,6 +338,10 @@ function TermGroup({
     expanded ? termKey : null,
     params,
   );
+  const examGroups = useMemo(
+    () => groupEvaluationsByExam(evaluationsQuery.data ?? []),
+    [evaluationsQuery.data],
+  );
 
   return (
     <div className="py-0.5">
@@ -219,11 +355,11 @@ function TermGroup({
         <div className="border-border/60 mt-1 ml-4 space-y-1 border-l pl-3 sm:ml-5">
           {evaluationsQuery.isLoading ? (
             evaluationsSkeleton()
-          ) : (evaluationsQuery.data ?? []).length === 0 ? (
+          ) : examGroups.length === 0 ? (
             <p className="text-muted-foreground px-2 py-2 text-xs">Sin evaluaciones.</p>
           ) : (
-            (evaluationsQuery.data ?? []).map((row) => (
-              <EvaluationRowView key={row.id} row={row} courseCode={course.code} />
+            examGroups.map((exam) => (
+              <ExamGroupView key={exam.key} exam={exam} courseCode={course.code} />
             ))
           )}
         </div>

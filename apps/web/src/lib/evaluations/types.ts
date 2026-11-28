@@ -44,6 +44,14 @@ export function formatEvaluationTypeLabel(
   return modifiers.length > 0 ? `${withNumber} (${modifiers.join(", ")})` : withNumber;
 }
 
+export function formatEvaluationLevelLabel(
+  extraordinary: boolean,
+  variant: number | null = null,
+): string {
+  const base = extraordinary ? "Extraordinario" : "Ordinario";
+  return variant !== null ? `${base} · V${variant}` : base;
+}
+
 export function formatEvaluationFileName(
   courseCode: string,
   type: EvaluationType,

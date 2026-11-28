@@ -30,6 +30,7 @@ export const Route = createFileRoute("/evaluations/")({
         "Explora exámenes y evaluaciones subidos por estudiantes del Tecnológico de Costa Rica, organizados por curso.",
       breadcrumbName: "Evaluaciones",
       urlPath: "/evaluations",
+      image: "/og/og-evaluations.png",
     }),
   validateSearch: (search: EvaluationsSearchInput): EvaluationsSearch => ({
     q: typeof search.q === "string" && search.q.trim() !== "" ? search.q : undefined,

@@ -28,6 +28,7 @@ import { Route as ModerationReportsRouteImport } from './routes/moderation/repor
 import { Route as ModerationReviewsRouteImport } from './routes/moderation/reviews'
 import { Route as ModerationUsersRouteImport } from './routes/moderation/users'
 import { Route as OgCurriculumRouteImport } from './routes/og/curriculum'
+import { Route as OgEvaluationsRouteImport } from './routes/og/evaluations'
 import { Route as OgProfessorsRouteImport } from './routes/og/professors'
 import { Route as OgScheduleRouteImport } from './routes/og/schedule'
 import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
@@ -152,6 +153,11 @@ const ModerationUsersRoute = ModerationUsersRouteImport.update({
 const OgCurriculumRoute = OgCurriculumRouteImport.update({
   id: '/og/curriculum',
   path: '/og/curriculum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OgEvaluationsRoute = OgEvaluationsRouteImport.update({
+  id: '/og/evaluations',
+  path: '/og/evaluations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OgProfessorsRoute = OgProfessorsRouteImport.update({
@@ -309,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/moderation/reviews': typeof ModerationReviewsRoute
   '/moderation/users': typeof ModerationUsersRoute
   '/og/curriculum': typeof OgCurriculumRoute
+  '/og/evaluations': typeof OgEvaluationsRoute
   '/og/professors': typeof OgProfessorsRoute
   '/og/schedule': typeof OgScheduleRoute
   '/professors/$professorId': typeof ProfessorsProfessorIdRoute
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/moderation/reviews': typeof ModerationReviewsRoute
   '/moderation/users': typeof ModerationUsersRoute
   '/og/curriculum': typeof OgCurriculumRoute
+  '/og/evaluations': typeof OgEvaluationsRoute
   '/og/professors': typeof OgProfessorsRoute
   '/og/schedule': typeof OgScheduleRoute
   '/professors/$professorId': typeof ProfessorsProfessorIdRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/moderation/reviews': typeof ModerationReviewsRoute
   '/moderation/users': typeof ModerationUsersRoute
   '/og/curriculum': typeof OgCurriculumRoute
+  '/og/evaluations': typeof OgEvaluationsRoute
   '/og/professors': typeof OgProfessorsRoute
   '/og/schedule': typeof OgScheduleRoute
   '/professors/$professorId': typeof ProfessorsProfessorIdRoute
@@ -427,6 +436,7 @@ export interface FileRouteTypes {
     | '/moderation/reviews'
     | '/moderation/users'
     | '/og/curriculum'
+    | '/og/evaluations'
     | '/og/professors'
     | '/og/schedule'
     | '/professors/$professorId'
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/moderation/reviews'
     | '/moderation/users'
     | '/og/curriculum'
+    | '/og/evaluations'
     | '/og/professors'
     | '/og/schedule'
     | '/professors/$professorId'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/moderation/reviews'
     | '/moderation/users'
     | '/og/curriculum'
+    | '/og/evaluations'
     | '/og/professors'
     | '/og/schedule'
     | '/professors/$professorId'
@@ -538,6 +550,7 @@ export interface RootRouteChildren {
   CurriculumCourseIdRoute: typeof CurriculumCourseIdRoute
   DocsSplatRoute: typeof DocsSplatRoute
   OgCurriculumRoute: typeof OgCurriculumRoute
+  OgEvaluationsRoute: typeof OgEvaluationsRoute
   OgProfessorsRoute: typeof OgProfessorsRoute
   OgScheduleRoute: typeof OgScheduleRoute
   ProfessorsProfessorIdRoute: typeof ProfessorsProfessorIdRoute
@@ -672,6 +685,13 @@ declare module '@tanstack/react-router' {
       path: '/og/curriculum'
       fullPath: '/og/curriculum'
       preLoaderRoute: typeof OgCurriculumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/og/evaluations': {
+      id: '/og/evaluations'
+      path: '/og/evaluations'
+      fullPath: '/og/evaluations'
+      preLoaderRoute: typeof OgEvaluationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/og/professors': {
@@ -888,6 +908,7 @@ const rootRouteChildren: RootRouteChildren = {
   CurriculumCourseIdRoute: CurriculumCourseIdRoute,
   DocsSplatRoute: DocsSplatRoute,
   OgCurriculumRoute: OgCurriculumRoute,
+  OgEvaluationsRoute: OgEvaluationsRoute,
   OgProfessorsRoute: OgProfessorsRoute,
   OgScheduleRoute: OgScheduleRoute,
   ProfessorsProfessorIdRoute: ProfessorsProfessorIdRoute,

@@ -1,29 +1,46 @@
 /* eslint-disable no-console */
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { chromium } from "playwright";
+import { pathToFileURL } from "node:url";
+
+const require = createRequire(import.meta.url);
+const webRoot = path.resolve(import.meta.dirname, "..", "apps", "web");
+const playwrightEntry = require.resolve("playwright", { paths: [webRoot] });
+const playwright = await import(pathToFileURL(playwrightEntry).href);
+const { chromium } = playwright.default ?? playwright;
 
 const PORT = 5173;
 const URL = `http://127.0.0.1:${PORT}`;
 
 async function waitForServer() {
-  console.log("Waiting 8 seconds for dev server to start...");
-  await new Promise((r) => setTimeout(r, 8000));
-  console.log("Proceeding...");
+  const deadline = Date.now() + 60_000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(URL);
+      if (response.ok) {
+        console.log("Dev server is ready.");
+        return;
+      }
+    } catch {
+      // Server is not accepting connections yet.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  throw new Error("Timed out waiting for the Vite dev server");
 }
 
 async function main() {
-  // Ensure public/og directory exists
-  const ogDir = path.resolve(process.cwd(), "public/og");
+  const ogDir = path.join(webRoot, "public/og");
   await fs.mkdir(ogDir, { recursive: true });
 
-  // Start the dev server
   console.log("Starting Vite dev server...");
   const server = spawn(
     "pnpm",
     ["exec", "vite", "dev", "--port", PORT.toString(), "--host", "127.0.0.1", "--strictPort"],
     {
+      cwd: webRoot,
       stdio: "inherit",
       detached: true,
     },
@@ -48,6 +65,7 @@ async function main() {
       { path: "/og/schedule", output: "og-schedule.png" },
       { path: "/og/professors", output: "og-professors.png" },
       { path: "/og/curriculum", output: "og-curriculum.png" },
+      { path: "/og/evaluations", output: "og-evaluations.png" },
     ];
 
     for (const route of routes) {

@@ -305,11 +305,14 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
                 ) AS label,
                 COUNT(*)::bigint AS total_count
               FROM public.course_evaluations e
+              JOIN public.course c ON c.id = e.course_id
               LEFT JOIN public.academic_term at ON at.id = e.term_id
               LEFT JOIN public.professor p ON p.id = e.professor_id
               WHERE e.status = 'approved'
                 AND e.course_id = ${params.courseId}
                 AND (${pattern}::text IS NULL OR
+                     c.code ILIKE ${pattern} OR
+                     c.name ILIKE ${pattern} OR
                      p.full_name ILIKE ${pattern} OR
                      e.name ILIKE ${pattern})
                 AND (${types.length}::int = 0 OR e.type::TEXT = ANY(${types}::text[]))
@@ -376,6 +379,8 @@ export const EvaluationsHandlers = HttpApiBuilder.group(ClaustrumApi, "evaluatio
                 AND e.course_id = ${params.courseId}
                 AND (${noTerm} OR e.term_id = ${termId})
                 AND (${pattern}::text IS NULL OR
+                     c.code ILIKE ${pattern} OR
+                     c.name ILIKE ${pattern} OR
                      p.full_name ILIKE ${pattern} OR
                      e.name ILIKE ${pattern})
                 AND (${types.length}::int = 0 OR e.type::TEXT = ANY(${types}::text[]))

@@ -5,9 +5,9 @@ import {
   File02Icon,
   FileUpIcon,
 } from "@hugeicons/core-free-icons";
-import { useDebouncedCallback } from "@tanstack/react-pacer";
+import { useDebouncedValue } from "@tanstack/react-pacer";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import type { BrowseEvaluationsParams } from "@/lib/evaluations/api";
 
@@ -452,25 +452,33 @@ export function EvaluationsPage() {
 
   const [uploadCourse, setUploadCourse] = useState<EvaluationCourseItem | null>(null);
   const [searchTerm, setSearchTerm] = useState(search.q ?? "");
-  const [previousQuery, setPreviousQuery] = useState(search.q ?? "");
-  if ((search.q ?? "") !== previousQuery) {
-    setPreviousQuery(search.q ?? "");
-    setSearchTerm(search.q ?? "");
-  }
+  const urlQuery = search.q ?? "";
+  const lastPushedQuery = useRef(urlQuery);
 
-  const updateSearchUrl = useDebouncedCallback(
-    (query: string) => {
-      void navigate({
-        search: (prev) => ({ ...prev, q: query.trim() || undefined }),
-        replace: true,
-      });
-    },
-    { wait: 300 },
-  );
+  // The URL only drives the input when it changes outside this search box
+  // (back/forward or a link). Our own debounced navigation must not rewrite
+  // the input, otherwise in-flight navigations restore old text.
+  useEffect(() => {
+    if (urlQuery === lastPushedQuery.current) return;
+    lastPushedQuery.current = urlQuery;
+    setSearchTerm(urlQuery);
+  }, [urlQuery]);
+
+  const [debouncedSearch] = useDebouncedValue(searchTerm, { wait: 300 });
+
+  useEffect(() => {
+    const next = debouncedSearch.trim();
+    if (next === lastPushedQuery.current) return;
+    lastPushedQuery.current = next;
+    void navigate({
+      search: (prev) => ({ ...prev, q: next || undefined }),
+      replace: true,
+    });
+  }, [debouncedSearch, navigate]);
 
   const params = useMemo<BrowseEvaluationsParams>(
-    () => ({ q: search.q?.trim() || undefined, types: search.types }),
-    [search.q, search.types],
+    () => ({ q: debouncedSearch.trim() || undefined, types: search.types }),
+    [debouncedSearch, search.types],
   );
   const coursesQuery = useEvaluationCourses(params);
   const courses = useMemo(() => coursesQuery.data ?? [], [coursesQuery.data]);
@@ -500,9 +508,7 @@ export function EvaluationsPage() {
             aria-label="Buscar evaluaciones por curso o profesor"
             value={searchTerm}
             onChange={(event) => {
-              const next = event.target.value;
-              setSearchTerm(next);
-              updateSearchUrl(next);
+              setSearchTerm(event.target.value);
             }}
           />
         </div>
